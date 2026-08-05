@@ -55,9 +55,14 @@
                 </div>
 
                 <div class="d-grid">
-                    <button class="btn btn-primary btn-lg">
-                        ✨ 광고 만들기
+                    <button
+                        class="btn btn-primary btn-lg w-100"
+                        type="submit">
+
+                        🚀 광고 만들기
+
                     </button>
+
                 </div>
 
             </form>
@@ -68,12 +73,24 @@
 
     <div class="card shadow mt-4">
 
-        <div class="card-body">
+        <div class="card mt-4">
 
-            <h3>AI 결과</h3>
+            <div class="card-header">
+                🤖 AI 결과
+            </div>
+        
+            <div class="card-body">
+        
+                <pre>{{ result }}</pre>
+        
 
-            <pre id="result" style="white-space: pre-wrap;">{{ result }}</pre>
-
+                <a
+                href="/download"
+                class="btn btn-success">
+            
+                📄 Word 다운로드
+            
+            </a>
             <button
                 class="btn btn-success mb-3"
                 onclick="copyResult()">

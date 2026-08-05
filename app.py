@@ -1,17 +1,34 @@
 import os
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 from openai import OpenAI
+from docx import Document
 
 app = Flask(__name__)
 
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
 )
+
+
+# Word 파일 생성 함수
+def create_word(result):
+    os.makedirs("downloads", exist_ok=True)
+
+    filename = "downloads/advertisement.docx"
+
+    document = Document()
+    document.add_heading("Project Freedom AI", level=1)
+    document.add_paragraph(result)
+    document.save(filename)
+
+    return filename
+
+
+# 메인 페이지
 @app.route("/", methods=["GET", "POST"])
 def home():
 
     result = ""
-
     business = ""
     company = ""
     style = ""
@@ -37,6 +54,9 @@ SNS 광고 문구를 5개 만들어줘.
 
         result = response.output_text
 
+        # Word 파일 생성
+        create_word(result)
+
     return render_template(
         "index.html",
         result=result,
@@ -45,5 +65,18 @@ SNS 광고 문구를 5개 만들어줘.
         style=style
     )
 
+
+# Word 다운로드
+@app.route("/download")
+def download():
+
+    filename = "downloads/advertisement.docx"
+
+    return send_file(
+        filename,
+        as_attachment=True
+    )
+
+
 if __name__ == "__main__":
-        app.run(debug=True)
+    app.run(debug=True)
