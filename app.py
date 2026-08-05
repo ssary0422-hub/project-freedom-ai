@@ -1,3 +1,4 @@
+import sqlite3
 import os
 from flask import Flask, render_template, request, send_file
 from openai import OpenAI
@@ -9,7 +10,27 @@ client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
 )
 
+def init_db():
 
+    conn = sqlite3.connect("project.db")
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            business TEXT,
+            company TEXT,
+            style TEXT,
+            result TEXT
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+
+init_db()
 # Word 파일 생성 함수
 def create_word(result):
     os.makedirs("downloads", exist_ok=True)
@@ -54,7 +75,13 @@ SNS 광고 문구를 5개 만들어줘.
 
         result = response.output_text
 
-        # Word 파일 생성
+        save_history(
+            business,
+            company,
+            style,
+            result
+        )
+
         create_word(result)
 
     return render_template(
@@ -77,6 +104,20 @@ def download():
         as_attachment=True
     )
 
+def save_history(business, company, style, result):
 
-if __name__ == "__main__":
-    app.run(debug=True)
+    conn = sqlite3.connect("project.db")
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO history
+        (business, company, style, result)
+        VALUES (?, ?, ?, ?)
+    """, (business, company, style, result))
+
+    conn.commit()
+    conn.close()
+
+    if __name__ == "__main__":
+        app.run(debug=True)
