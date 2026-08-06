@@ -1,3 +1,4 @@
+from ai.ads import make_ads
 import sqlite3
 import os
 from flask import Flask, render_template, request, send_file
@@ -28,7 +29,6 @@ def init_db():
 
     conn.commit()
     conn.close()
-
 
 init_db()
 # Word 파일 생성 함수
@@ -68,9 +68,10 @@ def home():
 SNS 광고 문구를 5개 만들어줘.
 """
 
-        response = client.responses.create(
-            model="gpt-5.5",
-            input=prompt
+        result = make_ads(
+            business,
+            company,
+            style
         )
 
         result = response.output_text
@@ -103,7 +104,15 @@ def download():
         filename,
         as_attachment=True
     )
+@app.route("/history")
+def history():
 
+    history_list = get_history()
+
+    return render_template(
+        "history.html",
+        history_list=history_list
+    )
 def save_history(business, company, style, result):
 
     conn = sqlite3.connect("project.db")
@@ -118,6 +127,21 @@ def save_history(business, company, style, result):
 
     conn.commit()
     conn.close()
+def get_history():
 
-    if __name__ == "__main__":
+    conn = sqlite3.connect("project.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, business, company, style, result
+        FROM history
+        ORDER BY id DESC
+    """)
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    return rows
+if __name__ == "__main__":
         app.run(debug=True)
