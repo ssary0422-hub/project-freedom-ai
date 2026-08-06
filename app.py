@@ -1,3 +1,4 @@
+from ai.blog import make_blog
 from ai.ads import make_ads
 import sqlite3
 import os
