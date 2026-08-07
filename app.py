@@ -6,6 +6,7 @@ from docx import Document
 
 from ai.ads import make_ads
 from ai.blog import make_blog
+from ai.sns import make_sns
 
 
 app = Flask(__name__)
@@ -198,12 +199,14 @@ def download():
     )
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# -------------------------
+# SNS 생성 페이지
+# -------------------------
 
 @app.route("/sns", methods=["GET", "POST"])
 def sns():
     result = ""
+    error = ""
     business = ""
     company = ""
     style = ""
@@ -215,19 +218,30 @@ def sns():
         style = request.form.get("style", "").strip()
         platform = request.form.get("platform", "").strip()
 
-        if business and company and style and platform:
-            result = make_sns(
-                business,
-                company,
-                style,
-                platform
-            )
+        if not all([business, company, style, platform]):
+            error = "모든 항목을 입력해 주세요."
+        else:
+            try:
+                result = make_sns(
+                    business,
+                    company,
+                    style,
+                    platform
+                )
+            except Exception as e:
+                error = f"SNS 생성 오류: {e}"
+                print(error)
 
     return render_template(
         "sns.html",
         result=result,
+        error=error,
         business=business,
         company=company,
         style=style,
         platform=platform
     )
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

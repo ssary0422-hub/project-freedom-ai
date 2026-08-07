@@ -43,7 +43,14 @@
 </nav>
 
 <div class="container pb-5">
+    {% if error %}
 
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+    
+    {% endif %}
+    
     <div class="text-center mb-4">
         <h1>📱 AI SNS 생성기</h1>
 
