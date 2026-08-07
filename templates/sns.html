@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>SNS 생성기 - Project Freedom AI</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+
+        <a class="navbar-brand" href="/">
+            🤖 Project Freedom AI
+        </a>
+
+        <div>
+            <a class="btn btn-outline-light me-2" href="/">
+                📢 광고
+            </a>
+
+            <a class="btn btn-outline-light me-2" href="/blog">
+                📝 블로그
+            </a>
+
+            <a class="btn btn-light me-2" href="/sns">
+                📱 SNS
+            </a>
+
+            <a class="btn btn-outline-light" href="/history">
+                📚 생성 기록
+            </a>
+        </div>
+
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <div class="text-center mb-4">
+        <h1>📱 AI SNS 생성기</h1>
+
+        <p class="text-muted">
+            업종과 브랜드 분위기에 맞는 SNS 게시글을 만들어드립니다.
+        </p>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+
+            <form method="POST">
+
+                <div class="mb-3">
+                    <label class="form-label">업종</label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="business"
+                        value="{{ business }}"
+                        placeholder="예) 마사지샵"
+                        required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">회사명</label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="company"
+                        value="{{ company }}"
+                        placeholder="예) 7데이즈"
+                        required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">원하는 분위기</label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="style"
+                        value="{{ style }}"
+                        placeholder="예) 고급스럽고 친절한"
+                        required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">플랫폼</label>
+
+                    <select
+                        class="form-select"
+                        name="platform"
+                        required>
+
+                        <option value="">
+                            플랫폼을 선택하세요
+                        </option>
+
+                        <option
+                            value="인스타그램"
+                            {% if platform == "인스타그램" %}selected{% endif %}>
+                            인스타그램
+                        </option>
+
+                        <option
+                            value="페이스북"
+                            {% if platform == "페이스북" %}selected{% endif %}>
+                            페이스북
+                        </option>
+
+                        <option
+                            value="네이버 홍보글"
+                            {% if platform == "네이버 홍보글" %}selected{% endif %}>
+                            네이버 홍보글
+                        </option>
+
+                        <option
+                            value="틱톡"
+                            {% if platform == "틱톡" %}selected{% endif %}>
+                            틱톡
+                        </option>
+
+                    </select>
+                </div>
+
+                <div class="d-grid">
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-lg">
+
+                        ✨ SNS 글 만들기
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    {% if result %}
+
+    <div class="card shadow mt-4">
+
+        <div class="card-header">
+            🤖 AI SNS 결과
+        </div>
+
+        <div class="card-body">
+
+            <pre
+                id="result"
+                class="bg-light p-3 rounded"
+                style="min-height: 250px; white-space: pre-wrap;">{{ result }}</pre>
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                onclick="copyResult()">
+
+                📋 결과 복사하기
+            </button>
+
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+
+<script>
+    async function copyResult() {
+        const resultElement = document.getElementById("result");
+
+        if (!resultElement) {
+            alert("복사할 결과가 없습니다.");
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(
+                resultElement.innerText
+            );
+
+            alert("📋 복사되었습니다!");
+        } catch (error) {
+            alert("복사에 실패했습니다.");
+            console.error(error);
+        }
+    }
+</script>
+
+</body>
+</html>

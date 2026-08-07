@@ -200,3 +200,34 @@ def download():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+@app.route("/sns", methods=["GET", "POST"])
+def sns():
+    result = ""
+    business = ""
+    company = ""
+    style = ""
+    platform = ""
+
+    if request.method == "POST":
+        business = request.form.get("business", "").strip()
+        company = request.form.get("company", "").strip()
+        style = request.form.get("style", "").strip()
+        platform = request.form.get("platform", "").strip()
+
+        if business and company and style and platform:
+            result = make_sns(
+                business,
+                company,
+                style,
+                platform
+            )
+
+    return render_template(
+        "sns.html",
+        result=result,
+        business=business,
+        company=company,
+        style=style,
+        platform=platform
+    )
