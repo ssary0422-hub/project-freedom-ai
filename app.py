@@ -1,8 +1,15 @@
 import os
 import sqlite3
 
-from flask import Flask, render_template, request, send_file
+from flask import (
+    Flask,
+    render_template,
+    request,
+    send_file,
+    redirect
+)
 from docx import Document
+from documents.pdf import create_pdf, PDF_PATH
 
 from ai.ads import make_ads
 from ai.blog import make_blog
@@ -76,6 +83,27 @@ def get_history():
 
     return rows
 
+@app.route("/delete/<int:id>")
+def delete(id):
+
+    delete_history(id)
+
+    return redirect("/history")
+
+    
+def delete_history(id):
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM history WHERE id=?",
+        (id,)
+    )
+
+    conn.commit()
+    conn.close()
+
 
 # 프로그램 시작 시 DB 준비
 init_db()
@@ -127,7 +155,7 @@ def home():
             )
 
             create_word(result)
-
+            create_pdf(result)
     return render_template(
         "index.html",
         result=result,
@@ -158,6 +186,13 @@ def blog():
                 topic,
                 tone,
                 length
+            )
+
+            save_history(
+                "BLOG",
+                topic,
+                tone,
+                result
             )
 
     return render_template(
@@ -198,6 +233,17 @@ def download():
         download_name="advertisement.docx"
     )
 
+@app.route("/download/pdf")
+def download_pdf():
+    if not os.path.exists(PDF_PATH):
+        return "먼저 광고를 생성해 주세요.", 404
+
+    return send_file(
+        PDF_PATH,
+        as_attachment=True,
+        download_name="advertisement.pdf"
+    )
+
 
 # -------------------------
 # SNS 생성 페이지
@@ -227,6 +273,12 @@ def sns():
                     company,
                     style,
                     platform
+                )
+                save_history(
+                    business,
+                    company,
+                    style,
+                    result
                 )
             except Exception as e:
                 error = f"SNS 생성 오류: {e}"
