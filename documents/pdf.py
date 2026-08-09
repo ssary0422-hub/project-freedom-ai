@@ -1,6 +1,7 @@
 import os
 
 from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
@@ -12,10 +13,11 @@ PDF_PATH = os.path.join(
 )
 
 
-def create_pdf(result: str) -> str:
+def create_pdf(result: str, image_path: str = "") -> str:
+
     os.makedirs("downloads", exist_ok=True)
 
-    # Windows 기본 한글 폰트
+    # Windows 한글 폰트
     font_path = r"C:\Windows\Fonts\malgun.ttf"
 
     if not os.path.exists(font_path):
@@ -34,39 +36,89 @@ def create_pdf(result: str) -> str:
 
     width, height = A4
 
+    # 제목
     pdf.setFont("MalgunGothic", 18)
+
     pdf.drawString(
         50,
-        height - 60,
+        height - 50,
         "Project Freedom AI"
     )
 
+    y = height - 90
+
+    # -------------------------
+    # AI 이미지
+    # -------------------------
+
+    if image_path and os.path.exists(image_path):
+
+        try:
+            image = ImageReader(image_path)
+
+            original_width, original_height = image.getSize()
+
+            max_width = 495
+            max_height = 300
+
+            ratio = min(
+                max_width / original_width,
+                max_height / original_height
+            )
+
+            image_width = original_width * ratio
+            image_height = original_height * ratio
+
+            x = (width - image_width) / 2
+
+            pdf.drawImage(
+                image,
+                x,
+                y - image_height,
+                width=image_width,
+                height=image_height,
+                preserveAspectRatio=True,
+                mask="auto"
+            )
+
+            y -= image_height + 30
+
+        except Exception as error:
+            print("PDF 이미지 삽입 오류:", error)
+
+    # -------------------------
+    # 광고 문구
+    # -------------------------
+
     pdf.setFont("MalgunGothic", 11)
 
-    x = 50
-    y = height - 100
     line_height = 18
 
     for paragraph in result.splitlines():
 
-        # 빈 줄 유지
         if not paragraph.strip():
             y -= line_height
             continue
 
-        # 긴 문장을 여러 줄로 나누기
         lines = split_text(
             paragraph,
             max_length=45
         )
 
         for line in lines:
+
             if y < 60:
                 pdf.showPage()
                 pdf.setFont("MalgunGothic", 11)
+
                 y = height - 60
 
-            pdf.drawString(x, y, line)
+            pdf.drawString(
+                50,
+                y,
+                line
+            )
+
             y -= line_height
 
     pdf.save()
@@ -75,6 +127,7 @@ def create_pdf(result: str) -> str:
 
 
 def split_text(text: str, max_length: int) -> list[str]:
+
     return [
         text[index:index + max_length]
         for index in range(
