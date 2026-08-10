@@ -1,3 +1,4 @@
+import gc
 from pathlib import Path
 import zipfile
 
@@ -53,6 +54,9 @@ def _make_image_safe(prompt: str, label: str):
 
         return "", ""
 
+    finally:
+        gc.collect()
+
 
 def _add_to_zip(zip_file, file_path, zip_name):
     if not file_path:
@@ -65,6 +69,18 @@ def _add_to_zip(zip_file, file_path, zip_name):
             str(path),
             zip_name
         )
+
+
+def _image_zip_name(image_path: str, base_name: str) -> str:
+    if not image_path:
+        return f"images/{base_name}.jpg"
+
+    suffix = Path(image_path).suffix.lower()
+
+    if suffix not in [".jpg", ".jpeg", ".png", ".webp"]:
+        suffix = ".jpg"
+
+    return f"images/{base_name}{suffix}"
 
 
 def create_package_zip(
@@ -80,7 +96,8 @@ def create_package_zip(
     with zipfile.ZipFile(
         str(PACKAGE_ZIP_PATH),
         mode="w",
-        compression=zipfile.ZIP_DEFLATED
+        compression=zipfile.ZIP_DEFLATED,
+        compresslevel=6
     ) as zip_file:
 
         # Word 3개
@@ -125,20 +142,31 @@ def create_package_zip(
         _add_to_zip(
             zip_file,
             ads_image_path,
-            "images/advertisement.png"
+            _image_zip_name(
+                ads_image_path,
+                "advertisement"
+            )
         )
 
         _add_to_zip(
             zip_file,
             blog_image_path,
-            "images/blog.png"
+            _image_zip_name(
+                blog_image_path,
+                "blog"
+            )
         )
 
         _add_to_zip(
             zip_file,
             sns_image_path,
-            "images/sns.png"
+            _image_zip_name(
+                sns_image_path,
+                "sns"
+            )
         )
+
+    gc.collect()
 
     return str(PACKAGE_ZIP_PATH)
 
@@ -261,6 +289,8 @@ def package():
                     ads_image_path
                 )
 
+                gc.collect()
+
                 # =====================================
                 # 2. 블로그
                 # =====================================
@@ -316,6 +346,8 @@ def package():
                     blog_image_path
                 )
 
+                gc.collect()
+
                 # =====================================
                 # 3. SNS
                 # =====================================
@@ -369,6 +401,8 @@ SNS에 적합한 깔끔하고 전문적인 구성.
                     sns_image_path
                 )
 
+                gc.collect()
+
                 # =====================================
                 # 4. ZIP
                 # =====================================
@@ -384,6 +418,9 @@ SNS에 적합한 깔끔하고 전문적인 구성.
             except Exception as exc:
                 error = f"패키지 생성 중 오류가 발생했습니다: {exc}"
                 print("패키지 생성 오류:", repr(exc))
+
+            finally:
+                gc.collect()
 
     return render_template(
         "package.html",
