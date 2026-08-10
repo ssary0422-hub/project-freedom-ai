@@ -24,6 +24,12 @@
         한 번 입력하면 광고, 블로그, SNS 콘텐츠를 모두 생성합니다.
     </p>
 
+    {% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+    {% endif %}
+
     <div class="card shadow mb-5">
         <div class="card-body">
 
@@ -62,15 +68,139 @@
                         required>
                 </div>
 
-                <div class="d-grid">
+                <div class="mb-3">
+                    <label class="form-label">블로그 길이</label>
 
+                    <select
+                        name="blog_length"
+                        class="form-select">
+
+                        <option
+                            value="1000자"
+                            {% if blog_length == "1000자" %}selected{% endif %}>
+                            짧게 - 약 1,000자
+                        </option>
+
+                        <option
+                            value="2000자"
+                            {% if blog_length == "2000자" %}selected{% endif %}>
+                            보통 - 약 2,000자
+                        </option>
+
+                        <option
+                            value="3000자"
+                            {% if blog_length == "3000자" %}selected{% endif %}>
+                            길게 - 약 3,000자
+                        </option>
+
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">SNS 플랫폼</label>
+
+                    <select
+                        name="sns_platform"
+                        class="form-select">
+
+                        <option
+                            value="인스타그램"
+                            {% if sns_platform == "인스타그램" %}selected{% endif %}>
+                            인스타그램
+                        </option>
+
+                        <option
+                            value="페이스북"
+                            {% if sns_platform == "페이스북" %}selected{% endif %}>
+                            페이스북
+                        </option>
+
+                        <option
+                            value="틱톡"
+                            {% if sns_platform == "틱톡" %}selected{% endif %}>
+                            틱톡
+                        </option>
+
+                        <option
+                            value="네이버 홍보글"
+                            {% if sns_platform == "네이버 홍보글" %}selected{% endif %}>
+                            네이버 홍보글
+                        </option>
+
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">이미지 스타일</label>
+
+                    <select
+                        name="image_style"
+                        class="form-select">
+
+                        <option
+                            value="고급스러운 실사"
+                            {% if image_style == "고급스러운 실사" %}selected{% endif %}>
+                            고급스러운 실사
+                        </option>
+
+                        <option
+                            value="감성적인 분위기"
+                            {% if image_style == "감성적인 분위기" %}selected{% endif %}>
+                            감성적인 분위기
+                        </option>
+
+                        <option
+                            value="미니멀하고 깔끔한 스타일"
+                            {% if image_style == "미니멀하고 깔끔한 스타일" %}selected{% endif %}>
+                            미니멀
+                        </option>
+
+                        <option
+                            value="화려한 광고 비주얼"
+                            {% if image_style == "화려한 광고 비주얼" %}selected{% endif %}>
+                            화려한 광고
+                        </option>
+
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        광고 문구 개수
+                    </label>
+
+                    <select
+                        name="ads_count"
+                        class="form-select">
+
+                        <option
+                            value="3"
+                            {% if ads_count == 3 %}selected{% endif %}>
+                            3개
+                        </option>
+
+                        <option
+                            value="5"
+                            {% if ads_count == 5 %}selected{% endif %}>
+                            5개
+                        </option>
+
+                        <option
+                            value="10"
+                            {% if ads_count == 10 %}selected{% endif %}>
+                            10개
+                        </option>
+
+                    </select>
+                </div>
+
+                <div class="d-grid">
                     <button
                         type="submit"
                         class="btn btn-primary btn-lg">
 
                         🚀 마케팅 패키지 생성
                     </button>
-
                 </div>
 
             </form>
@@ -78,82 +208,84 @@
         </div>
     </div>
 
-
     {% if ads_result %}
 
     <div class="card shadow mb-4">
-
         <div class="card-header">
             📢 광고
         </div>
 
         <div class="card-body">
 
+            {% if ads_image_url %}
             <img
                 src="{{ ads_image_url }}"
                 class="img-fluid rounded mb-3"
-                style="max-width: 600px;">
+                style="max-width: 600px;"
+                alt="광고 이미지">
+            {% endif %}
 
             <pre style="white-space: pre-wrap;">{{ ads_result }}</pre>
 
         </div>
-
     </div>
 
-
     <div class="card shadow mb-4">
-
         <div class="card-header">
             📝 블로그
         </div>
 
         <div class="card-body">
 
+            {% if blog_image_url %}
             <img
                 src="{{ blog_image_url }}"
                 class="img-fluid rounded mb-3"
-                style="max-width: 600px;">
+                style="max-width: 600px;"
+                alt="블로그 이미지">
+            {% endif %}
 
             <pre style="white-space: pre-wrap;">{{ blog_result }}</pre>
 
         </div>
-
     </div>
 
-
     <div class="card shadow mb-4">
-
         <div class="card-header">
             📱 SNS
         </div>
 
         <div class="card-body">
 
+            {% if sns_image_url %}
             <img
                 src="{{ sns_image_url }}"
                 class="img-fluid rounded mb-3"
-                style="max-width: 600px;">
+                style="max-width: 600px;"
+                alt="SNS 이미지">
+            {% endif %}
 
             <pre style="white-space: pre-wrap;">{{ sns_result }}</pre>
 
         </div>
+    </div>
 
+    {% endif %}
 
+    {% if package_ready %}
     <div class="text-center mb-4">
 
         <a
             href="/package/download"
             class="btn btn-dark btn-lg">
-        
+
             📦 전체 패키지 ZIP 다운로드
         </a>
-        
-    </div>
 
+    </div>
     {% endif %}
 
 </div>
 
 </body>
-
 </html>
