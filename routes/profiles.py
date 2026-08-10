@@ -2,9 +2,12 @@ from flask import Blueprint, render_template, request, redirect, url_for
 
 from database.profiles import (
     get_profiles,
+    get_profile,
     save_profile,
     delete_profile,
 )
+
+from database.db import get_brand_history
 
 
 profiles_bp = Blueprint(
@@ -85,6 +88,76 @@ def profiles():
         "profiles.html",
         profiles=get_profiles(),
         error=error
+    )
+
+
+@profiles_bp.route(
+    "/profiles/<int:profile_id>/history"
+)
+def brand_history(profile_id):
+    profile = get_profile(
+        profile_id
+    )
+
+    if not profile:
+        return "브랜드 프로필을 찾을 수 없습니다.", 404
+
+    company = profile[2]
+
+    history_rows = get_brand_history(
+        profile_id,
+        company=company
+    )
+
+    # package_id 기준으로 광고/블로그/SNS를 묶음
+    grouped_packages = {}
+
+    for row in history_rows:
+        (
+            history_id,
+            business,
+            row_company,
+            style,
+            result,
+            image_url,
+            content_type,
+            package_id,
+            brand_profile_id,
+            created_at
+        ) = row
+
+        # 과거 데이터는 package_id가 없으므로 개별 묶음으로 표시
+        group_key = (
+            package_id
+            or f"legacy-{history_id}"
+        )
+
+        if group_key not in grouped_packages:
+            grouped_packages[group_key] = {
+                "package_id": package_id,
+                "created_at": created_at,
+                "items": []
+            }
+
+        grouped_packages[group_key]["items"].append({
+            "id": history_id,
+            "business": business,
+            "company": row_company,
+            "style": style,
+            "result": result,
+            "image_url": image_url,
+            "content_type": content_type or "general",
+            "created_at": created_at
+        })
+
+    packages = list(
+        grouped_packages.values()
+    )
+
+    return render_template(
+        "brand_history.html",
+        profile=profile,
+        packages=packages
     )
 
 

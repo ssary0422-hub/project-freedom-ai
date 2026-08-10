@@ -70,6 +70,13 @@
 
             <form method="POST">
 
+                {% if selected_profile_id %}
+                <input
+                    type="hidden"
+                    name="profile_id"
+                    value="{{ selected_profile_id }}">
+                {% endif %}
+
                 <div class="mb-3">
                     <label class="form-label">
                         업종
@@ -254,9 +261,9 @@
                         <span
                             id="loadingSpinner"
                             class="spinner-border spinner-border-sm ms-2 d-none"
-                            role="status">
+                            role="status"
+                            aria-hidden="true">
                         </span>
-
                     </button>
 
                     <div
@@ -266,7 +273,6 @@
                         🤖 AI가 마케팅 패키지를 생성하고 있습니다.<br>
                         광고 → 블로그 → SNS → 이미지 → PDF → ZIP 순서로 작업 중입니다.
                     </div>
-
                 </div>
 
             </form>
@@ -355,24 +361,29 @@
 
 </div>
 
+
 <script>
-    const form = document.querySelector("form");
+    const packageForm = document.querySelector('form');
 
-    const button = document.getElementById("generateButton");
-    const buttonText = document.getElementById("buttonText");
-    const spinner = document.getElementById("loadingSpinner");
-    const loadingMessage = document.getElementById("loadingMessage");
+    const generateButton = document.getElementById('generateButton');
+    const buttonText = document.getElementById('buttonText');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const loadingMessage = document.getElementById('loadingMessage');
 
-    form.addEventListener("submit", function () {
-
-        button.disabled = true;
-
-        buttonText.textContent = "AI 생성 중...";
-
-        spinner.classList.remove("d-none");
-
-        loadingMessage.classList.remove("d-none");
-    });
+    if (
+        packageForm &&
+        generateButton &&
+        buttonText &&
+        loadingSpinner &&
+        loadingMessage
+    ) {
+        packageForm.addEventListener('submit', function () {
+            generateButton.disabled = true;
+            buttonText.textContent = 'AI 생성 중...';
+            loadingSpinner.classList.remove('d-none');
+            loadingMessage.classList.remove('d-none');
+        });
+    }
 </script>
 
 </body>

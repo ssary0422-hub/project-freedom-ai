@@ -1,5 +1,6 @@
 import gc
 from pathlib import Path
+import uuid
 import zipfile
 
 from flask import Blueprint, render_template, request, send_file
@@ -191,6 +192,7 @@ def package():
     package_ready = False
     error = ""
     loaded_profile_name = ""
+    selected_profile_id = None
 
     # =====================================
     # GET: 저장된 브랜드 프로필 불러오기
@@ -201,6 +203,8 @@ def package():
             "profile_id",
             type=int
         )
+
+        selected_profile_id = profile_id
 
         if profile_id:
             profile = get_profile(
@@ -265,6 +269,11 @@ def package():
             type=int
         )
 
+        selected_profile_id = request.form.get(
+            "profile_id",
+            type=int
+        )
+
         if ads_count not in [3, 5, 10]:
             ads_count = 5
 
@@ -273,6 +282,9 @@ def package():
 
         else:
             try:
+                # 광고/블로그/SNS 3개 기록을 한 패키지로 묶는 고유 ID
+                package_id = uuid.uuid4().hex
+
                 # =====================================
                 # 1. 광고
                 # =====================================
@@ -314,7 +326,10 @@ def package():
                     company,
                     style,
                     ads_result,
-                    ads_image_url
+                    ads_image_url,
+                    content_type="ads",
+                    package_id=package_id,
+                    brand_profile_id=selected_profile_id
                 )
 
                 create_word(
@@ -369,11 +384,14 @@ def package():
                 )
 
                 save_history(
-                    "BLOG",
-                    blog_topic,
+                    business,
+                    company,
                     style,
                     blog_result,
-                    blog_image_url
+                    blog_image_url,
+                    content_type="blog",
+                    package_id=package_id,
+                    brand_profile_id=selected_profile_id
                 )
 
                 create_blog_word(
@@ -434,7 +452,10 @@ SNS 광고에 어울리는 고급스럽고 시선을 끄는 구성.
                     company,
                     style,
                     sns_result,
-                    sns_image_url
+                    sns_image_url,
+                    content_type="sns",
+                    package_id=package_id,
+                    brand_profile_id=selected_profile_id
                 )
 
                 create_sns_word(
@@ -488,7 +509,8 @@ SNS 광고에 어울리는 고급스럽고 시선을 끄는 구성.
 
         package_ready=package_ready,
         error=error,
-        loaded_profile_name=loaded_profile_name
+        loaded_profile_name=loaded_profile_name,
+        selected_profile_id=selected_profile_id
     )
 
 
