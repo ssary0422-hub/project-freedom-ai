@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>AI 마케팅 패키지</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<div class="container py-5">
+
+    <h1 class="text-center mb-2">
+        🚀 AI 마케팅 패키지
+    </h1>
+
+    <p class="text-center text-muted mb-5">
+        한 번 입력하면 광고, 블로그, SNS 콘텐츠를 모두 생성합니다.
+    </p>
+
+    <div class="card shadow mb-5">
+        <div class="card-body">
+
+            <form method="POST">
+
+                <div class="mb-3">
+                    <label class="form-label">업종</label>
+
+                    <input
+                        type="text"
+                        name="business"
+                        class="form-control"
+                        value="{{ business }}"
+                        required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">회사명</label>
+
+                    <input
+                        type="text"
+                        name="company"
+                        class="form-control"
+                        value="{{ company }}"
+                        required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">브랜드 분위기</label>
+
+                    <input
+                        type="text"
+                        name="style"
+                        class="form-control"
+                        value="{{ style }}"
+                        required>
+                </div>
+
+                <div class="d-grid">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-lg">
+
+                        🚀 마케팅 패키지 생성
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+
+    {% if ads_result %}
+
+    <div class="card shadow mb-4">
+
+        <div class="card-header">
+            📢 광고
+        </div>
+
+        <div class="card-body">
+
+            <img
+                src="{{ ads_image_url }}"
+                class="img-fluid rounded mb-3"
+                style="max-width: 600px;">
+
+            <pre style="white-space: pre-wrap;">{{ ads_result }}</pre>
+
+        </div>
+
+    </div>
+
+
+    <div class="card shadow mb-4">
+
+        <div class="card-header">
+            📝 블로그
+        </div>
+
+        <div class="card-body">
+
+            <img
+                src="{{ blog_image_url }}"
+                class="img-fluid rounded mb-3"
+                style="max-width: 600px;">
+
+            <pre style="white-space: pre-wrap;">{{ blog_result }}</pre>
+
+        </div>
+
+    </div>
+
+
+    <div class="card shadow mb-4">
+
+        <div class="card-header">
+            📱 SNS
+        </div>
+
+        <div class="card-body">
+
+            <img
+                src="{{ sns_image_url }}"
+                class="img-fluid rounded mb-3"
+                style="max-width: 600px;">
+
+            <pre style="white-space: pre-wrap;">{{ sns_result }}</pre>
+
+        </div>
+
+
+    <div class="text-center mb-4">
+
+        <a
+            href="/package/download"
+            class="btn btn-dark btn-lg">
+        
+            📦 전체 패키지 ZIP 다운로드
+        </a>
+        
+    </div>
+
+    {% endif %}
+
+</div>
+
+</body>
+
+</html>

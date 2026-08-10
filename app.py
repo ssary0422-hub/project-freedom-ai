@@ -1,6 +1,13 @@
 import os
 import sqlite3
 
+from routes.ads import ads_bp
+from routes.blog import blog_bp
+from routes.sns import sns_bp
+from routes.history import history_bp
+from database.db import init_db
+from routes.package import package_bp
+
 from flask import (
     Flask,
     render_template,
@@ -10,7 +17,12 @@ from flask import (
 )
 from docx import Document
 from docx.shared import Inches
-from documents.pdf import create_pdf, PDF_PATH
+from documents.pdf import (
+    create_pdf,
+    create_blog_pdf,
+    create_sns_pdf,
+    PDF_PATH
+)
 
 from ai.ads import make_ads
 from ai.blog import make_blog
@@ -19,9 +31,19 @@ from ai.image import make_image
 
 app = Flask(__name__)
 
+init_db()
+
+
+app.register_blueprint(ads_bp)
+app.register_blueprint(blog_bp)
+app.register_blueprint(sns_bp)
+app.register_blueprint(history_bp)
+app.register_blueprint(package_bp)
+
 DB_PATH = "project.db"
 WORD_PATH = "downloads/advertisement.docx"
-
+BLOG_WORD_PATH = "downloads/blog.docx"
+SNS_WORD_PATH = "downloads/sns.docx"
 
 # -------------------------
 # 데이터베이스
@@ -158,6 +180,52 @@ def create_word(result, image_path=""):
     return WORD_PATH
 
 
+def create_blog_word(result, image_path=""):
+    os.makedirs("downloads", exist_ok=True)
+
+    document = Document()
+
+    document.add_heading(
+        "Project Freedom AI - Blog",
+        level=1
+    )
+
+    if image_path and os.path.exists(image_path):
+        document.add_picture(
+            image_path,
+            width=Inches(5.5)
+        )
+
+    document.add_paragraph(result)
+
+    document.save(BLOG_WORD_PATH)
+
+    return BLOG_WORD_PATH
+
+
+def create_sns_word(result, image_path=""):
+    os.makedirs("downloads", exist_ok=True)
+
+    document = Document()
+
+    document.add_heading(
+        "Project Freedom AI - SNS",
+        level=1
+    )
+
+    if image_path and os.path.exists(image_path):
+        document.add_picture(
+            image_path,
+            width=Inches(5.5)
+        )
+
+    document.add_paragraph(result)
+
+    document.save(SNS_WORD_PATH)
+
+    return SNS_WORD_PATH
+
+
 # -------------------------
 # 광고 생성 페이지
 # -------------------------
@@ -243,54 +311,9 @@ def home():
 # 블로그 생성 페이지
 # -------------------------
 
-@app.route("/blog", methods=["GET", "POST"])
-def blog():
-    result = ""
-    topic = ""
-    tone = ""
-    length = ""
-
-    if request.method == "POST":
-        topic = request.form.get("topic", "").strip()
-        tone = request.form.get("tone", "").strip()
-        length = request.form.get("length", "").strip()
-
-        if topic and tone and length:
-            result = make_blog(
-                topic,
-                tone,
-                length
-            )
-
-            save_history(
-                "BLOG",
-                topic,
-                tone,
-                result
-            )
-
-    return render_template(
-        "blog.html",
-        result=result,
-        topic=topic,
-        tone=tone,
-        length=length
-    )
-
-
 # -------------------------
 # 생성 기록 페이지
 # -------------------------
-
-@app.route("/history")
-def history():
-    history_list = get_history()
-
-    return render_template(
-        "history.html",
-        history_list=history_list
-    )
-
 
 # -------------------------
 # Word 다운로드
@@ -323,49 +346,55 @@ def download_pdf():
 # SNS 생성 페이지
 # -------------------------
 
-@app.route("/sns", methods=["GET", "POST"])
-def sns():
-    result = ""
-    error = ""
-    business = ""
-    company = ""
-    style = ""
-    platform = ""
 
-    if request.method == "POST":
-        business = request.form.get("business", "").strip()
-        company = request.form.get("company", "").strip()
-        style = request.form.get("style", "").strip()
-        platform = request.form.get("platform", "").strip()
+@app.route("/blog/download/word")
+def download_blog_word():
+    if not os.path.exists(BLOG_WORD_PATH):
+        return "먼저 블로그 글을 생성해 주세요.", 404
 
-        if not all([business, company, style, platform]):
-            error = "모든 항목을 입력해 주세요."
-        else:
-            try:
-                result = make_sns(
-                    business,
-                    company,
-                    style,
-                    platform
-                )
-                save_history(
-                    business,
-                    company,
-                    style,
-                    result
-                )
-            except Exception as e:
-                error = f"SNS 생성 오류: {e}"
-                print(error)
+    return send_file(
+        BLOG_WORD_PATH,
+        as_attachment=True,
+        download_name="blog.docx"
+    )
 
-    return render_template(
-        "sns.html",
-        result=result,
-        error=error,
-        business=business,
-        company=company,
-        style=style,
-        platform=platform
+
+@app.route("/blog/download/pdf")
+def download_blog_pdf():
+    blog_pdf_path = "downloads/blog.pdf"
+
+    if not os.path.exists(blog_pdf_path):
+        return "먼저 블로그 글을 생성해 주세요.", 404
+
+    return send_file(
+        blog_pdf_path,
+        as_attachment=True,
+        download_name="blog.pdf"
+    )
+
+@app.route("/sns/download/word")
+def download_sns_word():
+    if not os.path.exists(SNS_WORD_PATH):
+        return "먼저 SNS 글을 생성해 주세요.", 404
+
+    return send_file(
+        SNS_WORD_PATH,
+        as_attachment=True,
+        download_name="sns.docx"
+    )
+
+
+@app.route("/sns/download/pdf")
+def download_sns_pdf():
+    sns_pdf_path = "downloads/sns.pdf"
+
+    if not os.path.exists(sns_pdf_path):
+        return "먼저 SNS 글을 생성해 주세요.", 404
+
+    return send_file(
+        sns_pdf_path,
+        as_attachment=True,
+        download_name="sns.pdf"
     )
 
 

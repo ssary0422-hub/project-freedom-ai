@@ -127,6 +127,24 @@
             🤖 AI 블로그 결과
         </div>
 
+    {% if image_url %}
+
+    <div class="mt-4">
+
+        <h5 class="mb-3">
+            🎨 AI 대표 이미지
+        </h5>
+
+        <img
+            src="{{ image_url }}"
+            class="img-fluid rounded shadow"
+            style="max-width: 700px;"
+            alt="블로그 대표 이미지">
+
+    </div>
+
+    {% endif %}
+
         <div class="card-body">
 
             <pre
@@ -141,6 +159,20 @@
 
                 📋 결과 복사하기
             </button>
+            
+            <a
+                href="/blog/download/word"
+                class="btn btn-success me-2">
+
+                📄 Word 다운로드
+            </a>
+            
+            <a
+                href="/blog/download/pdf"
+                class="btn btn-danger me-2">
+
+                📕 PDF 다운로드
+            </a>
 
         </div>
     </div>

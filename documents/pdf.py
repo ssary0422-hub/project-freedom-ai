@@ -126,6 +126,211 @@ def create_pdf(result: str, image_path: str = "") -> str:
     return PDF_PATH
 
 
+def create_blog_pdf(result, image_path=""):
+    blog_pdf_path = os.path.join(
+        "downloads",
+        "blog.pdf"
+    )
+
+    os.makedirs("downloads", exist_ok=True)
+
+    font_path = r"C:\Windows\Fonts\malgun.ttf"
+
+    if not os.path.exists(font_path):
+        raise FileNotFoundError(
+            "맑은 고딕 폰트를 찾을 수 없습니다."
+        )
+
+    pdfmetrics.registerFont(
+        TTFont("MalgunGothic", font_path)
+    )
+
+    pdf = canvas.Canvas(
+        blog_pdf_path,
+        pagesize=A4
+    )
+
+    width, height = A4
+
+    pdf.setFont("MalgunGothic", 18)
+    pdf.drawString(
+        50,
+        height - 50,
+        "Project Freedom AI - Blog"
+    )
+
+    y = height - 90
+
+    # 대표 이미지
+    if image_path and os.path.exists(image_path):
+        image = ImageReader(image_path)
+
+        original_width, original_height = image.getSize()
+
+        max_width = 495
+        max_height = 280
+
+        ratio = min(
+            max_width / original_width,
+            max_height / original_height
+        )
+
+        image_width = original_width * ratio
+        image_height = original_height * ratio
+
+        x = (width - image_width) / 2
+
+        pdf.drawImage(
+            image,
+            x,
+            y - image_height,
+            width=image_width,
+            height=image_height,
+            preserveAspectRatio=True,
+            mask="auto"
+        )
+
+        y -= image_height + 30
+
+    # 블로그 본문
+    pdf.setFont("MalgunGothic", 11)
+    line_height = 18
+
+    for paragraph in result.splitlines():
+
+        if not paragraph.strip():
+            y -= line_height
+            continue
+
+        lines = split_text(
+            paragraph,
+            max_length=45
+        )
+
+        for line in lines:
+
+            if y < 60:
+                pdf.showPage()
+                pdf.setFont("MalgunGothic", 11)
+                y = height - 60
+
+            pdf.drawString(
+                50,
+                y,
+                line
+            )
+
+            y -= line_height
+
+    pdf.save()
+
+    return blog_pdf_path
+
+
+def create_sns_pdf(result, image_path=""):
+    sns_pdf_path = os.path.join(
+        "downloads",
+        "sns.pdf"
+    )
+
+    os.makedirs("downloads", exist_ok=True)
+
+    font_path = r"C:\Windows\Fonts\malgun.ttf"
+
+    if not os.path.exists(font_path):
+        raise FileNotFoundError(
+            "맑은 고딕 폰트를 찾을 수 없습니다."
+        )
+
+    pdfmetrics.registerFont(
+        TTFont("MalgunGothic", font_path)
+    )
+
+    pdf = canvas.Canvas(
+        sns_pdf_path,
+        pagesize=A4
+    )
+
+    width, height = A4
+
+    pdf.setFont("MalgunGothic", 18)
+
+    pdf.drawString(
+        50,
+        height - 50,
+        "Project Freedom AI - SNS"
+    )
+
+    y = height - 90
+
+    # AI 이미지
+    if image_path and os.path.exists(image_path):
+
+        image = ImageReader(image_path)
+
+        original_width, original_height = image.getSize()
+
+        max_width = 495
+        max_height = 320
+
+        ratio = min(
+            max_width / original_width,
+            max_height / original_height
+        )
+
+        image_width = original_width * ratio
+        image_height = original_height * ratio
+
+        x = (width - image_width) / 2
+
+        pdf.drawImage(
+            image,
+            x,
+            y - image_height,
+            width=image_width,
+            height=image_height,
+            preserveAspectRatio=True,
+            mask="auto"
+        )
+
+        y -= image_height + 30
+
+    # SNS 본문
+    pdf.setFont("MalgunGothic", 11)
+
+    line_height = 18
+
+    for paragraph in result.splitlines():
+
+        if not paragraph.strip():
+            y -= line_height
+            continue
+
+        lines = split_text(
+            paragraph,
+            max_length=45
+        )
+
+        for line in lines:
+
+            if y < 60:
+                pdf.showPage()
+                pdf.setFont("MalgunGothic", 11)
+                y = height - 60
+
+            pdf.drawString(
+                50,
+                y,
+                line
+            )
+
+            y -= line_height
+
+    pdf.save()
+
+    return sns_pdf_path
+    
+    
 def split_text(text: str, max_length: int) -> list[str]:
 
     return [
