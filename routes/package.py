@@ -10,6 +10,7 @@ from ai.sns import make_sns
 from ai.image import make_image
 
 from database.db import save_history
+from database.profiles import get_profile
 
 from documents.word import (
     create_word,
@@ -100,7 +101,6 @@ def create_package_zip(
         compresslevel=6
     ) as zip_file:
 
-        # Word 3개
         _add_to_zip(
             zip_file,
             WORD_PATH,
@@ -119,7 +119,6 @@ def create_package_zip(
             "sns.docx"
         )
 
-        # PDF 3개
         _add_to_zip(
             zip_file,
             PDF_PATH,
@@ -138,7 +137,6 @@ def create_package_zip(
             "sns.pdf"
         )
 
-        # 이미지 3개
         _add_to_zip(
             zip_file,
             ads_image_path,
@@ -192,6 +190,43 @@ def package():
 
     package_ready = False
     error = ""
+    loaded_profile_name = ""
+
+    # =====================================
+    # GET: 저장된 브랜드 프로필 불러오기
+    # =====================================
+
+    if request.method == "GET":
+        profile_id = request.args.get(
+            "profile_id",
+            type=int
+        )
+
+        if profile_id:
+            profile = get_profile(
+                profile_id
+            )
+
+            if profile:
+                (
+                    _profile_id,
+                    business,
+                    company,
+                    style,
+                    image_style,
+                    sns_platform,
+                    blog_length,
+                    ads_count
+                ) = profile
+
+                loaded_profile_name = company
+
+            else:
+                error = "선택한 브랜드 프로필을 찾을 수 없습니다."
+
+    # =====================================
+    # POST: 마케팅 패키지 생성
+    # =====================================
 
     if request.method == "POST":
         business = request.form.get(
@@ -256,10 +291,13 @@ def package():
 브랜드 분위기: {style}
 이미지 스타일: {image_style}
 
-깨끗하고 전문적인 상업용 웰니스 공간.
-정돈된 인테리어와 편안한 분위기.
-사람의 신체 노출이나 마사지 장면은 포함하지 말 것.
-비성적이고 가족 친화적인 광고 이미지.
+고급스럽고 전문적인 마사지샵의 실제 서비스 장면.
+성인 고객이 단정한 마사지복 또는 수건으로 충분히 가려진 상태에서
+전문 마사지 테라피스트에게 어깨나 등 중심의 건전한 마사지를 받는 모습.
+테라피스트와 고객 모두 자연스럽고 전문적인 자세.
+신체 노출은 최소화하고 성적인 분위기는 전혀 없게 표현.
+따뜻한 조명, 정돈된 인테리어, 편안한 웰니스 분위기.
+상업 광고에 사용할 수 있는 가족 친화적이고 전문적인 사진.
 이미지 안에는 글자를 넣지 말 것.
 """
 
@@ -313,10 +351,12 @@ def package():
 브랜드 분위기: {style}
 이미지 스타일: {image_style}
 
-전문적인 상업용 웰니스 공간 이미지.
-깔끔하고 편안하며 블로그 대표 이미지에 적합한 구성.
-사람의 신체 노출이나 마사지 장면은 포함하지 말 것.
-비성적이고 가족 친화적인 이미지.
+고급스럽고 전문적인 마사지샵의 실제 서비스 장면.
+성인 고객이 단정한 마사지복 또는 수건으로 충분히 가려진 상태에서
+전문 마사지 테라피스트에게 어깨나 등 중심의 건전한 마사지를 받는 모습.
+신체 노출은 최소화하고 성적인 분위기는 전혀 없게 표현.
+깔끔하고 편안하며 블로그 대표 이미지에 적합한 자연스러운 구도.
+따뜻한 조명과 전문적인 웰니스 공간.
 이미지 안에는 글자를 넣지 말 것.
 """
 
@@ -368,11 +408,17 @@ SNS 게시물용 상업 이미지.
 브랜드 분위기: {style}
 이미지 스타일: {image_style}
 
-세련되고 시선을 끄는 상업용 웰니스 공간.
-SNS에 적합한 깔끔하고 전문적인 구성.
-사람의 신체 노출이나 마사지 장면은 포함하지 말 것.
-비성적이고 가족 친화적인 이미지.
-이미지 안에는 글자를 넣지 말 것.
+세련된 마사지샵의 전문적인 서비스 장면.
+성인 고객이 단정한 마사지복 또는 수건으로 충분히 가려진 상태에서
+전문 마사지 테라피스트에게 어깨나 등 중심의 건전한 마사지를 받는 모습.
+신체 노출은 최소화하고 성적인 분위기는 전혀 없게 표현.
+SNS 광고에 어울리는 고급스럽고 시선을 끄는 구성.
+
+이미지 안에 업체명 "{company}"을 정확한 철자로 한 번만 표시.
+업체명은 상단 또는 하단의 세련된 브랜드 로고/간판 형태로 크게 배치.
+"{company}" 외에는 다른 문구나 임의의 글자를 넣지 말 것.
+글자가 잘리지 않고 또렷하게 읽히도록 표현.
+가족 친화적이고 전문적인 상업 광고 이미지.
 """
 
                 (
@@ -441,7 +487,8 @@ SNS에 적합한 깔끔하고 전문적인 구성.
         sns_image_url=sns_image_url,
 
         package_ready=package_ready,
-        error=error
+        error=error,
+        loaded_profile_name=loaded_profile_name
     )
 
 

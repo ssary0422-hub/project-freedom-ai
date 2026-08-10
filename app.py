@@ -7,6 +7,7 @@ from routes.sns import sns_bp
 from routes.history import history_bp
 from database.db import init_db
 from routes.package import package_bp
+from routes.profiles import profiles_bp
 
 from flask import (
     Flask,
@@ -39,6 +40,7 @@ app.register_blueprint(blog_bp)
 app.register_blueprint(sns_bp)
 app.register_blueprint(history_bp)
 app.register_blueprint(package_bp)
+app.register_blueprint(profiles_bp)
 
 DB_PATH = "project.db"
 WORD_PATH = "downloads/advertisement.docx"

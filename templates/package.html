@@ -14,15 +14,50 @@
 
 <body class="bg-light">
 
-<div class="container py-5">
+<nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container">
 
-    <h1 class="text-center mb-2">
-        🚀 AI 마케팅 패키지
-    </h1>
+        <a
+            class="navbar-brand"
+            href="/">
+            🤖 Project Freedom AI
+        </a>
 
-    <p class="text-center text-muted mb-5">
-        한 번 입력하면 광고, 블로그, SNS 콘텐츠를 모두 생성합니다.
-    </p>
+        <div>
+            <a
+                class="btn btn-light me-2"
+                href="/package">
+                🚀 마케팅 패키지
+            </a>
+
+            <a
+                class="btn btn-outline-light"
+                href="/profiles">
+                🏢 브랜드 프로필
+            </a>
+        </div>
+
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <div class="text-center mb-4">
+        <h1>
+            🚀 AI 마케팅 패키지
+        </h1>
+
+        <p class="text-muted">
+            한 번 입력하면 광고, 블로그, SNS 콘텐츠를 모두 생성합니다.
+        </p>
+    </div>
+
+    {% if loaded_profile_name %}
+    <div class="alert alert-success">
+        ✅ <strong>{{ loaded_profile_name }}</strong> 브랜드 프로필을 불러왔습니다.
+        내용을 확인한 뒤 바로 패키지를 생성할 수 있습니다.
+    </div>
+    {% endif %}
 
     {% if error %}
     <div class="alert alert-danger">
@@ -36,7 +71,9 @@
             <form method="POST">
 
                 <div class="mb-3">
-                    <label class="form-label">업종</label>
+                    <label class="form-label">
+                        업종
+                    </label>
 
                     <input
                         type="text"
@@ -47,7 +84,9 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">회사명</label>
+                    <label class="form-label">
+                        회사명
+                    </label>
 
                     <input
                         type="text"
@@ -58,7 +97,9 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">브랜드 분위기</label>
+                    <label class="form-label">
+                        브랜드 분위기
+                    </label>
 
                     <input
                         type="text"
@@ -69,7 +110,9 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">블로그 길이</label>
+                    <label class="form-label">
+                        블로그 길이
+                    </label>
 
                     <select
                         name="blog_length"
@@ -97,7 +140,9 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">SNS 플랫폼</label>
+                    <label class="form-label">
+                        SNS 플랫폼
+                    </label>
 
                     <select
                         name="sns_platform"
@@ -131,7 +176,9 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">이미지 스타일</label>
+                    <label class="form-label">
+                        이미지 스타일
+                    </label>
 
                     <select
                         name="image_style"
@@ -273,7 +320,8 @@
     {% endif %}
 
     {% if package_ready %}
-    <div class="text-center mb-4">
+
+    <div class="text-center mb-5">
 
         <a
             href="/package/download"
@@ -283,6 +331,7 @@
         </a>
 
     </div>
+
     {% endif %}
 
 </div>
