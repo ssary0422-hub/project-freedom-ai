@@ -243,11 +243,30 @@
 
                 <div class="d-grid">
                     <button
+                        id="generateButton"
                         type="submit"
                         class="btn btn-primary btn-lg">
 
-                        🚀 마케팅 패키지 생성
+                        <span id="buttonText">
+                            🚀 마케팅 패키지 생성
+                        </span>
+
+                        <span
+                            id="loadingSpinner"
+                            class="spinner-border spinner-border-sm ms-2 d-none"
+                            role="status">
+                        </span>
+
                     </button>
+
+                    <div
+                        id="loadingMessage"
+                        class="text-center mt-3 text-primary d-none">
+
+                        🤖 AI가 마케팅 패키지를 생성하고 있습니다.<br>
+                        광고 → 블로그 → SNS → 이미지 → PDF → ZIP 순서로 작업 중입니다.
+                    </div>
+
                 </div>
 
             </form>
@@ -335,6 +354,26 @@
     {% endif %}
 
 </div>
+
+<script>
+    const form = document.querySelector("form");
+
+    const button = document.getElementById("generateButton");
+    const buttonText = document.getElementById("buttonText");
+    const spinner = document.getElementById("loadingSpinner");
+    const loadingMessage = document.getElementById("loadingMessage");
+
+    form.addEventListener("submit", function () {
+
+        button.disabled = true;
+
+        buttonText.textContent = "AI 생성 중...";
+
+        spinner.classList.remove("d-none");
+
+        loadingMessage.classList.remove("d-none");
+    });
+</script>
 
 </body>
 </html>
