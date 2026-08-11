@@ -1,6 +1,8 @@
 import gc
 from pathlib import Path
 import uuid
+
+from PIL import Image, ImageDraw, ImageFont
 import zipfile
 
 from flask import Blueprint, render_template, request, send_file
@@ -83,6 +85,426 @@ def _image_zip_name(image_path: str, base_name: str) -> str:
         suffix = ".jpg"
 
     return f"images/{base_name}{suffix}"
+
+
+
+def _find_brand_font(size: int):
+    candidates = [
+        Path(r"C:\Windows\Fonts\malgunbd.ttf"),
+        Path(r"C:\Windows\Fonts\malgun.ttf"),
+        Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+        Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"),
+    ]
+
+    for font_path in candidates:
+        if font_path.exists():
+            try:
+                return ImageFont.truetype(str(font_path), size=size)
+            except Exception:
+                pass
+
+    return ImageFont.load_default()
+
+
+def _add_company_name_to_image(image_path: str, company: str) -> str:
+    """
+    SNS 이미지 하단에 업체명을 프리미엄 스파 광고처럼 합성합니다.
+    검은 박스 대신 은은한 하단 그라데이션 + 브랜드명 + 서브카피를 사용합니다.
+    """
+    if not image_path or not company:
+        return image_path
+
+    path = Path(image_path)
+
+    if not path.exists():
+        return image_path
+
+    try:
+        with Image.open(str(path)) as source:
+            image = source.convert("RGBA")
+
+        width, height = image.size
+
+        # -------------------------------------------------
+        # 하단 은은한 그라데이션
+        # -------------------------------------------------
+        overlay = Image.new(
+            "RGBA",
+            image.size,
+            (0, 0, 0, 0)
+        )
+
+        overlay_draw = ImageDraw.Draw(
+            overlay,
+            "RGBA"
+        )
+
+        gradient_height = int(
+            height * 0.30
+        )
+
+        gradient_start = (
+            height
+            - gradient_height
+        )
+
+        for step in range(
+            gradient_height
+        ):
+            progress = (
+                step
+                / max(
+                    1,
+                    gradient_height - 1
+                )
+            )
+
+            alpha = int(
+                150
+                * progress
+            )
+
+            y = (
+                gradient_start
+                + step
+            )
+
+            overlay_draw.line(
+                (
+                    0,
+                    y,
+                    width,
+                    y
+                ),
+                fill=(
+                    0,
+                    0,
+                    0,
+                    alpha
+                )
+            )
+
+        image = Image.alpha_composite(
+            image,
+            overlay
+        )
+
+        draw = ImageDraw.Draw(
+            image,
+            "RGBA"
+        )
+
+        # -------------------------------------------------
+        # 브랜드명
+        # -------------------------------------------------
+        brand_font_size = max(
+            24,
+            int(
+                width
+                * 0.040
+            )
+        )
+
+        brand_font = _find_brand_font(
+            brand_font_size
+        )
+
+        max_text_width = (
+            width
+            * 0.78
+        )
+
+        while brand_font_size > 18:
+            brand_bbox = draw.textbbox(
+                (0, 0),
+                company,
+                font=brand_font
+            )
+
+            brand_width = (
+                brand_bbox[2]
+                - brand_bbox[0]
+            )
+
+            if brand_width <= max_text_width:
+                break
+
+            brand_font_size -= 2
+
+            brand_font = _find_brand_font(
+                brand_font_size
+            )
+
+        brand_bbox = draw.textbbox(
+            (0, 0),
+            company,
+            font=brand_font
+        )
+
+        brand_width = (
+            brand_bbox[2]
+            - brand_bbox[0]
+        )
+
+        brand_height = (
+            brand_bbox[3]
+            - brand_bbox[1]
+        )
+
+        # -------------------------------------------------
+        # 작은 서브카피
+        # -------------------------------------------------
+        tagline = (
+            "RELAX · HEAL · REFRESH"
+        )
+
+        tagline_font_size = max(
+            12,
+            int(
+                width
+                * 0.018
+            )
+        )
+
+        tagline_font = _find_brand_font(
+            tagline_font_size
+        )
+
+        tagline_bbox = draw.textbbox(
+            (0, 0),
+            tagline,
+            font=tagline_font
+        )
+
+        tagline_width = (
+            tagline_bbox[2]
+            - tagline_bbox[0]
+        )
+
+        tagline_height = (
+            tagline_bbox[3]
+            - tagline_bbox[1]
+        )
+
+        # -------------------------------------------------
+        # 중앙 정렬 위치
+        # -------------------------------------------------
+        bottom_margin = int(
+            height
+            * 0.045
+        )
+
+        tagline_y = (
+            height
+            - bottom_margin
+            - tagline_height
+        )
+
+        brand_y = (
+            tagline_y
+            - int(
+                height
+                * 0.012
+            )
+            - brand_height
+        )
+
+        brand_x = (
+            width
+            - brand_width
+        ) // 2
+
+        tagline_x = (
+            width
+            - tagline_width
+        ) // 2
+
+        # -------------------------------------------------
+        # 은은한 그림자
+        # -------------------------------------------------
+        shadow_offset = max(
+            1,
+            int(
+                width
+                * 0.002
+            )
+        )
+
+        draw.text(
+            (
+                brand_x
+                + shadow_offset,
+                brand_y
+                + shadow_offset
+            ),
+            company,
+            font=brand_font,
+            fill=(
+                0,
+                0,
+                0,
+                150
+            )
+        )
+
+        draw.text(
+            (
+                brand_x,
+                brand_y
+            ),
+            company,
+            font=brand_font,
+            fill=(
+                250,
+                246,
+                238,
+                255
+            )
+        )
+
+        draw.text(
+            (
+                tagline_x
+                + shadow_offset,
+                tagline_y
+                + shadow_offset
+            ),
+            tagline,
+            font=tagline_font,
+            fill=(
+                0,
+                0,
+                0,
+                120
+            )
+        )
+
+        draw.text(
+            (
+                tagline_x,
+                tagline_y
+            ),
+            tagline,
+            font=tagline_font,
+            fill=(
+                232,
+                222,
+                207,
+                235
+            )
+        )
+
+        # -------------------------------------------------
+        # 저장
+        # -------------------------------------------------
+        suffix = path.suffix.lower()
+
+        if suffix in [
+            ".jpg",
+            ".jpeg",
+            ".webp"
+        ]:
+            image.convert("RGB").save(
+                str(path),
+                quality=94
+            )
+        else:
+            image.save(
+                str(path)
+            )
+
+        return str(path)
+
+    except Exception as error:
+        print(
+            "SNS 업체명 합성 실패:",
+            error
+        )
+
+        return image_path
+
+
+
+def _is_fun_animal_style(image_style: str) -> bool:
+    return image_style == "귀엽고 유머러스한 동물 콘셉트"
+
+
+def _make_sns_image(company, business, sns_platform, style, image_style):
+    if _is_fun_animal_style(image_style):
+        primary_prompt = f"""
+SNS 게시물용 재미있는 상업 이미지.
+
+업종: {business}
+플랫폼: {sns_platform}
+브랜드 분위기: {style}
+
+귀엽고 유머러스한 동물 캐릭터가 실제 사진처럼 보이는 광고 장면.
+예: 선글라스를 쓴 고양이가 다른 고양이의 어깨나 등을
+진지하게 마사지해 주는 모습처럼 한눈에 웃음이 나는 콘셉트.
+동물은 의인화되어 있지만 전체 이미지는 고급 상업 사진처럼 세련되게 표현.
+따뜻한 웰니스 공간, 포근한 조명, 깨끗한 인테리어.
+밈처럼 재미있고 SNS에서 시선을 끌지만 저급하거나 과장된 만화 느낌은 피할 것.
+이미지 안에는 글자, 로고, 워터마크를 넣지 말 것.
+"""
+    else:
+        primary_prompt = f"""
+SNS 게시물용 상업 이미지.
+
+업종: {business}
+플랫폼: {sns_platform}
+브랜드 분위기: {style}
+이미지 스타일: {image_style}
+
+세련되고 전문적인 웰니스 또는 마사지 서비스 공간의 실제 광고 사진.
+성인 고객은 단정한 서비스 의상으로 충분히 가려진 상태.
+전문 테라피스트가 어깨 중심의 편안하고 건전한 웰니스 서비스를 제공하는 장면.
+고객과 테라피스트 모두 자연스럽고 전문적인 자세.
+따뜻한 조명, 정돈된 인테리어, 편안하고 고급스러운 분위기.
+가족 친화적인 상업 광고 사진.
+신체 노출이나 선정적인 연출 없이 표현.
+이미지 안에는 글자, 로고, 워터마크를 넣지 말 것.
+"""
+
+    image_path, image_url = _make_image_safe(
+        primary_prompt,
+        "SNS 1차"
+    )
+
+    if not image_path:
+        if _is_fun_animal_style(image_style):
+            retry_prompt = f"""
+Cute humorous premium social media advertising photo for a {business}.
+Two adorable anthropomorphic cats in a luxury wellness studio.
+One cat wears stylish sunglasses and gives the other cat a playful shoulder massage.
+Warm lighting, polished commercial photography, charming and funny, family-friendly.
+No text, no logo, no watermark.
+"""
+        else:
+            retry_prompt = f"""
+Professional commercial social media photo for a {business} business.
+Brand mood: {style}. Visual style: {image_style}.
+A clean elegant wellness interior with a professional therapist providing
+a fully clothed adult client with a relaxing shoulder wellness service.
+Warm lighting, polished interior, calm atmosphere, family-friendly advertising photography.
+No nudity, no suggestive pose, no text, no logo, no watermark.
+"""
+
+        image_path, image_url = _make_image_safe(
+            retry_prompt,
+            "SNS 재시도"
+        )
+
+    if image_path:
+        image_path = _add_company_name_to_image(
+            image_path,
+            company
+        )
+
+        image_url = "/" + str(
+            Path(image_path)
+        ).replace("\\", "/")
+
+    return image_path, image_url
 
 
 def create_package_zip(
@@ -296,7 +718,22 @@ def package():
                     ads_count
                 )
 
-                ads_prompt = f"""
+                if _is_fun_animal_style(image_style):
+                    ads_prompt = f"""
+{company}의 재미있는 상업 광고 이미지.
+
+업종: {business}
+브랜드 분위기: {style}
+
+귀엽고 유머러스한 동물들이 웰니스 서비스를 즐기는 장면.
+선글라스를 쓴 고양이가 다른 고양이를 진지하게 마사지하는 것처럼
+SNS에서 바로 시선을 끌 수 있는 재치 있는 콘셉트.
+실제 고급 광고 사진처럼 디테일하고 자연스러운 털 표현.
+따뜻하고 세련된 스파 인테리어, 가족 친화적이고 밝은 분위기.
+글자, 로고, 워터마크는 넣지 말 것.
+"""
+                else:
+                    ads_prompt = f"""
 {company}의 상업용 광고 이미지.
 
 업종: {business}
@@ -320,6 +757,16 @@ def package():
                     ads_prompt,
                     "광고"
                 )
+
+                if ads_image_path:
+                    ads_image_path = _add_company_name_to_image(
+                        ads_image_path,
+                        company
+                    )
+
+                    ads_image_url = "/" + str(
+                        Path(ads_image_path)
+                    ).replace("\\", "/")
 
                 save_history(
                     business,
@@ -359,7 +806,22 @@ def package():
                     blog_length
                 )
 
-                blog_prompt = f"""
+                if _is_fun_animal_style(image_style):
+                    blog_prompt = f"""
+블로그 대표 이미지.
+
+주제: {blog_topic}
+브랜드 분위기: {style}
+
+귀엽고 유머러스한 동물 웰니스 콘셉트.
+고양이 두 마리가 고급 마사지샵에서 마사지 테라피스트와 고객 역할을 하는 장면.
+실제 사진처럼 섬세하고 고급스러우면서도 한눈에 재미있는 이미지.
+선글라스나 작은 수건 같은 재치 있는 소품을 자연스럽게 사용.
+따뜻한 조명, 고급 스파 인테리어, 가족 친화적인 분위기.
+글자, 로고, 워터마크는 넣지 말 것.
+"""
+                else:
+                    blog_prompt = f"""
 블로그 대표 이미지.
 
 주제: {blog_topic}
@@ -382,6 +844,16 @@ def package():
                     blog_prompt,
                     "블로그"
                 )
+
+                if blog_image_path:
+                    blog_image_path = _add_company_name_to_image(
+                        blog_image_path,
+                        company
+                    )
+
+                    blog_image_url = "/" + str(
+                        Path(blog_image_path)
+                    ).replace("\\", "/")
 
                 save_history(
                     business,
@@ -417,34 +889,15 @@ def package():
                     sns_platform
                 )
 
-                sns_prompt = f"""
-SNS 게시물용 상업 이미지.
-
-회사명: {company}
-업종: {business}
-플랫폼: {sns_platform}
-브랜드 분위기: {style}
-이미지 스타일: {image_style}
-
-세련된 마사지샵의 전문적인 서비스 장면.
-성인 고객이 단정한 마사지복 또는 수건으로 충분히 가려진 상태에서
-전문 마사지 테라피스트에게 어깨나 등 중심의 건전한 마사지를 받는 모습.
-신체 노출은 최소화하고 성적인 분위기는 전혀 없게 표현.
-SNS 광고에 어울리는 고급스럽고 시선을 끄는 구성.
-
-이미지 안에 업체명 "{company}"을 정확한 철자로 한 번만 표시.
-업체명은 상단 또는 하단의 세련된 브랜드 로고/간판 형태로 크게 배치.
-"{company}" 외에는 다른 문구나 임의의 글자를 넣지 말 것.
-글자가 잘리지 않고 또렷하게 읽히도록 표현.
-가족 친화적이고 전문적인 상업 광고 이미지.
-"""
-
                 (
                     sns_image_path,
                     sns_image_url
-                ) = _make_image_safe(
-                    sns_prompt,
-                    "SNS"
+                ) = _make_sns_image(
+                    company,
+                    business,
+                    sns_platform,
+                    style,
+                    image_style
                 )
 
                 save_history(

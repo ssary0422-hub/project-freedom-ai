@@ -82,9 +82,43 @@
                     📦 마케팅 패키지
                 </strong>
 
-                <span class="text-muted">
-                    {{ package['created_at'] }}
-                </span>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                    <span class="text-muted">
+                        {{ package['created_at'] }}
+                    </span>
+
+                    {% if package['package_id'] %}
+
+                    <a
+                        href="/profiles/{{ profile[0] }}/history/{{ package['package_id'] }}"
+                        class="btn btn-sm btn-outline-primary">
+                        🔎 상세보기
+                    </a>
+
+                    <a
+                        href="/package?profile_id={{ profile[0] }}"
+                        class="btn btn-sm btn-outline-success">
+                        🔄 같은 브랜드로 재생성
+                    </a>
+
+                    <form
+                        method="POST"
+                        action="/profiles/{{ profile[0] }}/history/{{ package['package_id'] }}/delete"
+                        class="d-inline"
+                        onsubmit="return confirm('이 마케팅 패키지 기록 전체를 삭제할까요?');">
+
+                        <button
+                            type="submit"
+                            class="btn btn-sm btn-outline-danger">
+                            🗑 삭제
+                        </button>
+
+                    </form>
+
+                    {% endif %}
+
+                </div>
 
             </div>
 

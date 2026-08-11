@@ -1,30 +1,241 @@
-{% for item in history_list %}
+<!DOCTYPE html>
+<html lang="ko">
 
-<hr>
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1">
 
-<p><b>업종 :</b> {{ item[1] }}</p>
-<p><b>회사명 :</b> {{ item[2] }}</p>
-<p><b>분위기 :</b> {{ item[3] }}</p>
+    <title>생성 기록 - Project Freedom AI</title>
 
-<pre>{{ item[4] }}</pre>
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        rel="stylesheet">
 
-{% if item[5] %}
-    <img
-        src="{{ item[5] }}"
-        class="img-fluid rounded shadow"
-        style="max-width: 500px;"
-        alt="생성 이미지">
-{% endif %}
+    <style>
+        .history-image {
+            width: 100%;
+            max-height: 420px;
+            object-fit: cover;
+        }
 
-<br><br>
+        .result-text {
+            white-space: pre-wrap;
+            font-family: inherit;
+            margin-bottom: 0;
+            line-height: 1.7;
+        }
 
-<a
-    href="/delete/{{ item[0] }}"
-    class="btn btn-danger btn-sm">
-    🗑 삭제
-</a>
+        .history-card {
+            border: 0;
+            border-radius: 18px;
+            overflow: hidden;
+        }
 
-{% endfor %}
+        .history-meta {
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+
+        <a
+            class="navbar-brand"
+            href="/">
+            🤖 Project Freedom AI
+        </a>
+
+        <div class="d-flex gap-2 flex-wrap">
+
+            <a
+                class="btn btn-light"
+                href="/">
+                🏠 홈
+            </a>
+
+            <a
+                class="btn btn-outline-light"
+                href="/package">
+                🚀 마케팅 패키지
+            </a>
+
+            <a
+                class="btn btn-outline-light"
+                href="/profiles">
+                🏢 브랜드 프로필
+            </a>
+
+        </div>
+
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <div class="text-center mb-5">
+
+        <h1 class="mb-2">
+            📚 생성 기록
+        </h1>
+
+        <p class="text-muted mb-0">
+            지금까지 생성한 콘텐츠와 이미지를 확인할 수 있습니다.
+        </p>
+
+    </div>
+
+    {% if history_list %}
+
+        <div class="row g-4">
+
+            {% for item in history_list %}
+
+            <div class="col-12">
+
+                <div class="card shadow-sm history-card">
+
+                    <div class="card-header bg-white py-3">
+
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                            <div>
+
+                                <h5 class="mb-1">
+                                    {{ item[2] or "회사명 없음" }}
+                                </h5>
+
+                                <div class="text-muted history-meta">
+                                    <span class="me-3">
+                                        🏷 업종: {{ item[1] or "-" }}
+                                    </span>
+
+                                    <span>
+                                        🎨 분위기: {{ item[3] or "-" }}
+                                    </span>
+                                </div>
+
+                            </div>
+
+                            <div class="d-flex gap-2 flex-wrap">
+
+                                <a
+                                    href="/history/download/{{ item[0] }}/pdf"
+                                    class="btn btn-sm btn-outline-danger">
+                                    📄 PDF
+                                </a>
+
+                                <a
+                                    href="/history/download/{{ item[0] }}/word"
+                                    class="btn btn-sm btn-outline-primary">
+                                    📝 Word
+                                </a>
+
+                                {% if item[5] %}
+                                <a
+                                    href="/history/download/{{ item[0] }}/image"
+                                    class="btn btn-sm btn-outline-success">
+                                    🖼 이미지
+                                </a>
+                                {% endif %}
+
+                                <form
+                                    method="GET"
+                                    action="/delete/{{ item[0] }}"
+                                    onsubmit="return confirm('이 생성 기록을 정말 삭제할까요?');">
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm btn-outline-danger">
+                                        🗑 삭제
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card-body p-4">
+
+                        {% if item[5] %}
+
+                        <div class="row g-4 align-items-start">
+
+                            <div class="col-lg-5">
+
+                                <img
+                                    src="{{ item[5] }}"
+                                    class="img-fluid rounded history-image"
+                                    alt="생성 이미지">
+
+                            </div>
+
+                            <div class="col-lg-7">
+
+                                <pre class="result-text">{{ item[4] }}</pre>
+
+                            </div>
+
+                        </div>
+
+                        {% else %}
+
+                        <pre class="result-text">{{ item[4] }}</pre>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center py-5">
+
+                <div class="fs-1 mb-3">
+                    📭
+                </div>
+
+                <h4>
+                    아직 생성 기록이 없습니다.
+                </h4>
+
+                <p class="text-muted">
+                    광고, 블로그, SNS 또는 마케팅 패키지를 먼저 생성해 보세요.
+                </p>
+
+                <a
+                    href="/"
+                    class="btn btn-primary me-2">
+                    📢 광고 만들기
+                </a>
+
+                <a
+                    href="/package"
+                    class="btn btn-success">
+                    🚀 마케팅 패키지 만들기
+                </a>
+
+            </div>
+        </div>
+
+    {% endif %}
+
+</div>
 
 </body>
 </html>

@@ -31,10 +31,18 @@
             </a>
 
             <a
-                class="btn btn-outline-light"
+                class="btn btn-outline-light me-2"
                 href="/profiles">
                 🏢 브랜드 프로필
             </a>
+
+            {% if selected_profile_id %}
+            <a
+                class="btn btn-outline-light"
+                href="/profiles/{{ selected_profile_id }}/history">
+                📚 브랜드 히스토리
+            </a>
+            {% endif %}
         </div>
 
     </div>
@@ -201,6 +209,12 @@
                             value="감성적인 분위기"
                             {% if image_style == "감성적인 분위기" %}selected{% endif %}>
                             감성적인 분위기
+                        </option>
+
+                        <option
+                            value="귀엽고 유머러스한 동물 콘셉트"
+                            {% if image_style == "귀엽고 유머러스한 동물 콘셉트" %}selected{% endif %}>
+                            🐱 귀엽고 유머러스한 동물 콘셉트
                         </option>
 
                         <option
