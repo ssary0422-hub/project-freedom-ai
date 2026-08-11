@@ -425,8 +425,51 @@ def _add_company_name_to_image(image_path: str, company: str) -> str:
 
 
 
+ANIMAL_STYLE_MAP = {
+    "고양이 유머 콘셉트": "cat",
+    "강아지 유머 콘셉트": "dog",
+    "코끼리 유머 콘셉트": "elephant",
+    "랜덤 동물 유머 콘셉트": "random",
+    # 이전에 저장된 브랜드 프로필과의 호환성 유지
+    "귀엽고 유머러스한 동물 콘셉트": "cat",
+}
+
+
+def _animal_for_style(image_style: str) -> str:
+    animal = ANIMAL_STYLE_MAP.get(
+        image_style,
+        ""
+    )
+
+    if animal != "random":
+        return animal
+
+    import random
+
+    return random.choice([
+        "cat",
+        "dog",
+        "elephant"
+    ])
+
+
 def _is_fun_animal_style(image_style: str) -> bool:
-    return image_style == "귀엽고 유머러스한 동물 콘셉트"
+    return image_style in ANIMAL_STYLE_MAP
+
+
+def _animal_prompt_name(image_style: str) -> str:
+    animal = _animal_for_style(
+        image_style
+    )
+
+    return {
+        "cat": "adorable cats",
+        "dog": "adorable dogs",
+        "elephant": "adorable elephants",
+    }.get(
+        animal,
+        "adorable animals"
+    )
 
 
 def _make_sns_image(company, business, sns_platform, style, image_style):
@@ -438,8 +481,9 @@ SNS 게시물용 재미있는 상업 이미지.
 플랫폼: {sns_platform}
 브랜드 분위기: {style}
 
-귀엽고 유머러스한 동물 캐릭터가 실제 사진처럼 보이는 광고 장면.
-예: 선글라스를 쓴 고양이가 다른 고양이의 어깨나 등을
+선택 동물: {_animal_prompt_name(image_style)}
+귀엽고 유머러스한 선택 동물 캐릭터가 실제 사진처럼 보이는 광고 장면.
+선글라스나 작은 스파 소품을 착용한 한 마리가 다른 한 마리의 어깨나 등을
 진지하게 마사지해 주는 모습처럼 한눈에 웃음이 나는 콘셉트.
 동물은 의인화되어 있지만 전체 이미지는 고급 상업 사진처럼 세련되게 표현.
 따뜻한 웰니스 공간, 포근한 조명, 깨끗한 인테리어.
@@ -474,8 +518,8 @@ SNS 게시물용 상업 이미지.
         if _is_fun_animal_style(image_style):
             retry_prompt = f"""
 Cute humorous premium social media advertising photo for a {business}.
-Two adorable anthropomorphic cats in a luxury wellness studio.
-One cat wears stylish sunglasses and gives the other cat a playful shoulder massage.
+Two {_animal_prompt_name(image_style)} in a luxury wellness studio.
+One wears stylish sunglasses and gives the other a playful shoulder massage.
 Warm lighting, polished commercial photography, charming and funny, family-friendly.
 No text, no logo, no watermark.
 """
@@ -725,8 +769,9 @@ def package():
 업종: {business}
 브랜드 분위기: {style}
 
-귀엽고 유머러스한 동물들이 웰니스 서비스를 즐기는 장면.
-선글라스를 쓴 고양이가 다른 고양이를 진지하게 마사지하는 것처럼
+선택 동물: {_animal_prompt_name(image_style)}
+귀엽고 유머러스한 선택 동물들이 웰니스 서비스를 즐기는 장면.
+선글라스나 작은 스파 소품을 착용한 한 마리가 다른 한 마리를 진지하게 마사지하는 것처럼
 SNS에서 바로 시선을 끌 수 있는 재치 있는 콘셉트.
 실제 고급 광고 사진처럼 디테일하고 자연스러운 털 표현.
 따뜻하고 세련된 스파 인테리어, 가족 친화적이고 밝은 분위기.
@@ -814,7 +859,8 @@ SNS에서 바로 시선을 끌 수 있는 재치 있는 콘셉트.
 브랜드 분위기: {style}
 
 귀엽고 유머러스한 동물 웰니스 콘셉트.
-고양이 두 마리가 고급 마사지샵에서 마사지 테라피스트와 고객 역할을 하는 장면.
+선택 동물: {_animal_prompt_name(image_style)}
+선택 동물 두 마리가 고급 마사지샵에서 마사지 테라피스트와 고객 역할을 하는 장면.
 실제 사진처럼 섬세하고 고급스러우면서도 한눈에 재미있는 이미지.
 선글라스나 작은 수건 같은 재치 있는 소품을 자연스럽게 사용.
 따뜻한 조명, 고급 스파 인테리어, 가족 친화적인 분위기.

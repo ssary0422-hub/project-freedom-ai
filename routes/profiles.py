@@ -35,6 +35,7 @@ from routes.package import (
     _make_image_safe,
     _make_sns_image,
     _is_fun_animal_style,
+    _animal_prompt_name,
 )
 
 from documents.word import (
@@ -604,8 +605,8 @@ Cute humorous premium commercial advertising photo for {company}.
 Business: {business}
 Brand mood: {style}.
 
-Two adorable anthropomorphic cats in an upscale wellness studio.
-One stylish cat wearing sunglasses is seriously giving another relaxed cat
+Two {_animal_prompt_name(image_style)} in an upscale wellness studio.
+One stylish animal wearing sunglasses is seriously giving another relaxed animal
 a shoulder or back massage. Photorealistic fur, premium spa interior,
 warm lighting, funny but polished social advertising aesthetic.
 Family-friendly. No text, no logo, no watermark.
@@ -678,7 +679,8 @@ No nudity, no sensual posing, no text, no logo, no watermark.
 브랜드 분위기: {style}
 
 귀엽고 유머러스한 동물 웰니스 광고 사진.
-선글라스를 쓴 고양이가 다른 고양이에게 진지하게 마사지를 해주는 장면.
+선택 동물: {_animal_prompt_name(image_style)}
+선글라스나 작은 스파 소품을 착용한 한 마리가 다른 한 마리에게 진지하게 마사지를 해주는 장면.
 고급 스파 인테리어와 따뜻한 조명, 실제 사진 같은 털과 디테일.
 재미있고 사랑스럽지만 광고용으로 세련된 분위기.
 글자, 로고, 워터마크는 넣지 말 것.

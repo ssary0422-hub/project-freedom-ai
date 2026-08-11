@@ -212,9 +212,27 @@
                         </option>
 
                         <option
-                            value="귀엽고 유머러스한 동물 콘셉트"
-                            {% if image_style == "귀엽고 유머러스한 동물 콘셉트" %}selected{% endif %}>
-                            🐱 귀엽고 유머러스한 동물 콘셉트
+                            value="고양이 유머 콘셉트"
+                            {% if image_style in ["고양이 유머 콘셉트", "귀엽고 유머러스한 동물 콘셉트"] %}selected{% endif %}>
+                            🐱 고양이 유머 콘셉트
+                        </option>
+
+                        <option
+                            value="강아지 유머 콘셉트"
+                            {% if image_style == "강아지 유머 콘셉트" %}selected{% endif %}>
+                            🐶 강아지 유머 콘셉트
+                        </option>
+
+                        <option
+                            value="코끼리 유머 콘셉트"
+                            {% if image_style == "코끼리 유머 콘셉트" %}selected{% endif %}>
+                            🐘 코끼리 유머 콘셉트
+                        </option>
+
+                        <option
+                            value="랜덤 동물 유머 콘셉트"
+                            {% if image_style == "랜덤 동물 유머 콘셉트" %}selected{% endif %}>
+                            🎲 랜덤 동물 유머 콘셉트
                         </option>
 
                         <option
