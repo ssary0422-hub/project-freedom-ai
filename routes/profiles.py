@@ -8,7 +8,8 @@ from flask import (
     request,
     redirect,
     url_for,
-    send_file
+    send_file,
+    session
 )
 
 from database.profiles import (
@@ -31,11 +32,14 @@ from ai.ads import make_ads
 from ai.blog import make_blog
 from ai.sns import make_sns
 
+from routes.auth import login_required
+
 from routes.package import (
     _make_image_safe,
     _make_sns_image,
     _is_fun_animal_style,
     _animal_prompt_name,
+    _brand_tagline_for_business,
 )
 
 from documents.word import (
@@ -58,6 +62,7 @@ profiles_bp = Blueprint("profiles", __name__)
 
 
 @profiles_bp.route("/profiles", methods=["GET", "POST"])
+@login_required
 def profiles():
     error = ""
 
@@ -100,7 +105,8 @@ def profiles():
                 image_style,
                 sns_platform,
                 blog_length,
-                ads_count
+                ads_count,
+                user_id=session["user_id"]
             )
 
             return redirect(
@@ -109,14 +115,15 @@ def profiles():
 
     return render_template(
         "profiles.html",
-        profiles=get_profiles(),
+        profiles=get_profiles(session["user_id"]),
         error=error
     )
 
 
 @profiles_bp.route("/profiles/<int:profile_id>/history")
+@login_required
 def brand_history(profile_id):
-    profile = get_profile(profile_id)
+    profile = get_profile(profile_id, session["user_id"])
 
     if not profile:
         return "브랜드 프로필을 찾을 수 없습니다.", 404
@@ -125,6 +132,7 @@ def brand_history(profile_id):
 
     history_rows = get_brand_history(
         profile_id,
+        session["user_id"],
         company=company
     )
 
@@ -176,8 +184,9 @@ def brand_history(profile_id):
 @profiles_bp.route(
     "/profiles/<int:profile_id>/history/<package_id>"
 )
+@login_required
 def package_detail(profile_id, package_id):
-    profile = get_profile(profile_id)
+    profile = get_profile(profile_id, session["user_id"])
 
     if not profile:
         return "브랜드 프로필을 찾을 수 없습니다.", 404
@@ -185,13 +194,15 @@ def package_detail(profile_id, package_id):
     current_rows = get_package_history(
         package_id,
         brand_profile_id=profile_id,
-        current_only=True
+        current_only=True,
+        user_id=session["user_id"]
     )
 
     all_rows = get_package_history(
         package_id,
         brand_profile_id=profile_id,
-        current_only=False
+        current_only=False,
+        user_id=session["user_id"]
     )
 
     if not all_rows:
@@ -273,15 +284,17 @@ def package_detail(profile_id, package_id):
     "/profiles/<int:profile_id>/history/<package_id>/delete",
     methods=["POST"]
 )
+@login_required
 def delete_package(profile_id, package_id):
-    profile = get_profile(profile_id)
+    profile = get_profile(profile_id, session["user_id"])
 
     if not profile:
         return "브랜드 프로필을 찾을 수 없습니다.", 404
 
     delete_package_history(
         package_id,
-        brand_profile_id=profile_id
+        brand_profile_id=profile_id,
+        user_id=session["user_id"]
     )
 
     return redirect(
@@ -297,6 +310,7 @@ def delete_package(profile_id, package_id):
 @profiles_bp.route(
     "/history/download/<int:history_id>/<file_type>"
 )
+@login_required
 def download_single_history(
     history_id,
     file_type
@@ -312,7 +326,8 @@ def download_single_history(
         return "지원하지 않는 파일 형식입니다.", 400
 
     item = get_history_item(
-        history_id
+        history_id,
+        session["user_id"]
     )
 
     if not item:
@@ -421,6 +436,7 @@ def _find_package_item(rows, content_type):
 @profiles_bp.route(
     "/profiles/<int:profile_id>/history/<package_id>/download/<content_type>/<file_type>"
 )
+@login_required
 def download_history_file(
     profile_id,
     package_id,
@@ -433,14 +449,15 @@ def download_history_file(
     if file_type not in {"pdf", "word"}:
         return "지원하지 않는 파일 형식입니다.", 400
 
-    profile = get_profile(profile_id)
+    profile = get_profile(profile_id, session["user_id"])
 
     if not profile:
         return "브랜드 프로필을 찾을 수 없습니다.", 404
 
     rows = get_package_history(
         package_id,
-        brand_profile_id=profile_id
+        brand_profile_id=profile_id,
+        user_id=session["user_id"]
     )
 
     item = _find_package_item(
@@ -511,6 +528,7 @@ def download_history_file(
     "/profiles/<int:profile_id>/history/<package_id>/restore/<content_type>/<int:history_id>",
     methods=["POST"]
 )
+@login_required
 def restore_history_content(
     profile_id,
     package_id,
@@ -525,7 +543,8 @@ def restore_history_content(
         return "지원하지 않는 콘텐츠 종류입니다.", 400
 
     profile = get_profile(
-        profile_id
+        profile_id,
+        session["user_id"]
     )
 
     if not profile:
@@ -535,7 +554,8 @@ def restore_history_content(
         history_id,
         package_id,
         profile_id,
-        content_type
+        content_type,
+        session["user_id"]
     )
 
     if not success:
@@ -555,6 +575,7 @@ def restore_history_content(
     "/profiles/<int:profile_id>/history/<package_id>/regenerate/<content_type>",
     methods=["POST"]
 )
+@login_required
 def regenerate_history_content(
     profile_id,
     package_id,
@@ -571,7 +592,8 @@ def regenerate_history_content(
         return "지원하지 않는 콘텐츠 종류입니다.", 400
 
     profile = get_profile(
-        profile_id
+        profile_id,
+        session["user_id"]
     )
 
     if not profile:
@@ -605,9 +627,10 @@ Cute humorous premium commercial advertising photo for {company}.
 Business: {business}
 Brand mood: {style}.
 
-Two {_animal_prompt_name(image_style)} in an upscale wellness studio.
-One stylish animal wearing sunglasses is seriously giving another relaxed animal
-a shoulder or back massage. Photorealistic fur, premium spa interior,
+Two {_animal_prompt_name(image_style)} representing the exact business category: {business}.
+One animal acts as a professional staff member and the other as a customer.
+If the business is a hospital or clinic, show a medical consultation/examination scene,
+not massage or spa. Use the authentic workplace and tools of the business. Photorealistic fur,
 warm lighting, funny but polished social advertising aesthetic.
 Family-friendly. No text, no logo, no watermark.
 """
@@ -680,7 +703,9 @@ No nudity, no sensual posing, no text, no logo, no watermark.
 
 귀엽고 유머러스한 동물 웰니스 광고 사진.
 선택 동물: {_animal_prompt_name(image_style)}
-선글라스나 작은 스파 소품을 착용한 한 마리가 다른 한 마리에게 진지하게 마사지를 해주는 장면.
+선택 동물 두 마리를 '{business}' 업종의 전문 직원과 고객 역할로 귀엽게 의인화.
+병원/의원/정형외과라면 진료실, 의료진 가운, 상담·진찰·검사 장면으로 표현하고
+마사지, 스파, 테라피 장면은 절대 사용하지 말 것.
 고급 스파 인테리어와 따뜻한 조명, 실제 사진 같은 털과 디테일.
 재미있고 사랑스럽지만 광고용으로 세련된 분위기.
 글자, 로고, 워터마크는 넣지 말 것.
@@ -693,12 +718,13 @@ No nudity, no sensual posing, no text, no logo, no watermark.
 브랜드 분위기: {style}
 이미지 스타일: {image_style}
 
-고급스럽고 전문적인 마사지샵의 실제 서비스 장면.
-성인 고객이 단정한 마사지복 또는 수건으로 충분히 가려진 상태에서
-전문 마사지 테라피스트에게 어깨나 등 중심의 건전한 마사지를 받는 모습.
-신체 노출은 최소화하고 성적인 분위기는 전혀 없게 표현.
-깔끔하고 편안하며 블로그 대표 이미지에 적합한 자연스러운 구도.
-따뜻한 조명과 전문적인 웰니스 공간.
+반드시 '{business}' 업종의 실제 환경과 핵심 서비스를 정확하게 표현.
+병원/의원/정형외과라면 깨끗한 진료실, 전문 의료진,
+X-ray/MRI 영상 또는 관절·척추 모형을 활용한 상담·진찰·검사 장면으로 표현할 것.
+의료진이 환자의 어깨나 등을 직접 누르거나 주무르는 장면은 피하고,
+마사지·도수치료처럼 보이는 장면, 스파, 테라피는 절대 사용하지 말 것.
+다른 업종이라면 해당 업종의 공간, 직원, 고객, 제품 또는 서비스를 명확히 표현.
+깔끔하고 전문적인 상업 사진 구도.
 이미지 안에는 글자를 넣지 말 것.
 """
 
@@ -734,7 +760,8 @@ No nudity, no sensual posing, no text, no logo, no watermark.
             image_url,
             content_type,
             package_id,
-            profile_id
+            profile_id,
+            session["user_id"]
         )
 
     except Exception as error:
@@ -803,6 +830,7 @@ def _zip_add_history_image(
 @profiles_bp.route(
     "/profiles/<int:profile_id>/history/<package_id>/download/zip"
 )
+@login_required
 def download_history_zip(
     profile_id,
     package_id
@@ -812,14 +840,15 @@ def download_history_zip(
     PDF + Word + 이미지 전체를 ZIP 하나로 내려줍니다.
     ZIP 자체는 메모리에서 만들어 동시 사용자 간 파일 충돌을 줄입니다.
     """
-    profile = get_profile(profile_id)
+    profile = get_profile(profile_id, session["user_id"])
 
     if not profile:
         return "브랜드 프로필을 찾을 수 없습니다.", 404
 
     rows = get_package_history(
         package_id,
-        brand_profile_id=profile_id
+        brand_profile_id=profile_id,
+        user_id=session["user_id"]
     )
 
     if not rows:
@@ -981,6 +1010,7 @@ def download_history_zip(
     "/profiles/delete/<int:profile_id>",
     methods=["POST"]
 )
+@login_required
 def delete(profile_id):
     delete_profile(profile_id)
 

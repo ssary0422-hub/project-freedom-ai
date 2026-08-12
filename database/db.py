@@ -40,7 +40,8 @@ def init_db():
         "brand_profile_id": "INTEGER",
         "created_at": "TEXT",
         "version": "INTEGER DEFAULT 1",
-        "is_current": "INTEGER DEFAULT 1"
+        "is_current": "INTEGER DEFAULT 1",
+        "user_id": "INTEGER"
     }
 
     for column_name, column_type in migrations.items():
@@ -87,7 +88,8 @@ def save_history(
     image_url="",
     content_type="general",
     package_id=None,
-    brand_profile_id=None
+    brand_profile_id=None,
+    user_id=None
 ):
     init_db()
 
@@ -108,9 +110,10 @@ def save_history(
             content_type,
             package_id,
             brand_profile_id,
-            created_at
+            created_at,
+            user_id
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         business,
         company,
@@ -120,7 +123,8 @@ def save_history(
         content_type,
         package_id,
         brand_profile_id,
-        created_at
+        created_at,
+        user_id
     ))
 
     conn.commit()
@@ -132,7 +136,7 @@ def save_history(
     return history_id
 
 
-def get_history():
+def get_history(user_id):
     init_db()
 
     conn = _connect()
@@ -147,11 +151,13 @@ def get_history():
             result,
             image_url
         FROM history
+        WHERE user_id = ?
         ORDER BY id DESC
-    """)
+    """, (
+        user_id,
+    ))
 
     rows = cursor.fetchall()
-
     conn.close()
 
     return rows
@@ -159,6 +165,7 @@ def get_history():
 
 def get_brand_history(
     brand_profile_id,
+    user_id,
     company=None
 ):
     """
@@ -193,13 +200,15 @@ def get_brand_history(
                         AND company = ?
                     )
                   )
+              AND user_id = ?
               AND COALESCE(is_current, 1) = 1
             ORDER BY
                 created_at DESC,
                 id DESC
         """, (
             brand_profile_id,
-            company
+            company,
+            user_id
         ))
 
     else:
@@ -217,12 +226,14 @@ def get_brand_history(
                 created_at
             FROM history
             WHERE brand_profile_id = ?
+              AND user_id = ?
               AND COALESCE(is_current, 1) = 1
             ORDER BY
                 created_at DESC,
                 id DESC
         """, (
             brand_profile_id,
+            user_id,
         ))
 
     rows = cursor.fetchall()
@@ -232,15 +243,15 @@ def get_brand_history(
     return rows
 
 
-def delete_history_by_id(history_id):
+def delete_history_by_id(history_id, user_id):
     init_db()
 
     conn = _connect()
     cursor = conn.cursor()
 
     cursor.execute(
-        "DELETE FROM history WHERE id = ?",
-        (history_id,)
+        "DELETE FROM history WHERE id = ? AND user_id = ?",
+        (history_id, user_id)
     )
 
     conn.commit()
@@ -250,7 +261,8 @@ def delete_history_by_id(history_id):
 def get_package_history(
     package_id,
     brand_profile_id=None,
-    current_only=True
+    current_only=True,
+    user_id=None
 ):
     init_db()
 
@@ -276,6 +288,14 @@ def get_package_history(
     if current_only:
         filters.append(
             "COALESCE(is_current, 1) = 1"
+        )
+
+    if user_id is not None:
+        filters.append(
+            "user_id = ?"
+        )
+        params.append(
+            user_id
         )
 
     where_clause = " AND ".join(
@@ -326,7 +346,8 @@ def save_history_version(
     image_url,
     content_type,
     package_id,
-    brand_profile_id
+    brand_profile_id,
+    user_id
 ):
     """
     기존 콘텐츠를 삭제하지 않고 새 버전으로 저장합니다.
@@ -343,10 +364,12 @@ def save_history_version(
         WHERE package_id = ?
           AND content_type = ?
           AND brand_profile_id = ?
+          AND user_id = ?
     """, (
         package_id,
         content_type,
-        brand_profile_id
+        brand_profile_id,
+        user_id
     ))
 
     next_version = (
@@ -360,11 +383,13 @@ def save_history_version(
         WHERE package_id = ?
           AND content_type = ?
           AND brand_profile_id = ?
+          AND user_id = ?
           AND COALESCE(is_current, 1) = 1
     """, (
         package_id,
         content_type,
-        brand_profile_id
+        brand_profile_id,
+        user_id
     ))
 
     created_at = datetime.now().strftime(
@@ -383,9 +408,10 @@ def save_history_version(
             brand_profile_id,
             created_at,
             version,
-            is_current
+            is_current,
+            user_id
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
     """, (
         business,
         company,
@@ -396,7 +422,8 @@ def save_history_version(
         package_id,
         brand_profile_id,
         created_at,
-        next_version
+        next_version,
+        user_id
     ))
 
     history_id = cursor.lastrowid
@@ -408,23 +435,50 @@ def save_history_version(
 
 
 
-def delete_package_history(package_id, brand_profile_id=None):
+def delete_package_history(
+    package_id,
+    brand_profile_id=None,
+    user_id=None
+):
     init_db()
 
     conn = _connect()
     cursor = conn.cursor()
 
+    filters = [
+        "package_id = ?"
+    ]
+    params = [
+        package_id
+    ]
+
     if brand_profile_id is not None:
-        cursor.execute("""
-            DELETE FROM history
-            WHERE package_id = ?
-              AND brand_profile_id = ?
-        """, (package_id, brand_profile_id))
-    else:
-        cursor.execute("""
-            DELETE FROM history
-            WHERE package_id = ?
-        """, (package_id,))
+        filters.append(
+            "brand_profile_id = ?"
+        )
+        params.append(
+            brand_profile_id
+        )
+
+    if user_id is not None:
+        filters.append(
+            "user_id = ?"
+        )
+        params.append(
+            user_id
+        )
+
+    where_clause = " AND ".join(
+        filters
+    )
+
+    cursor.execute(
+        f"""
+        DELETE FROM history
+        WHERE {where_clause}
+        """,
+        tuple(params)
+    )
 
     deleted_count = cursor.rowcount
 
@@ -434,13 +488,12 @@ def delete_package_history(package_id, brand_profile_id=None):
     return deleted_count
 
 
-
-
 def restore_history_version(
     history_id,
     package_id,
     brand_profile_id,
-    content_type
+    content_type,
+    user_id
 ):
     """
     특정 과거 버전을 현재 버전으로 다시 지정합니다.
@@ -458,11 +511,13 @@ def restore_history_version(
           AND package_id = ?
           AND brand_profile_id = ?
           AND content_type = ?
+          AND user_id = ?
     """, (
         history_id,
         package_id,
         brand_profile_id,
-        content_type
+        content_type,
+        user_id
     ))
 
     target = cursor.fetchone()
@@ -477,18 +532,22 @@ def restore_history_version(
         WHERE package_id = ?
           AND brand_profile_id = ?
           AND content_type = ?
+          AND user_id = ?
     """, (
         package_id,
         brand_profile_id,
-        content_type
+        content_type,
+        user_id
     ))
 
     cursor.execute("""
         UPDATE history
         SET is_current = 1
         WHERE id = ?
+          AND user_id = ?
     """, (
         history_id,
+        user_id,
     ))
 
     conn.commit()
@@ -498,7 +557,7 @@ def restore_history_version(
 
 
 
-def get_history_item(history_id):
+def get_history_item(history_id, user_id):
     """
     생성 기록 1개를 다운로드용으로 조회합니다.
     """
@@ -518,8 +577,10 @@ def get_history_item(history_id):
             COALESCE(content_type, 'general')
         FROM history
         WHERE id = ?
+          AND user_id = ?
     """, (
         history_id,
+        user_id,
     ))
 
     row = cursor.fetchone()

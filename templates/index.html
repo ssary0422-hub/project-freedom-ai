@@ -37,6 +37,24 @@
             <a class="btn btn-outline-light" href="/history">
                 생성 기록
             </a>
+
+            {% if session.get("user_id") %}
+            <span class="navbar-text text-white ms-2">
+                👤 {{ session.get("user_name") }}님
+            </span>
+
+            <a class="btn btn-warning" href="/logout">
+                로그아웃
+            </a>
+            {% else %}
+            <a class="btn btn-outline-info" href="/login">
+                로그인
+            </a>
+
+            <a class="btn btn-info" href="/register">
+                회원가입
+            </a>
+            {% endif %}
         </div>
 
     </div>

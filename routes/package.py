@@ -5,7 +5,7 @@ import uuid
 from PIL import Image, ImageDraw, ImageFont
 import zipfile
 
-from flask import Blueprint, render_template, request, send_file
+from flask import Blueprint, render_template, request, send_file, session
 
 from ai.ads import make_ads
 from ai.blog import make_blog
@@ -14,6 +14,7 @@ from ai.image import make_image
 
 from database.db import save_history
 from database.profiles import get_profile
+from routes.auth import login_required
 
 from documents.word import (
     create_word,
@@ -106,7 +107,146 @@ def _find_brand_font(size: int):
     return ImageFont.load_default()
 
 
-def _add_company_name_to_image(image_path: str, company: str) -> str:
+def _brand_tagline_for_business(business: str) -> str:
+    """
+    업종에 맞는 짧은 영문 브랜드 슬로건을 반환합니다.
+    """
+    name = (business or "").strip().lower()
+
+    rules = [
+        (
+            [
+                "마사지",
+                "마사지샵",
+                "마사지숍",
+                "스파",
+                "spa",
+                "아로마",
+                "테라피",
+            ],
+            "RELAX · HEAL · REFRESH",
+        ),
+        (
+            [
+                "정형외과",
+                "병원",
+                "의원",
+                "클리닉",
+                "hospital",
+                "clinic",
+                "재활",
+            ],
+            "CARE · RECOVERY · WELLNESS",
+        ),
+        (
+            [
+                "피부과",
+                "피부",
+                "derma",
+                "dermatology",
+            ],
+            "SKIN · BEAUTY · CONFIDENCE",
+        ),
+        (
+            [
+                "치과",
+                "dental",
+                "dentist",
+            ],
+            "SMILE · CARE · TRUST",
+        ),
+        (
+            [
+                "카페",
+                "coffee",
+                "cafe",
+                "베이커리",
+                "디저트",
+            ],
+            "COFFEE · MOMENT · RELAX",
+        ),
+        (
+            [
+                "음식점",
+                "식당",
+                "레스토랑",
+                "restaurant",
+                "고기집",
+                "한식",
+                "중식",
+                "일식",
+                "양식",
+            ],
+            "TASTE · ENJOY · TOGETHER",
+        ),
+        (
+            [
+                "미용실",
+                "헤어",
+                "hair",
+                "salon",
+                "네일",
+                "nail",
+                "뷰티",
+                "beauty",
+            ],
+            "STYLE · BEAUTY · CONFIDENCE",
+        ),
+        (
+            [
+                "헬스",
+                "헬스장",
+                "fitness",
+                "gym",
+                "필라테스",
+                "요가",
+                "pt",
+            ],
+            "TRAIN · STRONG · CHANGE",
+        ),
+        (
+            [
+                "학원",
+                "교육",
+                "academy",
+                "school",
+                "영어",
+                "수학",
+            ],
+            "LEARN · GROW · ACHIEVE",
+        ),
+        (
+            [
+                "부동산",
+                "real estate",
+                "공인중개",
+            ],
+            "TRUST · VALUE · HOME",
+        ),
+        (
+            [
+                "자동차",
+                "세차",
+                "카센터",
+                "정비",
+                "car",
+                "auto",
+            ],
+            "DRIVE · CARE · CONFIDENCE",
+        ),
+    ]
+
+    for keywords, tagline in rules:
+        if any(
+            keyword in name
+            for keyword in keywords
+        ):
+            return tagline
+
+    return "QUALITY · TRUST · EXPERIENCE"
+
+
+def _add_company_name_to_image(image_path: str, company: str, business: str = "") -> str:
     """
     SNS 이미지 하단에 업체명을 프리미엄 스파 광고처럼 합성합니다.
     검은 박스 대신 은은한 하단 그라데이션 + 브랜드명 + 서브카피를 사용합니다.
@@ -254,8 +394,8 @@ def _add_company_name_to_image(image_path: str, company: str) -> str:
         # -------------------------------------------------
         # 작은 서브카피
         # -------------------------------------------------
-        tagline = (
-            "RELAX · HEAL · REFRESH"
+        tagline = _brand_tagline_for_business(
+            business
         )
 
         tagline_font_size = max(
@@ -477,35 +617,39 @@ def _make_sns_image(company, business, sns_platform, style, image_style):
         primary_prompt = f"""
 SNS 게시물용 재미있는 상업 이미지.
 
+회사명: {company}
 업종: {business}
 플랫폼: {sns_platform}
 브랜드 분위기: {style}
-
 선택 동물: {_animal_prompt_name(image_style)}
-귀엽고 유머러스한 선택 동물 캐릭터가 실제 사진처럼 보이는 광고 장면.
-선글라스나 작은 스파 소품을 착용한 한 마리가 다른 한 마리의 어깨나 등을
-진지하게 마사지해 주는 모습처럼 한눈에 웃음이 나는 콘셉트.
-동물은 의인화되어 있지만 전체 이미지는 고급 상업 사진처럼 세련되게 표현.
-따뜻한 웰니스 공간, 포근한 조명, 깨끗한 인테리어.
-밈처럼 재미있고 SNS에서 시선을 끌지만 저급하거나 과장된 만화 느낌은 피할 것.
+
+반드시 '{business}' 업종을 한눈에 알아볼 수 있는 장면을 만들 것.
+선택 동물 두 마리를 귀엽고 자연스럽게 의인화하여,
+한 마리는 해당 업종의 전문 직원 역할, 다른 한 마리는 고객 역할을 하게 표현.
+업종이 병원/의원/정형외과라면 진료실, 의료진 가운, 상담 또는 검사 장면처럼
+의료기관임이 분명하게 보이게 하고 마사지, 스파, 테라피 장면은 절대 사용하지 말 것.
+다른 업종도 반드시 그 업종의 실제 서비스 환경과 도구를 사용할 것.
+고급 상업 사진처럼 사실적이고 세련되며 가족 친화적으로 표현.
 이미지 안에는 글자, 로고, 워터마크를 넣지 말 것.
 """
     else:
         primary_prompt = f"""
 SNS 게시물용 상업 이미지.
 
+회사명: {company}
 업종: {business}
 플랫폼: {sns_platform}
 브랜드 분위기: {style}
 이미지 스타일: {image_style}
 
-세련되고 전문적인 웰니스 또는 마사지 서비스 공간의 실제 광고 사진.
-성인 고객은 단정한 서비스 의상으로 충분히 가려진 상태.
-전문 테라피스트가 어깨 중심의 편안하고 건전한 웰니스 서비스를 제공하는 장면.
-고객과 테라피스트 모두 자연스럽고 전문적인 자세.
-따뜻한 조명, 정돈된 인테리어, 편안하고 고급스러운 분위기.
-가족 친화적인 상업 광고 사진.
-신체 노출이나 선정적인 연출 없이 표현.
+반드시 '{business}' 업종과 직접 관련된 실제 서비스 현장을 표현할 것.
+업종이 병원/의원/정형외과라면 깨끗한 진료실, 전문 의료진,
+환자 상담·진찰·검사 같은 신뢰감 있는 의료 장면을 표현하고
+마사지샵, 스파, 웰니스 테라피 장면은 절대 사용하지 말 것.
+다른 업종이라면 해당 업종의 공간, 직원, 고객, 핵심 서비스나 제품이
+한눈에 이해되도록 정확하게 표현할 것.
+브랜드 분위기 '{style}'에 맞는 조명과 인테리어.
+전문적이고 자연스러운 상업 광고 사진.
 이미지 안에는 글자, 로고, 워터마크를 넣지 말 것.
 """
 
@@ -515,22 +659,15 @@ SNS 게시물용 상업 이미지.
     )
 
     if not image_path:
-        if _is_fun_animal_style(image_style):
-            retry_prompt = f"""
-Cute humorous premium social media advertising photo for a {business}.
-Two {_animal_prompt_name(image_style)} in a luxury wellness studio.
-One wears stylish sunglasses and gives the other a playful shoulder massage.
-Warm lighting, polished commercial photography, charming and funny, family-friendly.
+        retry_prompt = f"""
+Professional commercial advertising photo for this exact business category: {business}.
+Company: {company}. Brand mood: {style}. Visual style: {image_style}.
+The scene must unmistakably represent the real business category and its normal service environment.
+If this is a hospital, clinic, orthopedic clinic, or medical business, show a clean medical consultation
+or examination scene with professional medical staff and absolutely no massage, spa, or wellness treatment.
+For any other business, show the correct workplace, staff, customer, products or services for that category.
+Polished, realistic, family-friendly commercial photography.
 No text, no logo, no watermark.
-"""
-        else:
-            retry_prompt = f"""
-Professional commercial social media photo for a {business} business.
-Brand mood: {style}. Visual style: {image_style}.
-A clean elegant wellness interior with a professional therapist providing
-a fully clothed adult client with a relaxing shoulder wellness service.
-Warm lighting, polished interior, calm atmosphere, family-friendly advertising photography.
-No nudity, no suggestive pose, no text, no logo, no watermark.
 """
 
         image_path, image_url = _make_image_safe(
@@ -541,7 +678,8 @@ No nudity, no suggestive pose, no text, no logo, no watermark.
     if image_path:
         image_path = _add_company_name_to_image(
             image_path,
-            company
+            company,
+            business
         )
 
         image_url = "/" + str(
@@ -549,7 +687,6 @@ No nudity, no suggestive pose, no text, no logo, no watermark.
         ).replace("\\", "/")
 
     return image_path, image_url
-
 
 def create_package_zip(
     ads_image_path: str,
@@ -637,6 +774,7 @@ def create_package_zip(
 
 
 @package_bp.route("/package", methods=["GET", "POST"])
+@login_required
 def package():
     business = ""
     company = ""
@@ -674,7 +812,8 @@ def package():
 
         if profile_id:
             profile = get_profile(
-                profile_id
+                profile_id,
+                session["user_id"]
             )
 
             if profile:
@@ -768,13 +907,15 @@ def package():
 
 업종: {business}
 브랜드 분위기: {style}
-
 선택 동물: {_animal_prompt_name(image_style)}
-귀엽고 유머러스한 선택 동물들이 웰니스 서비스를 즐기는 장면.
-선글라스나 작은 스파 소품을 착용한 한 마리가 다른 한 마리를 진지하게 마사지하는 것처럼
-SNS에서 바로 시선을 끌 수 있는 재치 있는 콘셉트.
-실제 고급 광고 사진처럼 디테일하고 자연스러운 털 표현.
-따뜻하고 세련된 스파 인테리어, 가족 친화적이고 밝은 분위기.
+
+반드시 '{business}' 업종을 정확하게 표현할 것.
+선택 동물 두 마리를 귀엽게 의인화해 한 마리는 해당 업종의 전문 직원,
+다른 한 마리는 고객 역할로 표현.
+병원/의원/정형외과라면 의료진 가운, 깨끗한 진료실, 상담·진찰·검사 장면을 사용하고
+마사지, 스파, 테라피 장면은 절대 넣지 말 것.
+다른 업종도 해당 업종의 실제 공간, 도구, 서비스가 명확히 보이게 할 것.
+고급 상업 광고 사진처럼 사실적이고 세련되며 가족 친화적인 이미지.
 글자, 로고, 워터마크는 넣지 말 것.
 """
                 else:
@@ -785,16 +926,17 @@ SNS에서 바로 시선을 끌 수 있는 재치 있는 콘셉트.
 브랜드 분위기: {style}
 이미지 스타일: {image_style}
 
-고급스럽고 전문적인 마사지샵의 실제 서비스 장면.
-성인 고객이 단정한 마사지복 또는 수건으로 충분히 가려진 상태에서
-전문 마사지 테라피스트에게 어깨나 등 중심의 건전한 마사지를 받는 모습.
-테라피스트와 고객 모두 자연스럽고 전문적인 자세.
-신체 노출은 최소화하고 성적인 분위기는 전혀 없게 표현.
-따뜻한 조명, 정돈된 인테리어, 편안한 웰니스 분위기.
-상업 광고에 사용할 수 있는 가족 친화적이고 전문적인 사진.
+반드시 '{business}' 업종의 실제 서비스 현장을 정확하게 표현할 것.
+병원/의원/정형외과라면 깨끗한 진료실, 전문 의료진,
+X-ray/MRI 영상, 관절 또는 척추 모형을 활용한 상담·진찰·검사 장면을 우선적으로 표현할 것.
+의료진이 환자의 어깨나 등을 손으로 주무르거나 누르는 장면,
+마사지·도수치료처럼 보일 수 있는 직접적인 신체 압박 장면,
+마사지샵·스파·웰니스 테라피 장면은 절대 넣지 말 것.
+다른 업종이라면 해당 업종의 공간, 직원, 고객, 핵심 서비스 또는 제품이
+한눈에 이해되도록 표현할 것.
+'{style}' 분위기의 전문적이고 자연스러운 상업 광고 사진.
 이미지 안에는 글자를 넣지 말 것.
 """
-
                 (
                     ads_image_path,
                     ads_image_url
@@ -803,10 +945,31 @@ SNS에서 바로 시선을 끌 수 있는 재치 있는 콘셉트.
                     "광고"
                 )
 
+                if not ads_image_path:
+                    ads_retry_prompt = f"""
+Professional commercial advertising photo for {company}.
+Exact business category: {business}.
+Brand mood: {style}. Visual style: {image_style}.
+Show the authentic workplace, professional staff, customer, and core service of this exact business.
+For hospitals or clinics, show a clean medical consultation or examination scene,
+preferably with X-ray/MRI images or an orthopedic joint/spine model.
+Do not show the clinician pressing, rubbing, or massaging the patient's shoulders or back.
+No massage, spa, manual therapy-looking treatment, or wellness treatment.
+No text, no logo, no watermark.
+"""
+                    (
+                        ads_image_path,
+                        ads_image_url
+                    ) = _make_image_safe(
+                        ads_retry_prompt,
+                        "광고 재시도"
+                    )
+
                 if ads_image_path:
                     ads_image_path = _add_company_name_to_image(
                         ads_image_path,
-                        company
+                        company,
+                        business
                     )
 
                     ads_image_url = "/" + str(
@@ -821,7 +984,8 @@ SNS에서 바로 시선을 끌 수 있는 재치 있는 콘셉트.
                     ads_image_url,
                     content_type="ads",
                     package_id=package_id,
-                    brand_profile_id=selected_profile_id
+                    brand_profile_id=selected_profile_id,
+                    user_id=session["user_id"]
                 )
 
                 create_word(
@@ -855,34 +1019,38 @@ SNS에서 바로 시선을 끌 수 있는 재치 있는 콘셉트.
                     blog_prompt = f"""
 블로그 대표 이미지.
 
+회사명: {company}
 주제: {blog_topic}
+업종: {business}
 브랜드 분위기: {style}
-
-귀엽고 유머러스한 동물 웰니스 콘셉트.
 선택 동물: {_animal_prompt_name(image_style)}
-선택 동물 두 마리가 고급 마사지샵에서 마사지 테라피스트와 고객 역할을 하는 장면.
-실제 사진처럼 섬세하고 고급스러우면서도 한눈에 재미있는 이미지.
-선글라스나 작은 수건 같은 재치 있는 소품을 자연스럽게 사용.
-따뜻한 조명, 고급 스파 인테리어, 가족 친화적인 분위기.
+
+반드시 '{business}' 업종이 한눈에 보이는 블로그 대표 이미지를 만들 것.
+선택 동물을 해당 업종의 직원과 고객 역할로 귀엽게 의인화하되,
+병원/의원/정형외과라면 진료실, 의료진 가운, 상담·진찰·검사 장면으로 표현하고
+마사지, 스파, 테라피 장면은 절대 사용하지 말 것.
+다른 업종도 해당 업종의 실제 환경과 핵심 서비스를 정확하게 반영할 것.
+사실적이고 고급스러운 상업 사진, 깔끔한 블로그 썸네일 구도.
 글자, 로고, 워터마크는 넣지 말 것.
 """
                 else:
                     blog_prompt = f"""
 블로그 대표 이미지.
 
+회사명: {company}
 주제: {blog_topic}
+업종: {business}
 브랜드 분위기: {style}
 이미지 스타일: {image_style}
 
-고급스럽고 전문적인 마사지샵의 실제 서비스 장면.
-성인 고객이 단정한 마사지복 또는 수건으로 충분히 가려진 상태에서
-전문 마사지 테라피스트에게 어깨나 등 중심의 건전한 마사지를 받는 모습.
-신체 노출은 최소화하고 성적인 분위기는 전혀 없게 표현.
-깔끔하고 편안하며 블로그 대표 이미지에 적합한 자연스러운 구도.
-따뜻한 조명과 전문적인 웰니스 공간.
+반드시 '{business}' 업종의 실제 환경과 핵심 서비스를 정확하게 표현할 것.
+병원/의원/정형외과라면 깨끗한 진료실, 전문 의료진,
+환자 상담·진찰·검사 같은 의료 장면을 표현하고
+마사지샵, 스파, 웰니스 테라피 장면은 절대 사용하지 말 것.
+다른 업종이라면 해당 업종의 공간, 직원, 고객, 제품 또는 서비스를 명확히 표현할 것.
+'{style}' 분위기의 자연스럽고 전문적인 블로그 대표 사진.
 이미지 안에는 글자를 넣지 말 것.
 """
-
                 (
                     blog_image_path,
                     blog_image_url
@@ -894,7 +1062,38 @@ SNS에서 바로 시선을 끌 수 있는 재치 있는 콘셉트.
                 if blog_image_path:
                     blog_image_path = _add_company_name_to_image(
                         blog_image_path,
-                        company
+                        company,
+                        business
+                    )
+
+                    blog_image_url = "/" + str(
+                        Path(blog_image_path)
+                    ).replace("\\", "/")
+
+                if not blog_image_path:
+                    blog_retry_prompt = f"""
+Professional blog hero image for {company}.
+Exact business category: {business}.
+Topic: {blog_topic}. Brand mood: {style}. Visual style: {image_style}.
+Show an authentic scene directly related to this business category.
+For hospitals or clinics, show a clean medical consultation or examination scene,
+with professional medical staff and no massage, spa, or wellness treatment.
+For other businesses, show their real workplace and core service.
+No text, no logo, no watermark.
+"""
+                    (
+                        blog_image_path,
+                        blog_image_url
+                    ) = _make_image_safe(
+                        blog_retry_prompt,
+                        "블로그 재시도"
+                    )
+
+                if blog_image_path:
+                    blog_image_path = _add_company_name_to_image(
+                        blog_image_path,
+                        company,
+                        business
                     )
 
                     blog_image_url = "/" + str(
@@ -909,7 +1108,8 @@ SNS에서 바로 시선을 끌 수 있는 재치 있는 콘셉트.
                     blog_image_url,
                     content_type="blog",
                     package_id=package_id,
-                    brand_profile_id=selected_profile_id
+                    brand_profile_id=selected_profile_id,
+                    user_id=session["user_id"]
                 )
 
                 create_blog_word(
@@ -954,7 +1154,8 @@ SNS에서 바로 시선을 끌 수 있는 재치 있는 콘셉트.
                     sns_image_url,
                     content_type="sns",
                     package_id=package_id,
-                    brand_profile_id=selected_profile_id
+                    brand_profile_id=selected_profile_id,
+                    user_id=session["user_id"]
                 )
 
                 create_sns_word(

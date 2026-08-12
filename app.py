@@ -8,6 +8,8 @@ from routes.history import history_bp
 from database.db import init_db
 from routes.package import package_bp
 from routes.profiles import profiles_bp
+from routes.auth import auth_bp
+from database.users import init_users_table
 
 from flask import (
     Flask,
@@ -32,7 +34,16 @@ from ai.image import make_image
 
 app = Flask(__name__)
 
+app.config["SECRET_KEY"] = os.environ.get(
+    "SECRET_KEY",
+    "project-freedom-ai-dev-secret-change-me"
+)
+
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
 init_db()
+init_users_table()
 
 
 app.register_blueprint(ads_bp)
@@ -41,6 +52,7 @@ app.register_blueprint(sns_bp)
 app.register_blueprint(history_bp)
 app.register_blueprint(package_bp)
 app.register_blueprint(profiles_bp)
+app.register_blueprint(auth_bp)
 
 DB_PATH = "project.db"
 WORD_PATH = "downloads/advertisement.docx"

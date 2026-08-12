@@ -6,8 +6,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH = BASE_DIR / "project.db"
 
 
+def _connect():
+    return sqlite3.connect(str(DB_PATH))
+
+
 def init_profiles_table():
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = _connect()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -20,18 +24,34 @@ def init_profiles_table():
             sns_platform TEXT DEFAULT '인스타그램',
             blog_length TEXT DEFAULT '2000자',
             ads_count INTEGER DEFAULT 5,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            user_id INTEGER
         )
     """)
+
+    cursor.execute(
+        "PRAGMA table_info(brand_profiles)"
+    )
+
+    columns = {
+        row[1]
+        for row in cursor.fetchall()
+    }
+
+    if "user_id" not in columns:
+        cursor.execute("""
+            ALTER TABLE brand_profiles
+            ADD COLUMN user_id INTEGER
+        """)
 
     conn.commit()
     conn.close()
 
 
-def get_profiles():
+def get_profiles(user_id):
     init_profiles_table()
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = _connect()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -45,20 +65,22 @@ def get_profiles():
             blog_length,
             ads_count
         FROM brand_profiles
+        WHERE user_id = ?
         ORDER BY id DESC
-    """)
+    """, (
+        user_id,
+    ))
 
     rows = cursor.fetchall()
-
     conn.close()
 
     return rows
 
 
-def get_profile(profile_id):
+def get_profile(profile_id, user_id):
     init_profiles_table()
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = _connect()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -73,12 +95,13 @@ def get_profile(profile_id):
             ads_count
         FROM brand_profiles
         WHERE id = ?
+          AND user_id = ?
     """, (
         profile_id,
+        user_id,
     ))
 
     row = cursor.fetchone()
-
     conn.close()
 
     return row
@@ -91,11 +114,17 @@ def save_profile(
     image_style="고급스러운 실사",
     sns_platform="인스타그램",
     blog_length="2000자",
-    ads_count=5
+    ads_count=5,
+    user_id=None
 ):
     init_profiles_table()
 
-    conn = sqlite3.connect(str(DB_PATH))
+    if user_id is None:
+        raise ValueError(
+            "브랜드 프로필 저장에는 user_id가 필요합니다."
+        )
+
+    conn = _connect()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -106,9 +135,10 @@ def save_profile(
             image_style,
             sns_platform,
             blog_length,
-            ads_count
+            ads_count,
+            user_id
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         business,
         company,
@@ -116,23 +146,36 @@ def save_profile(
         image_style,
         sns_platform,
         blog_length,
-        ads_count
+        ads_count,
+        user_id,
     ))
 
+    profile_id = cursor.lastrowid
+
     conn.commit()
     conn.close()
 
+    return profile_id
 
-def delete_profile(profile_id):
+
+def delete_profile(profile_id, user_id):
     init_profiles_table()
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = _connect()
     cursor = conn.cursor()
 
-    cursor.execute(
-        "DELETE FROM brand_profiles WHERE id = ?",
-        (profile_id,)
-    )
+    cursor.execute("""
+        DELETE FROM brand_profiles
+        WHERE id = ?
+          AND user_id = ?
+    """, (
+        profile_id,
+        user_id,
+    ))
+
+    deleted_count = cursor.rowcount
 
     conn.commit()
     conn.close()
+
+    return deleted_count
