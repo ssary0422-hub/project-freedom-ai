@@ -179,3 +179,23 @@ def delete_profile(profile_id, user_id):
     conn.close()
 
     return deleted_count
+
+
+def count_profiles(user_id):
+    init_profiles_table()
+
+    conn = _connect()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM brand_profiles
+        WHERE user_id = ?
+    """, (
+        user_id,
+    ))
+
+    count = cursor.fetchone()[0]
+    conn.close()
+
+    return count

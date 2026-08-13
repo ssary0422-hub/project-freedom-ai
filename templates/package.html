@@ -429,12 +429,40 @@
 
     <div class="text-center mb-5">
 
+        {% if plan == "PRO" %}
         <a
             href="/package/download"
             class="btn btn-dark btn-lg">
 
             📦 전체 패키지 ZIP 다운로드
         </a>
+
+        <div class="text-muted small mt-2">
+            ⭐ PRO 전용 전체 다운로드
+        </div>
+
+        {% else %}
+        <div class="card border-warning shadow-sm mx-auto" style="max-width: 620px;">
+            <div class="card-body py-4">
+
+                <h5 class="fw-bold mb-2">
+                    🔒 전체 ZIP 다운로드 · PRO
+                </h5>
+
+                <p class="text-muted mb-3">
+                    광고 · 블로그 · SNS 문서와 이미지를 한 번에 받는
+                    전체 ZIP 다운로드는 PRO 전용 기능입니다.
+                </p>
+
+                <a
+                    href="/upgrade"
+                    class="btn btn-warning btn-lg fw-bold">
+                    ⭐ PRO 알아보기
+                </a>
+
+            </div>
+        </div>
+        {% endif %}
 
     </div>
 

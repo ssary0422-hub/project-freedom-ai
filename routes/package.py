@@ -799,6 +799,11 @@ def package():
     loaded_profile_name = ""
     selected_profile_id = None
 
+    plan_status = get_plan_status(
+        session["user_id"]
+    )
+    plan = plan_status["plan"]
+
     # 로그인한 사용자의 저장된 브랜드 목록
     saved_profiles = get_profiles(
         session["user_id"]
@@ -869,10 +874,12 @@ def package():
                 error=error,
                 loaded_profile_name=loaded_profile_name,
                 selected_profile_id=selected_profile_id,
-                saved_profiles=saved_profiles
+                saved_profiles=saved_profiles,
+                plan=plan
             )
 
         plan_status = get_plan_status(session["user_id"])
+        plan = plan_status["plan"]
 
         if not plan_status["can_generate"]:
             error = (
@@ -897,7 +904,8 @@ def package():
                 sns_image_url=sns_image_url, package_ready=False, error=error,
                 loaded_profile_name=loaded_profile_name,
                 selected_profile_id=selected_profile_id,
-                saved_profiles=saved_profiles
+                saved_profiles=saved_profiles,
+                plan=plan
             )
 
         business = request.form.get(
@@ -1247,6 +1255,7 @@ No text, no logo, no watermark.
                 # 패키지 3종 생성이 모두 성공한 경우에만 월 사용량 1회 차감
                 record_package_usage(session["user_id"])
                 plan_status = get_plan_status(session["user_id"])
+                plan = plan_status["plan"]
                 session["plan"] = plan_status["plan"]
                 session["plan_used"] = plan_status["used"]
                 session["plan_limit"] = plan_status["limit"]
@@ -1282,12 +1291,25 @@ No text, no logo, no watermark.
         error=error,
         loaded_profile_name=loaded_profile_name,
         selected_profile_id=selected_profile_id,
-        saved_profiles=saved_profiles
+        saved_profiles=saved_profiles,
+        plan=plan
     )
 
 
 @package_bp.route("/package/download")
+@login_required
 def download_package():
+    plan_status = get_plan_status(
+        session["user_id"]
+    )
+
+    if plan_status["plan"] != "PRO":
+        return (
+            "ZIP 전체 다운로드는 PRO 전용 기능입니다. "
+            "PRO로 업그레이드해 주세요.",
+            403
+        )
+
     if not PACKAGE_ZIP_PATH.exists():
         return "먼저 마케팅 패키지를 생성해 주세요.", 404
 

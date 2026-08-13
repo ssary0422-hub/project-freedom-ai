@@ -50,6 +50,49 @@
         </p>
     </div>
 
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <div class="fw-bold fs-5">
+                        💾 저장 브랜드
+                        <span class="text-primary">
+                            {{ profile_count }} / {{ profile_limit }}
+                        </span>
+                    </div>
+
+                    <div class="text-muted mt-1">
+                        현재 플랜:
+                        {% if plan == "PRO" %}
+                        <span class="badge text-bg-warning">⭐ PRO</span>
+                        최대 20개까지 저장할 수 있습니다.
+                        {% else %}
+                        <span class="badge text-bg-secondary">FREE</span>
+                        최대 2개까지 저장할 수 있습니다.
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if plan != "PRO" %}
+                <a href="/upgrade" class="btn btn-warning fw-bold">
+                    ⭐ PRO 업그레이드
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="progress mt-3" style="height: 10px;">
+                <div
+                    class="progress-bar"
+                    role="progressbar"
+                    style="width: {{ ((profile_count / profile_limit) * 100) if profile_limit else 0 }}%;"
+                    aria-valuenow="{{ profile_count }}"
+                    aria-valuemin="0"
+                    aria-valuemax="{{ profile_limit }}">
+                </div>
+            </div>
+        </div>
+    </div>
+
     {% if error %}
     <div class="alert alert-danger">
         {{ error }}
@@ -62,6 +105,20 @@
         </div>
 
         <div class="card-body">
+
+            {% if profile_count >= profile_limit %}
+            <div class="alert alert-warning">
+                {% if plan == "PRO" %}
+                <strong>⚠️ 저장 한도 도달</strong><br>
+                PRO 플랜의 브랜드 저장 한도 20개를 모두 사용했습니다.
+                기존 브랜드를 삭제하면 다시 저장할 수 있습니다.
+                {% else %}
+                <strong>🔒 FREE 브랜드 저장 한도 도달</strong><br>
+                FREE 플랜은 브랜드를 최대 2개까지 저장할 수 있습니다.
+                기존 브랜드를 삭제하거나 PRO로 업그레이드해 주세요.
+                {% endif %}
+            </div>
+            {% endif %}
 
             <form method="POST">
 
@@ -239,9 +296,14 @@
                 <div class="d-grid">
                     <button
                         type="submit"
-                        class="btn btn-primary btn-lg">
+                        class="btn btn-primary btn-lg"
+                        {% if profile_count >= profile_limit %}disabled{% endif %}>
 
+                        {% if profile_count >= profile_limit %}
+                        🔒 브랜드 저장 한도 도달
+                        {% else %}
                         💾 브랜드 프로필 저장
+                        {% endif %}
                     </button>
                 </div>
 

@@ -17,6 +17,7 @@ from database.profiles import (
     get_profile,
     save_profile,
     delete_profile,
+    count_profiles,
 )
 
 from database.db import (
@@ -33,6 +34,7 @@ from ai.blog import make_blog
 from ai.sns import make_sns
 
 from routes.auth import login_required
+from database.users import get_plan_status
 
 from routes.package import (
     _make_image_safe,
@@ -67,6 +69,21 @@ profiles_bp = Blueprint("profiles", __name__)
 def profiles():
     error = ""
 
+    plan_status = get_plan_status(
+        session["user_id"]
+    )
+
+    plan = plan_status["plan"]
+    profile_limit = (
+        20
+        if plan == "PRO"
+        else 2
+    )
+
+    profile_count = count_profiles(
+        session["user_id"]
+    )
+
     if request.method == "POST":
         business = request.form.get("business", "").strip()
         company = request.form.get("company", "").strip()
@@ -98,6 +115,17 @@ def profiles():
 
         if not all([business, company, style]):
             error = "업종, 회사명, 브랜드 분위기를 모두 입력해 주세요."
+        elif profile_count >= profile_limit:
+            if plan == "PRO":
+                error = (
+                    "PRO 플랜의 저장 브랜드 한도 "
+                    "20개를 모두 사용했습니다."
+                )
+            else:
+                error = (
+                    "FREE 플랜은 브랜드를 최대 2개까지 저장할 수 있습니다. "
+                    "더 많은 브랜드를 저장하려면 PRO로 업그레이드해 주세요."
+                )
         else:
             save_profile(
                 business,
@@ -117,7 +145,10 @@ def profiles():
     return render_template(
         "profiles.html",
         profiles=get_profiles(session["user_id"]),
-        error=error
+        error=error,
+        plan=plan,
+        profile_count=profile_count,
+        profile_limit=profile_limit
     )
 
 
@@ -271,13 +302,18 @@ def package_detail(profile_id, package_id):
         else ""
     )
 
+    plan_status = get_plan_status(
+        session["user_id"]
+    )
+
     return render_template(
         "package_detail.html",
         profile=profile,
         package_id=package_id,
         created_at=created_at,
         items=items,
-        versions_by_type=versions_by_type
+        versions_by_type=versions_by_type,
+        plan=plan_status["plan"]
     )
 
 
@@ -865,6 +901,13 @@ def download_user_package_zip(
     brand_profile_id가 없어도 로그인 사용자의 package_id만으로
     광고/블로그/SNS 현재 버전을 ZIP으로 다시 내려줍니다.
     """
+    plan_status = get_plan_status(session["user_id"])
+
+    if plan_status["plan"] != "PRO":
+        return redirect(
+            url_for("plan.upgrade")
+        )
+
     rows = get_package_history(
         package_id,
         current_only=True,
@@ -1039,6 +1082,13 @@ def download_history_zip(
     PDF + Word + 이미지 전체를 ZIP 하나로 내려줍니다.
     ZIP 자체는 메모리에서 만들어 동시 사용자 간 파일 충돌을 줄입니다.
     """
+    plan_status = get_plan_status(session["user_id"])
+
+    if plan_status["plan"] != "PRO":
+        return redirect(
+            url_for("plan.upgrade")
+        )
+
     profile = get_profile(profile_id, session["user_id"])
 
     if not profile:

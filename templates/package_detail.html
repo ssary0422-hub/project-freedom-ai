@@ -70,11 +70,19 @@
 
         <div class="d-flex gap-2 flex-wrap">
 
+            {% if plan == "PRO" %}
             <a
                 href="/profiles/{{ profile[0] }}/history/{{ package_id }}/download/zip"
                 class="btn btn-success">
                 📦 전체 ZIP 다시 받기
             </a>
+            {% else %}
+            <a
+                href="/upgrade"
+                class="btn btn-warning fw-bold">
+                🔒 전체 ZIP · PRO
+            </a>
+            {% endif %}
 
             <form
                 method="POST"
@@ -92,6 +100,15 @@
         </div>
 
     </div>
+
+    {% if plan != "PRO" %}
+    <div class="alert alert-warning shadow-sm mb-4">
+        <strong>🔒 전체 ZIP 다운로드는 PRO 전용입니다.</strong><br>
+        PDF/Word 개별 다운로드는 계속 사용할 수 있고,
+        광고 · 블로그 · SNS · 이미지를 한 번에 받는 ZIP 기능은 PRO에서 사용할 수 있습니다.
+        <a href="/upgrade" class="alert-link">PRO 알아보기 →</a>
+    </div>
+    {% endif %}
 
     {% for item in items %}
 
