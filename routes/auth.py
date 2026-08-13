@@ -13,6 +13,7 @@ from database.users import (
     create_user,
     verify_user,
     get_user_by_email,
+    get_plan_status,
 )
 
 
@@ -163,6 +164,13 @@ def login():
             session["user_id"] = user["id"]
             session["user_name"] = user["username"]
             session["user_email"] = user["email"]
+
+            plan_status = get_plan_status(user["id"])
+            session["plan"] = plan_status["plan"]
+            session["plan_used"] = plan_status["used"]
+            session["plan_limit"] = plan_status["limit"]
+            session["plan_remaining"] = plan_status["remaining"]
+            session["plan_percent"] = plan_status["percent"]
 
             return redirect(
                 url_for("home")

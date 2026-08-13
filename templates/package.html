@@ -73,6 +73,55 @@
     </div>
     {% endif %}
 
+    <div class="card shadow-sm mb-3 border-primary">
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                <div>
+                    <h5 class="mb-1">🏢 저장된 브랜드 불러오기</h5>
+                    <div class="text-muted small">
+                        저장해둔 브랜드를 선택하면 업종, 회사명, 분위기와 생성 옵션을 자동으로 불러옵니다.
+                    </div>
+                </div>
+
+                <a
+                    href="/profiles"
+                    class="btn btn-sm btn-outline-primary">
+                    브랜드 관리
+                </a>
+            </div>
+
+            {% if saved_profiles %}
+            <select
+                id="savedProfileSelect"
+                class="form-select"
+                onchange="loadSavedProfile(this.value)">
+
+                <option value="">
+                    직접 입력하기
+                </option>
+
+                {% for profile in saved_profiles %}
+                <option
+                    value="{{ profile[0] }}"
+                    {% if selected_profile_id == profile[0] %}selected{% endif %}>
+                    {{ profile[2] }} · {{ profile[1] }}
+                </option>
+                {% endfor %}
+
+            </select>
+            {% else %}
+            <div class="alert alert-light border mb-0">
+                아직 저장된 브랜드가 없습니다.
+                <a href="/profiles" class="fw-semibold text-decoration-none">
+                    브랜드 프로필을 먼저 만들어보세요 →
+                </a>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
     <div class="card shadow mb-5">
         <div class="card-body">
 
@@ -415,6 +464,18 @@
             loadingSpinner.classList.remove('d-none');
             loadingMessage.classList.remove('d-none');
         });
+    }
+</script>
+
+
+<script>
+    function loadSavedProfile(profileId) {
+        if (profileId) {
+            window.location.href =
+                "/package?profile_id=" + encodeURIComponent(profileId);
+        } else {
+            window.location.href = "/package";
+        }
     }
 </script>
 

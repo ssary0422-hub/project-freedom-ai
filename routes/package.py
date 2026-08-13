@@ -13,7 +13,8 @@ from ai.sns import make_sns
 from ai.image import make_image
 
 from database.db import save_history
-from database.profiles import get_profile
+from database.profiles import get_profile, get_profiles
+from database.users import get_plan_status, record_package_usage
 from routes.auth import login_required
 
 from documents.word import (
@@ -798,6 +799,11 @@ def package():
     loaded_profile_name = ""
     selected_profile_id = None
 
+    # 로그인한 사용자의 저장된 브랜드 목록
+    saved_profiles = get_profiles(
+        session["user_id"]
+    )
+
     # =====================================
     # GET: 저장된 브랜드 프로필 불러오기
     # =====================================
@@ -838,6 +844,34 @@ def package():
     # =====================================
 
     if request.method == "POST":
+        plan_status = get_plan_status(session["user_id"])
+
+        if not plan_status["can_generate"]:
+            error = (
+                f"{plan_status['plan']} 요금제의 이번 달 패키지 생성 한도 "
+                f"{plan_status['limit']}회를 모두 사용했습니다. "
+                "PRO 업그레이드가 필요합니다."
+            )
+
+            session["plan"] = plan_status["plan"]
+            session["plan_used"] = plan_status["used"]
+            session["plan_limit"] = plan_status["limit"]
+            session["plan_remaining"] = plan_status["remaining"]
+            session["plan_percent"] = plan_status["percent"]
+
+            return render_template(
+                "package.html",
+                business=business, company=company, style=style,
+                blog_length=blog_length, sns_platform=sns_platform,
+                image_style=image_style, ads_count=ads_count,
+                ads_result=ads_result, blog_result=blog_result, sns_result=sns_result,
+                ads_image_url=ads_image_url, blog_image_url=blog_image_url,
+                sns_image_url=sns_image_url, package_ready=False, error=error,
+                loaded_profile_name=loaded_profile_name,
+                selected_profile_id=selected_profile_id,
+                saved_profiles=saved_profiles
+            )
+
         business = request.form.get(
             "business",
             ""
@@ -1182,6 +1216,15 @@ No text, no logo, no watermark.
 
                 package_ready = True
 
+                # 패키지 3종 생성이 모두 성공한 경우에만 월 사용량 1회 차감
+                record_package_usage(session["user_id"])
+                plan_status = get_plan_status(session["user_id"])
+                session["plan"] = plan_status["plan"]
+                session["plan_used"] = plan_status["used"]
+                session["plan_limit"] = plan_status["limit"]
+                session["plan_remaining"] = plan_status["remaining"]
+                session["plan_percent"] = plan_status["percent"]
+
             except Exception as exc:
                 error = f"패키지 생성 중 오류가 발생했습니다: {exc}"
                 print("패키지 생성 오류:", repr(exc))
@@ -1210,7 +1253,8 @@ No text, no logo, no watermark.
         package_ready=package_ready,
         error=error,
         loaded_profile_name=loaded_profile_name,
-        selected_profile_id=selected_profile_id
+        selected_profile_id=selected_profile_id,
+        saved_profiles=saved_profiles
     )
 
 

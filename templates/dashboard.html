@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MY DASHBOARD - Project Freedom AI</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f7fb;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #111827, #25334f);
+            color: white;
+            border-radius: 24px;
+        }
+
+        .dashboard-card {
+            border: 0;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .stat-number {
+            font-size: 2.1rem;
+            font-weight: 800;
+        }
+
+        .quick-btn {
+            border-radius: 14px;
+            padding: 14px;
+            font-weight: 700;
+        }
+
+        .brand-thumbnail {
+            width: 118px;
+            height: 88px;
+            object-fit: cover;
+            border-radius: 14px;
+            flex-shrink: 0;
+            background: #eef2f7;
+        }
+
+        .brand-placeholder {
+            width: 118px;
+            height: 88px;
+            border-radius: 14px;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            background: #eef2f7;
+            font-size: 2rem;
+        }
+
+        .package-actions {
+            white-space: nowrap;
+        }
+
+        .section-title {
+            font-weight: 800;
+        }
+        .plan-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: .85rem;
+        }
+
+        .plan-free { background: #e5e7eb; color: #111827; }
+        .plan-pro { background: #fef3c7; color: #92400e; }
+
+        .usage-box {
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-top: 18px;
+            max-width: 560px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+
+        <a class="navbar-brand fw-bold" href="/">
+            🤖 Project Freedom AI
+        </a>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-info" href="/dashboard">
+                📊 MY DASHBOARD
+            </a>
+
+            <a class="btn btn-outline-light" href="/package">
+                🚀 패키지
+            </a>
+
+            <a class="btn btn-outline-light" href="/profiles">
+                🏢 브랜드
+            </a>
+
+            <a class="btn btn-outline-light" href="/history">
+                📚 기록
+            </a>
+
+            <a class="btn btn-warning" href="/logout">
+                로그아웃
+            </a>
+        </div>
+
+    </div>
+</nav>
+
+<div class="container py-5">
+
+    <section class="hero shadow-sm p-4 p-md-5 mb-4">
+        <div class="row align-items-center g-4">
+
+            <div class="col-lg-8">
+                <div class="text-info fw-bold mb-2">
+                    PROJECT FREEDOM AI
+                </div>
+
+                <h1 class="fw-bold mb-3">
+                    👋 {{ session.get("user_name") }}님, 환영합니다.
+                </h1>
+
+                <p class="lead text-white-50 mb-0">
+                    내 브랜드와 AI 마케팅 콘텐츠를 한곳에서 관리하세요.
+                </p>
+
+                <div class="usage-box">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="fw-bold">이번 달 패키지 사용량</div>
+                        <span class="plan-pill {{ 'plan-pro' if session.get('plan') == 'PRO' else 'plan-free' }}">
+                            {{ '⭐ PRO' if session.get('plan') == 'PRO' else '🟢 FREE' }}
+                        </span>
+                    </div>
+                    <div class="progress" style="height: 9px;">
+                        <div class="progress-bar" role="progressbar"
+                             style="width: {{ session.get('plan_percent', 0) }}%"></div>
+                    </div>
+                    <div class="small text-white-50 mt-2">
+                        {{ session.get('plan_used', 0) }} / {{ session.get('plan_limit', 3) }}회 사용
+                        · {{ session.get('plan_remaining', 3) }}회 남음
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 text-lg-end">
+                <a
+                    href="/package"
+                    class="btn btn-info btn-lg quick-btn">
+                    ✨ 새 패키지 만들기
+                </a>
+
+                {% if session.get("plan", "FREE") == "FREE" %}
+                <div class="mt-2">
+                    <span class="badge text-bg-warning px-3 py-2">
+                        ⭐ PRO 업그레이드 준비 중
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </section>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card dashboard-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="text-muted mb-2">🏢 내 브랜드</div>
+                    <div class="stat-number">{{ dashboard.brand_count }}</div>
+                    <a href="/profiles" class="text-decoration-none">
+                        브랜드 관리 →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card dashboard-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="text-muted mb-2">🚀 생성 패키지</div>
+                    <div class="stat-number">{{ dashboard.package_count }}</div>
+                    <a href="/profiles" class="text-decoration-none">
+                        패키지 확인 →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card dashboard-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="text-muted mb-2">📚 현재 콘텐츠</div>
+                    <div class="stat-number">{{ dashboard.content_count }}</div>
+                    <a href="/history" class="text-decoration-none">
+                        생성 기록 →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-5">
+            <div class="card dashboard-card shadow-sm h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="section-title mb-0">
+                            🏢 최근 브랜드
+                        </h4>
+
+                        <a
+                            href="/profiles"
+                            class="btn btn-sm btn-outline-primary">
+                            전체 보기
+                        </a>
+                    </div>
+
+                    {% if dashboard.recent_brands %}
+
+                        {% for brand in dashboard.recent_brands %}
+
+                        <div class="d-flex gap-3 align-items-center border-bottom py-3">
+
+                            {% if brand[4] %}
+                            <img
+                                src="{{ brand[4] }}"
+                                class="brand-thumbnail"
+                                alt="{{ brand[2] }} 대표 이미지">
+                            {% else %}
+                            <div class="brand-placeholder">
+                                🏢
+                            </div>
+                            {% endif %}
+
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="fw-bold mb-1">
+                                    {{ brand[2] }}
+                                </div>
+
+                                <div class="small text-muted mb-2">
+                                    {{ brand[1] }} · {{ brand[3] }}
+                                </div>
+
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a
+                                        href="/profiles/{{ brand[0] }}/history"
+                                        class="btn btn-sm btn-outline-dark">
+                                        👁 브랜드 열기
+                                    </a>
+
+                                    <a
+                                        href="/package?profile_id={{ brand[0] }}"
+                                        class="btn btn-sm btn-primary">
+                                        🚀 이 브랜드로 생성
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <div class="text-center py-5">
+                            <div class="display-5 mb-3">🏢</div>
+                            <p class="fw-bold mb-1">
+                                아직 등록된 브랜드가 없습니다.
+                            </p>
+                            <p class="text-muted small">
+                                첫 브랜드를 만들고 AI 마케팅을 시작해보세요.
+                            </p>
+                            <a href="/profiles" class="btn btn-primary">
+                                브랜드 만들기
+                            </a>
+                        </div>
+
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card dashboard-card shadow-sm h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="section-title mb-0">
+                            🚀 최근 마케팅 패키지
+                        </h4>
+
+                        <a
+                            href="/package"
+                            class="btn btn-sm btn-success">
+                            + 새 패키지
+                        </a>
+                    </div>
+
+                    {% if dashboard.recent_packages %}
+
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+
+                            <thead>
+                                <tr>
+                                    <th>브랜드</th>
+                                    <th>업종</th>
+                                    <th>콘텐츠</th>
+                                    <th>생성일</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                            {% for package in dashboard.recent_packages %}
+                                <tr>
+                                    <td class="fw-semibold">
+                                        {{ package[2] }}
+                                    </td>
+
+                                    <td>
+                                        {{ package[3] }}
+                                    </td>
+
+                                    <td>
+                                        <span class="badge text-bg-primary">
+                                            {{ package[5] }}종
+                                        </span>
+                                    </td>
+
+                                    <td class="small text-muted">
+                                        {{ package[4] or "-" }}
+                                    </td>
+
+                                    <td class="text-end package-actions">
+
+                                        {% if package[1] %}
+                                        <a
+                                            href="/profiles/{{ package[1] }}/history/{{ package[0] }}"
+                                            class="btn btn-sm btn-outline-dark">
+                                            👁 보기
+                                        </a>
+                                        {% endif %}
+
+                                        <a
+                                            href="/history/package/{{ package[0] }}/download/zip"
+                                            class="btn btn-sm btn-success">
+                                            📦 ZIP
+                                        </a>
+
+                                    </td>
+                                </tr>
+                            {% endfor %}
+
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                    {% else %}
+
+                        <div class="text-center py-5">
+                            <div class="display-5 mb-3">
+                                🚀
+                            </div>
+                            <p class="fw-bold mb-1">
+                                아직 생성된 패키지가 없습니다.
+                            </p>
+                            <p class="text-muted small">
+                                광고 + 블로그 + SNS를 한 번에 만들어보세요.
+                            </p>
+                            <a href="/package" class="btn btn-success">
+                                첫 패키지 만들기
+                            </a>
+                        </div>
+
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card dashboard-card shadow-sm mt-4">
+        <div class="card-body p-4">
+
+            <h4 class="section-title mb-3">
+                ⚡ 빠른 실행
+            </h4>
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+                    <a
+                        href="/package"
+                        class="btn btn-primary w-100 quick-btn">
+                        🚀 마케팅 패키지 생성
+                    </a>
+                </div>
+
+                <div class="col-md-4">
+                    <a
+                        href="/profiles"
+                        class="btn btn-outline-primary w-100 quick-btn">
+                        🏢 브랜드 프로필 관리
+                    </a>
+                </div>
+
+                <div class="col-md-4">
+                    <a
+                        href="/history"
+                        class="btn btn-outline-secondary w-100 quick-btn">
+                        📚 전체 생성 기록
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

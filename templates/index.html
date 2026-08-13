@@ -25,6 +25,9 @@
             <a class="btn btn-outline-light" href="/">
                 홈
             </a>
+            {% if session.get("user_id") %}
+            <a class="btn btn-info" href="/dashboard">📊 MY DASHBOARD</a>
+            {% endif %}
 
             <a class="btn btn-outline-light" href="/package">
                 🚀 마케팅 패키지
@@ -113,7 +116,7 @@
 
             </div>
 
-            <form method="POST">
+            <form method="POST" id="aiGenerateForm">
 
                 <div class="mb-3">
                     <label class="form-label">업종</label>
@@ -154,9 +157,22 @@
                 <div class="d-grid">
                     <button
                         class="btn btn-primary btn-lg"
-                        type="submit">
+                        type="submit"
+                        id="aiGenerateButton">
                         🚀 광고 만들기
                     </button>
+                </div>
+
+                <div id="aiLoading"
+                     class="alert alert-info mt-3 text-center d-none"
+                     role="status">
+                    <div class="spinner-border spinner-border-sm me-2"
+                         aria-hidden="true"></div>
+                    <strong>AI 생성 중...</strong>
+                    <div class="small mt-2">
+                        광고 문구와 이미지를 생성하고 있습니다.<br>
+                        이미지 생성에는 잠시 시간이 걸릴 수 있습니다.
+                    </div>
                 </div>
 
             </form>
@@ -206,6 +222,24 @@
 </div>
 
 <script>
+    const aiGenerateForm = document.getElementById("aiGenerateForm");
+    const aiGenerateButton = document.getElementById("aiGenerateButton");
+    const aiLoading = document.getElementById("aiLoading");
+
+    if (aiGenerateForm) {
+        aiGenerateForm.addEventListener("submit", function () {
+            if (aiGenerateButton) {
+                aiGenerateButton.disabled = true;
+                aiGenerateButton.innerHTML =
+                    '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>AI 생성 중...';
+            }
+
+            if (aiLoading) {
+                aiLoading.classList.remove("d-none");
+            }
+        });
+    }
+
     async function copyResult() {
         const resultElement = document.getElementById("result");
 

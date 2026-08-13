@@ -5,10 +5,10 @@ from routes.ads import ads_bp
 from routes.blog import blog_bp
 from routes.sns import sns_bp
 from routes.history import history_bp
-from database.db import init_db
+from database.db import init_db, get_dashboard_data
 from routes.package import package_bp
 from routes.profiles import profiles_bp
-from routes.auth import auth_bp
+from routes.auth import auth_bp, login_required
 from database.users import init_users_table
 
 from flask import (
@@ -16,7 +16,8 @@ from flask import (
     render_template,
     request,
     send_file,
-    redirect
+    redirect,
+    session
 )
 from docx import Document
 from docx.shared import Inches
@@ -162,6 +163,14 @@ def delete_history(id):
 # 프로그램 시작 시 DB 준비
 init_db()
 
+
+
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    dashboard_data = get_dashboard_data(session["user_id"])
+    return render_template("dashboard.html", dashboard=dashboard_data)
 
 # -------------------------
 # Word 문서

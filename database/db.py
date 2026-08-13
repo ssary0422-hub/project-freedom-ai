@@ -588,3 +588,108 @@ def get_history_item(history_id, user_id):
     conn.close()
 
     return row
+
+
+def get_dashboard_data(user_id):
+    """
+    로그인 사용자의 대시보드 요약 데이터를 반환합니다.
+    브랜드별 최신 생성 이미지를 대표 썸네일로 함께 조회합니다.
+    """
+    init_db()
+
+    conn = _connect()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM brand_profiles
+        WHERE user_id = ?
+    """, (
+        user_id,
+    ))
+    brand_count = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT
+            bp.id,
+            bp.business,
+            bp.company,
+            bp.style,
+            (
+                SELECT h.image_url
+                FROM history h
+                WHERE h.brand_profile_id = bp.id
+                  AND h.user_id = bp.user_id
+                  AND h.image_url IS NOT NULL
+                  AND h.image_url != ''
+                  AND COALESCE(h.is_current, 1) = 1
+                ORDER BY
+                    h.created_at DESC,
+                    h.id DESC
+                LIMIT 1
+            ) AS thumbnail_url
+        FROM brand_profiles bp
+        WHERE bp.user_id = ?
+        ORDER BY bp.id DESC
+        LIMIT 3
+    """, (
+        user_id,
+    ))
+    recent_brands = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM history
+        WHERE user_id = ?
+          AND COALESCE(is_current, 1) = 1
+    """, (
+        user_id,
+    ))
+    content_count = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT COUNT(DISTINCT package_id)
+        FROM history
+        WHERE user_id = ?
+          AND package_id IS NOT NULL
+          AND package_id != ''
+    """, (
+        user_id,
+    ))
+    package_count = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT
+            package_id,
+            brand_profile_id,
+            MAX(company) AS company,
+            MAX(business) AS business,
+            MAX(created_at) AS created_at,
+            COUNT(DISTINCT content_type) AS content_count
+        FROM history
+        WHERE user_id = ?
+          AND package_id IS NOT NULL
+          AND package_id != ''
+          AND COALESCE(is_current, 1) = 1
+        GROUP BY
+            package_id,
+            brand_profile_id
+        ORDER BY
+            MAX(created_at) DESC,
+            MAX(id) DESC
+        LIMIT 5
+    """, (
+        user_id,
+    ))
+    recent_packages = cursor.fetchall()
+
+    conn.close()
+
+    return {
+        "brand_count": brand_count,
+        "package_count": package_count,
+        "content_count": content_count,
+        "recent_brands": recent_brands,
+        "recent_packages": recent_packages,
+    }
+

@@ -40,6 +40,7 @@ from routes.package import (
     _is_fun_animal_style,
     _animal_prompt_name,
     _brand_tagline_for_business,
+    _add_company_name_to_image,
 )
 
 from documents.word import (
@@ -636,19 +637,26 @@ Family-friendly. No text, no logo, no watermark.
 """
             else:
                 prompt = f"""
-Professional commercial wellness advertisement photo.
+Professional commercial advertising photo.
 
-Business: {business}
+Business category: {business}
 Brand: {company}
 Brand mood: {style}
 Visual style: {image_style}
 
-A clean, elegant wellness studio with warm lighting and a polished interior.
-A professional therapist is providing a fully clothed adult client
-with a relaxing shoulder wellness treatment while seated comfortably.
-Both people have natural, professional poses.
-Family-friendly commercial photography.
-No nudity, no suggestive pose, no text, no logo, no watermark.
+The image must accurately represent the real business category '{business}'.
+Show the authentic workplace, professional staff, customer, and core service
+or product of this exact business.
+
+If this is a hospital, clinic, orthopedic clinic, or medical business:
+show a clean medical consultation or examination scene with professional medical staff,
+preferably with X-ray/MRI imagery or a joint/spine model.
+Do not show massage, spa, wellness therapy, shoulder rubbing, back rubbing,
+or manual-therapy-looking treatment.
+
+For any other business, use the correct environment, tools, products and service scene.
+Polished, realistic, family-friendly commercial photography.
+No text, no logo, no watermark.
 """
 
             image_path, image_url = _make_image_safe(
@@ -659,14 +667,18 @@ No nudity, no suggestive pose, no text, no logo, no watermark.
             # 1차 실패 시 사람 표현을 더 줄인 안전 프롬프트로 자동 재시도
             if not image_path:
                 retry_prompt = f"""
-Premium commercial image for a {business} brand named {company}.
+Premium commercial advertising photo for {company}.
 
-A serene, upscale wellness interior with massage chairs,
-soft towels, plants, warm ambient lighting and a calm luxury atmosphere.
-A professional therapist and a fully clothed adult client may appear
-in a natural, non-suggestive wellness setting.
-Suitable for a family-friendly business advertisement.
-No nudity, no sensual posing, no text, no logo, no watermark.
+Exact business category: {business}.
+Brand mood: {style}. Visual style: {image_style}.
+
+Show the authentic workplace, professional staff, customer and core service
+for this exact business category.
+If this is a hospital or clinic, show a clean consultation or examination scene,
+preferably with X-ray/MRI imagery or a joint/spine model.
+Absolutely no massage, spa, wellness therapy, shoulder/back rubbing,
+or manual-therapy-looking treatment.
+No text, no logo, no watermark.
 """
 
                 image_path, image_url = _make_image_safe(
@@ -706,7 +718,7 @@ No nudity, no sensual posing, no text, no logo, no watermark.
 선택 동물 두 마리를 '{business}' 업종의 전문 직원과 고객 역할로 귀엽게 의인화.
 병원/의원/정형외과라면 진료실, 의료진 가운, 상담·진찰·검사 장면으로 표현하고
 마사지, 스파, 테라피 장면은 절대 사용하지 말 것.
-고급 스파 인테리어와 따뜻한 조명, 실제 사진 같은 털과 디테일.
+해당 업종에 맞는 실제 공간과 도구, 따뜻한 조명, 실제 사진 같은 털과 디테일.
 재미있고 사랑스럽지만 광고용으로 세련된 분위기.
 글자, 로고, 워터마크는 넣지 말 것.
 """
@@ -751,6 +763,20 @@ X-ray/MRI 영상 또는 관절·척추 모형을 활용한 상담·진찰·검�
                 style,
                 image_style
             )
+
+        if (
+            content_type in {"ads", "blog"}
+            and image_path
+        ):
+            image_path = _add_company_name_to_image(
+                image_path,
+                company,
+                business
+            )
+
+            image_url = "/" + str(
+                Path(image_path)
+            ).replace("\\", "/")
 
         save_history_version(
             business,
@@ -824,6 +850,179 @@ def _zip_add_history_image(
         zip_file,
         image_path,
         f"images/{base_name}{suffix}"
+    )
+
+
+
+@profiles_bp.route(
+    "/history/package/<package_id>/download/zip"
+)
+@login_required
+def download_user_package_zip(
+    package_id
+):
+    """
+    brand_profile_id가 없어도 로그인 사용자의 package_id만으로
+    광고/블로그/SNS 현재 버전을 ZIP으로 다시 내려줍니다.
+    """
+    rows = get_package_history(
+        package_id,
+        current_only=True,
+        user_id=session["user_id"]
+    )
+
+    if not rows:
+        return "마케팅 패키지 기록을 찾을 수 없습니다.", 404
+
+    ads_item = _find_package_item(
+        rows,
+        "ads"
+    )
+
+    blog_item = _find_package_item(
+        rows,
+        "blog"
+    )
+
+    sns_item = _find_package_item(
+        rows,
+        "sns"
+    )
+
+    zip_buffer = BytesIO()
+
+    with zipfile.ZipFile(
+        zip_buffer,
+        mode="w",
+        compression=zipfile.ZIP_DEFLATED,
+        compresslevel=6
+    ) as zip_file:
+
+        if ads_item:
+            ads_result = ads_item[4]
+            ads_image_url = ads_item[5]
+            ads_image_path = _history_image_path(
+                ads_image_url
+            )
+
+            ads_pdf = create_pdf(
+                ads_result,
+                ads_image_path
+            )
+
+            ads_word = create_word(
+                ads_result,
+                ads_image_path
+            )
+
+            _zip_add_file(
+                zip_file,
+                ads_pdf,
+                "advertisement.pdf"
+            )
+
+            _zip_add_file(
+                zip_file,
+                ads_word,
+                "advertisement.docx"
+            )
+
+            _zip_add_history_image(
+                zip_file,
+                ads_image_url,
+                "advertisement"
+            )
+
+        if blog_item:
+            blog_result = blog_item[4]
+            blog_image_url = blog_item[5]
+            blog_image_path = _history_image_path(
+                blog_image_url
+            )
+
+            blog_pdf = create_blog_pdf(
+                blog_result,
+                blog_image_path
+            )
+
+            blog_word = create_blog_word(
+                blog_result,
+                blog_image_path
+            )
+
+            _zip_add_file(
+                zip_file,
+                blog_pdf,
+                "blog.pdf"
+            )
+
+            _zip_add_file(
+                zip_file,
+                blog_word,
+                "blog.docx"
+            )
+
+            _zip_add_history_image(
+                zip_file,
+                blog_image_url,
+                "blog"
+            )
+
+        if sns_item:
+            sns_result = sns_item[4]
+            sns_image_url = sns_item[5]
+            sns_image_path = _history_image_path(
+                sns_image_url
+            )
+
+            sns_pdf = create_sns_pdf(
+                sns_result,
+                sns_image_path
+            )
+
+            sns_word = create_sns_word(
+                sns_result,
+                sns_image_path
+            )
+
+            _zip_add_file(
+                zip_file,
+                sns_pdf,
+                "sns.pdf"
+            )
+
+            _zip_add_file(
+                zip_file,
+                sns_word,
+                "sns.docx"
+            )
+
+            _zip_add_history_image(
+                zip_file,
+                sns_image_url,
+                "sns"
+            )
+
+    zip_buffer.seek(0)
+
+    safe_package_id = "".join(
+        character
+        for character in str(package_id)
+        if character.isalnum()
+        or character in {"-", "_"}
+    )
+
+    if not safe_package_id:
+        safe_package_id = "package"
+
+    return send_file(
+        zip_buffer,
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name=(
+            f"marketing_package_"
+            f"{safe_package_id[:12]}.zip"
+        )
     )
 
 
@@ -1012,7 +1211,10 @@ def download_history_zip(
 )
 @login_required
 def delete(profile_id):
-    delete_profile(profile_id)
+    delete_profile(
+        profile_id,
+        session["user_id"]
+    )
 
     return redirect(
         url_for("profiles.profiles")
