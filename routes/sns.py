@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, request
 from ai.sns import make_sns
 from ai.image import make_image
 from database.db import save_history
+from database.users import get_ai_enabled
 from documents.pdf import create_sns_pdf
 from documents.word import create_sns_word
 
@@ -21,6 +22,23 @@ def sns():
     platform = ""
 
     if request.method == "POST":
+        if not get_ai_enabled():
+            error = (
+                "현재 AI 생성 시스템이 점검 중입니다. "
+                "잠시 후 다시 이용해주세요."
+            )
+
+            return render_template(
+                "sns.html",
+                result=result,
+                image_url=image_url,
+                error=error,
+                business=business,
+                company=company,
+                style=style,
+                platform=platform
+            )
+
         business = request.form.get("business", "").strip()
         company = request.form.get("company", "").strip()
         style = request.form.get("style", "").strip()

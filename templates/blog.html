@@ -52,6 +52,13 @@
         </p>
     </div>
 
+    {% if error %}
+    <div class="alert alert-warning shadow-sm mb-4" role="alert">
+        <strong>⚠️ AI 생성 일시 중지</strong><br>
+        {{ error }}
+    </div>
+    {% endif %}
+
     <div class="card shadow">
         <div class="card-body">
 

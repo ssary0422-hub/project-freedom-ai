@@ -41,12 +41,32 @@ def init_users_table():
             "ALTER TABLE users ADD COLUMN plan TEXT NOT NULL DEFAULT 'FREE'"
         )
 
+    if "is_admin" not in columns:
+        cursor.execute(
+            "ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0"
+        )
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS package_usage (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             used_at TEXT NOT NULL
         )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS system_settings (
+            setting_key TEXT PRIMARY KEY,
+            setting_value TEXT NOT NULL
+        )
+    """)
+
+    cursor.execute("""
+        INSERT OR IGNORE INTO system_settings (
+            setting_key,
+            setting_value
+        )
+        VALUES ('ai_enabled', '1')
     """)
 
     conn.commit()
@@ -113,7 +133,8 @@ def get_user_by_email(email):
             username,
             password_hash,
             created_at,
-            plan
+            plan,
+            is_admin
         FROM users
         WHERE email = ?
     """, (
@@ -138,7 +159,8 @@ def get_user_by_id(user_id):
             email,
             username,
             created_at,
-            plan
+            plan,
+            is_admin
         FROM users
         WHERE id = ?
     """, (
@@ -239,3 +261,157 @@ def set_user_plan(user_id, plan):
     )
     conn.commit()
     conn.close()
+
+
+def is_user_admin(user_id):
+    user = get_user_by_id(user_id)
+
+    if not user:
+        return False
+
+    return bool(user["is_admin"])
+
+
+def set_user_admin_by_email(email, is_admin=True):
+    """
+    ADMIN_EMAIL 환경변수와 함께 사용할 수 있는 관리자 지정 helper.
+    """
+    init_users_table()
+
+    email = (email or "").strip().lower()
+
+    if not email:
+        return False
+
+    conn = _connect()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE users
+        SET is_admin = ?
+        WHERE lower(email) = ?
+        """,
+        (
+            1 if is_admin else 0,
+            email,
+        )
+    )
+
+    changed = cursor.rowcount > 0
+
+    conn.commit()
+    conn.close()
+
+    return changed
+
+
+def get_ai_enabled():
+    init_users_table()
+
+    conn = _connect()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT setting_value
+        FROM system_settings
+        WHERE setting_key = 'ai_enabled'
+    """)
+
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        return True
+
+    return str(row["setting_value"]) == "1"
+
+
+def set_ai_enabled(enabled):
+    init_users_table()
+
+    conn = _connect()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO system_settings (
+            setting_key,
+            setting_value
+        )
+        VALUES ('ai_enabled', ?)
+        ON CONFLICT(setting_key)
+        DO UPDATE SET setting_value = excluded.setting_value
+    """, (
+        "1" if enabled else "0",
+    ))
+
+    conn.commit()
+    conn.close()
+
+
+def get_admin_stats():
+    init_users_table()
+
+    month_key = datetime.now().strftime("%Y-%m")
+
+    conn = _connect()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM users")
+    total_users = cursor.fetchone()[0]
+
+    cursor.execute(
+        "SELECT COUNT(*) FROM users WHERE upper(plan) = 'FREE'"
+    )
+    free_users = cursor.fetchone()[0]
+
+    cursor.execute(
+        "SELECT COUNT(*) FROM users WHERE upper(plan) = 'PRO'"
+    )
+    pro_users = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM package_usage
+        WHERE substr(used_at, 1, 7) = ?
+    """, (
+        month_key,
+    ))
+    monthly_packages = cursor.fetchone()[0]
+
+    conn.close()
+
+    return {
+        "total_users": total_users,
+        "free_users": free_users,
+        "pro_users": pro_users,
+        "monthly_packages": monthly_packages,
+        "ai_enabled": get_ai_enabled(),
+    }
+
+
+def get_admin_users(limit=50):
+    init_users_table()
+
+    conn = _connect()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            id,
+            email,
+            username,
+            plan,
+            is_admin,
+            created_at
+        FROM users
+        ORDER BY id DESC
+        LIMIT ?
+    """, (
+        int(limit),
+    ))
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    return rows

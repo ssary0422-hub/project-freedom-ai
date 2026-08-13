@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>요금제 - Project Freedom AI</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f7fb;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #111827, #25334f);
+            color: white;
+            border-radius: 24px;
+        }
+
+        .plan-card {
+            border: 0;
+            border-radius: 22px;
+            overflow: hidden;
+        }
+
+        .plan-card.pro {
+            border: 2px solid #f59e0b;
+        }
+
+        .price {
+            font-size: 2.4rem;
+            font-weight: 800;
+        }
+
+        .feature-row {
+            padding: 10px 0;
+            border-bottom: 1px solid #eef0f3;
+        }
+
+        .current-badge {
+            border-radius: 999px;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container">
+
+        <a class="navbar-brand fw-bold" href="/">
+            🤖 Project Freedom AI
+        </a>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a
+                href="/dashboard"
+                class="btn btn-outline-light">
+                📊 MY DASHBOARD
+            </a>
+
+            <a
+                href="/package"
+                class="btn btn-outline-light">
+                🚀 패키지
+            </a>
+
+            <a
+                href="/logout"
+                class="btn btn-warning">
+                로그아웃
+            </a>
+        </div>
+
+    </div>
+</nav>
+
+<div class="container py-5">
+
+    <section class="hero shadow-sm p-4 p-md-5 mb-4 text-center">
+        <div class="text-info fw-bold mb-2">
+            PROJECT FREEDOM AI
+        </div>
+
+        <h1 class="fw-bold mb-3">
+            나에게 맞는 플랜을 선택하세요
+        </h1>
+
+        <p class="lead text-white-50 mb-0">
+            현재 플랜:
+            <strong>
+                {{ '⭐ PRO' if plan_status.plan == 'PRO' else '🟢 FREE' }}
+            </strong>
+        </p>
+    </section>
+
+    {% if test_mode %}
+    <div class="alert alert-warning shadow-sm mb-4">
+        <strong>🧪 로컬 테스트 모드</strong><br>
+        아래 전환 버튼은 개발용입니다.
+        Flask Debug 모드가 꺼진 배포 환경에서는 사용할 수 없습니다.
+    </div>
+    {% endif %}
+
+    <div class="row g-4 justify-content-center">
+
+        <div class="col-lg-5">
+            <div class="card plan-card shadow-sm h-100">
+                <div class="card-body p-4 p-md-5">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="fw-bold mb-0">
+                            FREE
+                        </h2>
+
+                        {% if plan_status.plan == "FREE" %}
+                        <span class="badge text-bg-secondary current-badge px-3 py-2">
+                            현재 플랜
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="price mb-1">
+                        ₩0
+                    </div>
+
+                    <div class="text-muted mb-4">
+                        무료로 시작하기
+                    </div>
+
+                    <div class="feature-row">
+                        ✅ 월 마케팅 패키지 3회
+                    </div>
+
+                    <div class="feature-row">
+                        ✅ 광고 + 블로그 + SNS 생성
+                    </div>
+
+                    <div class="feature-row">
+                        ✅ AI 이미지 생성
+                    </div>
+
+                    <div class="feature-row">
+                        ✅ PDF / Word / ZIP 다운로드
+                    </div>
+
+                    <div class="feature-row">
+                        ✅ 브랜드 관리
+                    </div>
+
+                    {% if test_mode %}
+                    <form
+                        method="POST"
+                        action="/plan/test/FREE"
+                        class="d-grid mt-4">
+
+                        <button
+                            type="submit"
+                            class="btn btn-outline-secondary btn-lg">
+                            🧪 FREE로 테스트
+                        </button>
+                    </form>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card plan-card pro shadow h-100">
+                <div class="card-body p-4 p-md-5">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="fw-bold mb-0">
+                            ⭐ PRO
+                        </h2>
+
+                        {% if plan_status.plan == "PRO" %}
+                        <span class="badge text-bg-warning current-badge px-3 py-2">
+                            현재 플랜
+                        </span>
+                        {% else %}
+                        <span class="badge text-bg-warning current-badge px-3 py-2">
+                            추천
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="price mb-1">
+                        가격 준비 중
+                    </div>
+
+                    <div class="text-muted mb-4">
+                        실제 결제 연결 전 테스트 단계
+                    </div>
+
+                    <div class="feature-row">
+                        ⭐ 월 마케팅 패키지 50회
+                    </div>
+
+                    <div class="feature-row">
+                        ⭐ 광고 + 블로그 + SNS 생성
+                    </div>
+
+                    <div class="feature-row">
+                        ⭐ AI 이미지 생성
+                    </div>
+
+                    <div class="feature-row">
+                        ⭐ PDF / Word / ZIP 다운로드
+                    </div>
+
+                    <div class="feature-row">
+                        ⭐ 향후 PRO 전용 기능 추가
+                    </div>
+
+                    {% if test_mode %}
+                    <form
+                        method="POST"
+                        action="/plan/test/PRO"
+                        class="d-grid mt-4">
+
+                        <button
+                            type="submit"
+                            class="btn btn-warning btn-lg fw-bold">
+                            🧪 PRO로 테스트 전환
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="d-grid mt-4">
+                        <button
+                            type="button"
+                            class="btn btn-warning btn-lg fw-bold"
+                            disabled>
+                            결제 기능 준비 중
+                        </button>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 mt-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold">
+                📊 이번 달 현재 사용량
+            </h5>
+
+            <div class="progress mt-3" style="height: 12px;">
+                <div
+                    class="progress-bar"
+                    style="width: {{ plan_status.percent }}%">
+                </div>
+            </div>
+
+            <div class="text-muted mt-2">
+                {{ plan_status.used }}
+                /
+                {{ plan_status.limit }}회 사용
+                ·
+                {{ plan_status.remaining }}회 남음
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

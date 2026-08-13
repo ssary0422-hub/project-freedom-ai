@@ -1,3 +1,4 @@
+import os
 from functools import wraps
 
 from flask import (
@@ -14,6 +15,8 @@ from database.users import (
     verify_user,
     get_user_by_email,
     get_plan_status,
+    is_user_admin,
+    set_user_admin_by_email,
 )
 
 
@@ -164,6 +167,24 @@ def login():
             session["user_id"] = user["id"]
             session["user_name"] = user["username"]
             session["user_email"] = user["email"]
+
+            admin_email = os.environ.get(
+                "ADMIN_EMAIL",
+                ""
+            ).strip().lower()
+
+            if (
+                admin_email
+                and user["email"].strip().lower() == admin_email
+            ):
+                set_user_admin_by_email(
+                    user["email"],
+                    True
+                )
+
+            session["is_admin"] = is_user_admin(
+                user["id"]
+            )
 
             plan_status = get_plan_status(user["id"])
             session["plan"] = plan_status["plan"]

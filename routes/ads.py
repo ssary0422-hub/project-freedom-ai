@@ -6,6 +6,7 @@ from ai.ads import make_ads
 from ai.image import make_image
 from documents.pdf import create_pdf, PDF_PATH
 from database.db import save_history
+from database.users import get_ai_enabled
 from documents.word import create_word
 
 ads_bp = Blueprint("ads", __name__)
@@ -18,8 +19,23 @@ def home():
     business = ""
     company = ""
     style = ""
+    error = ""
 
     if request.method == "POST":
+        if not get_ai_enabled():
+            return render_template(
+                "index.html",
+                result=result,
+                image_url=image_url,
+                business=business,
+                company=company,
+                style=style,
+                error=(
+                    "현재 AI 생성 시스템이 점검 중입니다. "
+                    "잠시 후 다시 이용해주세요."
+                )
+            )
+
         business = request.form.get("business", "").strip()
         company = request.form.get("company", "").strip()
         style = request.form.get("style", "").strip()
@@ -69,7 +85,8 @@ def home():
         image_url=image_url,
         business=business,
         company=company,
-        style=style
+        style=style,
+        error=error
     )
 
 

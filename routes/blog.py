@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, request
 from ai.blog import make_blog
 from ai.image import make_image
 from database.db import save_history
+from database.users import get_ai_enabled
 from documents.pdf import create_blog_pdf
 from documents.word import create_blog_word
 
@@ -12,12 +13,29 @@ blog_bp = Blueprint("blog", __name__)
 @blog_bp.route("/blog", methods=["GET", "POST"])
 def blog():
     result = ""
+    error = ""
     image_url = ""
     topic = ""
     tone = ""
     length = ""
 
     if request.method == "POST":
+        if not get_ai_enabled():
+            error = (
+                "현재 AI 생성 시스템이 점검 중입니다. "
+                "잠시 후 다시 이용해주세요."
+            )
+
+            return render_template(
+                "blog.html",
+                result=result,
+                image_url=image_url,
+                topic=topic,
+                tone=tone,
+                length=length,
+                error=error
+            )
+
         topic = request.form.get("topic", "").strip()
         tone = request.form.get("tone", "").strip()
         length = request.form.get("length", "").strip()
@@ -72,5 +90,6 @@ def blog():
         image_url=image_url,
         topic=topic,
         tone=tone,
-        length=length
+        length=length,
+        error=error
     )

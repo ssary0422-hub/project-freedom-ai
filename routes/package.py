@@ -14,7 +14,7 @@ from ai.image import make_image
 
 from database.db import save_history
 from database.profiles import get_profile, get_profiles
-from database.users import get_plan_status, record_package_usage
+from database.users import get_plan_status, record_package_usage, get_ai_enabled
 from routes.auth import login_required
 
 from documents.word import (
@@ -844,6 +844,34 @@ def package():
     # =====================================
 
     if request.method == "POST":
+        if not get_ai_enabled():
+            error = (
+                "현재 AI 생성 시스템이 점검 중입니다. "
+                "잠시 후 다시 이용해주세요."
+            )
+
+            return render_template(
+                "package.html",
+                business=business,
+                company=company,
+                style=style,
+                blog_length=blog_length,
+                sns_platform=sns_platform,
+                image_style=image_style,
+                ads_count=ads_count,
+                ads_result=ads_result,
+                blog_result=blog_result,
+                sns_result=sns_result,
+                ads_image_url=ads_image_url,
+                blog_image_url=blog_image_url,
+                sns_image_url=sns_image_url,
+                package_ready=False,
+                error=error,
+                loaded_profile_name=loaded_profile_name,
+                selected_profile_id=selected_profile_id,
+                saved_profiles=saved_profiles
+            )
+
         plan_status = get_plan_status(session["user_id"])
 
         if not plan_status["can_generate"]:
