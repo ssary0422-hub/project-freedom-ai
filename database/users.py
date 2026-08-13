@@ -62,6 +62,16 @@ def init_users_table():
     """)
 
     cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ai_credit_usage (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            usage_type TEXT NOT NULL,
+            credits INTEGER NOT NULL,
+            used_at TEXT NOT NULL
+        )
+    """)
+
+    cursor.execute("""
         INSERT OR IGNORE INTO system_settings (
             setting_key,
             setting_value
@@ -190,49 +200,79 @@ def verify_user(email, password):
     return user
 
 
-PLAN_LIMITS = {
-    "FREE": 3,
-    "PRO": 50,
-}
+CREDIT_LIMITS = {"FREE": 6, "PRO": 100}
+CREDIT_COSTS = {"ADS": 2, "BLOG": 2, "SNS": 2, "PACKAGE": 6}
 
 
 def get_monthly_package_usage(user_id):
     init_users_table()
     month_key = datetime.now().strftime("%Y-%m")
-
     conn = _connect()
     cursor = conn.cursor()
-    cursor.execute(
-        """
-        SELECT COUNT(*)
-        FROM package_usage
-        WHERE user_id = ?
-          AND substr(used_at, 1, 7) = ?
-        """,
-        (user_id, month_key)
-    )
+    cursor.execute("""
+        SELECT COUNT(*) FROM package_usage
+        WHERE user_id = ? AND substr(used_at, 1, 7) = ?
+    """, (user_id, month_key))
     count = cursor.fetchone()[0]
     conn.close()
     return count
 
 
-def get_plan_status(user_id):
+def get_monthly_credit_usage(user_id):
+    init_users_table()
+    month_key = datetime.now().strftime("%Y-%m")
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT COALESCE(SUM(credits), 0)
+        FROM ai_credit_usage
+        WHERE user_id = ? AND substr(used_at, 1, 7) = ?
+    """, (user_id, month_key))
+    used = int(cursor.fetchone()[0] or 0)
+    conn.close()
+    return used
+
+
+def get_plan_status(user_id, required_credits=1):
     user = get_user_by_id(user_id)
     plan = (user["plan"] if user and user["plan"] else "FREE").upper()
-    if plan not in PLAN_LIMITS:
+    if plan not in CREDIT_LIMITS:
         plan = "FREE"
-
-    used = get_monthly_package_usage(user_id)
-    limit = PLAN_LIMITS[plan]
-
+    used = get_monthly_credit_usage(user_id)
+    limit = CREDIT_LIMITS[plan]
+    remaining = max(0, limit - used)
+    required = max(0, int(required_credits or 0))
     return {
         "plan": plan,
         "used": used,
         "limit": limit,
-        "remaining": max(0, limit - used),
-        "can_generate": used < limit,
+        "remaining": remaining,
+        "can_generate": remaining >= required,
         "percent": min(100, int((used / limit) * 100)) if limit else 0,
+        "required": required,
     }
+
+
+def record_ai_credit_usage(user_id, usage_type, credits=None):
+    init_users_table()
+    usage_type = (usage_type or "OTHER").strip().upper()
+    if credits is None:
+        credits = CREDIT_COSTS.get(usage_type, 1)
+    credits = int(credits)
+    if credits <= 0:
+        return
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO ai_credit_usage (user_id, usage_type, credits, used_at)
+        VALUES (?, ?, ?, ?)
+    """, (
+        user_id, usage_type, credits,
+        datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    ))
+    conn.commit()
+    conn.close()
+
 
 
 def record_package_usage(user_id):
@@ -245,12 +285,13 @@ def record_package_usage(user_id):
     )
     conn.commit()
     conn.close()
+    record_ai_credit_usage(user_id, "PACKAGE", CREDIT_COSTS["PACKAGE"])
 
 
 def set_user_plan(user_id, plan):
     init_users_table()
     plan = (plan or "FREE").upper()
-    if plan not in PLAN_LIMITS:
+    if plan not in CREDIT_LIMITS:
         raise ValueError("plan은 FREE 또는 PRO만 가능합니다.")
 
     conn = _connect()

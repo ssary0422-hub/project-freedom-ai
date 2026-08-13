@@ -1,328 +1,57 @@
-<!DOCTYPE html>
-<html lang="ko">
+{% extends "generator_base.html" %}
+{% set active_tab = "ads" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% block title %}광고 생성기 - Project Freedom AI{% endblock %}
+{% block generator_title %}📢 AI 광고 생성기{% endblock %}
+{% block generator_subtitle %}업종과 브랜드 분위기에 맞는 광고 문구와 이미지를 생성합니다.{% endblock %}
 
-    <title>Project Freedom AI</title>
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-        rel="stylesheet">
-</head>
-
-
-<div
-    id="ai-loading-overlay"
-    style="
-        display:none;
-        position:fixed;
-        inset:0;
-        z-index:9999;
-        background:rgba(255,255,255,.88);
-        backdrop-filter:blur(3px);
-        align-items:center;
-        justify-content:center;
-    ">
-    <div class="text-center bg-white shadow rounded-4 p-5" style="min-width:320px;">
-        <div class="spinner-border text-primary mb-3" role="status"></div>
-        <h4 class="fw-bold mb-2">🤖 AI 생성 중...</h4>
-        <div class="text-muted">
-            글과 이미지를 만들고 있습니다.<br>
-            잠시만 기다려 주세요.
-        </div>
+{% block form %}
+<form method="POST">
+    <div class="mb-3">
+        <label class="form-label">업종</label>
+        <input type="text" class="form-control" name="business"
+               value="{{ business or '' }}" placeholder="예) 마사지샵" required>
     </div>
+
+    <div class="mb-3">
+        <label class="form-label">업체명</label>
+        <input type="text" class="form-control" name="company"
+               value="{{ company or '' }}" placeholder="예) 7데이즈" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">원하는 분위기</label>
+        <input type="text" class="form-control" name="style"
+               value="{{ style or '' }}" placeholder="예) 고급스럽고 친절한" required>
+    </div>
+
+
+<div class="mb-3">
+    <label class="form-label">이미지 스타일</label>
+    <select name="image_style" class="form-select">
+        <option value="고급스러운 실사" {% if image_style == "고급스러운 실사" %}selected{% endif %}>고급스러운 실사</option>
+        <option value="감성적인 분위기" {% if image_style == "감성적인 분위기" %}selected{% endif %}>감성적인 분위기</option>
+        <option value="고양이 유머 콘셉트" {% if image_style == "고양이 유머 콘셉트" %}selected{% endif %}>🐱 고양이 유머 콘셉트</option>
+        <option value="강아지 유머 콘셉트" {% if image_style == "강아지 유머 콘셉트" %}selected{% endif %}>🐶 강아지 유머 콘셉트</option>
+        <option value="코끼리 유머 콘셉트" {% if image_style == "코끼리 유머 콘셉트" %}selected{% endif %}>🐘 코끼리 유머 콘셉트</option>
+        <option value="랜덤 동물 유머 콘셉트" {% if image_style == "랜덤 동물 유머 콘셉트" %}selected{% endif %}>🎲 랜덤 동물 유머 콘셉트</option>
+        <option value="미니멀하고 깔끔한 스타일" {% if image_style == "미니멀하고 깔끔한 스타일" %}selected{% endif %}>미니멀</option>
+        <option value="화려한 광고 비주얼" {% if image_style == "화려한 광고 비주얼" %}selected{% endif %}>화려한 광고</option>
+    </select>
 </div>
 
-<body class="bg-light">
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-
-        <a class="navbar-brand" href="/">
-            🤖 Project Freedom AI
-        </a>
-
-        <div class="d-flex gap-2 flex-wrap">
-            <a class="btn btn-outline-light" href="/">
-                홈
-            </a>
-            {% if session.get("user_id") %}
-            <a class="btn btn-info" href="/dashboard">📊 MY DASHBOARD</a>
-            {% endif %}
-
-            <a class="btn btn-outline-light" href="/package">
-                🚀 마케팅 패키지
-            </a>
-
-            <a class="btn btn-outline-light" href="/profiles">
-                🏢 브랜드 프로필
-            </a>
-
-            <a class="btn btn-outline-light" href="/history">
-                생성 기록
-            </a>
-
-            {% if session.get("user_id") %}
-            <span class="navbar-text text-white ms-2">
-                👤 {{ session.get("user_name") }}님
-            </span>
-
-            <a class="btn btn-warning" href="/logout">
-                로그아웃
-            </a>
-            {% else %}
-            <a class="btn btn-outline-info" href="/login">
-                로그인
-            </a>
-
-            <a class="btn btn-info" href="/register">
-                회원가입
-            </a>
-            {% endif %}
-        </div>
-
+    <div class="d-grid">
+        <button class="btn btn-primary btn-lg" type="submit">
+            🚀 광고 만들기
+        </button>
     </div>
-</nav>
+</form>
+{% endblock %}
 
-<div class="container pb-5">
+{% block result_title %}🤖 AI 광고 결과{% endblock %}
 
-    <div class="text-center mb-4">
-        <h1>🤖 Project Freedom AI</h1>
-
-        <p class="text-muted">
-            AI가 당신의 콘텐츠 제작을 도와드립니다.
-        </p>
-    </div>
-
-    {% if error %}
-    <div class="alert alert-warning shadow-sm mb-4">
-        <strong>⚠️ 안내</strong><br>
-        {{ error }}
-    </div>
-    {% endif %}
-
-    <div class="card shadow">
-        <div class="card-body">
-
-            <div class="d-flex gap-2 flex-wrap mb-4">
-
-                <a
-                    href="/"
-                    class="btn btn-primary flex-fill">
-                    📢 광고
-                </a>
-
-                <a
-                    href="/blog"
-                    class="btn btn-outline-primary flex-fill">
-                    📝 블로그
-                </a>
-
-                <a
-                    href="/sns"
-                    class="btn btn-outline-primary flex-fill">
-                    📱 SNS
-                </a>
-
-                <a
-                    href="/package"
-                    class="btn btn-success flex-fill">
-                    🚀 마케팅 패키지
-                </a>
-
-                <a
-                    href="/profiles"
-                    class="btn btn-outline-success flex-fill">
-                    🏢 브랜드
-                </a>
-
-                <a
-                    href="/history"
-                    class="btn btn-outline-secondary flex-fill">
-                    📚 기록 보기
-                </a>
-
-            </div>
-
-            <form method="POST">
-
-                <div class="mb-3">
-                    <label class="form-label">업종</label>
-
-                    <input
-                        type="text"
-                        class="form-control"
-                        name="business"
-                        value="{{ business }}"
-                        placeholder="예) 마사지샵"
-                        required>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">회사명</label>
-
-                    <input
-                        type="text"
-                        class="form-control"
-                        name="company"
-                        value="{{ company }}"
-                        placeholder="예) 7데이즈"
-                        required>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">원하는 분위기</label>
-
-                    <input
-                        type="text"
-                        class="form-control"
-                        name="style"
-                        value="{{ style }}"
-                        placeholder="예) 고급스럽고 친절한"
-                        required>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">이미지 스타일</label>
-                    <select name="image_style" class="form-select">
-                        <option value="고급스러운 실사" {% if image_style == "고급스러운 실사" %}selected{% endif %}>
-                            고급스러운 실사
-                        </option>
-                        <option value="감성적인 분위기" {% if image_style == "감성적인 분위기" %}selected{% endif %}>
-                            감성적인 분위기
-                        </option>
-                        <option value="고양이 유머 콘셉트" {% if image_style == "고양이 유머 콘셉트" %}selected{% endif %}>
-                            🐱 고양이 유머 콘셉트
-                        </option>
-                        <option value="강아지 유머 콘셉트" {% if image_style == "강아지 유머 콘셉트" %}selected{% endif %}>
-                            🐶 강아지 유머 콘셉트
-                        </option>
-                        <option value="코끼리 유머 콘셉트" {% if image_style == "코끼리 유머 콘셉트" %}selected{% endif %}>
-                            🐘 코끼리 유머 콘셉트
-                        </option>
-                        <option value="랜덤 동물 유머 콘셉트" {% if image_style == "랜덤 동물 유머 콘셉트" %}selected{% endif %}>
-                            🎲 랜덤 동물 유머 콘셉트
-                        </option>
-                        <option value="미니멀하고 깔끔한 스타일" {% if image_style == "미니멀하고 깔끔한 스타일" %}selected{% endif %}>
-                            미니멀
-                        </option>
-                        <option value="화려한 광고 비주얼" {% if image_style == "화려한 광고 비주얼" %}selected{% endif %}>
-                            화려한 광고
-                        </option>
-                    </select>
-                </div>
-
-                <div class="d-grid">
-                    <button
-                        class="btn btn-primary btn-lg"
-                        type="submit">
-                        🚀 광고 만들기
-                    </button>
-                </div>
-
-            </form>
-
-        </div>
-    </div>
-
-    {% if result %}
-
-    <div class="card shadow mt-4">
-
-        <div class="card-header">
-            🤖 AI 결과
-        </div>
-
-        <div class="card-body">
-
-            {% if image_url %}
-            <div class="mb-4 text-center">
-                <h5 class="mb-3">🎨 AI 광고 이미지</h5>
-                <img
-                    src="{{ image_url }}"
-                    class="img-fluid rounded shadow"
-                    style="max-width: 700px;"
-                    alt="AI 광고 이미지">
-            </div>
-            {% endif %}
-
-            <pre
-                id="result"
-                class="bg-light p-3 rounded"
-                style="min-height: 250px; white-space: pre-wrap;">{{ result }}</pre>
-
-            <a
-                href="/download"
-                class="btn btn-success me-2">
-                📄 Word 다운로드
-            </a>
-
-            <a
-                href="/download/pdf"
-                class="btn btn-danger me-2">
-                📕 PDF 다운로드
-            </a>
-
-            <button
-                type="button"
-                class="btn btn-primary"
-                onclick="copyResult()">
-                📋 복사하기
-            </button>
-
-        </div>
-    </div>
-
-    {% endif %}
-
-</div>
-
-<script>
-    async function copyResult() {
-        const resultElement = document.getElementById("result");
-
-        if (!resultElement) {
-            alert("복사할 결과가 없습니다.");
-            return;
-        }
-
-        try {
-            await navigator.clipboard.writeText(
-                resultElement.innerText
-            );
-
-            alert("📋 복사되었습니다!");
-        } catch (error) {
-            alert("복사에 실패했습니다.");
-            console.error(error);
-        }
-    }
-</script>
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const form = document.querySelector("form[method='POST']");
-    const overlay = document.getElementById("ai-loading-overlay");
-
-    if (!form || !overlay) {
-        return;
-    }
-
-    form.addEventListener("submit", function () {
-        overlay.style.display = "flex";
-
-        const submitButton = form.querySelector("button[type='submit']");
-        if (submitButton) {
-            submitButton.disabled = true;
-            submitButton.dataset.originalText = submitButton.innerHTML;
-            submitButton.innerHTML = "🤖 AI 생성 중...";
-        }
-    });
-});
-</script>
-
-</body>
-</html>
+{% block result_actions %}
+<a href="/download" class="btn btn-success me-2">📄 Word 다운로드</a>
+<a href="/download/pdf" class="btn btn-danger me-2">📕 PDF 다운로드</a>
+<button type="button" class="btn btn-primary" onclick="copyResult()">📋 복사하기</button>
+{% endblock %}

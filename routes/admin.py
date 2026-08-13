@@ -14,6 +14,7 @@ from database.users import (
     get_admin_users,
     get_ai_enabled,
     set_ai_enabled,
+    is_user_admin,
 )
 
 from routes.auth import login_required
@@ -30,8 +31,13 @@ def admin_required(view_function):
     @wraps(view_function)
     @login_required
     def wrapped_view(*args, **kwargs):
-        if not session.get("is_admin"):
+        user_id = session.get("user_id")
+
+        if not user_id or not is_user_admin(user_id):
+            session["is_admin"] = False
             abort(403)
+
+        session["is_admin"] = True
 
         return view_function(
             *args,

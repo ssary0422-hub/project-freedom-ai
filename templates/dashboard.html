@@ -149,7 +149,7 @@
 
                 <div class="usage-box">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="fw-bold">이번 달 패키지 사용량</div>
+                        <div class="fw-bold">이번 달 AI 크레딧</div>
                         <span class="plan-pill {{ 'plan-pro' if session.get('plan') == 'PRO' else 'plan-free' }}">
                             {{ '⭐ PRO' if session.get('plan') == 'PRO' else '🟢 FREE' }}
                         </span>
@@ -159,8 +159,11 @@
                              style="width: {{ session.get('plan_percent', 0) }}%"></div>
                     </div>
                     <div class="small text-white-50 mt-2">
-                        {{ session.get('plan_used', 0) }} / {{ session.get('plan_limit', 3) }}회 사용
-                        · {{ session.get('plan_remaining', 3) }}회 남음
+                        {{ session.get('plan_used', 0) }} / {{ session.get('plan_limit', 6) }} 크레딧 사용
+                        · {{ session.get('plan_remaining', 6) }} 크레딧 남음
+                    </div>
+                    <div class="small text-white-50 mt-2">
+                        광고 2 · 블로그 2 · SNS 2 · 패키지 6 크레딧
                     </div>
                 </div>
             </div>

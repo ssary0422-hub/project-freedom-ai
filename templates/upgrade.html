@@ -132,23 +132,23 @@
                     </div>
 
                     <div class="feature-row">
-                        ✅ 월 마케팅 패키지 3회
+                        ✅ 월 AI 크레딧 6 제공
                     </div>
 
                     <div class="feature-row">
-                        ✅ 광고 + 블로그 + SNS 생성
+                        ✅ 광고 · 블로그 · SNS 각 2크레딧
                     </div>
 
                     <div class="feature-row">
-                        ✅ AI 이미지 생성
+                        ✅ AI 이미지 포함 생성
                     </div>
 
                     <div class="feature-row">
-                        ✅ PDF / Word / ZIP 다운로드
+                        ✅ 마케팅 패키지 6크레딧
                     </div>
 
                     <div class="feature-row">
-                        ✅ 브랜드 관리
+                        ✅ 브랜드 관리 · 문서 다운로드
                     </div>
 
                     {% if test_mode %}
@@ -198,23 +198,23 @@
                     </div>
 
                     <div class="feature-row">
-                        ⭐ 월 마케팅 패키지 50회
+                        ⭐ 월 AI 크레딧 100 제공
                     </div>
 
                     <div class="feature-row">
-                        ⭐ 광고 + 블로그 + SNS 생성
+                        ⭐ 광고 · 블로그 · SNS 각 2크레딧
                     </div>
 
                     <div class="feature-row">
-                        ⭐ AI 이미지 생성
+                        ⭐ AI 이미지 포함 생성
                     </div>
 
                     <div class="feature-row">
-                        ⭐ PDF / Word / ZIP 다운로드
+                        ⭐ 마케팅 패키지 6크레딧
                     </div>
 
                     <div class="feature-row">
-                        ⭐ 향후 PRO 전용 기능 추가
+                        ⭐ 넉넉한 월 100크레딧 · PRO 기능 확장 예정
                     </div>
 
                     {% if test_mode %}
@@ -260,11 +260,21 @@
             </div>
 
             <div class="text-muted mt-2">
-                {{ plan_status.used }}
-                /
-                {{ plan_status.limit }}회 사용
+                {{ plan_status.used }} / {{ plan_status.limit }} 크레딧 사용
                 ·
-                {{ plan_status.remaining }}회 남음
+                {{ plan_status.remaining }} 크레딧 남음
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 mt-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">💡 크레딧 사용 기준</h5>
+            <div class="row g-3 text-center">
+                <div class="col-md-3"><div class="border rounded-3 p-3">📢 광고<br><strong>2 크레딧</strong></div></div>
+                <div class="col-md-3"><div class="border rounded-3 p-3">📝 블로그<br><strong>2 크레딧</strong></div></div>
+                <div class="col-md-3"><div class="border rounded-3 p-3">📱 SNS<br><strong>2 크레딧</strong></div></div>
+                <div class="col-md-3"><div class="border rounded-3 p-3">🚀 패키지<br><strong>6 크레딧</strong></div></div>
             </div>
         </div>
     </div>

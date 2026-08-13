@@ -878,14 +878,17 @@ def package():
                 plan=plan
             )
 
-        plan_status = get_plan_status(session["user_id"])
+        plan_status = get_plan_status(
+            session["user_id"],
+            required_credits=6
+        )
         plan = plan_status["plan"]
 
         if not plan_status["can_generate"]:
             error = (
-                f"{plan_status['plan']} 요금제의 이번 달 패키지 생성 한도 "
-                f"{plan_status['limit']}회를 모두 사용했습니다. "
-                "PRO 업그레이드가 필요합니다."
+                f"{plan_status['plan']} 요금제의 AI 크레딧이 부족합니다. "
+                f"현재 {plan_status['remaining']}크레딧 남음 · "
+                "마케팅 패키지는 6크레딧이 필요합니다."
             )
 
             session["plan"] = plan_status["plan"]

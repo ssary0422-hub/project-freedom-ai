@@ -1,283 +1,67 @@
-<!DOCTYPE html>
-<html lang="ko">
+{% extends "generator_base.html" %}
+{% set active_tab = "blog" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% block title %}블로그 생성기 - Project Freedom AI{% endblock %}
+{% block generator_title %}📝 AI 블로그 생성기{% endblock %}
+{% block generator_subtitle %}업체 정보와 주제를 입력하면 블로그 글과 대표 이미지를 생성합니다.{% endblock %}
 
-    <title>블로그 생성기 - Project Freedom AI</title>
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-        rel="stylesheet">
-</head>
-
-
-<div
-    id="ai-loading-overlay"
-    style="
-        display:none;
-        position:fixed;
-        inset:0;
-        z-index:9999;
-        background:rgba(255,255,255,.88);
-        backdrop-filter:blur(3px);
-        align-items:center;
-        justify-content:center;
-    ">
-    <div class="text-center bg-white shadow rounded-4 p-5" style="min-width:320px;">
-        <div class="spinner-border text-primary mb-3" role="status"></div>
-        <h4 class="fw-bold mb-2">🤖 AI 생성 중...</h4>
-        <div class="text-muted">
-            글과 이미지를 만들고 있습니다.<br>
-            잠시만 기다려 주세요.
-        </div>
+{% block form %}
+<form method="POST">
+    <div class="mb-3">
+        <label class="form-label">업종</label>
+        <input type="text" class="form-control" name="business"
+               value="{{ business or '' }}" placeholder="예) 헬스장" required>
     </div>
+
+    <div class="mb-3">
+        <label class="form-label">업체명</label>
+        <input type="text" class="form-control" name="company"
+               value="{{ company or '' }}" placeholder="예) 런바디스튜디오" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">블로그 주제</label>
+        <input type="text" class="form-control" name="topic"
+               value="{{ topic or '' }}" placeholder="예) 초보자를 위한 러닝 자세" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">글의 분위기</label>
+        <input type="text" class="form-control" name="tone"
+               value="{{ tone or '' }}" placeholder="예) 친근하고 전문적으로" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">글의 길이</label>
+        <select class="form-select" name="length" required>
+            <option value="">길이를 선택하세요</option>
+            <option value="1000자" {% if length == "1000자" %}selected{% endif %}>짧게 — 약 1,000자</option>
+            <option value="2000자" {% if length == "2000자" %}selected{% endif %}>보통 — 약 2,000자</option>
+            <option value="3000자" {% if length == "3000자" %}selected{% endif %}>길게 — 약 3,000자</option>
+        </select>
+    </div>
+
+
+<div class="mb-3">
+    <label class="form-label">이미지 스타일</label>
+    <select name="image_style" class="form-select">
+        <option value="고급스러운 실사" {% if image_style == "고급스러운 실사" %}selected{% endif %}>고급스러운 실사</option>
+        <option value="감성적인 분위기" {% if image_style == "감성적인 분위기" %}selected{% endif %}>감성적인 분위기</option>
+        <option value="고양이 유머 콘셉트" {% if image_style == "고양이 유머 콘셉트" %}selected{% endif %}>🐱 고양이 유머 콘셉트</option>
+        <option value="강아지 유머 콘셉트" {% if image_style == "강아지 유머 콘셉트" %}selected{% endif %}>🐶 강아지 유머 콘셉트</option>
+        <option value="코끼리 유머 콘셉트" {% if image_style == "코끼리 유머 콘셉트" %}selected{% endif %}>🐘 코끼리 유머 콘셉트</option>
+        <option value="랜덤 동물 유머 콘셉트" {% if image_style == "랜덤 동물 유머 콘셉트" %}selected{% endif %}>🎲 랜덤 동물 유머 콘셉트</option>
+        <option value="미니멀하고 깔끔한 스타일" {% if image_style == "미니멀하고 깔끔한 스타일" %}selected{% endif %}>미니멀</option>
+        <option value="화려한 광고 비주얼" {% if image_style == "화려한 광고 비주얼" %}selected{% endif %}>화려한 광고</option>
+    </select>
 </div>
 
-<body class="bg-light">
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-
-        <a class="navbar-brand" href="/">
-            🤖 Project Freedom AI
-        </a>
-
-        <div>
-            <a class="btn btn-outline-light me-2" href="/">
-                📢 광고
-            </a>
-
-            <a class="btn btn-light me-2" href="/blog">
-                📝 블로그
-            </a>
-
-            <a class="btn btn-outline-light" href="/history">
-                📚 생성 기록
-            </a>
-        </div>
-
+    <div class="d-grid">
+        <button class="btn btn-primary btn-lg" type="submit">
+            ✨ 블로그 글 만들기
+        </button>
     </div>
-</nav>
+</form>
+{% endblock %}
 
-<div class="container pb-5">
-
-    <div class="text-center mb-4">
-        <h1>📝 AI 블로그 생성기</h1>
-
-        <p class="text-muted">
-            주제와 분위기를 입력하면 블로그 글을 작성합니다.
-        </p>
-    </div>
-
-    <div class="card shadow">
-        <div class="card-body">
-
-            <form method="POST">
-
-                <div class="mb-3">
-                    <label class="form-label">블로그 주제</label>
-
-                    <input
-                        type="text"
-                        class="form-control"
-                        name="topic"
-                        value="{{ topic }}"
-                        placeholder="예) 태국 마사지샵 방문 전 알아둘 점"
-                        required>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">글의 분위기</label>
-
-                    <input
-                        type="text"
-                        class="form-control"
-                        name="tone"
-                        value="{{ tone }}"
-                        placeholder="예) 친근하고 전문적으로"
-                        required>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">글의 길이</label>
-
-                    <select
-                        class="form-select"
-                        name="length"
-                        required>
-
-                        <option value="">길이를 선택하세요</option>
-
-                        <option value="1000자"
-                            {% if length == "1000자" %}selected{% endif %}>
-                            짧게 — 약 1,000자
-                        </option>
-
-                        <option value="2000자"
-                            {% if length == "2000자" %}selected{% endif %}>
-                            보통 — 약 2,000자
-                        </option>
-
-                        <option value="3000자"
-                            {% if length == "3000자" %}selected{% endif %}>
-                            길게 — 약 3,000자
-                        </option>
-
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">이미지 스타일</label>
-                    <select name="image_style" class="form-select">
-                        <option value="고급스러운 실사" {% if image_style == "고급스러운 실사" %}selected{% endif %}>
-                            고급스러운 실사
-                        </option>
-                        <option value="감성적인 분위기" {% if image_style == "감성적인 분위기" %}selected{% endif %}>
-                            감성적인 분위기
-                        </option>
-                        <option value="고양이 유머 콘셉트" {% if image_style == "고양이 유머 콘셉트" %}selected{% endif %}>
-                            🐱 고양이 유머 콘셉트
-                        </option>
-                        <option value="강아지 유머 콘셉트" {% if image_style == "강아지 유머 콘셉트" %}selected{% endif %}>
-                            🐶 강아지 유머 콘셉트
-                        </option>
-                        <option value="코끼리 유머 콘셉트" {% if image_style == "코끼리 유머 콘셉트" %}selected{% endif %}>
-                            🐘 코끼리 유머 콘셉트
-                        </option>
-                        <option value="랜덤 동물 유머 콘셉트" {% if image_style == "랜덤 동물 유머 콘셉트" %}selected{% endif %}>
-                            🎲 랜덤 동물 유머 콘셉트
-                        </option>
-                        <option value="미니멀하고 깔끔한 스타일" {% if image_style == "미니멀하고 깔끔한 스타일" %}selected{% endif %}>
-                            미니멀
-                        </option>
-                        <option value="화려한 광고 비주얼" {% if image_style == "화려한 광고 비주얼" %}selected{% endif %}>
-                            화려한 광고
-                        </option>
-                    </select>
-                </div>
-
-                <div class="d-grid">
-                    <button
-                        class="btn btn-primary btn-lg"
-                        type="submit">
-
-                        ✨ 블로그 글 만들기
-                    </button>
-                </div>
-
-            </form>
-
-        </div>
-    </div>
-
-    {% if result %}
-
-    <div class="card shadow mt-4">
-
-        <div class="card-header">
-            🤖 AI 블로그 결과
-        </div>
-
-    {% if image_url %}
-
-    <div class="mt-4">
-
-        <h5 class="mb-3">
-            🎨 AI 대표 이미지
-        </h5>
-
-        <img
-            src="{{ image_url }}"
-            class="img-fluid rounded shadow"
-            style="max-width: 700px;"
-            alt="블로그 대표 이미지">
-
-    </div>
-
-    {% endif %}
-
-        <div class="card-body">
-
-            <pre
-                id="result"
-                class="bg-light p-3 rounded"
-                style="white-space: pre-wrap; min-height: 300px;">{{ result }}</pre>
-
-            <button
-                type="button"
-                class="btn btn-primary"
-                onclick="copyResult()">
-
-                📋 결과 복사하기
-            </button>
-            
-            <a
-                href="/blog/download/word"
-                class="btn btn-success me-2">
-
-                📄 Word 다운로드
-            </a>
-            
-            <a
-                href="/blog/download/pdf"
-                class="btn btn-danger me-2">
-
-                📕 PDF 다운로드
-            </a>
-
-        </div>
-    </div>
-
-    {% endif %}
-
-</div>
-
-<script>
-    async function copyResult() {
-        const resultElement = document.getElementById("result");
-
-        if (!resultElement) {
-            alert("복사할 결과가 없습니다.");
-            return;
-        }
-
-        try {
-            await navigator.clipboard.writeText(
-                resultElement.innerText
-            );
-
-            alert("📋 복사되었습니다!");
-        } catch (error) {
-            alert("복사에 실패했습니다.");
-            console.error(error);
-        }
-    }
-</script>
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const form = document.querySelector("form[method='POST']");
-    const overlay = document.getElementById("ai-loading-overlay");
-
-    if (!form || !overlay) {
-        return;
-    }
-
-    form.addEventListener("submit", function () {
-        overlay.style.display = "flex";
-
-        const submitButton = form.querySelector("button[type='submit']");
-        if (submitButton) {
-            submitButton.disabled = true;
-            submitButton.dataset.originalText = submitButton.innerHTML;
-            submitButton.innerHTML = "🤖 AI 생성 중...";
-        }
-    });
-});
-</script>
-
-</body>
-</html>
+{% block result_title %}🤖 AI 블로그 결과{% endblock %}
