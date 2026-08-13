@@ -12,7 +12,7 @@
             data-bs-target="#pfMainNav"
             aria-controls="pfMainNav"
             aria-expanded="false"
-            aria-label="메뉴 열기">
+            aria-label="{{ t('nav.open_menu') }}">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -22,39 +22,62 @@
                 <a
                     class="btn pf-nav-btn {% if request.path == '/' or request.path.startswith('/blog') or request.path.startswith('/sns') %}pf-nav-active{% endif %}"
                     href="/">
-                    🏠 홈
+                    🏠 {{ t("nav.home") }}
                 </a>
+
+                <div class="dropdown">
+                    <button
+                        class="btn pf-nav-btn dropdown-toggle"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        🌐 {{ supported_languages[current_language]["flag"] }}
+                        {{ supported_languages[current_language]["label"] }}
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        {% for code, language in supported_languages.items() %}
+                        <li>
+                            <a
+                                class="dropdown-item {% if code == current_language %}active{% endif %}"
+                                href="/language/{{ code }}?next={{ request.full_path|urlencode }}">
+                                {{ language["flag"] }} {{ language["label"] }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
 
                 {% if session.get("user_id") %}
                 <a
                     class="btn pf-nav-btn {% if request.path.startswith('/dashboard') %}pf-nav-active{% endif %}"
                     href="/dashboard">
-                    📊 대시보드
+                    📊 {{ t("nav.dashboard") }}
                 </a>
 
                 <a
                     class="btn pf-nav-btn {% if request.path.startswith('/package') %}pf-nav-active{% endif %}"
                     href="/package">
-                    🚀 패키지
+                    🚀 {{ t("nav.package") }}
                 </a>
 
                 <a
                     class="btn pf-nav-btn {% if request.path.startswith('/profiles') %}pf-nav-active{% endif %}"
                     href="/profiles">
-                    🏢 브랜드
+                    🏢 {{ t("nav.brand") }}
                 </a>
 
                 <a
                     class="btn pf-nav-btn {% if request.path.startswith('/history') %}pf-nav-active{% endif %}"
                     href="/history">
-                    📚 기록
+                    📚 {{ t("nav.history") }}
                 </a>
 
                 <a
                     class="btn pf-credit-pill {% if request.path.startswith('/credits') %}pf-credit-active{% endif %}"
                     href="/credits"
-                    title="크레딧 충전 및 내역">
-                    💳 {{ session.get("plan_remaining", 0) }} 크레딧
+                    title="{{ t('nav.credit_title') }}">
+                    💳 {{ session.get("plan_remaining", 0) }} {{ t("nav.credits") }}
                 </a>
 
                 {% if session.get("is_admin") %}
@@ -66,11 +89,11 @@
                 {% endif %}
 
                 <div class="pf-user-chip">
-                    👤 {{ session.get("user_name") }}님
+                    👤 {{ session.get("user_name") }}{{ t("nav.user_suffix") }}
                 </div>
 
                 <a class="btn btn-warning fw-semibold" href="/logout">
-                    로그아웃
+                    {{ t("nav.logout") }}
                 </a>
 
                 {% else %}
@@ -78,13 +101,13 @@
                 <a
                     class="btn pf-nav-btn {% if request.path.startswith('/login') %}pf-nav-active{% endif %}"
                     href="/login">
-                    🔐 로그인
+                    🔐 {{ t("nav.login") }}
                 </a>
 
                 <a
                     class="btn btn-info fw-semibold {% if request.path.startswith('/register') %}shadow-sm{% endif %}"
                     href="/register">
-                    ✨ 회원가입
+                    ✨ {{ t("nav.register") }}
                 </a>
 
                 {% endif %}

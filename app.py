@@ -10,6 +10,8 @@ from routes.package import package_bp
 from routes.profiles import profiles_bp
 from routes.auth import auth_bp, login_required
 from routes.plan import plan_bp
+
+from i18n.translations import SUPPORTED_LANGUAGES, translate
 from routes.admin import admin_bp
 from routes.credits import credits_bp
 from database.users import init_users_table
@@ -58,6 +60,49 @@ app.register_blueprint(package_bp)
 app.register_blueprint(profiles_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(plan_bp)
+
+
+# -------------------------
+# 다국어 UI V1
+# -------------------------
+
+@app.context_processor
+def inject_i18n():
+    language = session.get("language", "ko")
+
+    if language not in SUPPORTED_LANGUAGES:
+        language = "ko"
+
+    return {
+        "current_language": language,
+        "supported_languages": SUPPORTED_LANGUAGES,
+        "t": lambda key: translate(key, language),
+    }
+
+
+@app.route("/language/<language_code>")
+def set_language(language_code):
+    if language_code in SUPPORTED_LANGUAGES:
+        session["language"] = language_code
+
+    next_url = request.args.get("next", "").strip()
+
+    # 외부 URL 오픈 리다이렉트 방지: 내부 경로만 허용
+    if not next_url.startswith("/") or next_url.startswith("//"):
+        next_url = request.referrer or "/"
+
+        # referrer가 외부 주소일 수 있으므로 최종적으로 안전하게 홈 사용
+        if next_url.startswith("http://") or next_url.startswith("https://"):
+            from urllib.parse import urlparse
+            parsed = urlparse(next_url)
+            next_url = parsed.path or "/"
+            if parsed.query:
+                next_url += "?" + parsed.query
+
+    return redirect(next_url)
+
+
+
 app.register_blueprint(admin_bp)
 app.register_blueprint(credits_bp)
 

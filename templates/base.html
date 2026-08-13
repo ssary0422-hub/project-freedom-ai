@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{{ current_language or 'ko' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -227,7 +227,7 @@
     </main>
 
     <footer class="pf-footer">
-        Project Freedom AI · AI Marketing Workspace
+        Project Freedom AI · {{ t("footer.workspace") }}
     </footer>
 
     <script
