@@ -12,6 +12,29 @@
         rel="stylesheet">
 </head>
 
+
+<div
+    id="ai-loading-overlay"
+    style="
+        display:none;
+        position:fixed;
+        inset:0;
+        z-index:9999;
+        background:rgba(255,255,255,.88);
+        backdrop-filter:blur(3px);
+        align-items:center;
+        justify-content:center;
+    ">
+    <div class="text-center bg-white shadow rounded-4 p-5" style="min-width:320px;">
+        <div class="spinner-border text-primary mb-3" role="status"></div>
+        <h4 class="fw-bold mb-2">🤖 AI 생성 중...</h4>
+        <div class="text-muted">
+            글과 이미지를 만들고 있습니다.<br>
+            잠시만 기다려 주세요.
+        </div>
+    </div>
+</div>
+
 <body class="bg-light">
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
@@ -74,8 +97,8 @@
     </div>
 
     {% if error %}
-    <div class="alert alert-warning shadow-sm mb-4" role="alert">
-        <strong>⚠️ AI 생성 일시 중지</strong><br>
+    <div class="alert alert-warning shadow-sm mb-4">
+        <strong>⚠️ 안내</strong><br>
         {{ error }}
     </div>
     {% endif %}
@@ -123,7 +146,7 @@
 
             </div>
 
-            <form method="POST" id="aiGenerateForm">
+            <form method="POST">
 
                 <div class="mb-3">
                     <label class="form-label">업종</label>
@@ -161,25 +184,42 @@
                         required>
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label">이미지 스타일</label>
+                    <select name="image_style" class="form-select">
+                        <option value="고급스러운 실사" {% if image_style == "고급스러운 실사" %}selected{% endif %}>
+                            고급스러운 실사
+                        </option>
+                        <option value="감성적인 분위기" {% if image_style == "감성적인 분위기" %}selected{% endif %}>
+                            감성적인 분위기
+                        </option>
+                        <option value="고양이 유머 콘셉트" {% if image_style == "고양이 유머 콘셉트" %}selected{% endif %}>
+                            🐱 고양이 유머 콘셉트
+                        </option>
+                        <option value="강아지 유머 콘셉트" {% if image_style == "강아지 유머 콘셉트" %}selected{% endif %}>
+                            🐶 강아지 유머 콘셉트
+                        </option>
+                        <option value="코끼리 유머 콘셉트" {% if image_style == "코끼리 유머 콘셉트" %}selected{% endif %}>
+                            🐘 코끼리 유머 콘셉트
+                        </option>
+                        <option value="랜덤 동물 유머 콘셉트" {% if image_style == "랜덤 동물 유머 콘셉트" %}selected{% endif %}>
+                            🎲 랜덤 동물 유머 콘셉트
+                        </option>
+                        <option value="미니멀하고 깔끔한 스타일" {% if image_style == "미니멀하고 깔끔한 스타일" %}selected{% endif %}>
+                            미니멀
+                        </option>
+                        <option value="화려한 광고 비주얼" {% if image_style == "화려한 광고 비주얼" %}selected{% endif %}>
+                            화려한 광고
+                        </option>
+                    </select>
+                </div>
+
                 <div class="d-grid">
                     <button
                         class="btn btn-primary btn-lg"
-                        type="submit"
-                        id="aiGenerateButton">
+                        type="submit">
                         🚀 광고 만들기
                     </button>
-                </div>
-
-                <div id="aiLoading"
-                     class="alert alert-info mt-3 text-center d-none"
-                     role="status">
-                    <div class="spinner-border spinner-border-sm me-2"
-                         aria-hidden="true"></div>
-                    <strong>AI 생성 중...</strong>
-                    <div class="small mt-2">
-                        광고 문구와 이미지를 생성하고 있습니다.<br>
-                        이미지 생성에는 잠시 시간이 걸릴 수 있습니다.
-                    </div>
                 </div>
 
             </form>
@@ -196,6 +236,17 @@
         </div>
 
         <div class="card-body">
+
+            {% if image_url %}
+            <div class="mb-4 text-center">
+                <h5 class="mb-3">🎨 AI 광고 이미지</h5>
+                <img
+                    src="{{ image_url }}"
+                    class="img-fluid rounded shadow"
+                    style="max-width: 700px;"
+                    alt="AI 광고 이미지">
+            </div>
+            {% endif %}
 
             <pre
                 id="result"
@@ -229,24 +280,6 @@
 </div>
 
 <script>
-    const aiGenerateForm = document.getElementById("aiGenerateForm");
-    const aiGenerateButton = document.getElementById("aiGenerateButton");
-    const aiLoading = document.getElementById("aiLoading");
-
-    if (aiGenerateForm) {
-        aiGenerateForm.addEventListener("submit", function () {
-            if (aiGenerateButton) {
-                aiGenerateButton.disabled = true;
-                aiGenerateButton.innerHTML =
-                    '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>AI 생성 중...';
-            }
-
-            if (aiLoading) {
-                aiLoading.classList.remove("d-none");
-            }
-        });
-    }
-
     async function copyResult() {
         const resultElement = document.getElementById("result");
 
@@ -266,6 +299,29 @@
             console.error(error);
         }
     }
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector("form[method='POST']");
+    const overlay = document.getElementById("ai-loading-overlay");
+
+    if (!form || !overlay) {
+        return;
+    }
+
+    form.addEventListener("submit", function () {
+        overlay.style.display = "flex";
+
+        const submitButton = form.querySelector("button[type='submit']");
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.dataset.originalText = submitButton.innerHTML;
+            submitButton.innerHTML = "🤖 AI 생성 중...";
+        }
+    });
+});
 </script>
 
 </body>

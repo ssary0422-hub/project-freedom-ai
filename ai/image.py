@@ -55,6 +55,11 @@ def make_image(prompt: str) -> str:
     if not prompt.strip():
         raise ValueError("이미지 설명을 입력해 주세요.")
 
+    if not os.getenv("OPENAI_API_KEY"):
+        raise RuntimeError(
+            "OPENAI_API_KEY 환경변수가 설정되지 않았습니다."
+        )
+
     # Render Free에서는 base64 데이터 자체를 작게 받아
     # 메모리 피크를 줄이는 것이 가장 중요합니다.
     if _is_render():

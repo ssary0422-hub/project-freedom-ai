@@ -17,6 +17,7 @@ from database.users import (
 )
 
 from routes.auth import login_required
+from services.openai_costs import get_openai_cost_status
 
 
 admin_bp = Blueprint(
@@ -43,10 +44,23 @@ def admin_required(view_function):
 @admin_bp.route("/admin")
 @admin_required
 def admin():
+    openai_cost = get_openai_cost_status()
+    auto_stopped = False
+
+    if (
+        openai_cost["connected"]
+        and openai_cost.get("budget_exceeded")
+        and get_ai_enabled()
+    ):
+        set_ai_enabled(False)
+        auto_stopped = True
+
     return render_template(
         "admin.html",
         stats=get_admin_stats(),
-        users=get_admin_users()
+        users=get_admin_users(),
+        openai_cost=openai_cost,
+        auto_stopped=auto_stopped
     )
 
 
@@ -61,9 +75,23 @@ def toggle_ai(state):
         == "on"
     )
 
-    set_ai_enabled(
-        enabled
-    )
+    if enabled:
+        openai_cost = get_openai_cost_status()
+
+        if (
+            openai_cost["connected"]
+            and openai_cost.get("budget_exceeded")
+        ):
+            return render_template(
+                "admin.html",
+                stats=get_admin_stats(),
+                users=get_admin_users(),
+                openai_cost=openai_cost,
+                auto_stopped=False,
+                ai_start_blocked=True
+            ), 409
+
+    set_ai_enabled(enabled)
 
     return redirect(
         url_for("admin.admin")

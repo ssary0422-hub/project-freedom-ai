@@ -163,9 +163,164 @@
             </div>
 
             <div class="alert alert-light border mt-3 mb-0">
-                다음 단계에서 패키지·광고·블로그·SNS 생성 라우트와 연결하면
-                OFF 상태에서 API 호출 전에 차단됩니다.
+                광고 · 블로그 · SNS · 마케팅 패키지 생성은
+                이 스위치와 연결되어 있습니다.<br>
+                <strong>비용 보호:</strong>
+                월 예산 100% 도달 시 AI가 자동 중지되며,
+                예산 초과 상태에서는 수동으로 다시 켤 수 없습니다.
             </div>
+
+        </div>
+    </div>
+
+
+    <div class="card admin-card shadow-sm mb-4">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        💳 OpenAI API 비용
+                    </h4>
+
+                    <div class="text-muted">
+                        이번 달 실제 Costs API 기준 · {{ openai_cost.scope_label }}
+                    </div>
+                </div>
+
+                {% if openai_cost.connected %}
+                    {% if openai_cost.status == "danger" %}
+                    <span class="badge text-bg-danger px-3 py-2">
+                        🔴 예산 초과 · AI 자동 중지
+                    </span>
+                    {% elif openai_cost.status == "critical" %}
+                    <span class="badge text-bg-danger px-3 py-2">
+                        🟠 비용 위험
+                    </span>
+                    {% elif openai_cost.status == "warning" %}
+                    <span class="badge text-bg-warning px-3 py-2">
+                        🟡 비용 주의
+                    </span>
+                    {% else %}
+                    <span class="badge text-bg-success px-3 py-2">
+                        🟢 비용 정상
+                    </span>
+                    {% endif %}
+                {% else %}
+                <span class="badge text-bg-secondary px-3 py-2">
+                    연결 필요
+                </span>
+                {% endif %}
+            </div>
+
+            {% if openai_cost.connected %}
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="border rounded-4 p-3 h-100">
+                        <div class="text-muted small">
+                            이번 달 실제 비용
+                        </div>
+                        <div class="stat-number">
+                            ${{ "%.2f"|format(openai_cost.spent) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="border rounded-4 p-3 h-100">
+                        <div class="text-muted small">
+                            월 운영 예산
+                        </div>
+                        <div class="stat-number">
+                            ${{ "%.2f"|format(openai_cost.budget) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="border rounded-4 p-3 h-100">
+                        <div class="text-muted small">
+                            예상 잔여 예산
+                        </div>
+                        <div class="stat-number">
+                            ${{ "%.2f"|format(openai_cost.remaining) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <div class="d-flex justify-content-between mb-2">
+                    <strong>예산 사용률</strong>
+                    <strong>{{ "%.1f"|format(openai_cost.percent) }}%</strong>
+                </div>
+
+                <div class="progress" style="height: 14px;">
+                    <div
+                        class="progress-bar
+                        {% if openai_cost.status == 'danger' %}
+                        bg-danger
+                        {% elif openai_cost.status == 'critical' %}
+                        bg-danger
+                        {% elif openai_cost.status == 'warning' %}
+                        bg-warning
+                        {% else %}
+                        bg-success
+                        {% endif %}"
+                        role="progressbar"
+                        style="width: {{ openai_cost.percent }}%;"
+                        aria-valuenow="{{ openai_cost.percent }}"
+                        aria-valuemin="0"
+                        aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-muted small mt-3">
+                최근 조회: {{ openai_cost.updated_at }}
+                · 60초 캐시
+            </div>
+
+            {% if auto_stopped %}
+            <div class="alert alert-danger mt-3 mb-0">
+                <strong>🛑 AI가 자동으로 중지되었습니다.</strong><br>
+                이번 달 OpenAI API 비용이 월 예산의 100%에 도달했습니다.
+                비용 또는 예산을 확인한 뒤 관리자가 직접 AI를 다시 시작해 주세요.
+            </div>
+            {% elif ai_start_blocked|default(false) %}
+            <div class="alert alert-danger mt-3 mb-0">
+                <strong>🔒 AI 시작이 차단되었습니다.</strong><br>
+                현재 API 비용이 월 예산의 100% 이상이라 AI 생성을 다시 켤 수 없습니다.
+            </div>
+            {% elif openai_cost.status == "critical" %}
+            <div class="alert alert-danger mt-3 mb-0">
+                <strong>🟠 비용 위험</strong><br>
+                월 예산의 90% 이상을 사용했습니다.
+            </div>
+            {% elif openai_cost.status == "warning" %}
+            <div class="alert alert-warning mt-3 mb-0">
+                <strong>🟡 비용 주의</strong><br>
+                월 예산의 80% 이상을 사용했습니다.
+            </div>
+            {% endif %}
+
+            {% if not openai_cost.project_filtered %}
+            <div class="alert alert-info mt-3 mb-0">
+                현재는 <strong>조직 전체 비용</strong>을 표시하고 있습니다.
+                프로젝트 프리덤만 보려면
+                <code>OPENAI_PROJECT_ID</code> 환경변수를 설정하세요.
+            </div>
+            {% endif %}
+
+            {% else %}
+
+            <div class="alert alert-warning mb-0">
+                <strong>OpenAI 비용 데이터를 불러오지 못했습니다.</strong><br>
+                {{ openai_cost.error }}
+            </div>
+
+            {% endif %}
 
         </div>
     </div>
