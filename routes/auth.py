@@ -1,3 +1,4 @@
+import hashlib
 from functools import wraps
 
 from flask import (
@@ -15,6 +16,9 @@ from database.users import (
     get_user_by_email,
     get_plan_status,
     is_user_admin,
+    has_claimed_free_trial_by_ip,
+    has_claimed_free_trial_by_device,
+    record_free_trial_claim,
 )
 
 
@@ -40,6 +44,78 @@ def login_required(view_function):
     return wrapped_view
 
 
+
+
+def _hash_trial_value(value):
+    value = (value or "").strip()
+    if not value:
+        return ""
+
+    return hashlib.sha256(
+        value.encode("utf-8")
+    ).hexdigest()
+
+
+def _client_ip():
+    forwarded = request.headers.get(
+        "X-Forwarded-For",
+        ""
+    )
+
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+
+    return request.remote_addr or ""
+
+
+def _device_fingerprint_source():
+    return "|".join([
+        request.headers.get("User-Agent", ""),
+        request.headers.get("Accept-Language", ""),
+        request.headers.get("Sec-CH-UA-Platform", ""),
+        request.headers.get("Sec-CH-UA-Mobile", ""),
+    ])
+
+
+def _trial_decision():
+    ip_hash = _hash_trial_value(
+        _client_ip()
+    )
+
+    device_hash = _hash_trial_value(
+        _device_fingerprint_source()
+    )
+
+    ip_claimed = has_claimed_free_trial_by_ip(
+        ip_hash
+    )
+
+    device_claimed = has_claimed_free_trial_by_device(
+        device_hash
+    )
+
+    if device_claimed:
+        return (
+            False,
+            "duplicate_device",
+            ip_hash,
+            device_hash,
+        )
+
+    if ip_claimed:
+        return (
+            False,
+            "duplicate_ip",
+            ip_hash,
+            device_hash,
+        )
+
+    return (
+        True,
+        "first_trial",
+        ip_hash,
+        device_hash,
+    )
 
 @auth_bp.route(
     "/register",
@@ -100,15 +176,33 @@ def register():
             error = "이미 가입된 이메일입니다."
 
         else:
+            (
+                trial_eligible,
+                trial_reason,
+                ip_hash,
+                device_hash,
+            ) = _trial_decision()
+
             user_id = create_user(
                 email,
                 username,
-                password
+                password,
+                trial_eligible=trial_eligible,
+                trial_reason=trial_reason,
             )
 
             if user_id is None:
                 error = "회원가입 처리 중 오류가 발생했습니다."
             else:
+                record_free_trial_claim(
+                    user_id=user_id,
+                    email=email,
+                    ip_hash=ip_hash,
+                    device_hash=device_hash,
+                    granted=trial_eligible,
+                    reason=trial_reason,
+                )
+
                 return redirect(
                     url_for(
                         "auth.login",

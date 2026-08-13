@@ -46,6 +46,17 @@ def init_users_table():
             "ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0"
         )
 
+
+    if "trial_eligible" not in columns:
+        cursor.execute(
+            "ALTER TABLE users ADD COLUMN trial_eligible INTEGER NOT NULL DEFAULT 0"
+        )
+
+    if "trial_reason" not in columns:
+        cursor.execute(
+            "ALTER TABLE users ADD COLUMN trial_reason TEXT NOT NULL DEFAULT ''"
+        )
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS package_usage (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,6 +82,50 @@ def init_users_table():
         )
     """)
 
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ai_credit_wallet (
+            user_id INTEGER PRIMARY KEY,
+            balance INTEGER NOT NULL DEFAULT 0,
+            updated_at TEXT NOT NULL
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ai_credit_transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            amount INTEGER NOT NULL,
+            kind TEXT NOT NULL,
+            note TEXT,
+            created_at TEXT NOT NULL
+        )
+    """)
+
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS free_trial_claims (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            email TEXT NOT NULL,
+            ip_hash TEXT,
+            device_hash TEXT,
+            granted INTEGER NOT NULL DEFAULT 0,
+            reason TEXT NOT NULL DEFAULT '',
+            claimed_at TEXT NOT NULL
+        )
+    """)
+
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_free_trial_ip_hash
+        ON free_trial_claims (ip_hash)
+    """)
+
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_free_trial_device_hash
+        ON free_trial_claims (device_hash)
+    """)
+
     cursor.execute("""
         INSERT OR IGNORE INTO system_settings (
             setting_key,
@@ -83,7 +138,7 @@ def init_users_table():
     conn.close()
 
 
-def create_user(email, username, password):
+def create_user(email, username, password, trial_eligible=False, trial_reason=''):
     init_users_table()
 
     email = (email or "").strip().lower()
@@ -106,14 +161,18 @@ def create_user(email, username, password):
                 email,
                 username,
                 password_hash,
-                created_at
+                created_at,
+                trial_eligible,
+                trial_reason
             )
-            VALUES (?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
         """, (
             email,
             username,
             password_hash,
             created_at,
+            1 if trial_eligible else 0,
+            str(trial_reason or ""),
         ))
 
         user_id = cursor.lastrowid
@@ -144,7 +203,9 @@ def get_user_by_email(email):
             password_hash,
             created_at,
             plan,
-            is_admin
+            is_admin,
+            trial_eligible,
+            trial_reason
         FROM users
         WHERE email = ?
     """, (
@@ -170,7 +231,9 @@ def get_user_by_id(user_id):
             username,
             created_at,
             plan,
-            is_admin
+            is_admin,
+            trial_eligible,
+            trial_reason
         FROM users
         WHERE id = ?
     """, (
@@ -200,8 +263,108 @@ def verify_user(email, password):
     return user
 
 
+
+def has_claimed_free_trial_by_ip(ip_hash):
+    init_users_table()
+
+    if not ip_hash:
+        return False
+
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT 1
+        FROM free_trial_claims
+        WHERE ip_hash = ? AND granted = 1
+        LIMIT 1
+        """,
+        (ip_hash,)
+    )
+    row = cursor.fetchone()
+    conn.close()
+    return row is not None
+
+
+def has_claimed_free_trial_by_device(device_hash):
+    init_users_table()
+
+    if not device_hash:
+        return False
+
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT 1
+        FROM free_trial_claims
+        WHERE device_hash = ? AND granted = 1
+        LIMIT 1
+        """,
+        (device_hash,)
+    )
+    row = cursor.fetchone()
+    conn.close()
+    return row is not None
+
+
+def record_free_trial_claim(
+    user_id,
+    email,
+    ip_hash="",
+    device_hash="",
+    granted=False,
+    reason=""
+):
+    init_users_table()
+
+    conn = _connect()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        INSERT INTO free_trial_claims (
+            user_id,
+            email,
+            ip_hash,
+            device_hash,
+            granted,
+            reason,
+            claimed_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            user_id,
+            (email or "").strip().lower(),
+            ip_hash or "",
+            device_hash or "",
+            1 if granted else 0,
+            str(reason or ""),
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def get_free_trial_status(user_id):
+    user = get_user_by_id(user_id)
+
+    if not user:
+        return {
+            "eligible": False,
+            "reason": "user_not_found",
+        }
+
+    return {
+        "eligible": bool(user["trial_eligible"]),
+        "reason": user["trial_reason"] or "",
+    }
+
 CREDIT_LIMITS = {"FREE": 6, "PRO": 100}
-CREDIT_COSTS = {"ADS": 2, "BLOG": 2, "SNS": 2, "PACKAGE": 6}
+CREDIT_COSTS = {"ADS_TEXT": 1, "ADS_IMAGE": 3, "BLOG_TEXT": 1, "BLOG_IMAGE": 3, "SNS_TEXT": 1, "SNS_IMAGE": 3, "PACKAGE_TEXT": 3, "PACKAGE_IMAGE": 7}
 
 
 def get_monthly_package_usage(user_id):
@@ -233,49 +396,208 @@ def get_monthly_credit_usage(user_id):
     return used
 
 
+
+def get_bonus_credit_balance(user_id):
+    """구매/관리자 지급 등 월이 바뀌어도 유지되는 추가 크레딧."""
+    init_users_table()
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT balance FROM ai_credit_wallet WHERE user_id = ?",
+        (user_id,)
+    )
+    row = cursor.fetchone()
+    conn.close()
+    return int(row["balance"] if row else 0)
+
+
+def add_bonus_credits(user_id, amount, kind="ADMIN_GRANT", note=""):
+    """추가 크레딧을 지급합니다. 실제 결제 성공 후에도 이 함수를 호출하면 됩니다."""
+    init_users_table()
+    amount = int(amount)
+
+    if amount <= 0:
+        raise ValueError("지급 크레딧은 1 이상이어야 합니다.")
+
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute("BEGIN IMMEDIATE")
+
+    cursor.execute(
+        """
+        INSERT INTO ai_credit_wallet (user_id, balance, updated_at)
+        VALUES (?, ?, ?)
+        ON CONFLICT(user_id)
+        DO UPDATE SET
+            balance = ai_credit_wallet.balance + excluded.balance,
+            updated_at = excluded.updated_at
+        """,
+        (user_id, amount, now)
+    )
+
+    cursor.execute(
+        """
+        INSERT INTO ai_credit_transactions (
+            user_id, amount, kind, note, created_at
+        )
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (user_id, amount, str(kind), str(note or ""), now)
+    )
+
+    conn.commit()
+    conn.close()
+    return get_bonus_credit_balance(user_id)
+
+
+def get_credit_transactions(user_id, limit=30):
+    init_users_table()
+    conn = _connect()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT id, amount, kind, note, created_at
+        FROM ai_credit_transactions
+        WHERE user_id = ?
+        ORDER BY id DESC
+        LIMIT ?
+        """,
+        (user_id, int(limit))
+    )
+
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
 def get_plan_status(user_id, required_credits=1):
     user = get_user_by_id(user_id)
     plan = (user["plan"] if user and user["plan"] else "FREE").upper()
+
     if plan not in CREDIT_LIMITS:
         plan = "FREE"
+
     used = get_monthly_credit_usage(user_id)
-    limit = CREDIT_LIMITS[plan]
-    remaining = max(0, limit - used)
+
+    if plan == "FREE":
+        trial_status = get_free_trial_status(user_id)
+        limit = CREDIT_LIMITS[plan] if trial_status["eligible"] else 0
+    else:
+        limit = CREDIT_LIMITS[plan]
+
+    base_remaining = max(0, limit - used)
+    bonus_balance = get_bonus_credit_balance(user_id)
+    remaining = base_remaining + bonus_balance
     required = max(0, int(required_credits or 0))
+
     return {
         "plan": plan,
         "used": used,
         "limit": limit,
+        "base_remaining": base_remaining,
+        "bonus_balance": bonus_balance,
         "remaining": remaining,
         "can_generate": remaining >= required,
-        "percent": min(100, int((used / limit) * 100)) if limit else 0,
+        "percent": min(100, int((min(used, limit) / limit) * 100)) if limit else 0,
         "required": required,
     }
 
-
 def record_ai_credit_usage(user_id, usage_type, credits=None):
+    """
+    월 기본 크레딧을 먼저 사용하고, 부족한 부분만 충전 크레딧에서 차감합니다.
+    """
     init_users_table()
     usage_type = (usage_type or "OTHER").strip().upper()
+
     if credits is None:
         credits = CREDIT_COSTS.get(usage_type, 1)
+
     credits = int(credits)
+
     if credits <= 0:
         return
+
+    user = get_user_by_id(user_id)
+    plan = (user["plan"] if user and user["plan"] else "FREE").upper()
+
+    if plan not in CREDIT_LIMITS:
+        plan = "FREE"
+
+    limit = CREDIT_LIMITS[plan]
+    month_key = datetime.now().strftime("%Y-%m")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     conn = _connect()
     cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO ai_credit_usage (user_id, usage_type, credits, used_at)
+    cursor.execute("BEGIN IMMEDIATE")
+
+    cursor.execute(
+        """
+        SELECT COALESCE(SUM(credits), 0)
+        FROM ai_credit_usage
+        WHERE user_id = ?
+          AND substr(used_at, 1, 7) = ?
+        """,
+        (user_id, month_key)
+    )
+    used_before = int(cursor.fetchone()[0] or 0)
+    base_available = max(0, limit - used_before)
+    bonus_needed = max(0, credits - base_available)
+
+    cursor.execute(
+        "SELECT balance FROM ai_credit_wallet WHERE user_id = ?",
+        (user_id,)
+    )
+    wallet_row = cursor.fetchone()
+    wallet_balance = int(wallet_row["balance"] if wallet_row else 0)
+
+    if bonus_needed > wallet_balance:
+        conn.rollback()
+        conn.close()
+        raise ValueError("AI 크레딧이 부족합니다.")
+
+    cursor.execute(
+        """
+        INSERT INTO ai_credit_usage (
+            user_id, usage_type, credits, used_at
+        )
         VALUES (?, ?, ?, ?)
-    """, (
-        user_id, usage_type, credits,
-        datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    ))
+        """,
+        (user_id, usage_type, credits, now)
+    )
+
+    if bonus_needed > 0:
+        cursor.execute(
+            """
+            UPDATE ai_credit_wallet
+            SET balance = balance - ?,
+                updated_at = ?
+            WHERE user_id = ?
+            """,
+            (bonus_needed, now, user_id)
+        )
+
+        cursor.execute(
+            """
+            INSERT INTO ai_credit_transactions (
+                user_id, amount, kind, note, created_at
+            )
+            VALUES (?, ?, 'USAGE', ?, ?)
+            """,
+            (
+                user_id,
+                -bonus_needed,
+                f"{usage_type} 생성에 충전 크레딧 사용",
+                now,
+            )
+        )
+
     conn.commit()
     conn.close()
 
-
-
-def record_package_usage(user_id):
+def record_package_usage(user_id, credits=7):
+    """패키지 통계 + 실제 크레딧 차감."""
     init_users_table()
     conn = _connect()
     cursor = conn.cursor()
@@ -285,7 +607,7 @@ def record_package_usage(user_id):
     )
     conn.commit()
     conn.close()
-    record_ai_credit_usage(user_id, "PACKAGE", CREDIT_COSTS["PACKAGE"])
+    record_ai_credit_usage(user_id, "PACKAGE", int(credits))
 
 
 def set_user_plan(user_id, plan):

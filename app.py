@@ -11,6 +11,7 @@ from routes.profiles import profiles_bp
 from routes.auth import auth_bp, login_required
 from routes.plan import plan_bp
 from routes.admin import admin_bp
+from routes.credits import credits_bp
 from database.users import init_users_table
 
 from flask import (
@@ -58,6 +59,7 @@ app.register_blueprint(profiles_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(plan_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(credits_bp)
 
 DB_PATH = "project.db"
 WORD_PATH = "downloads/advertisement.docx"

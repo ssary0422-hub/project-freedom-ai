@@ -1,20 +1,9 @@
-<!DOCTYPE html>
-<html lang="ko">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1">
+{% block title %}생성 기록 - Project Freedom AI{% endblock %}
 
-    <title>생성 기록 - Project Freedom AI</title>
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-        rel="stylesheet">
-
-    <style>
-        .history-image {
+{% block extra_style %}
+.history-image {
             width: 100%;
             max-height: 420px;
             object-fit: cover;
@@ -36,45 +25,9 @@
         .history-meta {
             font-size: 0.95rem;
         }
-    </style>
-</head>
+{% endblock %}
 
-<body class="bg-light">
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-
-        <a
-            class="navbar-brand"
-            href="/">
-            🤖 Project Freedom AI
-        </a>
-
-        <div class="d-flex gap-2 flex-wrap">
-
-            <a
-                class="btn btn-light"
-                href="/">
-                🏠 홈
-            </a>
-
-            <a
-                class="btn btn-outline-light"
-                href="/package">
-                🚀 마케팅 패키지
-            </a>
-
-            <a
-                class="btn btn-outline-light"
-                href="/profiles">
-                🏢 브랜드 프로필
-            </a>
-
-        </div>
-
-    </div>
-</nav>
-
+{% block content %}
 <div class="container pb-5">
 
     <div class="text-center mb-5">
@@ -236,6 +189,4 @@
     {% endif %}
 
 </div>
-
-</body>
-</html>
+{% endblock %}

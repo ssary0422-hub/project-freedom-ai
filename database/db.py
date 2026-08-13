@@ -26,6 +26,33 @@ def init_db():
         )
     """)
 
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            order_id TEXT NOT NULL UNIQUE,
+            payment_key TEXT,
+            product_code TEXT NOT NULL,
+            amount INTEGER NOT NULL,
+            credits INTEGER NOT NULL,
+            status TEXT NOT NULL,
+            provider TEXT NOT NULL DEFAULT 'TEST',
+            created_at TEXT NOT NULL,
+            paid_at TEXT
+        )
+    """)
+
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_payments_user_id
+        ON payments (user_id)
+    """)
+
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_payments_status
+        ON payments (status)
+    """)
+
     # 기존 DB를 깨뜨리지 않고 필요한 컬럼만 자동 추가
     cursor.execute("PRAGMA table_info(history)")
     columns = {
@@ -589,6 +616,137 @@ def get_history_item(history_id, user_id):
 
     return row
 
+
+
+def create_test_payment(
+    user_id,
+    order_id,
+    product_code,
+    amount,
+    credits
+):
+    """
+    TEST 결제 완료 기록을 저장합니다.
+    order_id UNIQUE 제약으로 같은 주문의 중복 지급을 방지합니다.
+    """
+    init_db()
+
+    created_at = datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+
+    conn = _connect()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            """
+            INSERT INTO payments (
+                user_id,
+                order_id,
+                payment_key,
+                product_code,
+                amount,
+                credits,
+                status,
+                provider,
+                created_at,
+                paid_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, 'PAID', 'TEST', ?, ?)
+            """,
+            (
+                user_id,
+                order_id,
+                f"test_{order_id}",
+                product_code,
+                int(amount),
+                int(credits),
+                created_at,
+                created_at,
+            )
+        )
+
+        conn.commit()
+        payment_id = cursor.lastrowid
+        return {
+            "ok": True,
+            "payment_id": payment_id,
+        }
+
+    except sqlite3.IntegrityError:
+        return {
+            "ok": False,
+            "reason": "duplicate_order",
+        }
+
+    finally:
+        conn.close()
+
+
+def get_user_payments(user_id, limit=30):
+    init_db()
+
+    conn = _connect()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT
+            id,
+            order_id,
+            product_code,
+            amount,
+            credits,
+            status,
+            provider,
+            created_at,
+            paid_at
+        FROM payments
+        WHERE user_id = ?
+        ORDER BY id DESC
+        LIMIT ?
+        """,
+        (
+            user_id,
+            int(limit),
+        )
+    )
+
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+
+def get_payment_by_order_id(order_id):
+    init_db()
+
+    conn = _connect()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT
+            id,
+            user_id,
+            order_id,
+            product_code,
+            amount,
+            credits,
+            status,
+            provider,
+            created_at,
+            paid_at
+        FROM payments
+        WHERE order_id = ?
+        LIMIT 1
+        """,
+        (order_id,)
+    )
+
+    row = cursor.fetchone()
+    conn.close()
+    return row
 
 def get_dashboard_data(user_id):
     """

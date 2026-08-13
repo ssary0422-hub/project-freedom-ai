@@ -1,21 +1,9 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>회원가입 - Project Freedom AI</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+{% extends "base.html" %}
 
-<nav class="navbar navbar-dark bg-dark mb-5">
-    <div class="container">
-        <a class="navbar-brand" href="/">🤖 Project Freedom AI</a>
-        <a class="btn btn-outline-light" href="/login">로그인</a>
-    </div>
-</nav>
+{% block title %}회원가입 - Project Freedom AI{% endblock %}
 
-<div class="container" style="max-width: 560px;">
+{% block content %}
+<div class="container py-3" style="max-width: 560px;">
     <div class="card shadow border-0">
         <div class="card-body p-4 p-md-5">
 
@@ -100,6 +88,4 @@
         </div>
     </div>
 </div>
-
-</body>
-</html>
+{% endblock %}

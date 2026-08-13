@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+
+{% block title %}AI 크레딧 - Project Freedom AI{% endblock %}
+
+{% block extra_style %}
+body {
+            background: #f5f7fb;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #111827, #25334f);
+            color: white;
+            border-radius: 24px;
+        }
+
+        .credit-card {
+            border: 0;
+            border-radius: 20px;
+        }
+
+        .credit-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+{% endblock %}
+
+{% block content %}
+<div class="container pb-5">
+
+    <section class="hero shadow-sm p-4 p-md-5 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <div class="text-info fw-bold mb-2">
+                    PROJECT FREEDOM AI
+                </div>
+
+                <h1 class="fw-bold mb-2">
+                    💳 AI 크레딧
+                </h1>
+
+                <p class="text-white-50 mb-0">
+                    월 기본 크레딧과 충전 크레딧을 함께 사용할 수 있습니다.
+                </p>
+            </div>
+
+            <div class="text-end">
+                <div class="text-white-50">
+                    현재 사용 가능
+                </div>
+
+                <div class="credit-number">
+                    {{ status.remaining }}
+                </div>
+
+                <div>크레딧</div>
+            </div>
+        </div>
+    </section>
+
+    {% if granted == 'invalid' %}
+    <div class="alert alert-danger">
+        지급 정보가 올바르지 않습니다.
+    </div>
+    {% elif granted == 'notfound' %}
+    <div class="alert alert-danger">
+        해당 이메일의 회원을 찾지 못했습니다.
+    </div>
+    {% elif granted %}
+    <div class="alert alert-success">
+        ✅ {{ granted }} 크레딧 지급이 완료되었습니다.
+    </div>
+    {% endif %}
+
+    {% if payment == 'success' %}
+    <div class="alert alert-success shadow-sm">
+        ✅ TEST 결제가 완료되었습니다.
+        <strong>+{{ payment_credits }} 크레딧</strong>이 충전되었습니다.
+        <div class="small mt-1">
+            실제 결제가 아닌 개발용 테스트 결제입니다.
+        </div>
+    </div>
+    {% elif payment == 'invalid_product' %}
+    <div class="alert alert-danger">
+        올바르지 않은 크레딧 상품입니다.
+    </div>
+    {% elif payment == 'duplicate' %}
+    <div class="alert alert-danger">
+        이미 처리된 테스트 주문입니다.
+    </div>
+    {% elif payment == 'credit_error' %}
+    <div class="alert alert-danger">
+        TEST 결제 기록은 생성됐지만 크레딧 지급에 실패했습니다.
+    </div>
+    {% endif %}
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card credit-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="text-muted">
+                        이번 달 기본 잔여
+                    </div>
+
+                    <div class="fs-2 fw-bold">
+                        {{ status.base_remaining }}
+                    </div>
+
+                    <div class="small text-muted">
+                        {{ status.plan }} 기본 {{ status.limit }} 크레딧
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card credit-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="text-muted">
+                        충전 크레딧
+                    </div>
+
+                    <div class="fs-2 fw-bold text-primary">
+                        {{ status.bonus_balance }}
+                    </div>
+
+                    <div class="small text-muted">
+                        월이 바뀌어도 유지
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card credit-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="text-muted">
+                        총 사용 가능
+                    </div>
+
+                    <div class="fs-2 fw-bold text-success">
+                        {{ status.remaining }}
+                    </div>
+
+                    <div class="small text-muted">
+                        기본 + 충전 크레딧
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-3">
+        <div>
+            <h4 class="fw-bold mb-1">
+                🛒 크레딧 충전
+            </h4>
+            <div class="text-muted">
+                현재는 사업자/PG 연결 전 단계라 TEST 결제로 전체 흐름을 검증합니다.
+            </div>
+        </div>
+
+        {% if test_payments_enabled %}
+        <span class="badge text-bg-warning px-3 py-2">
+            🧪 TEST PAYMENT MODE
+        </span>
+        {% else %}
+        <span class="badge text-bg-secondary px-3 py-2">
+            TEST 결제 비활성화
+        </span>
+        {% endif %}
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        {% for code, product in products.items() %}
+        <div class="col-md-4">
+            <div class="card credit-card shadow-sm h-100
+                {% if code == 'popular' %}border-primary{% endif %}">
+                <div class="card-body p-4 text-center d-flex flex-column">
+
+                    {% if code == 'popular' %}
+                    <div class="mb-2">
+                        <span class="badge text-bg-primary">
+                            ⭐ 가장 인기
+                        </span>
+                    </div>
+                    {% endif %}
+
+                    <div class="text-muted">
+                        {{ product.name }}
+                    </div>
+
+                    <div class="display-6 fw-bold my-2">
+                        {{ product.credits }}
+                        <span class="fs-5">C</span>
+                    </div>
+
+                    <div class="fs-4 fw-bold mb-1">
+                        ₩{{ "{:,}".format(product.amount) }}
+                    </div>
+
+                    <div class="small text-muted mb-4">
+                        충전 크레딧은 월이 바뀌어도 유지됩니다.
+                    </div>
+
+                    <div class="mt-auto">
+                        {% if test_payments_enabled %}
+                        <form
+                            method="POST"
+                            action="/credits/test-purchase"
+                            onsubmit="return confirm('실제 결제가 아닌 TEST 구매입니다. 계속할까요?');">
+
+                            <input
+                                type="hidden"
+                                name="product_code"
+                                value="{{ code }}">
+
+                            <button
+                                type="submit"
+                                class="btn {% if code == 'popular' %}btn-primary{% else %}btn-dark{% endif %} w-100">
+                                🧪 TEST 구매
+                            </button>
+                        </form>
+                        {% else %}
+                        <button
+                            class="btn btn-secondary w-100"
+                            disabled>
+                            TEST 결제 비활성화
+                        </button>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <div class="alert alert-warning border-0 shadow-sm mb-4">
+        <strong>🧪 개발용 TEST 결제</strong><br>
+        실제 카드 결제나 금전 거래가 발생하지 않습니다.
+        서버 환경변수 <code>ENABLE_TEST_PAYMENTS=1</code>일 때만 사용할 수 있습니다.
+        실제 서비스 공개 전에는 반드시 다시 <code>0</code>으로 비활성화하세요.
+    </div>
+
+    {% if is_admin %}
+    <div class="card credit-card shadow-sm border-danger mb-4">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        🛠 관리자 테스트 지급
+                    </h4>
+
+                    <div class="text-muted">
+                        결제 연결 전 크레딧 충전 동작을 테스트합니다.
+                    </div>
+                </div>
+
+                <span class="badge text-bg-danger">
+                    ADMIN ONLY
+                </span>
+            </div>
+
+            <form
+                method="POST"
+                action="/credits/admin/grant"
+                class="row g-2">
+
+                <div class="col-md-7">
+                    <input
+                        class="form-control"
+                        type="email"
+                        name="email"
+                        value="{{ session.get('user_email', '') }}"
+                        placeholder="회원 이메일"
+                        required>
+                </div>
+
+                <div class="col-md-3">
+                    <select
+                        class="form-select"
+                        name="amount">
+
+                        <option value="10">
+                            10 크레딧
+                        </option>
+
+                        <option value="30">
+                            30 크레딧
+                        </option>
+
+                        <option value="100">
+                            100 크레딧
+                        </option>
+
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-grid">
+                    <button
+                        class="btn btn-danger"
+                        type="submit">
+                        테스트 지급
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card credit-card shadow-sm mb-4">
+        <div class="card-body p-4">
+
+            <h4 class="fw-bold mb-3">
+                💳 결제 테스트 내역
+            </h4>
+
+            {% if payments %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>일시</th>
+                            <th>상품</th>
+                            <th>크레딧</th>
+                            <th>금액</th>
+                            <th>상태</th>
+                            <th>구분</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in payments %}
+                        <tr>
+                            <td>{{ p[8] or p[7] }}</td>
+                            <td>{{ p[2] }}</td>
+                            <td class="fw-bold">+{{ p[4] }}C</td>
+                            <td>₩{{ "{:,}".format(p[3]) }}</td>
+                            <td>
+                                <span class="badge text-bg-success">
+                                    {{ p[5] }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge text-bg-warning">
+                                    {{ p[6] }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-muted">
+                아직 TEST 결제 내역이 없습니다.
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="card credit-card shadow-sm">
+        <div class="card-body p-4">
+
+            <h4 class="fw-bold mb-3">
+                📜 충전 크레딧 내역
+            </h4>
+
+            {% if transactions %}
+
+            <div class="table-responsive">
+                <table class="table align-middle">
+
+                    <thead>
+                        <tr>
+                            <th>일시</th>
+                            <th>구분</th>
+                            <th>변동</th>
+                            <th>내용</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for tx in transactions %}
+
+                        <tr>
+                            <td>
+                                {{ tx['created_at'] }}
+                            </td>
+
+                            <td>
+                                {{ tx['kind'] }}
+                            </td>
+
+                            <td class="fw-bold {{ 'text-success' if tx['amount'] > 0 else 'text-danger' }}">
+                                {{ '+' if tx['amount'] > 0 else '' }}{{ tx['amount'] }}
+                            </td>
+
+                            <td>
+                                {{ tx['note'] or '-' }}
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+            {% else %}
+
+            <div class="text-muted">
+                아직 충전 크레딧 내역이 없습니다.
+            </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

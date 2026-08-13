@@ -1,16 +1,9 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>요금제 - Project Freedom AI</title>
+{% extends "base.html" %}
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-        rel="stylesheet">
+{% block title %}요금제 - Project Freedom AI{% endblock %}
 
-    <style>
-        body {
+{% block extra_style %}
+body {
             background: #f5f7fb;
         }
 
@@ -43,41 +36,9 @@
         .current-badge {
             border-radius: 999px;
         }
-    </style>
-</head>
+{% endblock %}
 
-<body>
-
-<nav class="navbar navbar-dark bg-dark">
-    <div class="container">
-
-        <a class="navbar-brand fw-bold" href="/">
-            🤖 Project Freedom AI
-        </a>
-
-        <div class="d-flex gap-2 flex-wrap">
-            <a
-                href="/dashboard"
-                class="btn btn-outline-light">
-                📊 MY DASHBOARD
-            </a>
-
-            <a
-                href="/package"
-                class="btn btn-outline-light">
-                🚀 패키지
-            </a>
-
-            <a
-                href="/logout"
-                class="btn btn-warning">
-                로그아웃
-            </a>
-        </div>
-
-    </div>
-</nav>
-
+{% block content %}
 <div class="container py-5">
 
     <section class="hero shadow-sm p-4 p-md-5 mb-4 text-center">
@@ -280,6 +241,4 @@
     </div>
 
 </div>
-
-</body>
-</html>
+{% endblock %}

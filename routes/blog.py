@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
-from flask import Blueprint, render_template, request, session
+from flask import Blueprint, render_template, request, session, send_file
 
 from ai.blog import make_blog
 from ai.image import make_image
@@ -11,8 +11,8 @@ from database.users import (
     get_plan_status,
     record_ai_credit_usage,
 )
-from documents.pdf import create_blog_pdf
-from documents.word import create_blog_word
+from documents.pdf import create_blog_pdf, BLOG_PDF_PATH
+from documents.word import create_blog_word, BLOG_WORD_PATH
 from routes.auth import login_required
 
 blog_bp = Blueprint("blog", __name__)
@@ -545,14 +545,11 @@ def _blog_page():
     tone = ""
     length = ""
     image_style = "고급스러운 실사"
+    with_image = False
 
     if request.method == "POST":
         if not get_ai_enabled():
-            error = (
-                "현재 AI 생성 시스템이 점검 중입니다. "
-                "잠시 후 다시 이용해주세요."
-            )
-
+            error = "현재 AI 생성 시스템이 점검 중입니다. 잠시 후 다시 이용해주세요."
             return render_template(
                 "blog.html",
                 result=result,
@@ -563,18 +560,7 @@ def _blog_page():
                 tone=tone,
                 length=length,
                 image_style=image_style,
-                error=error
-            )
-
-        credit_status = get_plan_status(session["user_id"], required_credits=2)
-        if not credit_status["can_generate"]:
-            error = (
-                f"{credit_status['plan']} 요금제의 AI 크레딧이 부족합니다. "
-                f"현재 {credit_status['remaining']}크레딧 남음 · 이 기능은 2크레딧이 필요합니다."
-            )
-            return render_template(
-                "blog.html",
-                result=result, image_url=image_url, business=business, company=company, topic=topic, tone=tone, length=length, image_style=image_style,
+                with_image=with_image,
                 error=error
             )
 
@@ -583,26 +569,42 @@ def _blog_page():
         topic = request.form.get("topic", "").strip()
         tone = request.form.get("tone", "").strip()
         length = request.form.get("length", "").strip()
-        image_style = request.form.get(
-            "image_style",
-            "고급스러운 실사"
-        ).strip()
+        image_style = request.form.get("image_style", "고급스러운 실사").strip()
+        with_image = request.form.get("with_image") == "on"
+
+        required_credits = 3 if with_image else 1
+        credit_status = get_plan_status(
+            session["user_id"],
+            required_credits=required_credits
+        )
+
+        if not credit_status["can_generate"]:
+            error = (
+                f"{credit_status['plan']} 요금제의 AI 크레딧이 부족합니다. "
+                f"현재 {credit_status['remaining']}크레딧 남음 · "
+                f"이번 블로그 생성은 {required_credits}크레딧이 필요합니다."
+            )
+            return render_template(
+                "blog.html",
+                result=result,
+                image_url=image_url,
+                business=business,
+                company=company,
+                topic=topic,
+                tone=tone,
+                length=length,
+                image_style=image_style,
+                with_image=with_image,
+                error=error
+            )
 
         if business and company and topic and tone and length:
+            result = make_blog(topic, tone, length)
+            image_path = ""
 
-            # 블로그 글 생성
-            result = make_blog(
-                topic,
-                tone,
-                length
-            )
-
-            # 대표 이미지 생성
-            image_style_instruction = _image_style_instruction(
-                image_style
-            )
-
-            image_prompt = f"""
+            if with_image:
+                image_style_instruction = _image_style_instruction(image_style)
+                image_prompt = f"""
 블로그 대표 이미지.
 
 업종: {business}
@@ -619,55 +621,41 @@ def _blog_page():
 본문 내용과 잘 어울리는 구성.
 이미지 안에는 글자를 넣지 말 것.
 """
-
-            image_path = ""
-
-            try:
-                image_path = make_image(image_prompt)
-                image_path = _add_company_name_to_image(
-                    image_path,
-                    company,
-                    business
-                )
-                image_url = "/" + str(Path(image_path)).replace("\\", "/")
-            except Exception as image_error:
-                print("블로그 이미지 생성 실패:", image_error)
-                error = (
-                    "블로그 글은 생성되었지만 이미지 생성에 실패했습니다. "
-                    f"오류: {image_error}"
-                )
-                image_url = ""
+                try:
+                    image_path = make_image(image_prompt)
+                    image_path = _add_company_name_to_image(
+                        image_path, company, business
+                    )
+                    image_url = "/" + Path(image_path).as_posix()
+                except Exception as image_error:
+                    print("블로그 이미지 생성 실패:", image_error)
+                    error = (
+                        "블로그 글은 생성되었지만 이미지 생성에 실패했습니다. "
+                        f"오류: {image_error}"
+                    )
 
             save_history(
-                business,
-                company,
-                tone,
-                result,
-                image_url,
+                business, company, tone, result, image_url,
                 content_type="blog",
                 user_id=session["user_id"]
             )
+            create_blog_word(result, image_path)
+            create_blog_pdf(result, image_path)
 
-            create_blog_word(
-                result,
-                image_path
-            )
-
-            create_blog_pdf(
-                result,
-                image_path
-            )
+            used_credits = 3 if with_image and image_url else 1
             record_ai_credit_usage(
                 session["user_id"],
-                "BLOG",
-                2 if bool(image_url) else 1
+                "BLOG_IMAGE" if used_credits == 3 else "BLOG_TEXT",
+                used_credits
             )
+
             credit_status = get_plan_status(session["user_id"])
             session["plan"] = credit_status["plan"]
             session["plan_used"] = credit_status["used"]
             session["plan_limit"] = credit_status["limit"]
             session["plan_remaining"] = credit_status["remaining"]
             session["plan_percent"] = credit_status["percent"]
+
     return render_template(
         "blog.html",
         result=result,
@@ -678,5 +666,36 @@ def _blog_page():
         tone=tone,
         length=length,
         image_style=image_style,
+        with_image=with_image,
         error=error
+    )
+
+
+@blog_bp.route("/blog/download/word")
+@login_required
+def download_blog_word():
+    path = Path(BLOG_WORD_PATH)
+
+    if not path.exists():
+        return "먼저 블로그 글을 생성해 주세요.", 404
+
+    return send_file(
+        str(path),
+        as_attachment=True,
+        download_name="blog.docx"
+    )
+
+
+@blog_bp.route("/blog/download/pdf")
+@login_required
+def download_blog_pdf():
+    path = Path(BLOG_PDF_PATH)
+
+    if not path.exists():
+        return "먼저 블로그 글을 생성해 주세요.", 404
+
+    return send_file(
+        str(path),
+        as_attachment=True,
+        download_name="blog.pdf"
     )

@@ -1,18 +1,9 @@
-<!DOCTYPE html>
-<html lang="ko">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% block title %}브랜드 히스토리 - Project Freedom AI{% endblock %}
 
-    <title>브랜드 히스토리 - Project Freedom AI</title>
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-        rel="stylesheet">
-
-    <style>
-        .result-text {
+{% block extra_style %}
+.result-text {
             white-space: pre-wrap;
             font-family: inherit;
             margin-bottom: 0;
@@ -23,37 +14,9 @@
             max-height: 360px;
             object-fit: cover;
         }
-    </style>
-</head>
+{% endblock %}
 
-<body class="bg-light">
-
-<nav class="navbar navbar-dark bg-dark mb-4">
-    <div class="container">
-
-        <a
-            class="navbar-brand"
-            href="/">
-            🤖 Project Freedom AI
-        </a>
-
-        <div>
-            <a
-                class="btn btn-outline-light me-2"
-                href="/profiles">
-                🏢 브랜드 프로필
-            </a>
-
-            <a
-                class="btn btn-outline-light"
-                href="/package?profile_id={{ profile[0] }}">
-                🚀 새 패키지 생성
-            </a>
-        </div>
-
-    </div>
-</nav>
-
+{% block content %}
 <div class="container pb-5">
 
     <div class="mb-4">
@@ -82,43 +45,9 @@
                     📦 마케팅 패키지
                 </strong>
 
-                <div class="d-flex align-items-center gap-2 flex-wrap">
-
-                    <span class="text-muted">
-                        {{ package['created_at'] }}
-                    </span>
-
-                    {% if package['package_id'] %}
-
-                    <a
-                        href="/profiles/{{ profile[0] }}/history/{{ package['package_id'] }}"
-                        class="btn btn-sm btn-outline-primary">
-                        🔎 상세보기
-                    </a>
-
-                    <a
-                        href="/package?profile_id={{ profile[0] }}"
-                        class="btn btn-sm btn-outline-success">
-                        🔄 같은 브랜드로 재생성
-                    </a>
-
-                    <form
-                        method="POST"
-                        action="/profiles/{{ profile[0] }}/history/{{ package['package_id'] }}/delete"
-                        class="d-inline"
-                        onsubmit="return confirm('이 마케팅 패키지 기록 전체를 삭제할까요?');">
-
-                        <button
-                            type="submit"
-                            class="btn btn-sm btn-outline-danger">
-                            🗑 삭제
-                        </button>
-
-                    </form>
-
-                    {% endif %}
-
-                </div>
+                <span class="text-muted">
+                    {{ package['created_at'] }}
+                </span>
 
             </div>
 
@@ -195,6 +124,4 @@
     {% endif %}
 
 </div>
-
-</body>
-</html>
+{% endblock %}

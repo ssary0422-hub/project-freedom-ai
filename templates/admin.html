@@ -1,16 +1,9 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ADMIN - Project Freedom AI</title>
+{% extends "base.html" %}
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-        rel="stylesheet">
+{% block title %}ADMIN - Project Freedom AI{% endblock %}
 
-    <style>
-        body {
+{% block extra_style %}
+body {
             background: #f5f7fb;
         }
 
@@ -44,35 +37,9 @@
         .status-off {
             background: #ef4444;
         }
-    </style>
-</head>
+{% endblock %}
 
-<body>
-
-<nav class="navbar navbar-dark bg-dark">
-    <div class="container">
-
-        <a class="navbar-brand fw-bold" href="/">
-            🤖 Project Freedom AI
-        </a>
-
-        <div class="d-flex gap-2">
-            <a
-                href="/dashboard"
-                class="btn btn-outline-light">
-                📊 대시보드
-            </a>
-
-            <a
-                href="/logout"
-                class="btn btn-warning">
-                로그아웃
-            </a>
-        </div>
-
-    </div>
-</nav>
-
+{% block content %}
 <div class="container py-5">
 
     <section class="admin-hero shadow-sm p-4 p-md-5 mb-4">
@@ -373,6 +340,146 @@
 
     </div>
 
+    <div class="card admin-card shadow-sm mb-4">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        💳 결제 관리
+                    </h4>
+                    <div class="text-muted">
+                        전체 회원의 TEST 결제와 향후 실제 PG 결제를 한곳에서 관리합니다.
+                    </div>
+                </div>
+
+                <span class="badge text-bg-dark px-3 py-2">
+                    최근 100건
+                </span>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="border rounded-4 p-3 h-100">
+                        <div class="text-muted small">💰 총 결제금액</div>
+                        <div class="stat-number">
+                            ₩{{ "{:,}".format(payment_summary.total_amount) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="border rounded-4 p-3 h-100">
+                        <div class="text-muted small">🧾 전체 결제건수</div>
+                        <div class="stat-number">
+                            {{ payment_summary.total_count }}건
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="border rounded-4 p-3 h-100">
+                        <div class="text-muted small">🔥 오늘 결제금액</div>
+                        <div class="stat-number">
+                            ₩{{ "{:,}".format(payment_summary.today_amount) }}
+                        </div>
+                        <div class="small text-muted">
+                            {{ payment_summary.today_count }}건
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="border rounded-4 p-3 h-100">
+                        <div class="text-muted small">💎 총 지급 크레딧</div>
+                        <div class="stat-number">
+                            {{ payment_summary.total_credits }}C
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if payments %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>결제일</th>
+                            <th>회원</th>
+                            <th>상품</th>
+                            <th>금액</th>
+                            <th>지급 C</th>
+                            <th>상태</th>
+                            <th>구분</th>
+                            <th>주문번호</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in payments %}
+                        <tr>
+                            <td class="text-nowrap">
+                                {{ p["paid_at"] or p["created_at"] }}
+                            </td>
+
+                            <td>
+                                <div class="fw-semibold">
+                                    {{ p["username"] or "탈퇴/미확인 회원" }}
+                                </div>
+                                <div class="small text-muted">
+                                    {{ p["email"] or ("User #" ~ p["user_id"]) }}
+                                </div>
+                            </td>
+
+                            <td class="text-capitalize">
+                                {{ p["product_code"] }}
+                            </td>
+
+                            <td class="fw-semibold">
+                                ₩{{ "{:,}".format(p["amount"]) }}
+                            </td>
+
+                            <td class="fw-bold text-success">
+                                +{{ p["credits"] }}C
+                            </td>
+
+                            <td>
+                                {% if p["status"] == "PAID" %}
+                                <span class="badge text-bg-success">PAID</span>
+                                {% else %}
+                                <span class="badge text-bg-secondary">
+                                    {{ p["status"] }}
+                                </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if p["provider"] == "TEST" %}
+                                <span class="badge text-bg-warning">TEST</span>
+                                {% else %}
+                                <span class="badge text-bg-primary">
+                                    {{ p["provider"] }}
+                                </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <code class="small">{{ p["order_id"] }}</code>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-light border mb-0">
+                아직 결제 내역이 없습니다.
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+
     <div class="card admin-card shadow-sm">
         <div class="card-body p-4">
 
@@ -451,6 +558,4 @@
     </div>
 
 </div>
-
-</body>
-</html>
+{% endblock %}

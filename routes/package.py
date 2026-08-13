@@ -5,7 +5,7 @@ import uuid
 from PIL import Image, ImageDraw, ImageFont
 import zipfile
 
-from flask import Blueprint, render_template, request, send_file, session
+from flask import Blueprint, render_template, request, send_file, session, g
 
 from ai.ads import make_ads
 from ai.blog import make_blog
@@ -47,6 +47,9 @@ PACKAGE_ZIP_PATH = DOWNLOAD_DIR / "marketing_package.zip"
 
 
 def _make_image_safe(prompt: str, label: str):
+    if not getattr(g, "generate_images", True):
+        return "", ""
+
     try:
         image_path = make_image(prompt)
         image_path = str(Path(image_path))
@@ -784,6 +787,7 @@ def package():
     blog_length = "2000자"
     sns_platform = "인스타그램"
     image_style = "고급스러운 실사"
+    with_image = False
     ads_count = 5
 
     ads_result = ""
@@ -863,6 +867,7 @@ def package():
                 blog_length=blog_length,
                 sns_platform=sns_platform,
                 image_style=image_style,
+                with_image=with_image,
                 ads_count=ads_count,
                 ads_result=ads_result,
                 blog_result=blog_result,
@@ -872,39 +877,6 @@ def package():
                 sns_image_url=sns_image_url,
                 package_ready=False,
                 error=error,
-                loaded_profile_name=loaded_profile_name,
-                selected_profile_id=selected_profile_id,
-                saved_profiles=saved_profiles,
-                plan=plan
-            )
-
-        plan_status = get_plan_status(
-            session["user_id"],
-            required_credits=6
-        )
-        plan = plan_status["plan"]
-
-        if not plan_status["can_generate"]:
-            error = (
-                f"{plan_status['plan']} 요금제의 AI 크레딧이 부족합니다. "
-                f"현재 {plan_status['remaining']}크레딧 남음 · "
-                "마케팅 패키지는 6크레딧이 필요합니다."
-            )
-
-            session["plan"] = plan_status["plan"]
-            session["plan_used"] = plan_status["used"]
-            session["plan_limit"] = plan_status["limit"]
-            session["plan_remaining"] = plan_status["remaining"]
-            session["plan_percent"] = plan_status["percent"]
-
-            return render_template(
-                "package.html",
-                business=business, company=company, style=style,
-                blog_length=blog_length, sns_platform=sns_platform,
-                image_style=image_style, ads_count=ads_count,
-                ads_result=ads_result, blog_result=blog_result, sns_result=sns_result,
-                ads_image_url=ads_image_url, blog_image_url=blog_image_url,
-                sns_image_url=sns_image_url, package_ready=False, error=error,
                 loaded_profile_name=loaded_profile_name,
                 selected_profile_id=selected_profile_id,
                 saved_profiles=saved_profiles,
@@ -951,6 +923,47 @@ def package():
             "profile_id",
             type=int
         )
+
+        with_image = request.form.get("with_image") == "on"
+        package_cost = 7 if with_image else 3
+
+        plan_status = get_plan_status(
+            session["user_id"],
+            required_credits=package_cost
+        )
+        plan = plan_status["plan"]
+
+        if not plan_status["can_generate"]:
+            error = (
+                f"{plan_status['plan']} 요금제의 AI 크레딧이 부족합니다. "
+                f"현재 {plan_status['remaining']}크레딧 남음 · "
+                f"이번 마케팅 패키지는 {package_cost}크레딧이 필요합니다."
+            )
+            return render_template(
+                "package.html",
+                business=business,
+                company=company,
+                style=style,
+                blog_length=blog_length,
+                sns_platform=sns_platform,
+                image_style=image_style,
+                with_image=with_image,
+                ads_count=ads_count,
+                ads_result=ads_result,
+                blog_result=blog_result,
+                sns_result=sns_result,
+                ads_image_url=ads_image_url,
+                blog_image_url=blog_image_url,
+                sns_image_url=sns_image_url,
+                package_ready=False,
+                error=error,
+                loaded_profile_name=loaded_profile_name,
+                selected_profile_id=selected_profile_id,
+                saved_profiles=saved_profiles,
+                plan=plan
+            )
+
+        g.generate_images = with_image
 
         if ads_count not in [3, 5, 10]:
             ads_count = 5
@@ -1256,7 +1269,7 @@ No text, no logo, no watermark.
                 package_ready = True
 
                 # 패키지 3종 생성이 모두 성공한 경우에만 월 사용량 1회 차감
-                record_package_usage(session["user_id"])
+                record_package_usage(session["user_id"], package_cost)
                 plan_status = get_plan_status(session["user_id"])
                 plan = plan_status["plan"]
                 session["plan"] = plan_status["plan"]
@@ -1280,6 +1293,7 @@ No text, no logo, no watermark.
         blog_length=blog_length,
         sns_platform=sns_platform,
         image_style=image_style,
+        with_image=with_image,
         ads_count=ads_count,
 
         ads_result=ads_result,

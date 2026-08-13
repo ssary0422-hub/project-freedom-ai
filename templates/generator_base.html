@@ -1,25 +1,33 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Project Freedom AI{% endblock %}</title>
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-        rel="stylesheet">
-    <style>
-        body { background:#f5f7fb; }
-        .main-card { border:0; border-radius:16px; }
-        .generator-tabs .btn { min-width:130px; }
-        .result-image { max-width:700px; width:100%; }
-        .top-brand { font-weight:700; }
-        @media (max-width: 768px) {
-            .generator-tabs .btn { min-width:0; width:100%; }
-        }
-    </style>
-</head>
+{% extends "base.html" %}
 
-<body>
+{% block body_attrs %}
+data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
+{% endblock %}
+
+{% block extra_style %}
+.main-card {
+    border: 0;
+    border-radius: 20px;
+}
+
+.generator-tabs .btn {
+    min-width: 130px;
+}
+
+.result-image {
+    max-width: 700px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .generator-tabs .btn {
+        min-width: 0;
+        width: 100%;
+    }
+}
+{% endblock %}
+
+{% block content %}
 
 <div
     id="ai-loading-overlay"
@@ -33,7 +41,7 @@
         align-items:center;
         justify-content:center;
     ">
-    <div class="text-center bg-white shadow rounded-4 p-5" style="min-width:320px;">
+    <div class="text-center bg-white shadow rounded-4 p-5 mx-3" style="min-width:min(320px, 90vw);">
         <div class="spinner-border text-primary mb-3" role="status"></div>
         <h4 class="fw-bold mb-2">🤖 AI 생성 중...</h4>
         <div class="text-muted">
@@ -43,54 +51,11 @@
     </div>
 </div>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-        <a class="navbar-brand top-brand" href="/">
-            🤖 Project Freedom AI
-        </a>
+<div class="container pb-3">
 
-        <div class="d-flex gap-2 flex-wrap justify-content-end">
-            <a class="btn btn-outline-light" href="/">홈</a>
-
-            {% if session.get("user_id") %}
-            <a class="btn btn-info" href="/dashboard">📊 MY DASHBOARD</a>
-            {% endif %}
-
-            <a class="btn btn-outline-light" href="/package">
-                🚀 마케팅 패키지
-            </a>
-
-            <a class="btn btn-outline-light" href="/profiles">
-                🏢 브랜드 프로필
-            </a>
-
-            <a class="btn btn-outline-light" href="/history">
-                📚 생성 기록
-            </a>
-
-            {% if session.get("is_admin") %}
-            <a class="btn btn-danger" href="/admin">
-                🛠 ADMIN
-            </a>
-            {% endif %}
-
-            {% if session.get("user_id") %}
-            <span class="navbar-text text-white ms-1">
-                👤 {{ session.get("user_name") }}님
-            </span>
-            <a class="btn btn-warning" href="/logout">로그아웃</a>
-            {% else %}
-            <a class="btn btn-outline-info" href="/login">로그인</a>
-            <a class="btn btn-info" href="/register">회원가입</a>
-            {% endif %}
-        </div>
-    </div>
-</nav>
-
-<div class="container pb-5">
-
-    <div class="text-center mb-4">
-        <h1>🤖 Project Freedom AI</h1>
+    <div class="text-center pf-page-header">
+        <div class="pf-eyebrow mb-2">PROJECT FREEDOM AI</div>
+        <h1 class="fw-bold mb-2">🤖 AI 콘텐츠 생성기</h1>
         <p class="text-muted mb-0">
             광고 · 블로그 · SNS 콘텐츠를 한곳에서 생성하세요.
         </p>
@@ -107,18 +72,21 @@
         <div class="card-body p-4">
 
             <div class="generator-tabs d-flex gap-2 flex-wrap mb-4">
-                <a href="/"
-                   class="btn {% if active_tab == 'ads' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
+                <a
+                    href="/"
+                    class="btn {% if active_tab == 'ads' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
                     📢 광고
                 </a>
 
-                <a href="/blog"
-                   class="btn {% if active_tab == 'blog' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
+                <a
+                    href="/blog"
+                    class="btn {% if active_tab == 'blog' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
                     📝 블로그
                 </a>
 
-                <a href="/sns"
-                   class="btn {% if active_tab == 'sns' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
+                <a
+                    href="/sns"
+                    class="btn {% if active_tab == 'sns' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
                     📱 SNS
                 </a>
 
@@ -131,13 +99,17 @@
                 </a>
 
                 <a href="/history" class="btn btn-outline-secondary flex-fill">
-                    📚 기록 보기
+                    📚 기록
                 </a>
             </div>
 
             <div class="mb-4">
-                <h4 class="fw-bold mb-1">{% block generator_title %}{% endblock %}</h4>
-                <div class="text-muted">{% block generator_subtitle %}{% endblock %}</div>
+                <h4 class="fw-bold mb-1">
+                    {% block generator_title %}{% endblock %}
+                </h4>
+                <div class="text-muted">
+                    {% block generator_subtitle %}{% endblock %}
+                </div>
             </div>
 
             {% block form %}{% endblock %}
@@ -151,6 +123,7 @@
         </div>
 
         <div class="card-body p-4">
+
             {% if image_url %}
             <div class="mb-4 text-center">
                 <h5 class="mb-3">🎨 생성 이미지</h5>
@@ -163,22 +136,27 @@
 
             <pre
                 id="result"
-                class="bg-light p-3 rounded"
+                class="bg-light border p-3 rounded-3"
                 style="white-space:pre-wrap; min-height:250px;">{{ result }}</pre>
 
-            {% block result_actions %}
-            <button
-                type="button"
-                class="btn btn-primary"
-                onclick="copyResult()">
-                📋 복사하기
-            </button>
-            {% endblock %}
+            <div class="d-flex gap-2 flex-wrap mt-3">
+                {% block result_actions %}
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    onclick="copyResult()">
+                    📋 복사하기
+                </button>
+                {% endblock %}
+            </div>
         </div>
     </div>
     {% endif %}
 </div>
 
+{% endblock %}
+
+{% block scripts %}
 <script>
 async function copyResult() {
     const resultElement = document.getElementById("result");
@@ -201,7 +179,53 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.querySelector("form[method='POST']");
     const overlay = document.getElementById("ai-loading-overlay");
 
-    if (!form || !overlay) return;
+    const currentCredit = Number(
+        document.body.dataset.remainingCredits || "0"
+    );
+
+    const imageToggle = document.querySelector(".image-credit-toggle");
+    const estimatedCredit = document.getElementById("estimated-credit");
+    const currentCreditEl = document.getElementById("current-credit");
+    const afterCreditEl = document.getElementById("after-credit");
+    const creditWarning = document.getElementById("credit-warning");
+
+    function updateEstimatedCredit() {
+        const cost = imageToggle && imageToggle.checked ? 3 : 1;
+        const after = currentCredit - cost;
+
+        if (estimatedCredit) {
+            estimatedCredit.textContent = String(cost);
+        }
+
+        if (currentCreditEl) {
+            currentCreditEl.textContent = String(currentCredit);
+        }
+
+        if (afterCreditEl) {
+            afterCreditEl.textContent = String(Math.max(0, after));
+        }
+
+        if (creditWarning) {
+            creditWarning.style.display = after < 0 ? "block" : "none";
+        }
+
+        if (form) {
+            const submitButton = form.querySelector("button[type='submit']");
+            if (submitButton) {
+                submitButton.disabled = after < 0;
+            }
+        }
+    }
+
+    if (imageToggle) {
+        imageToggle.addEventListener("change", updateEstimatedCredit);
+    }
+
+    updateEstimatedCredit();
+
+    if (!form || !overlay) {
+        return;
+    }
 
     form.addEventListener("submit", function () {
         overlay.style.display = "flex";
@@ -214,6 +238,4 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
-
-</body>
-</html>
+{% endblock %}

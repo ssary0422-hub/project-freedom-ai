@@ -40,6 +40,63 @@
     </select>
 </div>
 
+
+<div class="border rounded-3 p-3 mb-3 bg-light">
+    <div class="form-check form-switch">
+        <input class="form-check-input image-credit-toggle"
+               type="checkbox"
+               name="with_image"
+               id="with_image"
+               {% if with_image %}checked{% endif %}>
+        <label class="form-check-label fw-bold" for="with_image">
+            🎨 AI 이미지도 함께 생성
+        </label>
+    </div>
+
+    <div class="small text-muted mt-2">
+        텍스트만 <strong>1 크레딧</strong> · 이미지 포함 <strong>3 크레딧</strong>
+    </div>
+
+    <div class="row g-2 mt-2">
+        <div class="col-md-4">
+            <div class="border rounded-3 bg-white p-3 h-100">
+                <div class="small text-muted">💳 현재 보유</div>
+                <div class="fw-bold fs-5">
+                    <span id="current-credit">{{ session.get("plan_remaining", 0) }}</span>
+                    크레딧
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="border rounded-3 bg-white p-3 h-100">
+                <div class="small text-muted">🔥 이번 생성</div>
+                <div class="fw-bold fs-5">
+                    <span id="estimated-credit">1</span>
+                    크레딧
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="border rounded-3 bg-white p-3 h-100">
+                <div class="small text-muted">✨ 생성 후 예상</div>
+                <div class="fw-bold fs-5">
+                    <span id="after-credit">{{ session.get("plan_remaining", 0) }}</span>
+                    크레딧
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div
+        id="credit-warning"
+        class="alert alert-danger mt-3 mb-0 py-2"
+        style="display:none;">
+        ⚠️ 크레딧이 부족합니다. 이미지 옵션을 끄거나 플랜을 업그레이드해 주세요.
+    </div>
+</div>
+
     <div class="d-grid">
         <button class="btn btn-primary btn-lg" type="submit">
             🚀 광고 만들기
@@ -51,7 +108,18 @@
 {% block result_title %}🤖 AI 광고 결과{% endblock %}
 
 {% block result_actions %}
-<a href="/download" class="btn btn-success me-2">📄 Word 다운로드</a>
-<a href="/download/pdf" class="btn btn-danger me-2">📕 PDF 다운로드</a>
-<button type="button" class="btn btn-primary" onclick="copyResult()">📋 복사하기</button>
+<a href="/download" class="btn btn-success me-2">
+    📄 Word 다운로드
+</a>
+
+<a href="/download/pdf" class="btn btn-danger me-2">
+    📕 PDF 다운로드
+</a>
+
+<button
+    type="button"
+    class="btn btn-primary"
+    onclick="copyResult()">
+    📋 복사하기
+</button>
 {% endblock %}

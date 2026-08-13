@@ -1,45 +1,8 @@
-<!DOCTYPE html>
-<html lang="ko">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% block title %}브랜드 프로필 - Project Freedom AI{% endblock %}
 
-    <title>브랜드 프로필 - Project Freedom AI</title>
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-        rel="stylesheet">
-</head>
-
-<body class="bg-light">
-
-<nav class="navbar navbar-dark bg-dark mb-4">
-    <div class="container">
-
-        <a
-            class="navbar-brand"
-            href="/">
-            🤖 Project Freedom AI
-        </a>
-
-        <div>
-            <a
-                class="btn btn-outline-light me-2"
-                href="/package">
-                🚀 마케팅 패키지
-            </a>
-
-            <a
-                class="btn btn-light"
-                href="/profiles">
-                🏢 브랜드 프로필
-            </a>
-        </div>
-
-    </div>
-</nav>
-
+{% block content %}
 <div class="container pb-5">
 
     <div class="text-center mb-4">
@@ -412,6 +375,4 @@
     {% endif %}
 
 </div>
-
-</body>
-</html>
+{% endblock %}

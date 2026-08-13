@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title %}Project Freedom AI{% endblock %}</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --pf-bg: #f4f7fb;
+            --pf-card: #ffffff;
+            --pf-text: #182033;
+            --pf-muted: #6b7280;
+            --pf-border: #e7ebf2;
+            --pf-nav: #121927;
+            --pf-primary: #0d6efd;
+            --pf-soft: #eef4ff;
+        }
+
+        html {
+            min-height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top right, rgba(13, 110, 253, .06), transparent 28rem),
+                var(--pf-bg);
+            color: var(--pf-text);
+        }
+
+        .pf-navbar {
+            background: rgba(18, 25, 39, .97);
+            box-shadow: 0 6px 22px rgba(15, 23, 42, .12);
+            backdrop-filter: blur(12px);
+        }
+
+        .pf-logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,.10);
+        }
+
+        .pf-nav-btn {
+            color: #eef2f7;
+            border: 1px solid rgba(255,255,255,.16);
+            background: transparent;
+            white-space: nowrap;
+        }
+
+        .pf-nav-btn:hover,
+        .pf-nav-active {
+            color: #111827 !important;
+            background: #ffffff !important;
+            border-color: #ffffff !important;
+        }
+
+        .pf-credit-pill {
+            color: #111827;
+            background: #ffffff;
+            border: 1px solid #ffffff;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .pf-credit-pill:hover,
+        .pf-credit-active {
+            color: #084298;
+            background: #cfe2ff;
+            border-color: #9ec5fe;
+        }
+
+        .pf-admin-btn {
+            color: #ffffff;
+            background: #dc3545;
+            border: 1px solid #dc3545;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .pf-admin-btn:hover,
+        .pf-admin-active {
+            background: #b02a37;
+            border-color: #b02a37;
+            color: #ffffff;
+        }
+
+        .pf-user-chip {
+            color: #f8fafc;
+            padding: .45rem .65rem;
+            white-space: nowrap;
+            font-size: .93rem;
+        }
+
+        .pf-page {
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+        }
+
+        .pf-page-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .pf-eyebrow {
+            color: var(--pf-primary);
+            font-weight: 800;
+            font-size: .82rem;
+            letter-spacing: .08em;
+        }
+
+        .pf-card,
+        .card {
+            border-color: var(--pf-border);
+        }
+
+        .pf-card {
+            background: var(--pf-card);
+            border: 1px solid var(--pf-border);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, .06);
+        }
+
+        .card.shadow,
+        .card.shadow-sm,
+        .dashboard-card,
+        .admin-card,
+        .credit-card,
+        .main-card {
+            border: 1px solid var(--pf-border) !important;
+            border-radius: 20px !important;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, .06) !important;
+            overflow: hidden;
+        }
+
+        .card-header {
+            border-color: var(--pf-border);
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 12px;
+            border-color: #dce2ea;
+            min-height: 44px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 .22rem rgba(13,110,253,.12);
+        }
+
+        .btn {
+            border-radius: 10px;
+        }
+
+        .btn-lg {
+            border-radius: 12px;
+        }
+
+        .alert {
+            border-radius: 14px;
+        }
+
+        pre {
+            font-family: inherit;
+        }
+
+        .pf-footer {
+            color: #8a94a6;
+            font-size: .83rem;
+            text-align: center;
+            padding: 0 1rem 2rem;
+        }
+
+        .hero,
+        .admin-hero {
+            background: linear-gradient(135deg, #111827, #25334f) !important;
+            border-radius: 24px !important;
+        }
+
+        @media (max-width: 1199.98px) {
+            .pf-navbar .navbar-nav {
+                align-items: stretch !important;
+            }
+
+            .pf-navbar .btn,
+            .pf-user-chip {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .pf-page {
+                padding-top: 1.25rem;
+            }
+
+            .container,
+            .container-fluid {
+                --bs-gutter-x: 1.25rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        {% block extra_style %}{% endblock %}
+    </style>
+</head>
+
+<body {% block body_attrs %}{% endblock %}>
+
+    {% include "_navbar.html" %}
+
+    <main class="pf-page">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="pf-footer">
+        Project Freedom AI · AI Marketing Workspace
+    </footer>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

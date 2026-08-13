@@ -1,0 +1,94 @@
+<nav class="navbar navbar-expand-xl navbar-dark pf-navbar sticky-top">
+    <div class="container-fluid px-3 px-lg-4">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
+            <span class="pf-logo">🤖</span>
+            <span>Project Freedom AI</span>
+        </a>
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#pfMainNav"
+            aria-controls="pfMainNav"
+            aria-expanded="false"
+            aria-label="메뉴 열기">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse mt-3 mt-xl-0" id="pfMainNav">
+            <div class="navbar-nav ms-auto gap-2 align-items-xl-center">
+
+                <a
+                    class="btn pf-nav-btn {% if request.path == '/' or request.path.startswith('/blog') or request.path.startswith('/sns') %}pf-nav-active{% endif %}"
+                    href="/">
+                    🏠 홈
+                </a>
+
+                {% if session.get("user_id") %}
+                <a
+                    class="btn pf-nav-btn {% if request.path.startswith('/dashboard') %}pf-nav-active{% endif %}"
+                    href="/dashboard">
+                    📊 대시보드
+                </a>
+
+                <a
+                    class="btn pf-nav-btn {% if request.path.startswith('/package') %}pf-nav-active{% endif %}"
+                    href="/package">
+                    🚀 패키지
+                </a>
+
+                <a
+                    class="btn pf-nav-btn {% if request.path.startswith('/profiles') %}pf-nav-active{% endif %}"
+                    href="/profiles">
+                    🏢 브랜드
+                </a>
+
+                <a
+                    class="btn pf-nav-btn {% if request.path.startswith('/history') %}pf-nav-active{% endif %}"
+                    href="/history">
+                    📚 기록
+                </a>
+
+                <a
+                    class="btn pf-credit-pill {% if request.path.startswith('/credits') %}pf-credit-active{% endif %}"
+                    href="/credits"
+                    title="크레딧 충전 및 내역">
+                    💳 {{ session.get("plan_remaining", 0) }} 크레딧
+                </a>
+
+                {% if session.get("is_admin") %}
+                <a
+                    class="btn pf-admin-btn {% if request.path.startswith('/admin') %}pf-admin-active{% endif %}"
+                    href="/admin">
+                    🛠 ADMIN
+                </a>
+                {% endif %}
+
+                <div class="pf-user-chip">
+                    👤 {{ session.get("user_name") }}님
+                </div>
+
+                <a class="btn btn-warning fw-semibold" href="/logout">
+                    로그아웃
+                </a>
+
+                {% else %}
+
+                <a
+                    class="btn pf-nav-btn {% if request.path.startswith('/login') %}pf-nav-active{% endif %}"
+                    href="/login">
+                    🔐 로그인
+                </a>
+
+                <a
+                    class="btn btn-info fw-semibold {% if request.path.startswith('/register') %}shadow-sm{% endif %}"
+                    href="/register">
+                    ✨ 회원가입
+                </a>
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>

@@ -14,7 +14,7 @@ from database.users import (
     get_plan_status,
     record_ai_credit_usage,
 )
-from documents.word import create_word
+from documents.word import create_word, WORD_PATH
 from routes.auth import login_required
 
 ads_bp = Blueprint("ads", __name__)
@@ -544,6 +544,7 @@ def _home_page():
     company = ""
     style = ""
     image_style = "고급스러운 실사"
+    with_image = False
     error = ""
 
     if request.method == "POST":
@@ -556,44 +557,47 @@ def _home_page():
                 company=company,
                 style=style,
                 image_style=image_style,
-                error=(
-                    "현재 AI 생성 시스템이 점검 중입니다. "
-                    "잠시 후 다시 이용해주세요."
-                )
-            )
-
-        credit_status = get_plan_status(session["user_id"], required_credits=2)
-        if not credit_status["can_generate"]:
-            error = (
-                f"{credit_status['plan']} 요금제의 AI 크레딧이 부족합니다. "
-                f"현재 {credit_status['remaining']}크레딧 남음 · 이 기능은 2크레딧이 필요합니다."
-            )
-            return render_template(
-                "index.html",
-                result=result, image_url=image_url, business=business, company=company, style=style, image_style=image_style,
-                error=error
+                with_image=with_image,
+                error="현재 AI 생성 시스템이 점검 중입니다. 잠시 후 다시 이용해주세요."
             )
 
         business = request.form.get("business", "").strip()
         company = request.form.get("company", "").strip()
         style = request.form.get("style", "").strip()
-        image_style = request.form.get(
-            "image_style",
-            "고급스러운 실사"
-        ).strip()
+        image_style = request.form.get("image_style", "고급스러운 실사").strip()
+        with_image = request.form.get("with_image") == "on"
+
+        required_credits = 3 if with_image else 1
+        credit_status = get_plan_status(
+            session["user_id"],
+            required_credits=required_credits
+        )
+
+        if not credit_status["can_generate"]:
+            error = (
+                f"{credit_status['plan']} 요금제의 AI 크레딧이 부족합니다. "
+                f"현재 {credit_status['remaining']}크레딧 남음 · "
+                f"이번 광고 생성은 {required_credits}크레딧이 필요합니다."
+            )
+            return render_template(
+                "index.html",
+                result=result,
+                image_url=image_url,
+                business=business,
+                company=company,
+                style=style,
+                image_style=image_style,
+                with_image=with_image,
+                error=error
+            )
 
         if business and company and style:
-            result = make_ads(
-                business,
-                company,
-                style
-            )
+            result = make_ads(business, company, style)
+            image_path = ""
 
-            image_style_instruction = _image_style_instruction(
-                image_style
-            )
-
-            image_prompt = f"""
+            if with_image:
+                image_style_instruction = _image_style_instruction(image_style)
+                image_prompt = f"""
 {company}의 광고용 이미지.
 
 업종: {business}
@@ -606,59 +610,36 @@ def _home_page():
 마사지샵이 아닌 업종에는 마사지 베드, 마사지 장면, 스파 소품을 넣지 말 것.
 병원/의원은 의료진, 진료 공간, 의료 장비 등 해당 진료 업종에 맞게 표현할 것.
 카페는 카페 공간, 음료, 디저트 등 카페 업종에 맞게 표현할 것.
-고급스럽고 자연스러운 실제 사진 느낌.
-깔끔한 구성.
 이미지 안에는 글자를 넣지 말 것.
 """
-
-            image_path = ""
-
-            try:
-                image_path = make_image(image_prompt)
-
-                # 패키지와 동일한 방식:
-                # AI 원본 이미지 하단에 업체명 + 업종별 영문 서브카피를 직접 합성.
-                image_path = _add_company_name_to_image(
-                    image_path,
-                    company,
-                    business
-                )
-
-                image_url = "/" + str(
-                    Path(image_path)
-                ).replace("\\", "/")
-            except Exception as image_error:
-                print("광고 이미지 생성 실패:", image_error)
-                error = (
-                    "광고 문구는 생성되었지만 이미지 생성에 실패했습니다. "
-                    f"오류: {image_error}"
-                )
-                image_url = ""
+                try:
+                    image_path = make_image(image_prompt)
+                    image_path = _add_company_name_to_image(
+                        image_path, company, business
+                    )
+                    image_url = "/" + Path(image_path).as_posix()
+                except Exception as image_error:
+                    print("광고 이미지 생성 실패:", image_error)
+                    error = (
+                        "광고 문구는 생성되었지만 이미지 생성에 실패했습니다. "
+                        f"오류: {image_error}"
+                    )
 
             save_history(
-                business,
-                company,
-                style,
-                result,
-                image_url,
+                business, company, style, result, image_url,
                 content_type="ads",
                 user_id=session["user_id"]
             )
+            create_word(result, image_path)
+            create_pdf(result, image_path)
 
-            create_word(
-                result,
-                image_path
-            )
-
-            create_pdf(
-                result,
-                image_path
-            )
+            used_credits = 3 if with_image and image_url else 1
             record_ai_credit_usage(
                 session["user_id"],
-                "ADS",
-                2 if bool(image_url) else 1
+                "ADS_IMAGE" if used_credits == 3 else "ADS_TEXT",
+                used_credits
             )
+
             credit_status = get_plan_status(session["user_id"])
             session["plan"] = credit_status["plan"]
             session["plan_used"] = credit_status["used"]
@@ -674,9 +655,25 @@ def _home_page():
         company=company,
         style=style,
         image_style=image_style,
+        with_image=with_image,
         error=error
     )
 
+
+
+@ads_bp.route("/download")
+@login_required
+def download_word():
+    path = Path(WORD_PATH)
+
+    if not path.exists():
+        return "먼저 광고를 생성해 주세요.", 404
+
+    return send_file(
+        str(path),
+        as_attachment=True,
+        download_name="advertisement.docx"
+    )
 
 @ads_bp.route("/download/pdf")
 @login_required

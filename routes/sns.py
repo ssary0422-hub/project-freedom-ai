@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
-from flask import Blueprint, render_template, request, session
+from flask import Blueprint, render_template, request, session, send_file
 
 from ai.sns import make_sns
 from ai.image import make_image
@@ -11,8 +11,8 @@ from database.users import (
     get_plan_status,
     record_ai_credit_usage,
 )
-from documents.pdf import create_sns_pdf
-from documents.word import create_sns_word
+from documents.pdf import create_sns_pdf, SNS_PDF_PATH
+from documents.word import create_sns_word, SNS_WORD_PATH
 from routes.auth import login_required
 
 sns_bp = Blueprint("sns", __name__)
@@ -539,20 +539,16 @@ def _sns_page():
     result = ""
     image_url = ""
     error = ""
-
     business = ""
     company = ""
     style = ""
     platform = ""
     image_style = "고급스러운 실사"
+    with_image = False
 
     if request.method == "POST":
         if not get_ai_enabled():
-            error = (
-                "현재 AI 생성 시스템이 점검 중입니다. "
-                "잠시 후 다시 이용해주세요."
-            )
-
+            error = "현재 AI 생성 시스템이 점검 중입니다. 잠시 후 다시 이용해주세요."
             return render_template(
                 "sns.html",
                 result=result,
@@ -562,49 +558,52 @@ def _sns_page():
                 company=company,
                 style=style,
                 platform=platform,
-                image_style=image_style
-            )
-
-        credit_status = get_plan_status(session["user_id"], required_credits=2)
-        if not credit_status["can_generate"]:
-            error = (
-                f"{credit_status['plan']} 요금제의 AI 크레딧이 부족합니다. "
-                f"현재 {credit_status['remaining']}크레딧 남음 · 이 기능은 2크레딧이 필요합니다."
-            )
-            return render_template(
-                "sns.html",
-                result=result, image_url=image_url, business=business, company=company, style=style, platform=platform, image_style=image_style,
-                error=error
+                image_style=image_style,
+                with_image=with_image
             )
 
         business = request.form.get("business", "").strip()
         company = request.form.get("company", "").strip()
         style = request.form.get("style", "").strip()
         platform = request.form.get("platform", "").strip()
-        image_style = request.form.get(
-            "image_style",
-            "고급스러운 실사"
-        ).strip()
+        image_style = request.form.get("image_style", "고급스러운 실사").strip()
+        with_image = request.form.get("with_image") == "on"
+
+        required_credits = 3 if with_image else 1
+        credit_status = get_plan_status(
+            session["user_id"],
+            required_credits=required_credits
+        )
+
+        if not credit_status["can_generate"]:
+            error = (
+                f"{credit_status['plan']} 요금제의 AI 크레딧이 부족합니다. "
+                f"현재 {credit_status['remaining']}크레딧 남음 · "
+                f"이번 SNS 생성은 {required_credits}크레딧이 필요합니다."
+            )
+            return render_template(
+                "sns.html",
+                result=result,
+                image_url=image_url,
+                business=business,
+                company=company,
+                style=style,
+                platform=platform,
+                image_style=image_style,
+                with_image=with_image,
+                error=error
+            )
 
         if not all([business, company, style, platform]):
             error = "모든 항목을 입력해 주세요."
-
         else:
             try:
-                # SNS 글 생성
-                result = make_sns(
-                    business,
-                    company,
-                    style,
-                    platform
-                )
+                result = make_sns(business, company, style, platform)
+                image_path = ""
 
-                # SNS 이미지 생성
-                image_style_instruction = _image_style_instruction(
-                    image_style
-                )
-
-                image_prompt = f"""
+                if with_image:
+                    image_style_instruction = _image_style_instruction(image_style)
+                    image_prompt = f"""
 SNS 게시물용 대표 이미지.
 
 회사명: {company}
@@ -620,39 +619,27 @@ SNS 게시물용 대표 이미지.
 브랜드 분위기에 어울리는 자연스럽고 고급스러운 이미지.
 이미지 안에는 글자를 넣지 말 것.
 """
+                    image_path = make_image(image_prompt)
+                    image_path = _add_company_name_to_image(
+                        image_path, company, business
+                    )
+                    image_url = "/" + Path(image_path).as_posix()
 
-                image_path = make_image(image_prompt)
-                image_path = _add_company_name_to_image(
-                    image_path,
-                    company,
-                    business
-                )
-                image_url = "/" + str(Path(image_path)).replace("\\", "/")
-                    
                 save_history(
-                    business,
-                    company,
-                    style,
-                    result,
-                    image_url,
+                    business, company, style, result, image_url,
                     content_type="sns",
                     user_id=session["user_id"]
                 )
+                create_sns_word(result, image_path)
+                create_sns_pdf(result, image_path)
 
-                create_sns_word(
-                    result,
-                    image_path
-                )
-
-                create_sns_pdf(
-                    result,
-                    image_path
-                )
+                used_credits = 3 if with_image and image_url else 1
                 record_ai_credit_usage(
                     session["user_id"],
-                    "SNS",
-                    2 if True else 1
+                    "SNS_IMAGE" if used_credits == 3 else "SNS_TEXT",
+                    used_credits
                 )
+
                 credit_status = get_plan_status(session["user_id"])
                 session["plan"] = credit_status["plan"]
                 session["plan_used"] = credit_status["used"]
@@ -673,5 +660,36 @@ SNS 게시물용 대표 이미지.
         company=company,
         style=style,
         platform=platform,
-        image_style=image_style
+        image_style=image_style,
+        with_image=with_image
+    )
+
+
+@sns_bp.route("/sns/download/word")
+@login_required
+def download_sns_word():
+    path = Path(SNS_WORD_PATH)
+
+    if not path.exists():
+        return "먼저 SNS 글을 생성해 주세요.", 404
+
+    return send_file(
+        str(path),
+        as_attachment=True,
+        download_name="sns.docx"
+    )
+
+
+@sns_bp.route("/sns/download/pdf")
+@login_required
+def download_sns_pdf():
+    path = Path(SNS_PDF_PATH)
+
+    if not path.exists():
+        return "먼저 SNS 글을 생성해 주세요.", 404
+
+    return send_file(
+        str(path),
+        as_attachment=True,
+        download_name="sns.pdf"
     )
