@@ -92,16 +92,16 @@ body {
                 </div>
 
                 <h1 class="fw-bold mb-3">
-                    👋 {{ session.get("user_name") }}님, 환영합니다.
+                    👋 {{ session.get("user_name") }}{{ t("v3.dash.user_suffix") }}, {{ t("v3.dash.welcome") }}
                 </h1>
 
                 <p class="lead text-white-50 mb-0">
-                    내 브랜드와 AI 마케팅 콘텐츠를 한곳에서 관리하세요.
+                    {{ t("v3.dash.subtitle") }}
                 </p>
 
                 <div class="usage-box">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="fw-bold">이번 달 AI 크레딧</div>
+                        <div class="fw-bold">{{ t("v3.dash.month_credit") }}</div>
                         <span class="plan-pill {{ 'plan-pro' if session.get('plan') == 'PRO' else 'plan-free' }}">
                             {{ '⭐ PRO' if session.get('plan') == 'PRO' else '🟢 FREE' }}
                         </span>
@@ -111,19 +111,19 @@ body {
                              style="width: {{ session.get('plan_percent', 0) }}%"></div>
                     </div>
                     <div class="small text-white-50 mt-2">
-                        이번 달 사용 {{ session.get('plan_used', 0) }} 크레딧
-                        · 총 사용 가능 {{ session.get('plan_remaining', 6) }} 크레딧
+                        {{ t("v3.dash.used") }} {{ session.get('plan_used', 0) }} {{ t("v3.credits.unit") }}
+                        · {{ t("v3.dash.total_available") }} {{ session.get('plan_remaining', 6) }} {{ t("v3.credits.unit") }}
                     </div>
 
                     <div class="mt-3">
                         <a
                             href="/credits"
                             class="btn btn-sm btn-light fw-bold">
-                            💳 크레딧 충전 · 내역
+                            💳 {{ t("v3.dash.credit_history") }}
                         </a>
                     </div>
                     <div class="small text-white-50 mt-2">
-                        텍스트 1 · 이미지 포함 3 · 패키지 텍스트 3 · 이미지 포함 패키지 7 크레딧
+                        {{ t("v3.dash.credit_rule") }}
                     </div>
                 </div>
             </div>
@@ -132,13 +132,13 @@ body {
                 <a
                     href="/package"
                     class="btn btn-info btn-lg quick-btn">
-                    ✨ 새 패키지 만들기
+                    ✨ {{ t("v3.dash.new_package") }}
                 </a>
 
                 {% if session.get("plan", "FREE") == "FREE" %}
                 <div class="mt-2">
                     <span class="badge text-bg-warning px-3 py-2">
-                        ⭐ PRO 업그레이드 준비 중
+                        ⭐ {{ t("v3.dash.pro_soon") }}
                     </span>
                 </div>
                 {% endif %}
@@ -152,10 +152,10 @@ body {
         <div class="col-md-4">
             <div class="card dashboard-card shadow-sm h-100">
                 <div class="card-body p-4">
-                    <div class="text-muted mb-2">🏢 내 브랜드</div>
+                    <div class="text-muted mb-2">🏢 {{ t("v3.dash.my_brand") }}</div>
                     <div class="stat-number">{{ dashboard.brand_count }}</div>
                     <a href="/profiles" class="text-decoration-none">
-                        브랜드 관리 →
+                        {{ t("v3.dash.manage_brand") }}
                     </a>
                 </div>
             </div>
@@ -164,10 +164,10 @@ body {
         <div class="col-md-4">
             <div class="card dashboard-card shadow-sm h-100">
                 <div class="card-body p-4">
-                    <div class="text-muted mb-2">🚀 생성 패키지</div>
+                    <div class="text-muted mb-2">🚀 {{ t("v3.dash.packages") }}</div>
                     <div class="stat-number">{{ dashboard.package_count }}</div>
                     <a href="/profiles" class="text-decoration-none">
-                        패키지 확인 →
+                        {{ t("v3.dash.view_packages") }}
                     </a>
                 </div>
             </div>
@@ -176,10 +176,10 @@ body {
         <div class="col-md-4">
             <div class="card dashboard-card shadow-sm h-100">
                 <div class="card-body p-4">
-                    <div class="text-muted mb-2">📚 현재 콘텐츠</div>
+                    <div class="text-muted mb-2">📚 {{ t("v3.dash.content") }}</div>
                     <div class="stat-number">{{ dashboard.content_count }}</div>
                     <a href="/history" class="text-decoration-none">
-                        생성 기록 →
+                        {{ t("v3.dash.history") }}
                     </a>
                 </div>
             </div>
@@ -195,13 +195,13 @@ body {
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="section-title mb-0">
-                            🏢 최근 브랜드
+                            🏢 {{ t("v3.dash.recent_brand") }}
                         </h4>
 
                         <a
                             href="/profiles"
                             class="btn btn-sm btn-outline-primary">
-                            전체 보기
+                            {{ t("v3.dash.view_all") }}
                         </a>
                     </div>
 
@@ -215,7 +215,7 @@ body {
                             <img
                                 src="{{ brand[4] }}"
                                 class="brand-thumbnail"
-                                alt="{{ brand[2] }} 대표 이미지">
+                                alt="{{ brand[2] }} {{ t('v3.dash.image_alt') }}">
                             {% else %}
                             <div class="brand-placeholder">
                                 🏢
@@ -235,13 +235,13 @@ body {
                                     <a
                                         href="/profiles/{{ brand[0] }}/history"
                                         class="btn btn-sm btn-outline-dark">
-                                        👁 브랜드 열기
+                                        👁 {{ t("v3.dash.open_brand") }}
                                     </a>
 
                                     <a
                                         href="/package?profile_id={{ brand[0] }}"
                                         class="btn btn-sm btn-primary">
-                                        🚀 이 브랜드로 생성
+                                        🚀 {{ t("v3.dash.generate_brand") }}
                                     </a>
                                 </div>
                             </div>
@@ -255,13 +255,13 @@ body {
                         <div class="text-center py-5">
                             <div class="display-5 mb-3">🏢</div>
                             <p class="fw-bold mb-1">
-                                아직 등록된 브랜드가 없습니다.
+                                {{ t("v3.dash.no_brand") }}
                             </p>
                             <p class="text-muted small">
-                                첫 브랜드를 만들고 AI 마케팅을 시작해보세요.
+                                {{ t("v3.dash.no_brand_desc") }}
                             </p>
                             <a href="/profiles" class="btn btn-primary">
-                                브랜드 만들기
+                                {{ t("v3.dash.create_brand") }}
                             </a>
                         </div>
 
@@ -277,13 +277,13 @@ body {
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="section-title mb-0">
-                            🚀 최근 마케팅 패키지
+                            🚀 {{ t("v3.dash.recent_package") }}
                         </h4>
 
                         <a
                             href="/package"
                             class="btn btn-sm btn-success">
-                            + 새 패키지
+                            + {{ t("v3.dash.new_package_short") }}
                         </a>
                     </div>
 
@@ -294,10 +294,10 @@ body {
 
                             <thead>
                                 <tr>
-                                    <th>브랜드</th>
-                                    <th>업종</th>
-                                    <th>콘텐츠</th>
-                                    <th>생성일</th>
+                                    <th>{{ t("v3.dash.brand") }}</th>
+                                    <th>{{ t("v3.dash.industry") }}</th>
+                                    <th>{{ t("v3.dash.contents") }}</th>
+                                    <th>{{ t("v3.dash.created") }}</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -316,7 +316,7 @@ body {
 
                                     <td>
                                         <span class="badge text-bg-primary">
-                                            {{ package[5] }}종
+                                            {{ package[5] }} {{ t("v3.dash.types") }}
                                         </span>
                                     </td>
 
@@ -330,7 +330,7 @@ body {
                                         <a
                                             href="/profiles/{{ package[1] }}/history/{{ package[0] }}"
                                             class="btn btn-sm btn-outline-dark">
-                                            👁 보기
+                                            👁 {{ t("v3.dash.view") }}
                                         </a>
                                         {% endif %}
 
@@ -356,13 +356,13 @@ body {
                                 🚀
                             </div>
                             <p class="fw-bold mb-1">
-                                아직 생성된 패키지가 없습니다.
+                                {{ t("v3.dash.no_package") }}
                             </p>
                             <p class="text-muted small">
-                                광고 + 블로그 + SNS를 한 번에 만들어보세요.
+                                {{ t("v3.dash.no_package_desc") }}
                             </p>
                             <a href="/package" class="btn btn-success">
-                                첫 패키지 만들기
+                                {{ t("v3.dash.first_package") }}
                             </a>
                         </div>
 
@@ -378,7 +378,7 @@ body {
         <div class="card-body p-4">
 
             <h4 class="section-title mb-3">
-                ⚡ 빠른 실행
+                ⚡ {{ t("v3.dash.quick") }}
             </h4>
 
             <div class="row g-3">
@@ -387,7 +387,7 @@ body {
                     <a
                         href="/package"
                         class="btn btn-primary w-100 quick-btn">
-                        🚀 마케팅 패키지 생성
+                        🚀 {{ t("v3.dash.create_package") }}
                     </a>
                 </div>
 
@@ -395,7 +395,7 @@ body {
                     <a
                         href="/profiles"
                         class="btn btn-outline-primary w-100 quick-btn">
-                        🏢 브랜드 프로필 관리
+                        🏢 {{ t("v3.dash.manage_profile") }}
                     </a>
                 </div>
 
@@ -403,7 +403,7 @@ body {
                     <a
                         href="/history"
                         class="btn btn-outline-secondary w-100 quick-btn">
-                        📚 전체 생성 기록
+                        📚 {{ t("v3.dash.all_history") }}
                     </a>
                 </div>
 

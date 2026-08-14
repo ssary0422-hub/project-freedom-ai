@@ -1,31 +1,43 @@
 import os
 from openai import OpenAI
 
+from ai.language import output_language_instruction
+
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
 )
+
 
 def make_ads(
     business,
     company,
     style,
-    count=5
+    count=5,
+    language="ko"
 ):
+    language_instruction = output_language_instruction(
+        language
+    )
 
     prompt = f"""
-당신은 전문 광고 카피라이터입니다.
+You are a professional advertising copywriter.
 
-업종: {business}
-회사명: {company}
-분위기: {style}
+Business category: {business}
+Company / brand name: {company}
+Brand mood: {style}
 
-위 브랜드에 어울리는 광고 문구를
-{count}개 만들어주세요.
+Create {count} advertising copy options that fit this brand.
 
-각 광고는 읽기 쉽고,
-고객의 관심을 끌 수 있도록 작성해주세요.
+Requirements:
+- Make each option easy to read and attention-grabbing.
+- Naturally reflect the business category and brand mood.
+- Keep the company / brand name exactly as the user entered it.
+- Avoid unnecessary explanations before or after the copy.
+- Use natural marketing language for the target audience.
+- Emojis may be used when they improve the copy.
 
-한국어로 작성해주세요.
+OUTPUT LANGUAGE RULE:
+{language_instruction}
 """
 
     response = client.responses.create(

@@ -1,30 +1,46 @@
 import os
 from openai import OpenAI
 
+from ai.language import output_language_instruction
 
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
 )
 
 
-def make_sns(business, company, style, platform):
+def make_sns(
+    business,
+    company,
+    style,
+    platform,
+    language="ko"
+):
+    language_instruction = output_language_instruction(
+        language
+    )
+
     prompt = f"""
-당신은 전문 SNS 마케팅 콘텐츠 작가입니다.
+You are a professional social media marketing content writer.
 
-업종: {business}
-회사명: {company}
-원하는 분위기: {style}
-게시 플랫폼: {platform}
+Business category: {business}
+Company / brand name: {company}
+Desired mood: {style}
+Platform: {platform}
 
-다음 조건을 만족하는 SNS 게시글을 한국어로 작성해 주세요.
+Create a social media post that satisfies all requirements:
 
-1. 첫 문장은 시선을 끌게 작성
-2. 회사명을 자연스럽게 포함
-3. 이모지 포함
-4. 읽기 쉽게 줄바꿈
-5. 자연스러운 홍보 문구 포함
-6. 방문이나 문의를 유도하는 문장 포함
-7. 마지막에 관련 해시태그 15개 작성
+1. Make the first line attention-grabbing
+2. Naturally include the company / brand name
+3. Use emojis where appropriate
+4. Use line breaks for easy reading
+5. Include a natural promotional message
+6. Include a call to visit, contact, book, buy, or learn more when appropriate
+7. End with 15 relevant hashtags
+8. Adapt the writing style to the selected platform
+9. Keep company names, brand names and proper nouns exactly as entered by the user
+
+OUTPUT LANGUAGE RULE:
+{language_instruction}
 """
 
     response = client.responses.create(

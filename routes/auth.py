@@ -254,7 +254,13 @@ def login():
         if not user:
             error = "이메일 또는 비밀번호가 올바르지 않습니다."
         else:
+            selected_language = session.get(
+                "language",
+                "ko"
+            )
+
             session.clear()
+            session["language"] = selected_language
 
             session["user_id"] = user["id"]
             session["user_name"] = user["username"]
@@ -282,7 +288,13 @@ def login():
 
 @auth_bp.route("/logout")
 def logout():
+    selected_language = session.get(
+        "language",
+        "ko"
+    )
+
     session.clear()
+    session["language"] = selected_language
 
     return redirect(
         url_for("auth.login")

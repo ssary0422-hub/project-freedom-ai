@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}AI 크레딧 - Project Freedom AI{% endblock %}
+{% block title %}{{ t("v3.credits.title") }} - Project Freedom AI{% endblock %}
 
 {% block extra_style %}
 body {
@@ -35,61 +35,61 @@ body {
                 </div>
 
                 <h1 class="fw-bold mb-2">
-                    💳 AI 크레딧
+                    💳 {{ t("v3.credits.title") }}
                 </h1>
 
                 <p class="text-white-50 mb-0">
-                    월 기본 크레딧과 충전 크레딧을 함께 사용할 수 있습니다.
+                    {{ t("v3.credits.subtitle") }}
                 </p>
             </div>
 
             <div class="text-end">
                 <div class="text-white-50">
-                    현재 사용 가능
+                    {{ t("v3.credits.available") }}
                 </div>
 
                 <div class="credit-number">
                     {{ status.remaining }}
                 </div>
 
-                <div>크레딧</div>
+                <div>{{ t("v3.credits.unit") }}</div>
             </div>
         </div>
     </section>
 
     {% if granted == 'invalid' %}
     <div class="alert alert-danger">
-        지급 정보가 올바르지 않습니다.
+        {{ t("v3.credits.invalid") }}
     </div>
     {% elif granted == 'notfound' %}
     <div class="alert alert-danger">
-        해당 이메일의 회원을 찾지 못했습니다.
+        {{ t("v3.credits.notfound") }}
     </div>
     {% elif granted %}
     <div class="alert alert-success">
-        ✅ {{ granted }} 크레딧 지급이 완료되었습니다.
+        ✅ {{ granted }} {{ t("v3.credits.granted") }}
     </div>
     {% endif %}
 
     {% if payment == 'success' %}
     <div class="alert alert-success shadow-sm">
-        ✅ TEST 결제가 완료되었습니다.
-        <strong>+{{ payment_credits }} 크레딧</strong>이 충전되었습니다.
+        ✅ {{ t("v3.credits.test_success") }}
+        <strong>+{{ payment_credits }} {{ t("v3.credits.unit") }}</strong> {{ t("v3.credits.charged") }}
         <div class="small mt-1">
-            실제 결제가 아닌 개발용 테스트 결제입니다.
+            {{ t("v3.credits.test_notice") }}
         </div>
     </div>
     {% elif payment == 'invalid_product' %}
     <div class="alert alert-danger">
-        올바르지 않은 크레딧 상품입니다.
+        {{ t("v3.credits.invalid_product") }}
     </div>
     {% elif payment == 'duplicate' %}
     <div class="alert alert-danger">
-        이미 처리된 테스트 주문입니다.
+        {{ t("v3.credits.duplicate") }}
     </div>
     {% elif payment == 'credit_error' %}
     <div class="alert alert-danger">
-        TEST 결제 기록은 생성됐지만 크레딧 지급에 실패했습니다.
+        {{ t("v3.credits.credit_error") }}
     </div>
     {% endif %}
 
@@ -99,7 +99,7 @@ body {
             <div class="card credit-card shadow-sm h-100">
                 <div class="card-body p-4">
                     <div class="text-muted">
-                        이번 달 기본 잔여
+                        {{ t("v3.credits.base_remaining") }}
                     </div>
 
                     <div class="fs-2 fw-bold">
@@ -107,7 +107,7 @@ body {
                     </div>
 
                     <div class="small text-muted">
-                        {{ status.plan }} 기본 {{ status.limit }} 크레딧
+                        {{ status.plan }} {{ t("v3.credits.plan_base") }} {{ status.limit }} {{ t("v3.credits.unit") }}
                     </div>
                 </div>
             </div>
@@ -117,7 +117,7 @@ body {
             <div class="card credit-card shadow-sm h-100">
                 <div class="card-body p-4">
                     <div class="text-muted">
-                        충전 크레딧
+                        {{ t("v3.credits.bonus") }}
                     </div>
 
                     <div class="fs-2 fw-bold text-primary">
@@ -125,7 +125,7 @@ body {
                     </div>
 
                     <div class="small text-muted">
-                        월이 바뀌어도 유지
+                        {{ t("v3.credits.persist") }}
                     </div>
                 </div>
             </div>
@@ -135,7 +135,7 @@ body {
             <div class="card credit-card shadow-sm h-100">
                 <div class="card-body p-4">
                     <div class="text-muted">
-                        총 사용 가능
+                        {{ t("v3.credits.total") }}
                     </div>
 
                     <div class="fs-2 fw-bold text-success">
@@ -143,7 +143,7 @@ body {
                     </div>
 
                     <div class="small text-muted">
-                        기본 + 충전 크레딧
+                        기본 + {{ t("v3.credits.bonus") }}
                     </div>
                 </div>
             </div>
@@ -154,10 +154,10 @@ body {
     <div class="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-3">
         <div>
             <h4 class="fw-bold mb-1">
-                🛒 크레딧 충전
+                🛒 {{ t("v3.credits.topup") }}
             </h4>
             <div class="text-muted">
-                현재는 사업자/PG 연결 전 단계라 TEST 결제로 전체 흐름을 검증합니다.
+                {{ t("v3.credits.topup_desc") }}
             </div>
         </div>
 
@@ -167,7 +167,7 @@ body {
         </span>
         {% else %}
         <span class="badge text-bg-secondary px-3 py-2">
-            TEST 결제 비활성화
+            {{ t("v3.credits.test_disabled") }}
         </span>
         {% endif %}
     </div>
@@ -183,7 +183,7 @@ body {
                     {% if code == 'popular' %}
                     <div class="mb-2">
                         <span class="badge text-bg-primary">
-                            ⭐ 가장 인기
+                            ⭐ {{ t("v3.credits.popular") }}
                         </span>
                     </div>
                     {% endif %}
@@ -202,7 +202,7 @@ body {
                     </div>
 
                     <div class="small text-muted mb-4">
-                        충전 크레딧은 월이 바뀌어도 유지됩니다.
+                        {{ t("v3.credits.bonus") }}은 {{ t("v3.credits.persist") }}됩니다.
                     </div>
 
                     <div class="mt-auto">
@@ -210,7 +210,7 @@ body {
                         <form
                             method="POST"
                             action="/credits/test-purchase"
-                            onsubmit="return confirm('실제 결제가 아닌 TEST 구매입니다. 계속할까요?');">
+                            onsubmit="return confirm({{ t('v3.credits.test_confirm') | tojson }});">
 
                             <input
                                 type="hidden"
@@ -220,14 +220,14 @@ body {
                             <button
                                 type="submit"
                                 class="btn {% if code == 'popular' %}btn-primary{% else %}btn-dark{% endif %} w-100">
-                                🧪 TEST 구매
+                                🧪 {{ t("v3.credits.test_buy") }}
                             </button>
                         </form>
                         {% else %}
                         <button
                             class="btn btn-secondary w-100"
                             disabled>
-                            TEST 결제 비활성화
+                            {{ t("v3.credits.test_disabled") }}
                         </button>
                         {% endif %}
                     </div>
@@ -240,10 +240,8 @@ body {
     </div>
 
     <div class="alert alert-warning border-0 shadow-sm mb-4">
-        <strong>🧪 개발용 TEST 결제</strong><br>
-        실제 카드 결제나 금전 거래가 발생하지 않습니다.
-        서버 환경변수 <code>ENABLE_TEST_PAYMENTS=1</code>일 때만 사용할 수 있습니다.
-        실제 서비스 공개 전에는 반드시 다시 <code>0</code>으로 비활성화하세요.
+        <strong>🧪 {{ t("v3.credits.dev_test") }}</strong><br>
+        {{ t("v3.credits.dev_desc") }}
     </div>
 
     {% if is_admin %}
@@ -253,11 +251,11 @@ body {
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                 <div>
                     <h4 class="fw-bold mb-1">
-                        🛠 관리자 테스트 지급
+                        🛠 {{ t("v3.credits.admin_grant") }}
                     </h4>
 
                     <div class="text-muted">
-                        결제 연결 전 크레딧 충전 동작을 테스트합니다.
+                        {{ t("v3.credits.admin_desc") }}
                     </div>
                 </div>
 
@@ -277,7 +275,7 @@ body {
                         type="email"
                         name="email"
                         value="{{ session.get('user_email', '') }}"
-                        placeholder="회원 이메일"
+                        placeholder="{{ t('v3.credits.member_email') }}"
                         required>
                 </div>
 
@@ -287,15 +285,15 @@ body {
                         name="amount">
 
                         <option value="10">
-                            10 크레딧
+                            10 {{ t("v3.credits.unit") }}
                         </option>
 
                         <option value="30">
-                            30 크레딧
+                            30 {{ t("v3.credits.unit") }}
                         </option>
 
                         <option value="100">
-                            100 크레딧
+                            100 {{ t("v3.credits.unit") }}
                         </option>
 
                     </select>
@@ -305,7 +303,7 @@ body {
                     <button
                         class="btn btn-danger"
                         type="submit">
-                        테스트 지급
+                        {{ t("v3.credits.test_grant") }}
                     </button>
                 </div>
 
@@ -319,7 +317,7 @@ body {
         <div class="card-body p-4">
 
             <h4 class="fw-bold mb-3">
-                💳 결제 테스트 내역
+                💳 {{ t("v3.credits.payment_history") }}
             </h4>
 
             {% if payments %}
@@ -327,12 +325,12 @@ body {
                 <table class="table align-middle">
                     <thead>
                         <tr>
-                            <th>일시</th>
-                            <th>상품</th>
-                            <th>크레딧</th>
-                            <th>금액</th>
-                            <th>상태</th>
-                            <th>구분</th>
+                            <th>{{ t("v3.credits.date") }}</th>
+                            <th>{{ t("v3.credits.product") }}</th>
+                            <th>{{ t("v3.credits.unit") }}</th>
+                            <th>{{ t("v3.credits.amount") }}</th>
+                            <th>{{ t("v3.credits.status") }}</th>
+                            <th>{{ t("v3.credits.type") }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -359,7 +357,7 @@ body {
             </div>
             {% else %}
             <div class="text-muted">
-                아직 TEST 결제 내역이 없습니다.
+                {{ t("v3.credits.no_payment") }}
             </div>
             {% endif %}
 
@@ -370,7 +368,7 @@ body {
         <div class="card-body p-4">
 
             <h4 class="fw-bold mb-3">
-                📜 충전 크레딧 내역
+                📜 {{ t("v3.credits.bonus") }} 내역
             </h4>
 
             {% if transactions %}
@@ -380,10 +378,10 @@ body {
 
                     <thead>
                         <tr>
-                            <th>일시</th>
-                            <th>구분</th>
-                            <th>변동</th>
-                            <th>내용</th>
+                            <th>{{ t("v3.credits.date") }}</th>
+                            <th>{{ t("v3.credits.type") }}</th>
+                            <th>{{ t("v3.credits.change") }}</th>
+                            <th>{{ t("v3.credits.note") }}</th>
                         </tr>
                     </thead>
 
@@ -417,7 +415,7 @@ body {
             {% else %}
 
             <div class="text-muted">
-                아직 충전 크레딧 내역이 없습니다.
+                아직 {{ t("v3.credits.bonus") }} 내역이 없습니다.
             </div>
 
             {% endif %}

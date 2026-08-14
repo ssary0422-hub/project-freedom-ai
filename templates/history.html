@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}생성 기록 - Project Freedom AI{% endblock %}
+{% block title %}{{ t("v3.history.title") }} - Project Freedom AI{% endblock %}
 
 {% block extra_style %}
 .history-image {
@@ -33,11 +33,11 @@
     <div class="text-center mb-5">
 
         <h1 class="mb-2">
-            📚 생성 기록
+            📚 {{ t("v3.history.title") }}
         </h1>
 
         <p class="text-muted mb-0">
-            지금까지 생성한 콘텐츠와 이미지를 확인할 수 있습니다.
+            {{ t("v3.history.subtitle") }}
         </p>
 
     </div>
@@ -59,16 +59,16 @@
                             <div>
 
                                 <h5 class="mb-1">
-                                    {{ item[2] or "회사명 없음" }}
+                                    {{ item[2] or t("v3.history.no_company") }}
                                 </h5>
 
                                 <div class="text-muted history-meta">
                                     <span class="me-3">
-                                        🏷 업종: {{ item[1] or "-" }}
+                                        🏷 {{ t("v3.history.industry") }} {{ item[1] or "-" }}
                                     </span>
 
                                     <span>
-                                        🎨 분위기: {{ item[3] or "-" }}
+                                        🎨 {{ t("v3.history.mood") }} {{ item[3] or "-" }}
                                     </span>
                                 </div>
 
@@ -92,19 +92,19 @@
                                 <a
                                     href="/history/download/{{ item[0] }}/image"
                                     class="btn btn-sm btn-outline-success">
-                                    🖼 이미지
+                                    🖼 {{ t("v3.history.image") }}
                                 </a>
                                 {% endif %}
 
                                 <form
                                     method="GET"
                                     action="/delete/{{ item[0] }}"
-                                    onsubmit="return confirm('이 생성 기록을 정말 삭제할까요?');">
+                                    onsubmit="return confirm({{ t('v3.history.delete_confirm') | tojson }});">
 
                                     <button
                                         type="submit"
                                         class="btn btn-sm btn-outline-danger">
-                                        🗑 삭제
+                                        🗑 {{ t("v3.history.delete") }}
                                     </button>
 
                                 </form>
@@ -126,7 +126,7 @@
                                 <img
                                     src="{{ item[5] }}"
                                     class="img-fluid rounded history-image"
-                                    alt="생성 이미지">
+                                    alt="{{ t('v3.history.image_alt') }}">
 
                             </div>
 
@@ -164,23 +164,23 @@
                 </div>
 
                 <h4>
-                    아직 생성 기록이 없습니다.
+                    {{ t("v3.history.empty") }}
                 </h4>
 
                 <p class="text-muted">
-                    광고, 블로그, SNS 또는 마케팅 패키지를 먼저 생성해 보세요.
+                    {{ t("v3.history.empty_desc") }}
                 </p>
 
                 <a
                     href="/"
                     class="btn btn-primary me-2">
-                    📢 광고 만들기
+                    📢 {{ t("v3.history.make_ad") }}
                 </a>
 
                 <a
                     href="/package"
                     class="btn btn-success">
-                    🚀 마케팅 패키지 만들기
+                    🚀 {{ t("v3.history.make_package") }}
                 </a>
 
             </div>

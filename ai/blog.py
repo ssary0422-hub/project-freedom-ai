@@ -1,27 +1,43 @@
 import os
 from openai import OpenAI
 
+from ai.language import output_language_instruction
+
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
 )
 
 
-def make_blog(topic, tone, length):
+def make_blog(
+    topic,
+    tone,
+    length,
+    language="ko"
+):
+    language_instruction = output_language_instruction(
+        language
+    )
+
     prompt = f"""
-당신은 전문 블로그 콘텐츠 작가입니다.
+You are a professional blog content writer.
 
-주제: {topic}
-글의 분위기: {tone}
-글의 길이: {length}
+Topic: {topic}
+Writing tone / brand mood: {tone}
+Requested length: {length}
 
-다음 조건에 맞춰 한국어 블로그 글을 작성해주세요.
+Write a high-quality blog article that satisfies all of these requirements:
 
-1. 클릭하고 싶은 제목
-2. 자연스러운 도입부
-3. 소제목이 포함된 본문
-4. 읽기 편한 문단 구성
-5. 마지막 요약
-6. 관련 해시태그 15개
+1. An appealing title
+2. A natural introduction
+3. Main body with useful subheadings
+4. Easy-to-read paragraph structure
+5. A concise summary at the end
+6. 15 relevant hashtags
+7. Follow the requested length as closely as reasonably possible
+8. Preserve company names, brand names and proper nouns as entered by the user
+
+OUTPUT LANGUAGE RULE:
+{language_instruction}
 """
 
     response = client.responses.create(

@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}브랜드 프로필 - Project Freedom AI{% endblock %}
+{% block title %}{{ t("v3.profile.title") }} - Project Freedom AI{% endblock %}
 
 {% block content %}
 <div class="container pb-5">
 
     <div class="text-center mb-4">
-        <h1>🏢 브랜드 프로필</h1>
+        <h1>🏢 {{ t("v3.profile.title") }}</h1>
 
         <p class="text-muted">
-            자주 사용하는 회사 정보를 저장해 두고 마케팅 패키지에서 바로 불러올 수 있습니다.
+            {{ t("v3.profile.subtitle") }}
         </p>
     </div>
 
@@ -18,27 +18,27 @@
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
                     <div class="fw-bold fs-5">
-                        💾 저장 브랜드
+                        💾 {{ t("v3.profile.saved_count") }}
                         <span class="text-primary">
                             {{ profile_count }} / {{ profile_limit }}
                         </span>
                     </div>
 
                     <div class="text-muted mt-1">
-                        현재 플랜:
+                        {{ t("v3.profile.current_plan") }}
                         {% if plan == "PRO" %}
                         <span class="badge text-bg-warning">⭐ PRO</span>
-                        최대 20개까지 저장할 수 있습니다.
+                        {{ t("v3.profile.max20") }}
                         {% else %}
                         <span class="badge text-bg-secondary">FREE</span>
-                        최대 2개까지 저장할 수 있습니다.
+                        {{ t("v3.profile.max2") }}
                         {% endif %}
                     </div>
                 </div>
 
                 {% if plan != "PRO" %}
                 <a href="/upgrade" class="btn btn-warning fw-bold">
-                    ⭐ PRO 업그레이드
+                    ⭐ {{ t("v3.profile.upgrade") }}
                 </a>
                 {% endif %}
             </div>
@@ -64,7 +64,7 @@
 
     <div class="card shadow mb-5">
         <div class="card-header">
-            ➕ 새 브랜드 저장
+            ➕ {{ t("v3.profile.new") }}
         </div>
 
         <div class="card-body">
@@ -72,12 +72,11 @@
             {% if profile_count >= profile_limit %}
             <div class="alert alert-warning">
                 {% if plan == "PRO" %}
-                <strong>⚠️ 저장 한도 도달</strong><br>
-                PRO 플랜의 브랜드 저장 한도 20개를 모두 사용했습니다.
-                기존 브랜드를 삭제하면 다시 저장할 수 있습니다.
+                <strong>⚠️ {{ t("v3.profile.limit") }}</strong><br>
+                {{ t("v3.profile.limit_pro") }}
                 {% else %}
-                <strong>🔒 FREE 브랜드 저장 한도 도달</strong><br>
-                FREE 플랜은 브랜드를 최대 2개까지 저장할 수 있습니다.
+                <strong>🔒 {{ t("v3.profile.limit_free") }}</strong><br>
+                FREE 플랜은 브랜드를 {{ t("v3.profile.max2") }}
                 기존 브랜드를 삭제하거나 PRO로 업그레이드해 주세요.
                 {% endif %}
             </div>
@@ -89,40 +88,40 @@
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label">
-                            업종
+                            {{ t("v3.profile.business") }}
                         </label>
 
                         <input
                             type="text"
                             name="business"
                             class="form-control"
-                            placeholder="예) 마사지샵"
+                            placeholder="{{ t('v21.ph.business') }}"
                             required>
                     </div>
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label">
-                            회사명
+                            {{ t("v3.profile.company") }}
                         </label>
 
                         <input
                             type="text"
                             name="company"
                             class="form-control"
-                            placeholder="예) 7데이즈"
+                            placeholder="{{ t('v21.ph.company') }}"
                             required>
                     </div>
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label">
-                            브랜드 분위기
+                            {{ t("v3.profile.mood") }}
                         </label>
 
                         <input
                             type="text"
                             name="style"
                             class="form-control"
-                            placeholder="예) 고급스럽고 친절한"
+                            placeholder="{{ t('v21.ph.mood') }}"
                             required>
                     </div>
 
@@ -132,7 +131,7 @@
 
                     <div class="col-md-3 mb-3">
                         <label class="form-label">
-                            이미지 스타일
+                            {{ t("v3.profile.image_style") }}
                         </label>
 
                         <select
@@ -140,35 +139,35 @@
                             class="form-select">
 
                             <option value="고급스러운 실사">
-                                고급스러운 실사
+                                {{ t("v21.style.luxury") }}
                             </option>
 
                             <option value="감성적인 분위기">
-                                감성적인 분위기
+                                {{ t("v21.style.emotional") }}
                             </option>
 
                             <option value="고양이 유머 콘셉트">
-                                🐱 고양이 유머 콘셉트
+                                {{ t("v21.style.cat") }}
                             </option>
 
                             <option value="강아지 유머 콘셉트">
-                                🐶 강아지 유머 콘셉트
+                                {{ t("v21.style.dog") }}
                             </option>
 
                             <option value="코끼리 유머 콘셉트">
-                                🐘 코끼리 유머 콘셉트
+                                {{ t("v21.style.elephant") }}
                             </option>
 
                             <option value="랜덤 동물 유머 콘셉트">
-                                🎲 랜덤 동물 유머 콘셉트
+                                {{ t("v21.style.random") }}
                             </option>
 
                             <option value="미니멀하고 깔끔한 스타일">
-                                미니멀
+                                {{ t("v21.style.minimal") }}
                             </option>
 
                             <option value="화려한 광고 비주얼">
-                                화려한 광고
+                                {{ t("v21.style.flashy") }}
                             </option>
 
                         </select>
@@ -176,7 +175,7 @@
 
                     <div class="col-md-3 mb-3">
                         <label class="form-label">
-                            SNS 플랫폼
+                            {{ t("v3.profile.sns") }}
                         </label>
 
                         <select
@@ -184,19 +183,19 @@
                             class="form-select">
 
                             <option value="인스타그램">
-                                인스타그램
+                                {{ t("v21.platform.instagram") }}
                             </option>
 
                             <option value="페이스북">
-                                페이스북
+                                {{ t("v21.platform.facebook") }}
                             </option>
 
                             <option value="틱톡">
-                                틱톡
+                                {{ t("v21.platform.tiktok") }}
                             </option>
 
                             <option value="네이버 홍보글">
-                                네이버 홍보글
+                                {{ t("v21.platform.naver") }}
                             </option>
 
                         </select>
@@ -204,7 +203,7 @@
 
                     <div class="col-md-3 mb-3">
                         <label class="form-label">
-                            블로그 길이
+                            {{ t("v3.profile.blog_length") }}
                         </label>
 
                         <select
@@ -212,17 +211,17 @@
                             class="form-select">
 
                             <option value="1000자">
-                                약 1,000자
+                                {{ t("v3.profile.len1000") }}
                             </option>
 
                             <option
                                 value="2000자"
                                 selected>
-                                약 2,000자
+                                {{ t("v3.profile.len2000") }}
                             </option>
 
                             <option value="3000자">
-                                약 3,000자
+                                {{ t("v3.profile.len3000") }}
                             </option>
 
                         </select>
@@ -230,7 +229,7 @@
 
                     <div class="col-md-3 mb-3">
                         <label class="form-label">
-                            광고 문구 개수
+                            {{ t("v3.profile.ads_count") }}
                         </label>
 
                         <select
@@ -238,17 +237,17 @@
                             class="form-select">
 
                             <option value="3">
-                                3개
+                                {{ t("v3.profile.count3") }}
                             </option>
 
                             <option
                                 value="5"
                                 selected>
-                                5개
+                                {{ t("v3.profile.count5") }}
                             </option>
 
                             <option value="10">
-                                10개
+                                {{ t("v3.profile.count10") }}
                             </option>
 
                         </select>
@@ -263,9 +262,9 @@
                         {% if profile_count >= profile_limit %}disabled{% endif %}>
 
                         {% if profile_count >= profile_limit %}
-                        🔒 브랜드 저장 한도 도달
+                        🔒 {{ t("v3.profile.save_limit") }}
                         {% else %}
-                        💾 브랜드 프로필 저장
+                        💾 {{ t("v3.profile.save") }}
                         {% endif %}
                     </button>
                 </div>
@@ -276,7 +275,7 @@
     </div>
 
     <h3 class="mb-3">
-        📚 저장된 브랜드
+        📚 {{ t("v3.profile.saved") }}
     </h3>
 
     {% if profiles %}
@@ -296,17 +295,17 @@
                     </h4>
 
                     <p class="mb-1">
-                        <strong>업종:</strong>
+                        <strong>{{ t("v3.profile.business") }}:</strong>
                         {{ item[1] }}
                     </p>
 
                     <p class="mb-1">
-                        <strong>분위기:</strong>
+                        <strong>{{ t("v3.profile.mood_short") }}</strong>
                         {{ item[3] }}
                     </p>
 
                     <p class="mb-1">
-                        <strong>이미지:</strong>
+                        <strong>{{ t("v3.profile.image") }}</strong>
                         {{ item[4] }}
                     </p>
 
@@ -316,12 +315,12 @@
                     </p>
 
                     <p class="mb-1">
-                        <strong>블로그:</strong>
+                        <strong>{{ t("v3.profile.blog") }}</strong>
                         {{ item[6] }}
                     </p>
 
                     <p class="mb-3">
-                        <strong>광고:</strong>
+                        <strong>{{ t("v3.profile.ads") }}</strong>
                         {{ item[7] }}개
                     </p>
 
@@ -331,26 +330,26 @@
                             href="/package?profile_id={{ item[0] }}"
                             class="btn btn-primary">
 
-                            🚀 이 브랜드로 생성
+                            🚀 {{ t("v3.profile.generate") }}
                         </a>
 
                         <a
                             href="/profiles/{{ item[0] }}/history"
                             class="btn btn-outline-primary">
 
-                            📚 브랜드 히스토리
+                            📚 {{ t("v3.profile.brand_history") }}
                         </a>
 
                         <form
                             method="POST"
                             action="/profiles/delete/{{ item[0] }}"
-                            onsubmit="return confirm('이 브랜드 프로필을 삭제할까요?');">
+                            onsubmit="return confirm({{ t('v3.profile.delete_confirm') | tojson }});">
 
                             <button
                                 type="submit"
                                 class="btn btn-outline-danger">
 
-                                🗑 삭제
+                                🗑 {{ t("v3.profile.delete") }}
                             </button>
 
                         </form>
@@ -369,7 +368,7 @@
     {% else %}
 
     <div class="alert alert-secondary">
-        아직 저장된 브랜드 프로필이 없습니다.
+        {{ t("v3.profile.none") }}
     </div>
 
     {% endif %}

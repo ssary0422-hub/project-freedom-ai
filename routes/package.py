@@ -984,7 +984,8 @@ def package():
                     business,
                     company,
                     style,
-                    ads_count
+                    ads_count,
+                    language=session.get("language", "ko")
                 )
 
                 if _is_fun_animal_style(image_style):
@@ -1098,7 +1099,8 @@ No text, no logo, no watermark.
                 blog_result = make_blog(
                     blog_topic,
                     style,
-                    blog_length
+                    blog_length,
+                    language=session.get("language", "ko")
                 )
 
                 if _is_fun_animal_style(image_style):
@@ -1218,7 +1220,8 @@ No text, no logo, no watermark.
                     business,
                     company,
                     style,
-                    sns_platform
+                    sns_platform,
+                    language=session.get("language", "ko")
                 )
 
                 (

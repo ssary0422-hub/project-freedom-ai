@@ -592,7 +592,7 @@ def _home_page():
             )
 
         if business and company and style:
-            result = make_ads(business, company, style)
+            result = make_ads(business, company, style, language=session.get("language", "ko"))
             image_path = ""
 
             if with_image:

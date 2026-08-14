@@ -43,10 +43,9 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
     ">
     <div class="text-center bg-white shadow rounded-4 p-5 mx-3" style="min-width:min(320px, 90vw);">
         <div class="spinner-border text-primary mb-3" role="status"></div>
-        <h4 class="fw-bold mb-2">🤖 AI 생성 중...</h4>
+        <h4 class="fw-bold mb-2">{{ t("v21.gen.loading") }}</h4>
         <div class="text-muted">
-            글과 이미지를 만들고 있습니다.<br>
-            잠시만 기다려 주세요.
+            {{ t("v21.gen.loading_desc") }}
         </div>
     </div>
 </div>
@@ -55,15 +54,15 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
 
     <div class="text-center pf-page-header">
         <div class="pf-eyebrow mb-2">PROJECT FREEDOM AI</div>
-        <h1 class="fw-bold mb-2">🤖 AI 콘텐츠 생성기</h1>
+        <h1 class="fw-bold mb-2">{{ t("v21.gen.title") }}</h1>
         <p class="text-muted mb-0">
-            광고 · 블로그 · SNS 콘텐츠를 한곳에서 생성하세요.
+            {{ t("v21.gen.subtitle") }}
         </p>
     </div>
 
     {% if error %}
     <div class="alert alert-warning shadow-sm mb-4">
-        <strong>⚠️ 안내</strong><br>
+        <strong>{{ t("v21.gen.notice") }}</strong><br>
         {{ error }}
     </div>
     {% endif %}
@@ -75,31 +74,31 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
                 <a
                     href="/"
                     class="btn {% if active_tab == 'ads' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
-                    📢 광고
+                    {{ t("v21.tab.ads") }}
                 </a>
 
                 <a
                     href="/blog"
                     class="btn {% if active_tab == 'blog' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
-                    📝 블로그
+                    {{ t("v21.tab.blog") }}
                 </a>
 
                 <a
                     href="/sns"
                     class="btn {% if active_tab == 'sns' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
-                    📱 SNS
+                    {{ t("v21.tab.sns") }}
                 </a>
 
                 <a href="/package" class="btn btn-success flex-fill">
-                    🚀 마케팅 패키지
+                    {{ t("v21.tab.package") }}
                 </a>
 
                 <a href="/profiles" class="btn btn-outline-success flex-fill">
-                    🏢 브랜드
+                    {{ t("v21.tab.brand") }}
                 </a>
 
                 <a href="/history" class="btn btn-outline-secondary flex-fill">
-                    📚 기록
+                    {{ t("v21.tab.history") }}
                 </a>
             </div>
 
@@ -119,18 +118,18 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
     {% if result %}
     <div class="card shadow main-card mt-4">
         <div class="card-header bg-white fw-bold py-3">
-            {% block result_title %}🤖 AI 결과{% endblock %}
+            {% block result_title %}{{ t("v21.gen.title") }}{% endblock %}
         </div>
 
         <div class="card-body p-4">
 
             {% if image_url %}
             <div class="mb-4 text-center">
-                <h5 class="mb-3">🎨 생성 이미지</h5>
+                <h5 class="mb-3">{{ t("v21.gen.image") }}</h5>
                 <img
                     src="{{ image_url }}"
                     class="img-fluid rounded shadow result-image"
-                    alt="AI 생성 이미지">
+                    alt="{{ t('v21.gen.image') }}">
             </div>
             {% endif %}
 
@@ -145,7 +144,7 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
                     type="button"
                     class="btn btn-primary"
                     onclick="copyResult()">
-                    📋 복사하기
+                    {{ t("v21.copy") }}
                 </button>
                 {% endblock %}
             </div>
@@ -162,15 +161,15 @@ async function copyResult() {
     const resultElement = document.getElementById("result");
 
     if (!resultElement) {
-        alert("복사할 결과가 없습니다.");
+        alert({{ t("v21.gen.no_copy") | tojson }});
         return;
     }
 
     try {
         await navigator.clipboard.writeText(resultElement.innerText);
-        alert("📋 복사되었습니다!");
+        alert({{ t("v21.gen.copied") | tojson }});
     } catch (error) {
-        alert("복사에 실패했습니다.");
+        alert({{ t("v21.gen.copy_fail") | tojson }});
         console.error(error);
     }
 }
@@ -233,7 +232,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const submitButton = form.querySelector("button[type='submit']");
         if (submitButton) {
             submitButton.disabled = true;
-            submitButton.innerHTML = "🤖 AI 생성 중...";
+            submitButton.innerHTML = "{{ t("v21.gen.loading") }}";
         }
     });
 });

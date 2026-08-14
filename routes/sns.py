@@ -598,7 +598,7 @@ def _sns_page():
             error = "모든 항목을 입력해 주세요."
         else:
             try:
-                result = make_sns(business, company, style, platform)
+                result = make_sns(business, company, style, platform, language=session.get("language", "ko"))
                 image_path = ""
 
                 if with_image:

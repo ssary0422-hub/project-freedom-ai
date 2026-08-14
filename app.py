@@ -323,7 +323,8 @@ def home():
             result = make_ads(
                 business,
                 company,
-                style
+                style,
+                language=session.get("language", "ko")
             )
 
             # 2. 이미지 생성용 프롬프트

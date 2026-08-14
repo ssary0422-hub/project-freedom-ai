@@ -1,53 +1,53 @@
 {% extends "generator_base.html" %}
 {% set active_tab = "sns" %}
 
-{% block title %}SNS 생성기 - Project Freedom AI{% endblock %}
-{% block generator_title %}📱 AI SNS 생성기{% endblock %}
-{% block generator_subtitle %}플랫폼과 브랜드 분위기에 맞는 SNS 게시글과 이미지를 생성합니다.{% endblock %}
+{% block title %}{{ t("v2.sns") }} - Project Freedom AI{% endblock %}
+{% block generator_title %}📱 {{ t("v2.sns") }}{% endblock %}
+{% block generator_subtitle %}{{ t("v2.sns") }}{% endblock %}
 
 {% block form %}
 <form method="POST">
     <div class="mb-3">
-        <label class="form-label">업종</label>
+        <label class="form-label">{{ t("v2.business") }}</label>
         <input type="text" class="form-control" name="business"
-               value="{{ business or '' }}" placeholder="예) 마사지샵" required>
+               value="{{ business or '' }}" placeholder="{{ t('v21.ph.business') }}" required>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">업체명</label>
+        <label class="form-label">{{ t("v21.company") }}</label>
         <input type="text" class="form-control" name="company"
-               value="{{ company or '' }}" placeholder="예) 7데이즈" required>
+               value="{{ company or '' }}" placeholder="{{ t('v21.ph.company') }}" required>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">원하는 분위기</label>
+        <label class="form-label">{{ t("v2.mood") }}</label>
         <input type="text" class="form-control" name="style"
-               value="{{ style or '' }}" placeholder="예) 고급스럽고 친절한" required>
+               value="{{ style or '' }}" placeholder="{{ t('v21.ph.mood') }}" required>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">플랫폼</label>
+        <label class="form-label">{{ t("v2.platform") }}</label>
         <select class="form-select" name="platform" required>
-            <option value="">플랫폼을 선택하세요</option>
-            <option value="인스타그램" {% if platform == "인스타그램" %}selected{% endif %}>인스타그램</option>
-            <option value="페이스북" {% if platform == "페이스북" %}selected{% endif %}>페이스북</option>
-            <option value="네이버 홍보글" {% if platform == "네이버 홍보글" %}selected{% endif %}>네이버 홍보글</option>
-            <option value="틱톡" {% if platform == "틱톡" %}selected{% endif %}>틱톡</option>
+            <option value="">{{ t("v21.select.platform") }}</option>
+            <option value="인스타그램" {% if platform == "인스타그램" %}selected{% endif %}>{{ t("v21.platform.instagram") }}</option>
+            <option value="페이스북" {% if platform == "페이스북" %}selected{% endif %}>{{ t("v21.platform.facebook") }}</option>
+            <option value="네이버 홍보글" {% if platform == "네이버 홍보글" %}selected{% endif %}>{{ t("v21.platform.naver") }}</option>
+            <option value="틱톡" {% if platform == "틱톡" %}selected{% endif %}>{{ t("v21.platform.tiktok") }}</option>
         </select>
     </div>
 
 
 <div class="mb-3">
-    <label class="form-label">이미지 스타일</label>
+    <label class="form-label">{{ t("v2.image_style") }}</label>
     <select name="image_style" class="form-select">
-        <option value="고급스러운 실사" {% if image_style == "고급스러운 실사" %}selected{% endif %}>고급스러운 실사</option>
-        <option value="감성적인 분위기" {% if image_style == "감성적인 분위기" %}selected{% endif %}>감성적인 분위기</option>
-        <option value="고양이 유머 콘셉트" {% if image_style == "고양이 유머 콘셉트" %}selected{% endif %}>🐱 고양이 유머 콘셉트</option>
-        <option value="강아지 유머 콘셉트" {% if image_style == "강아지 유머 콘셉트" %}selected{% endif %}>🐶 강아지 유머 콘셉트</option>
-        <option value="코끼리 유머 콘셉트" {% if image_style == "코끼리 유머 콘셉트" %}selected{% endif %}>🐘 코끼리 유머 콘셉트</option>
-        <option value="랜덤 동물 유머 콘셉트" {% if image_style == "랜덤 동물 유머 콘셉트" %}selected{% endif %}>🎲 랜덤 동물 유머 콘셉트</option>
-        <option value="미니멀하고 깔끔한 스타일" {% if image_style == "미니멀하고 깔끔한 스타일" %}selected{% endif %}>미니멀</option>
-        <option value="화려한 광고 비주얼" {% if image_style == "화려한 광고 비주얼" %}selected{% endif %}>화려한 광고</option>
+        <option value="고급스러운 실사" {% if image_style == "고급스러운 실사" %}selected{% endif %}>{{ t("v21.style.luxury") }}</option>
+        <option value="감성적인 분위기" {% if image_style == "감성적인 분위기" %}selected{% endif %}>{{ t("v21.style.emotional") }}</option>
+        <option value="고양이 유머 콘셉트" {% if image_style == "고양이 유머 콘셉트" %}selected{% endif %}>{{ t("v21.style.cat") }}</option>
+        <option value="강아지 유머 콘셉트" {% if image_style == "강아지 유머 콘셉트" %}selected{% endif %}>{{ t("v21.style.dog") }}</option>
+        <option value="코끼리 유머 콘셉트" {% if image_style == "코끼리 유머 콘셉트" %}selected{% endif %}>{{ t("v21.style.elephant") }}</option>
+        <option value="랜덤 동물 유머 콘셉트" {% if image_style == "랜덤 동물 유머 콘셉트" %}selected{% endif %}>{{ t("v21.style.random") }}</option>
+        <option value="미니멀하고 깔끔한 스타일" {% if image_style == "미니멀하고 깔끔한 스타일" %}selected{% endif %}>{{ t("v21.style.minimal") }}</option>
+        <option value="화려한 광고 비주얼" {% if image_style == "화려한 광고 비주얼" %}selected{% endif %}>{{ t("v21.style.flashy") }}</option>
     </select>
 </div>
 
@@ -60,41 +60,41 @@
                id="with_image"
                {% if with_image %}checked{% endif %}>
         <label class="form-check-label fw-bold" for="with_image">
-            🎨 AI 이미지도 함께 생성
+            🎨 {{ t("v2.image") }}
         </label>
     </div>
 
     <div class="small text-muted mt-2">
-        텍스트만 <strong>1 크레딧</strong> · 이미지 포함 <strong>3 크레딧</strong>
+        {{ t("v21.credit.rule") }}
     </div>
 
     <div class="row g-2 mt-2">
         <div class="col-md-4">
             <div class="border rounded-3 bg-white p-3 h-100">
-                <div class="small text-muted">💳 현재 보유</div>
+                <div class="small text-muted">💳 {{ t("v2.current") }}</div>
                 <div class="fw-bold fs-5">
                     <span id="current-credit">{{ session.get("plan_remaining", 0) }}</span>
-                    크레딧
+                    {{ t("v2.credits") }}
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
             <div class="border rounded-3 bg-white p-3 h-100">
-                <div class="small text-muted">🔥 이번 생성</div>
+                <div class="small text-muted">🔥 {{ t("v2.this") }}</div>
                 <div class="fw-bold fs-5">
                     <span id="estimated-credit">1</span>
-                    크레딧
+                    {{ t("v2.credits") }}
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
             <div class="border rounded-3 bg-white p-3 h-100">
-                <div class="small text-muted">✨ 생성 후 예상</div>
+                <div class="small text-muted">✨ {{ t("v2.after") }}</div>
                 <div class="fw-bold fs-5">
                     <span id="after-credit">{{ session.get("plan_remaining", 0) }}</span>
-                    크레딧
+                    {{ t("v2.credits") }}
                 </div>
             </div>
         </div>
@@ -104,33 +104,33 @@
         id="credit-warning"
         class="alert alert-danger mt-3 mb-0 py-2"
         style="display:none;">
-        ⚠️ 크레딧이 부족합니다. 이미지 옵션을 끄거나 플랜을 업그레이드해 주세요.
+        ⚠️ {{ t("v2.warn") }}
     </div>
 </div>
 
     <div class="d-grid">
         <button class="btn btn-primary btn-lg" type="submit">
-            ✨ SNS 글 만들기
+            ✨ {{ t("v2.sns_btn") }}
         </button>
     </div>
 </form>
 {% endblock %}
 
-{% block result_title %}🤖 AI SNS 결과{% endblock %}
+{% block result_title %}{{ t("v21.result.sns") }}{% endblock %}
 
 {% block result_actions %}
 <a href="/sns/download/word" class="btn btn-success me-2">
-    📄 Word 다운로드
+    {{ t("v21.download.word") }}
 </a>
 
 <a href="/sns/download/pdf" class="btn btn-danger me-2">
-    📕 PDF 다운로드
+    {{ t("v21.download.pdf") }}
 </a>
 
 <button
     type="button"
     class="btn btn-primary"
     onclick="copyResult()">
-    📋 복사하기
+    {{ t("v21.copy") }}
 </button>
 {% endblock %}

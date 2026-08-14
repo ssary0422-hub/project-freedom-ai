@@ -1,58 +1,58 @@
 {% extends "generator_base.html" %}
 {% set active_tab = "blog" %}
 
-{% block title %}블로그 생성기 - Project Freedom AI{% endblock %}
-{% block generator_title %}📝 AI 블로그 생성기{% endblock %}
-{% block generator_subtitle %}업체 정보와 주제를 입력하면 블로그 글과 대표 이미지를 생성합니다.{% endblock %}
+{% block title %}{{ t("v2.blog") }} - Project Freedom AI{% endblock %}
+{% block generator_title %}📝 {{ t("v2.blog") }}{% endblock %}
+{% block generator_subtitle %}{{ t("v2.blog") }}{% endblock %}
 
 {% block form %}
 <form method="POST">
     <div class="mb-3">
-        <label class="form-label">업종</label>
+        <label class="form-label">{{ t("v2.business") }}</label>
         <input type="text" class="form-control" name="business"
-               value="{{ business or '' }}" placeholder="예) 헬스장" required>
+               value="{{ business or '' }}" placeholder="{{ t('v21.ph.blog_business') }}" required>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">업체명</label>
+        <label class="form-label">{{ t("v21.company") }}</label>
         <input type="text" class="form-control" name="company"
-               value="{{ company or '' }}" placeholder="예) 런바디스튜디오" required>
+               value="{{ company or '' }}" placeholder="{{ t('v21.ph.blog_company') }}" required>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">블로그 주제</label>
+        <label class="form-label">{{ t("v2.topic") }}</label>
         <input type="text" class="form-control" name="topic"
-               value="{{ topic or '' }}" placeholder="예) 초보자를 위한 러닝 자세" required>
+               value="{{ topic or '' }}" placeholder="{{ t('v21.ph.topic') }}" required>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">글의 분위기</label>
+        <label class="form-label">{{ t("v2.writing") }}</label>
         <input type="text" class="form-control" name="tone"
-               value="{{ tone or '' }}" placeholder="예) 친근하고 전문적으로" required>
+               value="{{ tone or '' }}" placeholder="{{ t('v21.ph.tone') }}" required>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">글의 길이</label>
+        <label class="form-label">{{ t("v2.length") }}</label>
         <select class="form-select" name="length" required>
-            <option value="">길이를 선택하세요</option>
-            <option value="1000자" {% if length == "1000자" %}selected{% endif %}>짧게 — 약 1,000자</option>
-            <option value="2000자" {% if length == "2000자" %}selected{% endif %}>보통 — 약 2,000자</option>
-            <option value="3000자" {% if length == "3000자" %}selected{% endif %}>길게 — 약 3,000자</option>
+            <option value="">{{ t("v21.select.length") }}</option>
+            <option value="1000자" {% if length == "1000자" %}selected{% endif %}>{{ t("v21.length.short") }}</option>
+            <option value="2000자" {% if length == "2000자" %}selected{% endif %}>{{ t("v21.length.normal") }}</option>
+            <option value="3000자" {% if length == "3000자" %}selected{% endif %}>{{ t("v21.length.long") }}</option>
         </select>
     </div>
 
 
 <div class="mb-3">
-    <label class="form-label">이미지 스타일</label>
+    <label class="form-label">{{ t("v2.image_style") }}</label>
     <select name="image_style" class="form-select">
-        <option value="고급스러운 실사" {% if image_style == "고급스러운 실사" %}selected{% endif %}>고급스러운 실사</option>
-        <option value="감성적인 분위기" {% if image_style == "감성적인 분위기" %}selected{% endif %}>감성적인 분위기</option>
-        <option value="고양이 유머 콘셉트" {% if image_style == "고양이 유머 콘셉트" %}selected{% endif %}>🐱 고양이 유머 콘셉트</option>
-        <option value="강아지 유머 콘셉트" {% if image_style == "강아지 유머 콘셉트" %}selected{% endif %}>🐶 강아지 유머 콘셉트</option>
-        <option value="코끼리 유머 콘셉트" {% if image_style == "코끼리 유머 콘셉트" %}selected{% endif %}>🐘 코끼리 유머 콘셉트</option>
-        <option value="랜덤 동물 유머 콘셉트" {% if image_style == "랜덤 동물 유머 콘셉트" %}selected{% endif %}>🎲 랜덤 동물 유머 콘셉트</option>
-        <option value="미니멀하고 깔끔한 스타일" {% if image_style == "미니멀하고 깔끔한 스타일" %}selected{% endif %}>미니멀</option>
-        <option value="화려한 광고 비주얼" {% if image_style == "화려한 광고 비주얼" %}selected{% endif %}>화려한 광고</option>
+        <option value="고급스러운 실사" {% if image_style == "고급스러운 실사" %}selected{% endif %}>{{ t("v21.style.luxury") }}</option>
+        <option value="감성적인 분위기" {% if image_style == "감성적인 분위기" %}selected{% endif %}>{{ t("v21.style.emotional") }}</option>
+        <option value="고양이 유머 콘셉트" {% if image_style == "고양이 유머 콘셉트" %}selected{% endif %}>{{ t("v21.style.cat") }}</option>
+        <option value="강아지 유머 콘셉트" {% if image_style == "강아지 유머 콘셉트" %}selected{% endif %}>{{ t("v21.style.dog") }}</option>
+        <option value="코끼리 유머 콘셉트" {% if image_style == "코끼리 유머 콘셉트" %}selected{% endif %}>{{ t("v21.style.elephant") }}</option>
+        <option value="랜덤 동물 유머 콘셉트" {% if image_style == "랜덤 동물 유머 콘셉트" %}selected{% endif %}>{{ t("v21.style.random") }}</option>
+        <option value="미니멀하고 깔끔한 스타일" {% if image_style == "미니멀하고 깔끔한 스타일" %}selected{% endif %}>{{ t("v21.style.minimal") }}</option>
+        <option value="화려한 광고 비주얼" {% if image_style == "화려한 광고 비주얼" %}selected{% endif %}>{{ t("v21.style.flashy") }}</option>
     </select>
 </div>
 
@@ -65,41 +65,41 @@
                id="with_image"
                {% if with_image %}checked{% endif %}>
         <label class="form-check-label fw-bold" for="with_image">
-            🎨 AI 이미지도 함께 생성
+            🎨 {{ t("v2.image") }}
         </label>
     </div>
 
     <div class="small text-muted mt-2">
-        텍스트만 <strong>1 크레딧</strong> · 이미지 포함 <strong>3 크레딧</strong>
+        {{ t("v21.credit.rule") }}
     </div>
 
     <div class="row g-2 mt-2">
         <div class="col-md-4">
             <div class="border rounded-3 bg-white p-3 h-100">
-                <div class="small text-muted">💳 현재 보유</div>
+                <div class="small text-muted">💳 {{ t("v2.current") }}</div>
                 <div class="fw-bold fs-5">
                     <span id="current-credit">{{ session.get("plan_remaining", 0) }}</span>
-                    크레딧
+                    {{ t("v2.credits") }}
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
             <div class="border rounded-3 bg-white p-3 h-100">
-                <div class="small text-muted">🔥 이번 생성</div>
+                <div class="small text-muted">🔥 {{ t("v2.this") }}</div>
                 <div class="fw-bold fs-5">
                     <span id="estimated-credit">1</span>
-                    크레딧
+                    {{ t("v2.credits") }}
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
             <div class="border rounded-3 bg-white p-3 h-100">
-                <div class="small text-muted">✨ 생성 후 예상</div>
+                <div class="small text-muted">✨ {{ t("v2.after") }}</div>
                 <div class="fw-bold fs-5">
                     <span id="after-credit">{{ session.get("plan_remaining", 0) }}</span>
-                    크레딧
+                    {{ t("v2.credits") }}
                 </div>
             </div>
         </div>
@@ -109,33 +109,33 @@
         id="credit-warning"
         class="alert alert-danger mt-3 mb-0 py-2"
         style="display:none;">
-        ⚠️ 크레딧이 부족합니다. 이미지 옵션을 끄거나 플랜을 업그레이드해 주세요.
+        ⚠️ {{ t("v2.warn") }}
     </div>
 </div>
 
     <div class="d-grid">
         <button class="btn btn-primary btn-lg" type="submit">
-            ✨ 블로그 글 만들기
+            ✨ {{ t("v2.blog_btn") }}
         </button>
     </div>
 </form>
 {% endblock %}
 
-{% block result_title %}🤖 AI 블로그 결과{% endblock %}
+{% block result_title %}{{ t("v21.result.blog") }}{% endblock %}
 
 {% block result_actions %}
 <a href="/blog/download/word" class="btn btn-success me-2">
-    📄 Word 다운로드
+    {{ t("v21.download.word") }}
 </a>
 
 <a href="/blog/download/pdf" class="btn btn-danger me-2">
-    📕 PDF 다운로드
+    {{ t("v21.download.pdf") }}
 </a>
 
 <button
     type="button"
     class="btn btn-primary"
     onclick="copyResult()">
-    📋 복사하기
+    {{ t("v21.copy") }}
 </button>
 {% endblock %}
