@@ -15,6 +15,52 @@ def init_db():
     conn = _connect()
     cursor = conn.cursor()
 
+    # 대시보드에서도 사용하는 브랜드 프로필 테이블을 항상 보장합니다.
+    # 새 서버/새 SQLite DB에서도 /dashboard가 먼저 열려도 오류가 나지 않습니다.
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS brand_profiles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            business TEXT NOT NULL,
+            company TEXT NOT NULL,
+            style TEXT NOT NULL,
+            image_style TEXT DEFAULT '고급스러운 실사',
+            sns_platform TEXT DEFAULT '인스타그램',
+            blog_length TEXT DEFAULT '2000자',
+            ads_count INTEGER DEFAULT 5,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            user_id INTEGER
+        )
+    """)
+
+    cursor.execute("PRAGMA table_info(brand_profiles)")
+    brand_columns = {
+        column[1]
+        for column in cursor.fetchall()
+    }
+
+    brand_migrations = {
+        "image_style": "TEXT DEFAULT '고급스러운 실사'",
+        "sns_platform": "TEXT DEFAULT '인스타그램'",
+        "blog_length": "TEXT DEFAULT '2000자'",
+        "ads_count": "INTEGER DEFAULT 5",
+        "created_at": "TIMESTAMP",
+        "user_id": "INTEGER",
+    }
+
+    for column_name, column_type in brand_migrations.items():
+        if column_name not in brand_columns:
+            cursor.execute(
+                f"""
+                ALTER TABLE brand_profiles
+                ADD COLUMN {column_name} {column_type}
+                """
+            )
+
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_brand_profiles_user_id
+        ON brand_profiles (user_id)
+    """)
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
