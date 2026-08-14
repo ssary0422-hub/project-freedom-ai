@@ -217,6 +217,11 @@ init_db()
 
 
 
+@app.route("/")
+def landing():
+    return render_template("landing.html")
+
+
 @app.route("/dashboard")
 @login_required
 def dashboard():

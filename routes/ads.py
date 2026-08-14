@@ -526,12 +526,12 @@ def _image_style_instruction(image_style):
     )
 
 
-@ads_bp.route("/", methods=["GET"])
+@ads_bp.route("/ads-generator", methods=["GET"])
 def home():
     return _home_page()
 
 
-@ads_bp.route("/", methods=["POST"])
+@ads_bp.route("/ads-generator", methods=["POST"])
 @login_required
 def generate_ads():
     return _home_page()
