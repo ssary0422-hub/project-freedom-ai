@@ -39,7 +39,8 @@ def _get_admin_payment_data(limit=100):
     init_db()
 
     conn = _connect()
-    conn.row_factory = sqlite3.Row
+    if isinstance(conn, sqlite3.Connection):
+        conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -58,7 +59,7 @@ def _get_admin_payment_data(limit=100):
             COALESCE(SUM(amount), 0) AS today_amount
         FROM payments
         WHERE status = 'PAID'
-          AND DATE(paid_at) = DATE('now', 'localtime')
+          AND DATE(paid_at) = CURRENT_DATE
     """)
     today = cursor.fetchone()
 
