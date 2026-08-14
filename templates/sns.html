@@ -36,6 +36,7 @@
                 </button>
             </div>
         </div>
+
         {% if loaded_profile_name %}
         <div class="alert alert-success py-2 mt-3 mb-0">
             ✅ <strong>{{ loaded_profile_name }}</strong> {{ t("v21.pkg.loaded") }}
@@ -92,6 +93,19 @@
         <option value="미니멀하고 깔끔한 스타일" {% if image_style == "미니멀하고 깔끔한 스타일" %}selected{% endif %}>{{ t("v21.style.minimal") }}</option>
         <option value="화려한 광고 비주얼" {% if image_style == "화려한 광고 비주얼" %}selected{% endif %}>{{ t("v21.style.flashy") }}</option>
     </select>
+    <div class="mt-2">
+        <label class="form-label mb-1">{{ t("v22.custom_image_style") }}</label>
+        <input
+            type="text"
+            name="custom_image_style"
+            class="form-control"
+            value="{{ custom_image_style or '' }}"
+            placeholder="{{ t('v22.custom_image_style_ph') }}">
+        <div class="form-text">
+            {{ t("v22.custom_image_style_help") }}
+        </div>
+    </div>
+
 </div>
 
 
@@ -179,6 +193,7 @@
 {% endblock %}
 
 {% block scripts %}
+{{ super() }}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const profileSelect = document.getElementById("saved-profile-select");
@@ -190,8 +205,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert({{ t("v21.pkg.choose_brand") | tojson }});
                 return;
             }
-            window.location.href = "/sns?profile_id=" +
-                encodeURIComponent(profileSelect.value);
+
+            window.location.href =
+                "/sns?profile_id=" + encodeURIComponent(profileSelect.value);
         });
     }
 });

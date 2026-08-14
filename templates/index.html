@@ -85,6 +85,15 @@
     </select>
 </div>
 
+<div class="mb-3">
+    <label class="form-label">이미지 스타일 직접 입력 (선택사항)</label>
+    <input type="text"
+           class="form-control"
+           name="custom_image_style"
+           value="{{ custom_image_style or '' }}"
+           placeholder="예) 네온 조명의 미래적인 야간 도시, 시네마틱 실사 스타일">
+    <div class="form-text">직접 입력하면 위에서 선택한 이미지 스타일보다 우선 적용됩니다.</div>
+</div>
 
 <div class="border rounded-3 p-3 mb-3 bg-light">
     <div class="form-check form-switch">
@@ -170,6 +179,7 @@
 {% endblock %}
 
 {% block scripts %}
+{{ super() }}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const profileSelect = document.getElementById("saved-profile-select");

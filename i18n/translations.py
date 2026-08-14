@@ -143,6 +143,8 @@ TRANSLATIONS["ko"].update({'v2.business': '업종',
  'v2.pkg_btn': '마케팅 패키지 생성',
  'v2.saved': '저장된 브랜드 불러오기',
  'v2.manage': '브랜드 관리',
+ 'v2.brand': '브랜드',
+ 'v2.history': '기록',
  'v2.select': '저장된 브랜드를 선택하세요',
  'v2.load': '불러오기',
  'v2.blog_length': '블로그 길이',
@@ -174,6 +176,8 @@ TRANSLATIONS["en"].update({'v2.business': 'Industry',
  'v2.pkg_btn': 'Create Marketing Package',
  'v2.saved': 'Load saved brand',
  'v2.manage': 'Manage brands',
+ 'v2.brand': 'Brand',
+ 'v2.history': 'History',
  'v2.select': 'Select a saved brand',
  'v2.load': 'Load',
  'v2.blog_length': 'Blog length',
@@ -205,6 +209,8 @@ TRANSLATIONS["ja"].update({'v2.business': '業種',
  'v2.pkg_btn': 'パッケージを生成',
  'v2.saved': '保存済みブランドを読み込む',
  'v2.manage': 'ブランド管理',
+ 'v2.brand': 'ブランド',
+ 'v2.history': '履歴',
  'v2.select': '保存済みブランドを選択',
  'v2.load': '読み込む',
  'v2.blog_length': 'ブログの長さ',
@@ -236,6 +242,8 @@ TRANSLATIONS["th"].update({'v2.business': 'ประเภทธุรกิจ'
  'v2.pkg_btn': 'สร้างแพ็กเกจการตลาด',
  'v2.saved': 'โหลดแบรนด์ที่บันทึกไว้',
  'v2.manage': 'จัดการแบรนด์',
+ 'v2.brand': 'แบรนด์',
+ 'v2.history': 'ประวัติ',
  'v2.select': 'เลือกแบรนด์ที่บันทึกไว้',
  'v2.load': 'โหลด',
  'v2.blog_length': 'ความยาวบล็อก',
@@ -267,6 +275,8 @@ TRANSLATIONS["zh"].update({'v2.business': '行业',
  'v2.pkg_btn': '生成营销套餐',
  'v2.saved': '加载已保存品牌',
  'v2.manage': '管理品牌',
+ 'v2.brand': '品牌',
+ 'v2.history': '记录',
  'v2.select': '选择已保存品牌',
  'v2.load': '加载',
  'v2.blog_length': '博客长度',
@@ -298,6 +308,8 @@ TRANSLATIONS["es"].update({'v2.business': 'Sector',
  'v2.pkg_btn': 'Crear paquete de marketing',
  'v2.saved': 'Cargar marca guardada',
  'v2.manage': 'Gestionar marcas',
+ 'v2.brand': 'Marca',
+ 'v2.history': 'Historial',
  'v2.select': 'Selecciona una marca guardada',
  'v2.load': 'Cargar',
  'v2.blog_length': 'Longitud del blog',
@@ -1648,3 +1660,38 @@ TRANSLATIONS["ja"].update({'landing.meta.title': 'Project Freedom AI — AIマ�
 TRANSLATIONS["th"].update({'landing.meta.title': 'Project Freedom AI — คอนเทนต์การตลาด AI', 'landing.meta.description': 'สร้างโฆษณา บล็อก โซเชียล และแพ็กเกจการตลาดด้วย AI', 'landing.hero.badge': '✨ การตลาด AI ในพื้นที่ทำงานเดียว', 'landing.hero.title': 'เปลี่ยนไอเดียเป็นคอนเทนต์การตลาดในไม่กี่วินาที', 'landing.hero.desc': 'สร้างข้อความโฆษณา บล็อก คอนเทนต์โซเชียล และแพ็กเกจการตลาดด้วย AI พร้อมทำงานหลายภาษาในเวิร์กโฟลว์เดียว', 'landing.workspace.title': 'พื้นที่ทำงาน AI เดียวสำหรับการตลาดของคุณ', 'landing.workspace.desc': 'เริ่มจากข้อมูลธุรกิจเพียงไม่กี่อย่าง แล้วสร้างคอนเทนต์ที่นำไปใช้ได้จริง', 'landing.global.title': 'สร้างคอนเทนต์สำหรับลูกค้าทั่วโลก', 'landing.global.desc': 'สร้างคอนเทนต์ภาษาเกาหลี อังกฤษ ญี่ปุ่น ไทย จีน และสเปนในเวิร์กโฟลว์เดียว', 'landing.pricing.title': 'เริ่มฟรี อัปเกรดเมื่อคุณต้องการมากขึ้น', 'landing.why.title': 'ทำไมต้อง Project Freedom AI?', 'landing.faq.title': 'คำถามที่พบบ่อย', 'landing.final.title': 'พร้อมสร้างแคมเปญถัดไปแล้วหรือยัง?', 'landing.feature.ads': 'โฆษณา', 'landing.feature.blog': 'บล็อก', 'landing.feature.social': 'โซเชียล', 'landing.feature.package': 'แพ็กเกจการตลาด', 'landing.pricing.free': 'ฟรี', 'landing.pricing.credits': 'เครดิต', 'landing.pricing.popular': 'ยอดนิยม', 'landing.cta.start_free': 'เริ่มฟรี', 'landing.cta.start_free_arrow': 'เริ่มฟรี →', 'landing.cta.dashboard': 'เปิดแดชบอร์ด →', 'landing.cta.dashboard_arrow': 'ไปที่แดชบอร์ด →', 'landing.preview.label': 'PROJECT FREEDOM AI · แพ็กเกจการตลาด', 'landing.preview.ads': 'ข้อความโฆษณาพร้อมใช้สำหรับแคมเปญ', 'landing.preview.blog': 'คอนเทนต์ยาวที่มีโครงสร้าง', 'landing.preview.social': 'โพสต์โซเชียลพร้อมใช้', 'landing.feature.ads_desc': 'สร้างข้อความโฆษณาหลายแบบให้เหมาะกับแบรนด์', 'landing.feature.blog_desc': 'สร้างบทความยาวอย่างเป็นระบบโดยไม่ต้องเริ่มจากหน้าว่าง', 'landing.feature.social_desc': 'สร้างโพสต์ที่เหมาะกับแพลตฟอร์ม พร้อม CTA และแฮชแท็ก', 'landing.feature.package_desc': 'สร้างโฆษณา บล็อก และโซเชียลพร้อมกัน', 'landing.product.badge': '🧪 ตัวอย่างผลิตภัณฑ์', 'landing.product.title': 'จากข้อมูลธุรกิจสู่คอนเทนต์ที่ใช้ได้จริง', 'landing.product.desc': 'กรอกครั้งเดียวเพื่อสร้างโฆษณา บล็อก และโซเชียลให้แบรนด์', 'landing.product.input': 'ตัวอย่างข้อมูล', 'landing.product.industry': 'ประเภทธุรกิจ', 'landing.product.sample_industry': 'สตูดิโอนวด', 'landing.product.business': 'ชื่อธุรกิจ', 'landing.product.sample_business': "7day's massage", 'landing.product.mood': 'บรรยากาศแบรนด์', 'landing.product.sample_mood': 'เป็นกันเอง · ผ่อนคลาย · สนุก', 'landing.product.output': 'ผลลัพธ์จาก AI', 'landing.product.output_title': '📢 ไอเดียแคมเปญโซเชียล', 'landing.product.output_text': 'เปลี่ยนวันที่เหนื่อยล้าให้เป็นค่ำคืนที่เบาสบาย มอบเหตุผลดี ๆ ให้ลูกค้าได้พัก เติมพลัง และกลับไปอย่างสดชื่น', 'landing.pricing.badge': '💳 ราคาเรียบง่าย', 'landing.pricing.desc': 'ใช้เครดิตกับการสร้างคอนเทนต์ AI และจัดการเวิร์กโฟลว์ในที่เดียว', 'landing.pricing.free_desc': 'ทดลองพื้นที่ทำงานก่อนอัปเกรด', 'landing.pricing.ai': 'สร้างคอนเทนต์ AI', 'landing.pricing.brand': 'พื้นที่ทำงานแบรนด์', 'landing.pricing.history': 'ประวัติการสร้าง', 'landing.pricing.testing': 'สำหรับทดลองและเริ่มต้น', 'landing.pricing.pro_desc': 'เหมาะสำหรับการสร้างคอนเทนต์การตลาดเป็นประจำ', 'landing.pricing.more_credits': 'เครดิตรายเดือนมากขึ้น', 'landing.pricing.abs': 'โฆษณา · บล็อก · โซเชียล', 'landing.pricing.packages': 'แพ็กเกจการตลาด', 'landing.pricing.exports': 'ส่งออก Word / PDF', 'landing.pricing.view_credits': 'ดูเครดิต', 'landing.pricing.create_account': 'สร้างบัญชี', 'landing.pricing.notice': 'แพ็กเกจเครดิตและการชำระเงินอาจเปลี่ยนแปลงก่อนเปิดตัวจริง', 'landing.why.fast': 'เวิร์กโฟลว์รวดเร็ว', 'landing.why.fast_desc': 'เปลี่ยนข้อมูลธุรกิจไม่กี่อย่างเป็นคอนเทนต์พร้อมแก้ไข', 'landing.why.multi': 'หลายภาษา', 'landing.why.multi_desc': 'สร้างคอนเทนต์สำหรับผู้ใช้ภาษาเกาหลี อังกฤษ ญี่ปุ่น ไทย จีน และสเปน', 'landing.why.brand': 'โปรไฟล์แบรนด์', 'landing.why.brand_desc': 'บันทึกข้อมูลแบรนด์ที่ใช้บ่อย ไม่ต้องกรอกใหม่ทุกครั้ง', 'landing.why.history': 'ประวัติและส่งออก', 'landing.why.history_desc': 'จัดระเบียบคอนเทนต์ที่สร้างและส่งออกผลลัพธ์ที่ต้องการ', 'landing.faq.q1': 'สร้างอะไรได้บ้าง?', 'landing.faq.a1': 'ข้อความโฆษณา บล็อก โพสต์โซเชียล และแพ็กเกจการตลาด', 'landing.faq.q2': 'รองรับภาษาอะไรบ้าง?', 'landing.faq.a2': 'รองรับเกาหลี อังกฤษ ญี่ปุ่น ไทย จีน และสเปน', 'landing.faq.q3': 'เครดิตทำงานอย่างไร?', 'landing.faq.a3': 'เครดิตจะถูกใช้เมื่อสร้างคอนเทนต์ AI และแต่ละตัวเลือกอาจใช้ไม่เท่ากัน', 'landing.faq.q4': 'บันทึกข้อมูลแบรนด์ได้ไหม?', 'landing.faq.a4': 'ได้ โปรไฟล์แบรนด์ช่วยให้ใช้ข้อมูลธุรกิจและการตลาดซ้ำได้', 'landing.final.desc': 'สร้างบัญชีแล้วเริ่มสร้างคอนเทนต์การตลาดด้วย AI', 'landing.footer.terms': 'ข้อกำหนด', 'landing.footer.privacy': 'ความเป็นส่วนตัว', 'landing.footer.refund': 'นโยบายคืนเงิน', 'landing.footer.contact': 'ติดต่อ'})
 TRANSLATIONS["zh"].update({'landing.meta.title': 'Project Freedom AI — AI 营销内容', 'landing.meta.description': '使用 AI 创建广告、博客、社交内容和营销套餐。', 'landing.hero.badge': '✨ 一个工作空间完成 AI 营销', 'landing.hero.title': '几秒钟把创意变成营销内容。', 'landing.hero.desc': '使用 AI 创建广告文案、博客、社交内容和完整营销套餐，并在同一工作流程中支持多种语言。', 'landing.workspace.title': '一个 AI 工作空间，完成你的营销', 'landing.workspace.desc': '只需输入少量业务信息，即可创建真正可用的内容。', 'landing.global.title': '为全球客户创建内容', 'landing.global.desc': '在同一工作流程中创建韩语、英语、日语、泰语、中文和西班牙语内容。', 'landing.pricing.title': '免费开始，需要时再升级。', 'landing.why.title': '为什么选择 Project Freedom AI？', 'landing.faq.title': '常见问题', 'landing.final.title': '准备好创建下一个营销活动了吗？', 'landing.feature.ads': '广告', 'landing.feature.blog': '博客', 'landing.feature.social': '社交媒体', 'landing.feature.package': '营销套餐', 'landing.pricing.free': '免费', 'landing.pricing.credits': '积分', 'landing.pricing.popular': '热门', 'landing.cta.start_free': '免费开始', 'landing.cta.start_free_arrow': '免费开始 →', 'landing.cta.dashboard': '打开控制台 →', 'landing.cta.dashboard_arrow': '前往控制台 →', 'landing.preview.label': 'PROJECT FREEDOM AI · 营销套餐', 'landing.preview.ads': '可用于营销活动的广告文案', 'landing.preview.blog': '结构化长篇内容', 'landing.preview.social': '适配平台的社交帖子', 'landing.feature.ads_desc': '生成符合品牌风格的多种广告文案。', 'landing.feature.blog_desc': '无需从空白页开始即可创建结构化长文。', 'landing.feature.social_desc': '生成包含行动号召和标签的平台友好帖子。', 'landing.feature.package_desc': '同时创建广告、博客和社交内容。', 'landing.product.badge': '🧪 产品预览', 'landing.product.title': '从业务信息到可用内容', 'landing.product.desc': '一次输入即可生成品牌广告、博客和社交内容。', 'landing.product.input': '示例输入', 'landing.product.industry': '行业', 'landing.product.sample_industry': '按摩工作室', 'landing.product.business': '商家名称', 'landing.product.sample_business': "7day's massage", 'landing.product.mood': '品牌氛围', 'landing.product.sample_mood': '友好 · 放松 · 活泼', 'landing.product.output': 'AI 生成结果', 'landing.product.output_title': '📢 社交营销创意', 'landing.product.output_text': '把疲惫的一天变成轻松的夜晚，给顾客一个暂停、充电并焕然一新的理由。', 'landing.pricing.badge': '💳 简单定价', 'landing.pricing.desc': '使用积分生成 AI 内容，并在一个地方管理工作流程。', 'landing.pricing.free_desc': '升级前先体验工作空间。', 'landing.pricing.ai': 'AI 内容生成', 'landing.pricing.brand': '品牌工作空间', 'landing.pricing.history': '生成记录', 'landing.pricing.testing': '用于测试和入门。', 'landing.pricing.pro_desc': '适合日常营销内容创作。', 'landing.pricing.more_credits': '更多每月积分', 'landing.pricing.abs': '广告 · 博客 · 社交', 'landing.pricing.packages': '营销套餐', 'landing.pricing.exports': '导出 Word / PDF', 'landing.pricing.view_credits': '查看积分', 'landing.pricing.create_account': '创建账户', 'landing.pricing.notice': '积分套餐和支付方式在正式上线前可能调整。', 'landing.why.fast': '快速工作流', 'landing.why.fast_desc': '从少量业务信息快速生成可编辑的营销内容。', 'landing.why.multi': '多语言', 'landing.why.multi_desc': '为韩语、英语、日语、泰语、中文和西班牙语客户创建内容。', 'landing.why.brand': '品牌资料', 'landing.why.brand_desc': '保存常用品牌信息，无需每次重新输入。', 'landing.why.history': '历史与导出', 'landing.why.history_desc': '整理生成内容并导出有用结果。', 'landing.faq.q1': '可以创建什么？', 'landing.faq.a1': '广告文案、博客、社交帖子和综合营销套餐。', 'landing.faq.q2': '支持哪些语言？', 'landing.faq.a2': '目前支持韩语、英语、日语、泰语、中文和西班牙语。', 'landing.faq.q3': '积分如何使用？', 'landing.faq.a3': '生成 AI 内容时会消耗积分，不同选项所需积分可能不同。', 'landing.faq.q4': '可以保存品牌信息吗？', 'landing.faq.a4': '可以。品牌资料可帮助重复使用常用业务和营销设置。', 'landing.final.desc': '创建账户，开始使用 AI 制作营销内容。', 'landing.footer.terms': '条款', 'landing.footer.privacy': '隐私', 'landing.footer.refund': '退款政策', 'landing.footer.contact': '联系'})
 TRANSLATIONS["es"].update({'landing.meta.title': 'Project Freedom AI — Contenido de marketing con IA', 'landing.meta.description': 'Crea anuncios, blogs, contenido social y paquetes de marketing con IA.', 'landing.hero.badge': '✨ Marketing con IA en un solo espacio', 'landing.hero.title': 'Convierte una idea en contenido de marketing en segundos.', 'landing.hero.desc': 'Crea textos publicitarios, blogs, contenido social y paquetes completos de marketing con IA. Trabaja en varios idiomas desde un solo flujo.', 'landing.workspace.title': 'Un espacio de IA para todo tu marketing', 'landing.workspace.desc': 'Convierte unos pocos datos de tu negocio en contenido que realmente puedes utilizar.', 'landing.global.title': 'Crea contenido para clientes de todo el mundo', 'landing.global.desc': 'Crea contenido en coreano, inglés, japonés, tailandés, chino y español desde un solo flujo.', 'landing.pricing.title': 'Empieza gratis. Mejora cuando necesites más.', 'landing.why.title': '¿Por qué Project Freedom AI?', 'landing.faq.title': 'Preguntas frecuentes', 'landing.final.title': '¿Listo para crear tu próxima campaña?', 'landing.feature.ads': 'Publicidad', 'landing.feature.blog': 'Blog', 'landing.feature.social': 'Social', 'landing.feature.package': 'Paquete de marketing', 'landing.pricing.free': 'Gratis', 'landing.pricing.credits': 'créditos', 'landing.pricing.popular': 'POPULAR', 'landing.cta.start_free': 'Empezar gratis', 'landing.cta.start_free_arrow': 'Empezar gratis →', 'landing.cta.dashboard': 'Abrir panel →', 'landing.cta.dashboard_arrow': 'Ir al panel →', 'landing.preview.label': 'PROJECT FREEDOM AI · PAQUETE DE MARKETING', 'landing.preview.ads': 'Ideas publicitarias listas para campañas', 'landing.preview.blog': 'Contenido largo estructurado', 'landing.preview.social': 'Publicaciones listas para cada plataforma', 'landing.feature.ads_desc': 'Genera varias ideas publicitarias adaptadas a tu marca.', 'landing.feature.blog_desc': 'Crea contenido largo y estructurado sin empezar desde cero.', 'landing.feature.social_desc': 'Crea publicaciones adaptadas a cada plataforma con llamadas a la acción y hashtags.', 'landing.feature.package_desc': 'Crea publicidad, blog y contenido social juntos.', 'landing.product.badge': '🧪 VISTA PREVIA', 'landing.product.title': 'De datos del negocio a contenido útil', 'landing.product.desc': 'Una entrada puede convertirse en publicidad, blog y contenido social.', 'landing.product.input': 'EJEMPLO DE ENTRADA', 'landing.product.industry': 'Sector', 'landing.product.sample_industry': 'Estudio de masajes', 'landing.product.business': 'Negocio', 'landing.product.sample_business': "7day's massage", 'landing.product.mood': 'Estilo de marca', 'landing.product.sample_mood': 'Cercano · relajante · divertido', 'landing.product.output': 'RESULTADO GENERADO POR IA', 'landing.product.output_title': '📢 Idea de campaña social', 'landing.product.output_text': 'Convierte un día agotador en una tarde más ligera. Da a tus clientes una razón para parar, recargar energías y volver renovados.', 'landing.pricing.badge': '💳 PRECIOS SENCILLOS', 'landing.pricing.desc': 'Usa créditos para generar contenido con IA y gestiona tu flujo en un solo lugar.', 'landing.pricing.free_desc': 'Explora el espacio antes de mejorar tu plan.', 'landing.pricing.ai': 'Generación de contenido IA', 'landing.pricing.brand': 'Espacio de marca', 'landing.pricing.history': 'Historial de generación', 'landing.pricing.testing': 'Para probar y empezar.', 'landing.pricing.pro_desc': 'Pensado para crear contenido de marketing con regularidad.', 'landing.pricing.more_credits': 'Más créditos mensuales', 'landing.pricing.abs': 'Anuncios · Blog · Social', 'landing.pricing.packages': 'Paquetes de marketing', 'landing.pricing.exports': 'Exportación Word / PDF', 'landing.pricing.view_credits': 'Ver créditos', 'landing.pricing.create_account': 'Crear cuenta', 'landing.pricing.notice': 'Los paquetes de créditos y pagos pueden cambiar antes del lanzamiento.', 'landing.why.fast': 'Flujo rápido', 'landing.why.fast_desc': 'Pasa de unos pocos datos a contenido listo para editar.', 'landing.why.multi': 'Multilingüe', 'landing.why.multi_desc': 'Crea para clientes en coreano, inglés, japonés, tailandés, chino y español.', 'landing.why.brand': 'Perfiles de marca', 'landing.why.brand_desc': 'Guarda datos frecuentes de marca y evita introducirlos cada vez.', 'landing.why.history': 'Historial y exportación', 'landing.why.history_desc': 'Organiza el contenido generado y exporta los resultados útiles.', 'landing.faq.q1': '¿Qué puedo crear?', 'landing.faq.a1': 'Textos publicitarios, blogs, publicaciones sociales y paquetes combinados.', 'landing.faq.q2': '¿Qué idiomas se admiten?', 'landing.faq.a2': 'Actualmente admite coreano, inglés, japonés, tailandés, chino y español.', 'landing.faq.q3': '¿Cómo funcionan los créditos?', 'landing.faq.a3': 'Los créditos se consumen al generar contenido y la cantidad depende de las opciones.', 'landing.faq.q4': '¿Puedo guardar la información de mi marca?', 'landing.faq.a4': 'Sí. Los perfiles permiten reutilizar datos y ajustes frecuentes.', 'landing.final.desc': 'Crea una cuenta y empieza a crear contenido de marketing con IA.', 'landing.footer.terms': 'Términos', 'landing.footer.privacy': 'Privacidad', 'landing.footer.refund': 'Política de reembolso', 'landing.footer.contact': 'Contacto'})
+
+
+# -------------------------
+# 다국어 UI V2.2: 이미지 스타일 직접 입력
+# -------------------------
+TRANSLATIONS["ko"].update({
+    "v22.custom_image_style": "이미지 스타일 직접 입력 (선택사항)",
+    "v22.custom_image_style_ph": "예) 네온 조명의 미래적인 야간 도시, 시네마틱 실사 스타일",
+    "v22.custom_image_style_help": "직접 입력하면 위에서 선택한 이미지 스타일보다 우선 적용됩니다.",
+})
+TRANSLATIONS["en"].update({
+    "v22.custom_image_style": "Custom image style (optional)",
+    "v22.custom_image_style_ph": "e.g. Futuristic neon city at night, cinematic photorealistic style",
+    "v22.custom_image_style_help": "If entered, this custom style overrides the selected image style above.",
+})
+TRANSLATIONS["ja"].update({
+    "v22.custom_image_style": "画像スタイルを直接入力（任意）",
+    "v22.custom_image_style_ph": "例）ネオンが輝く未来的な夜の街、シネマティックな実写スタイル",
+    "v22.custom_image_style_help": "入力した場合、上で選択した画像スタイルより優先されます。",
+})
+TRANSLATIONS["th"].update({
+    "v22.custom_image_style": "ระบุสไตล์ภาพเอง (ไม่บังคับ)",
+    "v22.custom_image_style_ph": "เช่น เมืองอนาคตยามค่ำคืน แสงนีออน สไตล์ภาพสมจริงแบบภาพยนตร์",
+    "v22.custom_image_style_help": "หากกรอก ระบบจะใช้ข้อความนี้แทนสไตล์ภาพที่เลือกด้านบน",
+})
+TRANSLATIONS["zh"].update({
+    "v22.custom_image_style": "自定义图片风格（可选）",
+    "v22.custom_image_style_ph": "例如：霓虹灯未来都市夜景，电影感写实风格",
+    "v22.custom_image_style_help": "填写后，将优先使用这里的风格，而不是上方选择的图片风格。",
+})
+TRANSLATIONS["es"].update({
+    "v22.custom_image_style": "Estilo de imagen personalizado (opcional)",
+    "v22.custom_image_style_ph": "Ej. ciudad futurista nocturna con neón, estilo cinematográfico fotorrealista",
+    "v22.custom_image_style_help": "Si escribes un estilo aquí, tendrá prioridad sobre el estilo seleccionado arriba.",
+})

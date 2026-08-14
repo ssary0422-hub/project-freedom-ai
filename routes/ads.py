@@ -546,6 +546,7 @@ def _home_page():
     company = ""
     style = ""
     image_style = "고급스러운 실사"
+    custom_image_style = ""
     with_image = False
     error = ""
 
@@ -575,6 +576,7 @@ def _home_page():
                 company=company,
                 style=style,
                 image_style=image_style,
+        custom_image_style=custom_image_style,
                 with_image=with_image,
                 error="현재 AI 생성 시스템이 점검 중입니다. 잠시 후 다시 이용해주세요.",
                 saved_profiles=saved_profiles,
@@ -586,6 +588,8 @@ def _home_page():
         company = request.form.get("company", "").strip()
         style = request.form.get("style", "").strip()
         image_style = request.form.get("image_style", "고급스러운 실사").strip()
+        custom_image_style = request.form.get("custom_image_style", "").strip()
+        effective_image_style = custom_image_style or image_style
         with_image = request.form.get("with_image") == "on"
 
         required_credits = 3 if with_image else 1
@@ -608,6 +612,7 @@ def _home_page():
                 company=company,
                 style=style,
                 image_style=image_style,
+        custom_image_style=custom_image_style,
                 with_image=with_image,
                 error=error,
                 saved_profiles=saved_profiles,
@@ -620,14 +625,14 @@ def _home_page():
             image_path = ""
 
             if with_image:
-                image_style_instruction = _image_style_instruction(image_style)
+                image_style_instruction = _image_style_instruction(effective_image_style)
                 image_prompt = f"""
 {company}의 광고용 이미지.
 
 업종: {business}
 회사명: {company}
 브랜드 분위기: {style}
-선택한 이미지 스타일: {image_style}
+적용 이미지 스타일: {effective_image_style}
 스타일 지시: {image_style_instruction}
 
 업종과 회사명에 정확히 맞는 전문적인 광고 이미지.
@@ -679,6 +684,7 @@ def _home_page():
         company=company,
         style=style,
         image_style=image_style,
+        custom_image_style=custom_image_style,
         with_image=with_image,
         error=error,
         saved_profiles=saved_profiles,

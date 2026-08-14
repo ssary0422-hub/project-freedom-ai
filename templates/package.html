@@ -32,9 +32,34 @@
         🚀 {{ t("v2.package") }}
     </h1>
 
-    <p class="text-center text-muted mb-5">
+    <p class="text-center text-muted mb-4">
         {{ t("v21.pkg.subtitle") }}
     </p>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body py-3">
+            <div class="row g-2">
+                <div class="col-6 col-md-2 d-grid">
+                    <a href="/ads-generator" class="btn btn-outline-primary">📣 {{ t("v2.ads") }}</a>
+                </div>
+                <div class="col-6 col-md-2 d-grid">
+                    <a href="/blog" class="btn btn-outline-primary">📝 {{ t("v2.blog") }}</a>
+                </div>
+                <div class="col-6 col-md-2 d-grid">
+                    <a href="/sns" class="btn btn-outline-primary">📱 {{ t("v2.sns") }}</a>
+                </div>
+                <div class="col-6 col-md-2 d-grid">
+                    <a href="/package" class="btn btn-success">🚀 {{ t("v2.package") }}</a>
+                </div>
+                <div class="col-6 col-md-2 d-grid">
+                    <a href="/profiles" class="btn btn-outline-success">🏢 {{ t("v2.brand") }}</a>
+                </div>
+                <div class="col-6 col-md-2 d-grid">
+                    <a href="/history" class="btn btn-outline-secondary">📚 {{ t("v2.history") }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="card shadow mb-5">
         <div class="card-body">
@@ -229,6 +254,19 @@
                             {{ t("v21.style.flashy") }}
                         </option>
                     </select>
+    <div class="mt-2">
+        <label class="form-label mb-1">{{ t("v22.custom_image_style") }}</label>
+        <input
+            type="text"
+            name="custom_image_style"
+            class="form-control"
+            value="{{ custom_image_style or '' }}"
+            placeholder="{{ t('v22.custom_image_style_ph') }}">
+        <div class="form-text">
+            {{ t("v22.custom_image_style_help") }}
+        </div>
+    </div>
+
                 </div>
 
                 <div class="border rounded-3 p-3 mb-3 bg-light">

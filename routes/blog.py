@@ -6,6 +6,7 @@ from flask import Blueprint, render_template, request, session, send_file
 from ai.blog import make_blog
 from ai.image import make_image
 from database.db import save_history
+from database.profiles import get_profiles, get_profile
 from database.users import (
     get_ai_enabled,
     get_plan_status,
@@ -525,6 +526,7 @@ def _image_style_instruction(image_style):
 
 
 @blog_bp.route("/blog", methods=["GET"])
+@login_required
 def blog():
     return _blog_page()
 
@@ -545,7 +547,24 @@ def _blog_page():
     tone = ""
     length = ""
     image_style = "고급스러운 실사"
+    custom_image_style = ""
     with_image = False
+
+    user_id = session["user_id"]
+    saved_profiles = get_profiles(user_id)
+    selected_profile_id = request.args.get("profile_id", type=int)
+    loaded_profile_name = ""
+
+    if request.method == "GET" and selected_profile_id:
+        selected_profile = get_profile(
+            selected_profile_id,
+            user_id,
+        )
+        if selected_profile:
+            business = selected_profile[1] or ""
+            company = selected_profile[2] or ""
+            tone = selected_profile[3] or ""
+            loaded_profile_name = company or business
 
     if request.method == "POST":
         if not get_ai_enabled():
@@ -560,8 +579,12 @@ def _blog_page():
                 tone=tone,
                 length=length,
                 image_style=image_style,
+        custom_image_style=custom_image_style,
                 with_image=with_image,
-                error=error
+                error=error,
+                saved_profiles=saved_profiles,
+                selected_profile_id=selected_profile_id,
+                loaded_profile_name=loaded_profile_name,
             )
 
         business = request.form.get("business", "").strip()
@@ -570,6 +593,8 @@ def _blog_page():
         tone = request.form.get("tone", "").strip()
         length = request.form.get("length", "").strip()
         image_style = request.form.get("image_style", "고급스러운 실사").strip()
+        custom_image_style = request.form.get("custom_image_style", "").strip()
+        effective_image_style = custom_image_style or image_style
         with_image = request.form.get("with_image") == "on"
 
         required_credits = 3 if with_image else 1
@@ -594,8 +619,12 @@ def _blog_page():
                 tone=tone,
                 length=length,
                 image_style=image_style,
+        custom_image_style=custom_image_style,
                 with_image=with_image,
-                error=error
+                error=error,
+                saved_profiles=saved_profiles,
+                selected_profile_id=selected_profile_id,
+                loaded_profile_name=loaded_profile_name,
             )
 
         if business and company and topic and tone and length:
@@ -603,7 +632,7 @@ def _blog_page():
             image_path = ""
 
             if with_image:
-                image_style_instruction = _image_style_instruction(image_style)
+                image_style_instruction = _image_style_instruction(effective_image_style)
                 image_prompt = f"""
 블로그 대표 이미지.
 
@@ -612,7 +641,7 @@ def _blog_page():
 주제: {topic}
 분위기: {tone}
 글의 길이: {length}
-선택한 이미지 스타일: {image_style}
+적용 이미지 스타일: {effective_image_style}
 스타일 지시: {image_style_instruction}
 
 블로그 주제와 실제 업종에 정확히 맞는 대표 이미지.
@@ -666,8 +695,12 @@ def _blog_page():
         tone=tone,
         length=length,
         image_style=image_style,
+        custom_image_style=custom_image_style,
         with_image=with_image,
-        error=error
+        error=error,
+        saved_profiles=saved_profiles,
+        selected_profile_id=selected_profile_id,
+        loaded_profile_name=loaded_profile_name,
     )
 
 

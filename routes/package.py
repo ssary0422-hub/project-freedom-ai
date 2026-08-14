@@ -617,7 +617,7 @@ def _animal_prompt_name(image_style: str) -> str:
 
 
 def _make_sns_image(company, business, sns_platform, style, image_style):
-    if _is_fun_animal_style(image_style):
+    if _is_fun_animal_style(effective_image_style):
         primary_prompt = f"""
 SNS 게시물용 재미있는 상업 이미지.
 
@@ -625,7 +625,7 @@ SNS 게시물용 재미있는 상업 이미지.
 업종: {business}
 플랫폼: {sns_platform}
 브랜드 분위기: {style}
-선택 동물: {_animal_prompt_name(image_style)}
+선택 동물: {_animal_prompt_name(effective_image_style)}
 
 반드시 '{business}' 업종을 한눈에 알아볼 수 있는 장면을 만들 것.
 선택 동물 두 마리를 귀엽고 자연스럽게 의인화하여,
@@ -644,7 +644,7 @@ SNS 게시물용 상업 이미지.
 업종: {business}
 플랫폼: {sns_platform}
 브랜드 분위기: {style}
-이미지 스타일: {image_style}
+이미지 스타일: {effective_image_style}
 
 반드시 '{business}' 업종과 직접 관련된 실제 서비스 현장을 표현할 것.
 업종이 병원/의원/정형외과라면 깨끗한 진료실, 전문 의료진,
@@ -665,7 +665,7 @@ SNS 게시물용 상업 이미지.
     if not image_path:
         retry_prompt = f"""
 Professional commercial advertising photo for this exact business category: {business}.
-Company: {company}. Brand mood: {style}. Visual style: {image_style}.
+Company: {company}. Brand mood: {style}. Visual style: {effective_image_style}.
 The scene must unmistakably represent the real business category and its normal service environment.
 If this is a hospital, clinic, orthopedic clinic, or medical business, show a clean medical consultation
 or examination scene with professional medical staff and absolutely no massage, spa, or wellness treatment.
@@ -787,6 +787,7 @@ def package():
     blog_length = "2000자"
     sns_platform = "인스타그램"
     image_style = "고급스러운 실사"
+    custom_image_style = ""
     with_image = False
     ads_count = 5
 
@@ -867,6 +868,7 @@ def package():
                 blog_length=blog_length,
                 sns_platform=sns_platform,
                 image_style=image_style,
+        custom_image_style=custom_image_style,
                 with_image=with_image,
                 ads_count=ads_count,
                 ads_result=ads_result,
@@ -913,6 +915,13 @@ def package():
             "고급스러운 실사"
         )
 
+        custom_image_style = request.form.get(
+            "custom_image_style",
+            ""
+        ).strip()
+
+        effective_image_style = custom_image_style or image_style
+
         ads_count = request.form.get(
             "ads_count",
             5,
@@ -947,6 +956,7 @@ def package():
                 blog_length=blog_length,
                 sns_platform=sns_platform,
                 image_style=image_style,
+        custom_image_style=custom_image_style,
                 with_image=with_image,
                 ads_count=ads_count,
                 ads_result=ads_result,
@@ -988,13 +998,13 @@ def package():
                     language=session.get("language", "ko")
                 )
 
-                if _is_fun_animal_style(image_style):
+                if _is_fun_animal_style(effective_image_style):
                     ads_prompt = f"""
 {company}의 재미있는 상업 광고 이미지.
 
 업종: {business}
 브랜드 분위기: {style}
-선택 동물: {_animal_prompt_name(image_style)}
+선택 동물: {_animal_prompt_name(effective_image_style)}
 
 반드시 '{business}' 업종을 정확하게 표현할 것.
 선택 동물 두 마리를 귀엽게 의인화해 한 마리는 해당 업종의 전문 직원,
@@ -1011,7 +1021,7 @@ def package():
 
 업종: {business}
 브랜드 분위기: {style}
-이미지 스타일: {image_style}
+이미지 스타일: {effective_image_style}
 
 반드시 '{business}' 업종의 실제 서비스 현장을 정확하게 표현할 것.
 병원/의원/정형외과라면 깨끗한 진료실, 전문 의료진,
@@ -1036,7 +1046,7 @@ X-ray/MRI 영상, 관절 또는 척추 모형을 활용한 상담·진찰·검�
                     ads_retry_prompt = f"""
 Professional commercial advertising photo for {company}.
 Exact business category: {business}.
-Brand mood: {style}. Visual style: {image_style}.
+Brand mood: {style}. Visual style: {effective_image_style}.
 Show the authentic workplace, professional staff, customer, and core service of this exact business.
 For hospitals or clinics, show a clean medical consultation or examination scene,
 preferably with X-ray/MRI images or an orthopedic joint/spine model.
@@ -1103,7 +1113,7 @@ No text, no logo, no watermark.
                     language=session.get("language", "ko")
                 )
 
-                if _is_fun_animal_style(image_style):
+                if _is_fun_animal_style(effective_image_style):
                     blog_prompt = f"""
 블로그 대표 이미지.
 
@@ -1111,7 +1121,7 @@ No text, no logo, no watermark.
 주제: {blog_topic}
 업종: {business}
 브랜드 분위기: {style}
-선택 동물: {_animal_prompt_name(image_style)}
+선택 동물: {_animal_prompt_name(effective_image_style)}
 
 반드시 '{business}' 업종이 한눈에 보이는 블로그 대표 이미지를 만들 것.
 선택 동물을 해당 업종의 직원과 고객 역할로 귀엽게 의인화하되,
@@ -1129,7 +1139,7 @@ No text, no logo, no watermark.
 주제: {blog_topic}
 업종: {business}
 브랜드 분위기: {style}
-이미지 스타일: {image_style}
+이미지 스타일: {effective_image_style}
 
 반드시 '{business}' 업종의 실제 환경과 핵심 서비스를 정확하게 표현할 것.
 병원/의원/정형외과라면 깨끗한 진료실, 전문 의료진,
@@ -1162,7 +1172,7 @@ No text, no logo, no watermark.
                     blog_retry_prompt = f"""
 Professional blog hero image for {company}.
 Exact business category: {business}.
-Topic: {blog_topic}. Brand mood: {style}. Visual style: {image_style}.
+Topic: {blog_topic}. Brand mood: {style}. Visual style: {effective_image_style}.
 Show an authentic scene directly related to this business category.
 For hospitals or clinics, show a clean medical consultation or examination scene,
 with professional medical staff and no massage, spa, or wellness treatment.
@@ -1232,7 +1242,7 @@ No text, no logo, no watermark.
                     business,
                     sns_platform,
                     style,
-                    image_style
+                    effective_image_style
                 )
 
                 save_history(
@@ -1296,6 +1306,7 @@ No text, no logo, no watermark.
         blog_length=blog_length,
         sns_platform=sns_platform,
         image_style=image_style,
+        custom_image_style=custom_image_style,
         with_image=with_image,
         ads_count=ads_count,
 
