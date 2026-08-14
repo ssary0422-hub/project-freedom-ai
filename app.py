@@ -14,7 +14,10 @@ from routes.plan import plan_bp
 from i18n.translations import SUPPORTED_LANGUAGES, translate
 from routes.admin import admin_bp
 from routes.credits import credits_bp
-from database.users import init_users_table
+from database.users import (
+    init_users_table,
+    set_user_admin_by_email,
+)
 
 from flask import (
     Flask,
@@ -50,6 +53,11 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 init_db()
 init_users_table()
+
+# Render/production 환경변수에 등록된 이메일을 관리자 계정으로 자동 지정
+admin_email = os.environ.get("ADMIN_EMAIL", "").strip()
+if admin_email:
+    set_user_admin_by_email(admin_email, True)
 
 
 app.register_blueprint(ads_bp)
