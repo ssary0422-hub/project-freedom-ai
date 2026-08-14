@@ -1,6 +1,14 @@
+import os
 import sqlite3
 from pathlib import Path
 from datetime import datetime
+
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+except ImportError:
+    psycopg2 = None
+    RealDictCursor = None
 
 from werkzeug.security import (
     generate_password_hash,
@@ -10,9 +18,62 @@ from werkzeug.security import (
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH = BASE_DIR / "project.db"
+DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
+USE_POSTGRES = bool(DATABASE_URL)
+
+
+class _PostgresCursor:
+    def __init__(self, cursor):
+        self._cursor = cursor
+
+    def execute(self, sql, params=None):
+        # 기존 SQLite 쿼리의 ? placeholder를 PostgreSQL 형식으로 변환
+        sql = sql.replace("?", "%s")
+        # SQLite 전용 트랜잭션 문법을 PostgreSQL용으로 변환
+        if sql.strip().upper() == "BEGIN IMMEDIATE":
+            sql = "BEGIN"
+        self._cursor.execute(sql, params)
+        return self
+
+    def fetchone(self):
+        return self._cursor.fetchone()
+
+    def fetchall(self):
+        return self._cursor.fetchall()
+
+    @property
+    def rowcount(self):
+        return self._cursor.rowcount
+
+    def __getattr__(self, name):
+        return getattr(self._cursor, name)
+
+
+class _PostgresConnection:
+    def __init__(self, conn):
+        self._conn = conn
+
+    def cursor(self):
+        return _PostgresCursor(self._conn.cursor(cursor_factory=RealDictCursor))
+
+    def commit(self):
+        return self._conn.commit()
+
+    def rollback(self):
+        return self._conn.rollback()
+
+    def close(self):
+        return self._conn.close()
 
 
 def _connect():
+    if USE_POSTGRES:
+        if psycopg2 is None:
+            raise RuntimeError(
+                "DATABASE_URL이 설정되어 있지만 psycopg2가 설치되지 않았습니다."
+            )
+        return _PostgresConnection(psycopg2.connect(DATABASE_URL))
+
     conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
     return conn
@@ -22,44 +83,40 @@ def init_users_table():
     conn = _connect()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    id_column = "BIGSERIAL PRIMARY KEY" if USE_POSTGRES else "INTEGER PRIMARY KEY AUTOINCREMENT"
+
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_column},
             email TEXT NOT NULL UNIQUE,
             username TEXT NOT NULL,
             password_hash TEXT NOT NULL,
-            created_at TEXT NOT NULL
+            created_at TEXT NOT NULL,
+            plan TEXT NOT NULL DEFAULT 'FREE',
+            is_admin INTEGER NOT NULL DEFAULT 0,
+            trial_eligible INTEGER NOT NULL DEFAULT 0,
+            trial_reason TEXT NOT NULL DEFAULT ''
         )
     """)
 
-    # 기존 users 테이블에도 안전하게 요금제 컬럼 추가
-    cursor.execute("PRAGMA table_info(users)")
-    columns = {row[1] for row in cursor.fetchall()}
+    # 기존 SQLite DB에 누락된 컬럼이 있으면 보강합니다.
+    # PostgreSQL 신규 테이블은 위 CREATE TABLE에서 모든 컬럼을 생성합니다.
+    if not USE_POSTGRES:
+        cursor.execute("PRAGMA table_info(users)")
+        columns = {row[1] for row in cursor.fetchall()}
 
-    if "plan" not in columns:
-        cursor.execute(
-            "ALTER TABLE users ADD COLUMN plan TEXT NOT NULL DEFAULT 'FREE'"
-        )
+        if "plan" not in columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN plan TEXT NOT NULL DEFAULT 'FREE'")
+        if "is_admin" not in columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0")
+        if "trial_eligible" not in columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN trial_eligible INTEGER NOT NULL DEFAULT 0")
+        if "trial_reason" not in columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN trial_reason TEXT NOT NULL DEFAULT ''")
 
-    if "is_admin" not in columns:
-        cursor.execute(
-            "ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0"
-        )
-
-
-    if "trial_eligible" not in columns:
-        cursor.execute(
-            "ALTER TABLE users ADD COLUMN trial_eligible INTEGER NOT NULL DEFAULT 0"
-        )
-
-    if "trial_reason" not in columns:
-        cursor.execute(
-            "ALTER TABLE users ADD COLUMN trial_reason TEXT NOT NULL DEFAULT ''"
-        )
-
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS package_usage (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_column},
             user_id INTEGER NOT NULL,
             used_at TEXT NOT NULL
         )
@@ -72,16 +129,15 @@ def init_users_table():
         )
     """)
 
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS ai_credit_usage (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_column},
             user_id INTEGER NOT NULL,
             usage_type TEXT NOT NULL,
             credits INTEGER NOT NULL,
             used_at TEXT NOT NULL
         )
     """)
-
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS ai_credit_wallet (
@@ -91,9 +147,9 @@ def init_users_table():
         )
     """)
 
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS ai_credit_transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_column},
             user_id INTEGER NOT NULL,
             amount INTEGER NOT NULL,
             kind TEXT NOT NULL,
@@ -102,10 +158,9 @@ def init_users_table():
         )
     """)
 
-
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS free_trial_claims (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_column},
             user_id INTEGER NOT NULL,
             email TEXT NOT NULL,
             ip_hash TEXT,
@@ -120,23 +175,19 @@ def init_users_table():
         CREATE INDEX IF NOT EXISTS idx_free_trial_ip_hash
         ON free_trial_claims (ip_hash)
     """)
-
     cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_free_trial_device_hash
         ON free_trial_claims (device_hash)
     """)
 
     cursor.execute("""
-        INSERT OR IGNORE INTO system_settings (
-            setting_key,
-            setting_value
-        )
+        INSERT INTO system_settings (setting_key, setting_value)
         VALUES ('ai_enabled', '1')
+        ON CONFLICT(setting_key) DO NOTHING
     """)
 
     conn.commit()
     conn.close()
-
 
 def create_user(email, username, password, trial_eligible=False, trial_reason=''):
     init_users_table()
@@ -156,7 +207,7 @@ def create_user(email, username, password, trial_eligible=False, trial_reason=''
     cursor = conn.cursor()
 
     try:
-        cursor.execute("""
+        insert_sql = """
             INSERT INTO users (
                 email,
                 username,
@@ -166,7 +217,11 @@ def create_user(email, username, password, trial_eligible=False, trial_reason=''
                 trial_reason
             )
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (
+        """
+        if USE_POSTGRES:
+            insert_sql += " RETURNING id"
+
+        cursor.execute(insert_sql, (
             email,
             username,
             password_hash,
@@ -175,12 +230,16 @@ def create_user(email, username, password, trial_eligible=False, trial_reason=''
             str(trial_reason or ""),
         ))
 
-        user_id = cursor.lastrowid
-        conn.commit()
+        if USE_POSTGRES:
+            user_id = cursor.fetchone()["id"]
+        else:
+            user_id = cursor.lastrowid
 
+        conn.commit()
         return user_id
 
-    except sqlite3.IntegrityError:
+    except (sqlite3.IntegrityError, psycopg2.IntegrityError if psycopg2 else sqlite3.IntegrityError):
+        conn.rollback()
         return None
 
     finally:
