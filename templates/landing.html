@@ -2,8 +2,8 @@
 <html lang="{{ current_language or 'ko' }}">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Project Freedom AI — AI Marketing Content</title>
-<meta name="description" content="Create ads, blog posts, social content and marketing packages with AI.">
+<title>{{ t("landing.meta.title") }}</title>
+<meta name="description" content="{{ t('landing.meta.description') }}">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
 :root{--bg:#07111f;--card:#0e1b2d;--line:rgba(255,255,255,.1);--muted:#9eb0c6}
@@ -14,44 +14,80 @@ h1{font-size:clamp(2.7rem,6vw,5.3rem);line-height:.98;letter-spacing:-.055em;fon
 .preview{padding:1rem;box-shadow:0 30px 80px rgba(0,0,0,.25)}.pc{background:white;color:#152033;border-radius:1rem;padding:1.1rem}
 .section{padding:5rem 0}.muted{color:var(--muted)}.feature{height:100%;padding:1.5rem}.icon{font-size:2rem}.pill{border:1px solid var(--line);border-radius:999px;padding:.5rem .75rem;color:#d7e2ef}
 footer{border-top:1px solid var(--line);color:var(--muted)}
+.price-card{height:100%;padding:1.6rem;position:relative}.price-card.popular{border-color:rgba(13,110,253,.75);box-shadow:0 0 0 1px rgba(13,110,253,.25),0 24px 60px rgba(0,0,0,.2)}
+.price{font-size:2.2rem;font-weight:800}.sample-box{padding:1.4rem;height:100%}.sample-output{background:#fff;color:#172033;border-radius:1rem;padding:1.15rem}
+.faqx .accordion-item{background:transparent;border-color:var(--line);color:white}.faqx .accordion-button{background:var(--card);color:white;box-shadow:none}.faqx .accordion-button:not(.collapsed){background:#13243c;color:white}.faqx .accordion-button::after{filter:invert(1)}
+.footer-link{color:var(--muted);text-decoration:none}.footer-link:hover{color:white}
 </style></head>
 <body>
 <nav class="navbar navbar-dark fixed-top navx"><div class="container py-2">
 <a class="navbar-brand fw-bold" href="/">🚀 Project Freedom AI</a><div class="d-flex gap-2">
-{% if session.get("user_id") %}<a class="btn btn-outline-light" href="/dashboard">Dashboard</a>
-{% else %}<a class="btn btn-outline-light" href="/login">Login</a><a class="btn btn-primary" href="/register">Start free</a>{% endif %}
+{% if session.get("user_id") %}<a class="btn btn-outline-light" href="/dashboard">{{ t("nav.dashboard") }}</a>
+{% else %}<a class="btn btn-outline-light" href="/login">{{ t("nav.login") }}</a><a class="btn btn-primary" href="/register">{{ t("landing.cta.start_free") }}</a>{% endif %}
 </div></div></nav>
 
 <header class="hero"><div class="container"><div class="row align-items-center g-5">
-<div class="col-lg-7"><span class="badge rounded-pill border p-2 mb-4">✨ AI marketing, from one workspace</span>
-<h1>Turn an idea into marketing content in seconds.</h1>
-<p class="leadx mt-4">Create advertising copy, blog posts, social content and complete marketing packages with AI. Work across multiple languages without rebuilding your workflow.</p>
+<div class="col-lg-7"><span class="badge rounded-pill border p-2 mb-4">{{ t("landing.hero.badge") }}</span>
+<h1>{{ t("landing.hero.title") }}</h1>
+<p class="leadx mt-4">{{ t("landing.hero.desc") }}</p>
 <div class="d-flex flex-wrap gap-3 mt-4">
-{% if session.get("user_id") %}<a href="/dashboard" class="btn btn-primary btn-lg">Open dashboard →</a>
-{% else %}<a href="/register" class="btn btn-primary btn-lg">Start free →</a><a href="/login" class="btn btn-outline-light btn-lg">Login</a>{% endif %}
+{% if session.get("user_id") %}<a href="/dashboard" class="btn btn-primary btn-lg">{{ t("landing.cta.dashboard") }}</a>
+{% else %}<a href="/register" class="btn btn-primary btn-lg">{{ t("landing.cta.start_free_arrow") }}</a><a href="/login" class="btn btn-outline-light btn-lg">{{ t("nav.login") }}</a>{% endif %}
 </div><div class="d-flex flex-wrap gap-2 mt-4">
-<span class="pill">🇰🇷 한국어</span><span class="pill">🇺🇸 English</span><span class="pill">🇯🇵 日本語</span><span class="pill">🇹🇭 ไทย</span><span class="pill">🇨🇳 中文</span><span class="pill">🇪🇸 Español</span>
+<a class="pill text-decoration-none" href="/language/ko">🇰🇷 한국어</a><a class="pill text-decoration-none" href="/language/en">🇺🇸 English</a><a class="pill text-decoration-none" href="/language/ja">🇯🇵 日本語</a><a class="pill text-decoration-none" href="/language/th">🇹🇭 ไทย</a><a class="pill text-decoration-none" href="/language/zh">🇨🇳 中文</a><a class="pill text-decoration-none" href="/language/es">🇪🇸 Español</a>
 </div></div>
 <div class="col-lg-5"><div class="glass preview">
-<div class="small muted mb-3">PROJECT FREEDOM AI · MARKETING PACKAGE</div>
-<div class="pc mb-3"><small class="text-secondary">Advertising</small><div class="fw-bold">Campaign-ready copy ideas</div></div>
-<div class="pc mb-3"><small class="text-secondary">Blog</small><div class="fw-bold">Structured long-form content</div></div>
-<div class="pc"><small class="text-secondary">Social</small><div class="fw-bold">Platform-ready social posts</div></div>
+<div class="small muted mb-3">{{ t("landing.preview.label") }}</div>
+<div class="pc mb-3"><small class="text-secondary">{{ t("landing.feature.ads") }}</small><div class="fw-bold">{{ t("landing.preview.ads") }}</div></div>
+<div class="pc mb-3"><small class="text-secondary">{{ t("landing.feature.blog") }}</small><div class="fw-bold">{{ t("landing.preview.blog") }}</div></div>
+<div class="pc"><small class="text-secondary">{{ t("landing.feature.social") }}</small><div class="fw-bold">{{ t("landing.preview.social") }}</div></div>
 </div></div></div></div></header>
 
-<section class="section"><div class="container"><div class="text-center mb-5"><h2 class="display-6 fw-bold">One AI workspace for your marketing</h2><p class="muted">Go from a few business details to content you can actually use.</p></div>
+<section class="section"><div class="container"><div class="text-center mb-5"><h2 class="display-6 fw-bold">{{ t("landing.workspace.title") }}</h2><p class="muted">{{ t("landing.workspace.desc") }}</p></div>
 <div class="row g-4">
-<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">📢</div><h3 class="h5 mt-3">Advertising</h3><p class="muted mb-0">Generate multiple ad copy ideas tailored to your brand.</p></div></div>
-<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">📝</div><h3 class="h5 mt-3">Blog</h3><p class="muted mb-0">Create structured long-form content without starting from a blank page.</p></div></div>
-<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">📱</div><h3 class="h5 mt-3">Social</h3><p class="muted mb-0">Produce platform-friendly posts with calls to action and hashtags.</p></div></div>
-<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">📦</div><h3 class="h5 mt-3">Marketing Package</h3><p class="muted mb-0">Create advertising, blog and social content together.</p></div></div>
+<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">📢</div><h3 class="h5 mt-3">{{ t("landing.feature.ads") }}</h3><p class="muted mb-0">{{ t("landing.feature.ads_desc") }}</p></div></div>
+<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">📝</div><h3 class="h5 mt-3">{{ t("landing.feature.blog") }}</h3><p class="muted mb-0">{{ t("landing.feature.blog_desc") }}</p></div></div>
+<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">📱</div><h3 class="h5 mt-3">{{ t("landing.feature.social") }}</h3><p class="muted mb-0">{{ t("landing.feature.social_desc") }}</p></div></div>
+<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">📦</div><h3 class="h5 mt-3">{{ t("landing.feature.package") }}</h3><p class="muted mb-0">{{ t("landing.feature.package_desc") }}</p></div></div>
 </div></div></section>
 
-<section class="section pt-2"><div class="container"><div class="glass p-5 text-center"><div class="icon">🌍</div><h2 class="fw-bold mt-3">Create for customers around the world</h2>
-<p class="muted mx-auto" style="max-width:760px">Create content in Korean, English, Japanese, Thai, Chinese and Spanish from one workflow.</p></div></div></section>
+<section class="section pt-2"><div class="container"><div class="glass p-5 text-center"><div class="icon">🌍</div><h2 class="fw-bold mt-3">{{ t("landing.global.title") }}</h2>
+<p class="muted mx-auto" style="max-width:760px">{{ t("landing.global.desc") }}</p></div></div></section>
 
-<section class="section text-center"><div class="container"><h2 class="display-6 fw-bold">Ready to create your next campaign?</h2><p class="muted">Create an account and start building marketing content with AI.</p>
-{% if session.get("user_id") %}<a href="/dashboard" class="btn btn-primary btn-lg">Go to dashboard →</a>{% else %}<a href="/register" class="btn btn-primary btn-lg">Start free →</a>{% endif %}
+
+<section class="section pt-2"><div class="container">
+<div class="text-center mb-5"><span class="badge rounded-pill border p-2 mb-3">{{ t("landing.product.badge") }}</span><h2 class="display-6 fw-bold">{{ t("landing.product.title") }}</h2><p class="muted">{{ t("landing.product.desc") }}</p></div>
+<div class="row g-4">
+<div class="col-lg-5"><div class="glass sample-box"><div class="small muted mb-3">{{ t("landing.product.input") }}</div><div class="mb-3"><small class="muted">{{ t("landing.product.industry") }}</small><div class="fw-bold">{{ t("landing.product.sample_industry") }}</div></div><div class="mb-3"><small class="muted">{{ t("landing.product.business") }}</small><div class="fw-bold">{{ t("landing.product.sample_business") }}</div></div><div><small class="muted">{{ t("landing.product.mood") }}</small><div class="fw-bold">{{ t("landing.product.sample_mood") }}</div></div></div></div>
+<div class="col-lg-7"><div class="glass sample-box"><div class="small muted mb-3">{{ t("landing.product.output") }}</div><div class="sample-output"><div class="fw-bold mb-2">{{ t("landing.product.output_title") }}</div><p class="mb-2">{{ t("landing.product.output_text") }}</p><small class="text-secondary">#Relax #Massage #SelfCare</small></div></div></div>
+</div></div></section>
+
+<section class="section pt-2"><div class="container">
+<div class="text-center mb-5"><span class="badge rounded-pill border p-2 mb-3">{{ t("landing.pricing.badge") }}</span><h2 class="display-6 fw-bold">{{ t("landing.pricing.title") }}</h2><p class="muted">{{ t("landing.pricing.desc") }}</p></div>
+<div class="row g-4 justify-content-center">
+<div class="col-md-6 col-lg-4"><div class="glass price-card"><h3 class="h4">{{ t("landing.pricing.free") }}</h3><div class="price mt-3">₩0</div><p class="muted">{{ t("landing.pricing.free_desc") }}</p><hr class="border-secondary"><p>✓ {{ t("landing.pricing.ai") }}</p><p>✓ {{ t("landing.pricing.brand") }}</p><p>✓ {{ t("landing.pricing.history") }}</p><p class="muted">{{ t("landing.pricing.testing") }}</p><a href="/register" class="btn btn-outline-light w-100 mt-2">{{ t("landing.cta.start_free") }}</a></div></div>
+<div class="col-md-6 col-lg-4"><div class="glass price-card popular"><span class="badge bg-primary position-absolute top-0 start-50 translate-middle">POPULAR</span><h3 class="h4">PRO</h3><div class="price mt-3">100 {{ t("landing.pricing.credits") }}</div><p class="muted">{{ t("landing.pricing.pro_desc") }}</p><hr class="border-secondary"><p>✓ {{ t("landing.pricing.more_credits") }}</p><p>✓ {{ t("landing.pricing.abs") }}</p><p>✓ {{ t("landing.pricing.packages") }}</p><p>✓ {{ t("landing.pricing.exports") }}</p><a href="{% if session.get('user_id') %}/credits{% else %}/register{% endif %}" class="btn btn-primary w-100 mt-2">{% if session.get("user_id") %}{{ t("landing.pricing.view_credits") }}{% else %}{{ t("landing.pricing.create_account") }}{% endif %}</a></div></div>
+</div><p class="text-center muted small mt-4">{{ t("landing.pricing.notice") }}</p></div></section>
+
+<section class="section pt-2"><div class="container"><div class="text-center mb-5"><h2 class="display-6 fw-bold">{{ t("landing.why.title") }}</h2></div>
+<div class="row g-4">
+<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">⚡</div><h3 class="h5 mt-3">{{ t("landing.why.fast") }}</h3><p class="muted mb-0">{{ t("landing.why.fast_desc") }}</p></div></div>
+<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">🌍</div><h3 class="h5 mt-3">{{ t("landing.why.multi") }}</h3><p class="muted mb-0">{{ t("landing.why.multi_desc") }}</p></div></div>
+<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">🏢</div><h3 class="h5 mt-3">{{ t("landing.why.brand") }}</h3><p class="muted mb-0">{{ t("landing.why.brand_desc") }}</p></div></div>
+<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">📚</div><h3 class="h5 mt-3">{{ t("landing.why.history") }}</h3><p class="muted mb-0">{{ t("landing.why.history_desc") }}</p></div></div>
+</div></div></section>
+
+<section class="section pt-2 faqx"><div class="container" style="max-width:900px"><div class="text-center mb-5"><h2 class="display-6 fw-bold">{{ t("landing.faq.title") }}</h2></div>
+<div class="accordion" id="faqAccordion">
+<div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">{{ t("landing.faq.q1") }}</button></h2><div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion"><div class="accordion-body muted">{{ t("landing.faq.a1") }}</div></div></div>
+<div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">{{ t("landing.faq.q2") }}</button></h2><div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body muted">{{ t("landing.faq.a2") }}</div></div></div>
+<div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">{{ t("landing.faq.q3") }}</button></h2><div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body muted">{{ t("landing.faq.a3") }}</div></div></div>
+<div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">{{ t("landing.faq.q4") }}</button></h2><div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body muted">{{ t("landing.faq.a4") }}</div></div></div>
+</div></div></section>
+
+<section class="section text-center"><div class="container"><h2 class="display-6 fw-bold">{{ t("landing.final.title") }}</h2><p class="muted">{{ t("landing.final.desc") }}</p>
+{% if session.get("user_id") %}<a href="/dashboard" class="btn btn-primary btn-lg">{{ t("landing.cta.dashboard_arrow") }}</a>{% else %}<a href="/register" class="btn btn-primary btn-lg">{{ t("landing.cta.start_free_arrow") }}</a>{% endif %}
 </div></section>
-<footer class="py-4"><div class="container d-flex justify-content-between flex-wrap gap-3"><span>© Project Freedom AI</span><span>Terms · Privacy · Refund Policy · Contact</span></div></footer>
+<footer class="py-4"><div class="container d-flex justify-content-between flex-wrap gap-3"><span>© Project Freedom AI</span><span><a class="footer-link" href="#">{{ t("landing.footer.terms") }}</a> · <a class="footer-link" href="#">{{ t("landing.footer.privacy") }}</a> · <a class="footer-link" href="#">{{ t("landing.footer.refund") }}</a> · <a class="footer-link" href="mailto:support@projectfreedom.ai">{{ t("landing.footer.contact") }}</a></span></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body></html>

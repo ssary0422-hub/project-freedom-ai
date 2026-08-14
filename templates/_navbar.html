@@ -20,8 +20,8 @@
             <div class="navbar-nav ms-auto gap-2 align-items-xl-center">
 
                 <a
-                    class="btn pf-nav-btn {% if request.path == '/' or request.path.startswith('/blog') or request.path.startswith('/sns') %}pf-nav-active{% endif %}"
-                    href="/">
+                    class="btn pf-nav-btn {% if request.path == '/' or request.path.startswith('/ads-generator') or request.path.startswith('/blog') or request.path.startswith('/sns') %}pf-nav-active{% endif %}"
+                    href="{% if session.get('user_id') %}/ads-generator{% else %}/{% endif %}">
                     🏠 {{ t("nav.home") }}
                 </a>
 
