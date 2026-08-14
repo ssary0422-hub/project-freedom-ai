@@ -1,25 +1,112 @@
+import os
 import sqlite3
 from pathlib import Path
 from datetime import datetime
 
+try:
+    import psycopg2
+    from psycopg2.extras import DictCursor
+except ImportError:
+    psycopg2 = None
+    DictCursor = None
+
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash,
+)
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH = BASE_DIR / "project.db"
+DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
+USE_POSTGRES = bool(DATABASE_URL)
+
+
+class _PostgresCursor:
+    def __init__(self, cursor):
+        self._cursor = cursor
+
+    def execute(self, sql, params=None):
+        # 기존 SQLite 쿼리의 ? placeholder를 PostgreSQL 형식으로 변환
+        sql = sql.replace("?", "%s")
+        # SQLite 전용 트랜잭션 문법을 PostgreSQL용으로 변환
+        if sql.strip().upper() == "BEGIN IMMEDIATE":
+            sql = "BEGIN"
+        self._cursor.execute(sql, params)
+        return self
+
+    def fetchone(self):
+        return self._cursor.fetchone()
+
+    def fetchall(self):
+        return self._cursor.fetchall()
+
+    @property
+    def rowcount(self):
+        return self._cursor.rowcount
+
+    def __getattr__(self, name):
+        return getattr(self._cursor, name)
+
+
+class _PostgresConnection:
+    def __init__(self, conn):
+        self._conn = conn
+
+    def cursor(self):
+        return _PostgresCursor(self._conn.cursor(cursor_factory=DictCursor))
+
+    def commit(self):
+        return self._conn.commit()
+
+    def rollback(self):
+        return self._conn.rollback()
+
+    def close(self):
+        return self._conn.close()
 
 
 def _connect():
-    return sqlite3.connect(str(DB_PATH))
+    if USE_POSTGRES:
+        if psycopg2 is None:
+            raise RuntimeError(
+                "DATABASE_URL이 설정되어 있지만 psycopg2가 설치되지 않았습니다."
+            )
+        return _PostgresConnection(psycopg2.connect(DATABASE_URL))
 
+    conn = sqlite3.connect(str(DB_PATH))
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+
+
+def _table_columns(cursor, table_name):
+    if USE_POSTGRES:
+        cursor.execute(
+            """
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = ?
+            """,
+            (table_name,),
+        )
+        return {row[0] for row in cursor.fetchall()}
+
+    cursor.execute(f"PRAGMA table_info({table_name})")
+    return {row[1] for row in cursor.fetchall()}
 
 def init_db():
     conn = _connect()
     cursor = conn.cursor()
+    id_column = "BIGSERIAL PRIMARY KEY" if USE_POSTGRES else "INTEGER PRIMARY KEY AUTOINCREMENT"
 
     # 대시보드에서도 사용하는 브랜드 프로필 테이블을 항상 보장합니다.
     # 새 서버/새 SQLite DB에서도 /dashboard가 먼저 열려도 오류가 나지 않습니다.
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS brand_profiles (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_column},
             business TEXT NOT NULL,
             company TEXT NOT NULL,
             style TEXT NOT NULL,
@@ -32,11 +119,7 @@ def init_db():
         )
     """)
 
-    cursor.execute("PRAGMA table_info(brand_profiles)")
-    brand_columns = {
-        column[1]
-        for column in cursor.fetchall()
-    }
+    brand_columns = _table_columns(cursor, "brand_profiles")
 
     brand_migrations = {
         "image_style": "TEXT DEFAULT '고급스러운 실사'",
@@ -61,9 +144,9 @@ def init_db():
         ON brand_profiles (user_id)
     """)
 
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS history (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_column},
             business TEXT,
             company TEXT,
             style TEXT,
@@ -73,9 +156,9 @@ def init_db():
     """)
 
 
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS payments (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_column},
             user_id INTEGER NOT NULL,
             order_id TEXT NOT NULL UNIQUE,
             payment_key TEXT,
@@ -100,11 +183,7 @@ def init_db():
     """)
 
     # 기존 DB를 깨뜨리지 않고 필요한 컬럼만 자동 추가
-    cursor.execute("PRAGMA table_info(history)")
-    columns = {
-        column[1]
-        for column in cursor.fetchall()
-    }
+    columns = _table_columns(cursor, "history")
 
     migrations = {
         "image_url": "TEXT",
@@ -173,7 +252,7 @@ def save_history(
         "%Y-%m-%d %H:%M:%S"
     )
 
-    cursor.execute("""
+    insert_sql = """
         INSERT INTO history (
             business,
             company,
@@ -187,7 +266,11 @@ def save_history(
             user_id
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
+    """
+    if USE_POSTGRES:
+        insert_sql += " RETURNING id"
+
+    cursor.execute(insert_sql, (
         business,
         company,
         style,
@@ -202,7 +285,10 @@ def save_history(
 
     conn.commit()
 
-    history_id = cursor.lastrowid
+    if USE_POSTGRES:
+        history_id = cursor.fetchone()[0]
+    else:
+        history_id = cursor.lastrowid
 
     conn.close()
 
@@ -431,14 +517,18 @@ def save_history_version(
     conn = _connect()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    insert_sql = """
         SELECT COALESCE(MAX(version), 0)
         FROM history
         WHERE package_id = ?
           AND content_type = ?
           AND brand_profile_id = ?
           AND user_id = ?
-    """, (
+    """
+    if USE_POSTGRES:
+        insert_sql += " RETURNING id"
+
+    cursor.execute(insert_sql, (
         package_id,
         content_type,
         brand_profile_id,
@@ -499,7 +589,10 @@ def save_history_version(
         user_id
     ))
 
-    history_id = cursor.lastrowid
+    if USE_POSTGRES:
+        history_id = cursor.fetchone()[0]
+    else:
+        history_id = cursor.lastrowid
 
     conn.commit()
     conn.close()
@@ -685,8 +778,7 @@ def create_test_payment(
     cursor = conn.cursor()
 
     try:
-        cursor.execute(
-            """
+        insert_sql = """
             INSERT INTO payments (
                 user_id,
                 order_id,
@@ -700,7 +792,12 @@ def create_test_payment(
                 paid_at
             )
             VALUES (?, ?, ?, ?, ?, ?, 'PAID', 'TEST', ?, ?)
-            """,
+            """
+        if USE_POSTGRES:
+            insert_sql += " RETURNING id"
+
+        cursor.execute(
+            insert_sql,
             (
                 user_id,
                 order_id,
@@ -714,13 +811,16 @@ def create_test_payment(
         )
 
         conn.commit()
-        payment_id = cursor.lastrowid
+        if USE_POSTGRES:
+            payment_id = cursor.fetchone()[0]
+        else:
+            payment_id = cursor.lastrowid
         return {
             "ok": True,
             "payment_id": payment_id,
         }
 
-    except sqlite3.IntegrityError:
+    except (sqlite3.IntegrityError, psycopg2.IntegrityError if psycopg2 else sqlite3.IntegrityError):
         return {
             "ok": False,
             "reason": "duplicate_order",

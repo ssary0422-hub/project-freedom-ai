@@ -5,10 +5,10 @@ from datetime import datetime
 
 try:
     import psycopg2
-    from psycopg2.extras import RealDictCursor
+    from psycopg2.extras import DictCursor
 except ImportError:
     psycopg2 = None
-    RealDictCursor = None
+    DictCursor = None
 
 from werkzeug.security import (
     generate_password_hash,
@@ -54,7 +54,7 @@ class _PostgresConnection:
         self._conn = conn
 
     def cursor(self):
-        return _PostgresCursor(self._conn.cursor(cursor_factory=RealDictCursor))
+        return _PostgresCursor(self._conn.cursor(cursor_factory=DictCursor))
 
     def commit(self):
         return self._conn.commit()

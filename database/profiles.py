@@ -1,22 +1,110 @@
+import os
 import sqlite3
 from pathlib import Path
+from datetime import datetime
+
+try:
+    import psycopg2
+    from psycopg2.extras import DictCursor
+except ImportError:
+    psycopg2 = None
+    DictCursor = None
+
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash,
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH = BASE_DIR / "project.db"
+DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
+USE_POSTGRES = bool(DATABASE_URL)
+
+
+class _PostgresCursor:
+    def __init__(self, cursor):
+        self._cursor = cursor
+
+    def execute(self, sql, params=None):
+        # 기존 SQLite 쿼리의 ? placeholder를 PostgreSQL 형식으로 변환
+        sql = sql.replace("?", "%s")
+        # SQLite 전용 트랜잭션 문법을 PostgreSQL용으로 변환
+        if sql.strip().upper() == "BEGIN IMMEDIATE":
+            sql = "BEGIN"
+        self._cursor.execute(sql, params)
+        return self
+
+    def fetchone(self):
+        return self._cursor.fetchone()
+
+    def fetchall(self):
+        return self._cursor.fetchall()
+
+    @property
+    def rowcount(self):
+        return self._cursor.rowcount
+
+    def __getattr__(self, name):
+        return getattr(self._cursor, name)
+
+
+class _PostgresConnection:
+    def __init__(self, conn):
+        self._conn = conn
+
+    def cursor(self):
+        return _PostgresCursor(self._conn.cursor(cursor_factory=DictCursor))
+
+    def commit(self):
+        return self._conn.commit()
+
+    def rollback(self):
+        return self._conn.rollback()
+
+    def close(self):
+        return self._conn.close()
 
 
 def _connect():
-    return sqlite3.connect(str(DB_PATH))
+    if USE_POSTGRES:
+        if psycopg2 is None:
+            raise RuntimeError(
+                "DATABASE_URL이 설정되어 있지만 psycopg2가 설치되지 않았습니다."
+            )
+        return _PostgresConnection(psycopg2.connect(DATABASE_URL))
 
+    conn = sqlite3.connect(str(DB_PATH))
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+
+
+def _table_columns(cursor, table_name):
+    if USE_POSTGRES:
+        cursor.execute(
+            """
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = ?
+            """,
+            (table_name,),
+        )
+        return {row[0] for row in cursor.fetchall()}
+
+    cursor.execute(f"PRAGMA table_info({table_name})")
+    return {row[1] for row in cursor.fetchall()}
 
 def init_profiles_table():
     conn = _connect()
     cursor = conn.cursor()
+    id_column = "BIGSERIAL PRIMARY KEY" if USE_POSTGRES else "INTEGER PRIMARY KEY AUTOINCREMENT"
 
-    cursor.execute("""
+    cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS brand_profiles (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_column},
             business TEXT NOT NULL,
             company TEXT NOT NULL,
             style TEXT NOT NULL,
@@ -29,14 +117,7 @@ def init_profiles_table():
         )
     """)
 
-    cursor.execute(
-        "PRAGMA table_info(brand_profiles)"
-    )
-
-    columns = {
-        row[1]
-        for row in cursor.fetchall()
-    }
+    columns = _table_columns(cursor, "brand_profiles")
 
     if "user_id" not in columns:
         cursor.execute("""
@@ -127,7 +208,7 @@ def save_profile(
     conn = _connect()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    insert_sql = """
         INSERT INTO brand_profiles (
             business,
             company,
@@ -139,7 +220,11 @@ def save_profile(
             user_id
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
+    """
+    if USE_POSTGRES:
+        insert_sql += " RETURNING id"
+
+    cursor.execute(insert_sql, (
         business,
         company,
         style,
@@ -150,7 +235,10 @@ def save_profile(
         user_id,
     ))
 
-    profile_id = cursor.lastrowid
+    if USE_POSTGRES:
+        profile_id = cursor.fetchone()[0]
+    else:
+        profile_id = cursor.lastrowid
 
     conn.commit()
     conn.close()
