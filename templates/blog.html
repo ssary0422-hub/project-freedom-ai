@@ -7,6 +7,49 @@
 
 {% block form %}
 <form method="POST">
+    {% if saved_profiles %}
+    <div class="border rounded-3 p-3 mb-4 bg-light">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+            <div>
+                <div class="fw-bold">🏢 {{ t("v2.saved") }}</div>
+                <div class="small text-muted">{{ t("v21.pkg.saved_desc") }}</div>
+            </div>
+            <a href="/profiles" class="btn btn-sm btn-outline-success">
+                {{ t("v2.manage") }}
+            </a>
+        </div>
+        <div class="row g-2">
+            <div class="col-md-9">
+                <select id="saved-profile-select" class="form-select">
+                    <option value="">{{ t("v2.select") }}</option>
+                    {% for profile in saved_profiles %}
+                    <option value="{{ profile[0] }}"
+                            {% if selected_profile_id == profile[0] %}selected{% endif %}>
+                        {{ profile[2] }} · {{ profile[1] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-grid">
+                <button type="button" id="load-profile-button" class="btn btn-success">
+                    📥 {{ t("v2.load") }}
+                </button>
+            </div>
+        </div>
+        {% if loaded_profile_name %}
+        <div class="alert alert-success py-2 mt-3 mb-0">
+            ✅ <strong>{{ loaded_profile_name }}</strong> {{ t("v21.pkg.loaded") }}
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="alert alert-light border mb-4">
+        {{ t("v21.pkg.none") }}
+        <a href="/profiles" class="fw-bold text-decoration-none">
+            {{ t("v21.pkg.save_first") }}
+        </a>
+    </div>
+    {% endif %}
     <div class="mb-3">
         <label class="form-label">{{ t("v2.business") }}</label>
         <input type="text" class="form-control" name="business"
@@ -138,4 +181,24 @@
     onclick="copyResult()">
     {{ t("v21.copy") }}
 </button>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const profileSelect = document.getElementById("saved-profile-select");
+    const loadButton = document.getElementById("load-profile-button");
+
+    if (loadButton) {
+        loadButton.addEventListener("click", function () {
+            if (!profileSelect || !profileSelect.value) {
+                alert({{ t("v21.pkg.choose_brand") | tojson }});
+                return;
+            }
+            window.location.href = "/blog?profile_id=" +
+                encodeURIComponent(profileSelect.value);
+        });
+    }
+});
+</script>
 {% endblock %}

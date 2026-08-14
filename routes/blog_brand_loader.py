@@ -1,13 +1,10 @@
-import os
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
-
 from flask import Blueprint, render_template, request, session, send_file
 
-from ai.ads import make_ads
+from ai.blog import make_blog
 from ai.image import make_image
-from documents.pdf import create_pdf, PDF_PATH
 from database.db import save_history
 from database.profiles import get_profiles, get_profile
 from database.users import (
@@ -15,10 +12,11 @@ from database.users import (
     get_plan_status,
     record_ai_credit_usage,
 )
-from documents.word import create_word, WORD_PATH
+from documents.pdf import create_blog_pdf, BLOG_PDF_PATH
+from documents.word import create_blog_word, BLOG_WORD_PATH
 from routes.auth import login_required
 
-ads_bp = Blueprint("ads", __name__)
+blog_bp = Blueprint("blog", __name__)
 
 
 def _find_brand_font(size: int):
@@ -527,27 +525,29 @@ def _image_style_instruction(image_style):
     )
 
 
-@ads_bp.route("/ads-generator", methods=["GET"])
+@blog_bp.route("/blog", methods=["GET"])
 @login_required
-def home():
-    return _home_page()
+def blog():
+    return _blog_page()
 
 
-@ads_bp.route("/ads-generator", methods=["POST"])
+@blog_bp.route("/blog", methods=["POST"])
 @login_required
-def generate_ads():
-    return _home_page()
+def generate_blog():
+    return _blog_page()
 
 
-def _home_page():
+def _blog_page():
     result = ""
+    error = ""
     image_url = ""
     business = ""
     company = ""
-    style = ""
+    topic = ""
+    tone = ""
+    length = ""
     image_style = "고급스러운 실사"
     with_image = False
-    error = ""
 
     user_id = session["user_id"]
     saved_profiles = get_profiles(user_id=user_id)
@@ -555,28 +555,28 @@ def _home_page():
     loaded_profile_name = ""
 
     if request.method == "GET" and selected_profile_id:
-        selected_profile = get_profile(
-            selected_profile_id,
-            user_id=user_id,
-        )
+        selected_profile = get_profile(selected_profile_id, user_id=user_id)
         if selected_profile:
             business = selected_profile["business"] or ""
             company = selected_profile["company"] or ""
-            style = selected_profile["style"] or ""
+            tone = selected_profile["style"] or ""
             loaded_profile_name = company or business
 
     if request.method == "POST":
         if not get_ai_enabled():
+            error = "현재 AI 생성 시스템이 점검 중입니다. 잠시 후 다시 이용해주세요."
             return render_template(
-                "index.html",
+                "blog.html",
                 result=result,
                 image_url=image_url,
                 business=business,
                 company=company,
-                style=style,
+                topic=topic,
+                tone=tone,
+                length=length,
                 image_style=image_style,
                 with_image=with_image,
-                error="현재 AI 생성 시스템이 점검 중입니다. 잠시 후 다시 이용해주세요.",
+                error=error,
                 saved_profiles=saved_profiles,
                 selected_profile_id=selected_profile_id,
                 loaded_profile_name=loaded_profile_name,
@@ -584,7 +584,9 @@ def _home_page():
 
         business = request.form.get("business", "").strip()
         company = request.form.get("company", "").strip()
-        style = request.form.get("style", "").strip()
+        topic = request.form.get("topic", "").strip()
+        tone = request.form.get("tone", "").strip()
+        length = request.form.get("length", "").strip()
         image_style = request.form.get("image_style", "고급스러운 실사").strip()
         with_image = request.form.get("with_image") == "on"
 
@@ -598,15 +600,17 @@ def _home_page():
             error = (
                 f"{credit_status['plan']} 요금제의 AI 크레딧이 부족합니다. "
                 f"현재 {credit_status['remaining']}크레딧 남음 · "
-                f"이번 광고 생성은 {required_credits}크레딧이 필요합니다."
+                f"이번 블로그 생성은 {required_credits}크레딧이 필요합니다."
             )
             return render_template(
-                "index.html",
+                "blog.html",
                 result=result,
                 image_url=image_url,
                 business=business,
                 company=company,
-                style=style,
+                topic=topic,
+                tone=tone,
+                length=length,
                 image_style=image_style,
                 with_image=with_image,
                 error=error,
@@ -615,25 +619,27 @@ def _home_page():
                 loaded_profile_name=loaded_profile_name,
             )
 
-        if business and company and style:
-            result = make_ads(business, company, style, language=session.get("language", "ko"))
+        if business and company and topic and tone and length:
+            result = make_blog(topic, tone, length, language=session.get("language", "ko"))
             image_path = ""
 
             if with_image:
                 image_style_instruction = _image_style_instruction(image_style)
                 image_prompt = f"""
-{company}의 광고용 이미지.
+블로그 대표 이미지.
 
 업종: {business}
 회사명: {company}
-브랜드 분위기: {style}
+주제: {topic}
+분위기: {tone}
+글의 길이: {length}
 선택한 이미지 스타일: {image_style}
 스타일 지시: {image_style_instruction}
 
-업종과 회사명에 정확히 맞는 전문적인 광고 이미지.
-마사지샵이 아닌 업종에는 마사지 베드, 마사지 장면, 스파 소품을 넣지 말 것.
-병원/의원은 의료진, 진료 공간, 의료 장비 등 해당 진료 업종에 맞게 표현할 것.
-카페는 카페 공간, 음료, 디저트 등 카페 업종에 맞게 표현할 것.
+블로그 주제와 실제 업종에 정확히 맞는 대표 이미지.
+주제와 관계없는 마사지/스파 장면을 임의로 넣지 말 것.
+깔끔하고 고급스러운 스타일.
+본문 내용과 잘 어울리는 구성.
 이미지 안에는 글자를 넣지 말 것.
 """
                 try:
@@ -643,24 +649,24 @@ def _home_page():
                     )
                     image_url = "/" + Path(image_path).as_posix()
                 except Exception as image_error:
-                    print("광고 이미지 생성 실패:", image_error)
+                    print("블로그 이미지 생성 실패:", image_error)
                     error = (
-                        "광고 문구는 생성되었지만 이미지 생성에 실패했습니다. "
+                        "블로그 글은 생성되었지만 이미지 생성에 실패했습니다. "
                         f"오류: {image_error}"
                     )
 
             save_history(
-                business, company, style, result, image_url,
-                content_type="ads",
+                business, company, tone, result, image_url,
+                content_type="blog",
                 user_id=session["user_id"]
             )
-            create_word(result, image_path)
-            create_pdf(result, image_path)
+            create_blog_word(result, image_path)
+            create_blog_pdf(result, image_path)
 
             used_credits = 3 if with_image and image_url else 1
             record_ai_credit_usage(
                 session["user_id"],
-                "ADS_IMAGE" if used_credits == 3 else "ADS_TEXT",
+                "BLOG_IMAGE" if used_credits == 3 else "BLOG_TEXT",
                 used_credits
             )
 
@@ -672,12 +678,14 @@ def _home_page():
             session["plan_percent"] = credit_status["percent"]
 
     return render_template(
-        "index.html",
+        "blog.html",
         result=result,
         image_url=image_url,
         business=business,
         company=company,
-        style=style,
+        topic=topic,
+        tone=tone,
+        length=length,
         image_style=image_style,
         with_image=with_image,
         error=error,
@@ -687,29 +695,31 @@ def _home_page():
     )
 
 
-
-@ads_bp.route("/download")
+@blog_bp.route("/blog/download/word")
 @login_required
-def download_word():
-    path = Path(WORD_PATH)
+def download_blog_word():
+    path = Path(BLOG_WORD_PATH)
 
     if not path.exists():
-        return "먼저 광고를 생성해 주세요.", 404
+        return "먼저 블로그 글을 생성해 주세요.", 404
 
     return send_file(
         str(path),
         as_attachment=True,
-        download_name="advertisement.docx"
+        download_name="blog.docx"
     )
 
-@ads_bp.route("/download/pdf")
+
+@blog_bp.route("/blog/download/pdf")
 @login_required
-def download_pdf():
-    if not os.path.exists(PDF_PATH):
-        return "먼저 광고를 생성해 주세요.", 404
+def download_blog_pdf():
+    path = Path(BLOG_PDF_PATH)
+
+    if not path.exists():
+        return "먼저 블로그 글을 생성해 주세요.", 404
 
     return send_file(
-        PDF_PATH,
+        str(path),
         as_attachment=True,
-        download_name="advertisement.pdf"
+        download_name="blog.pdf"
     )
