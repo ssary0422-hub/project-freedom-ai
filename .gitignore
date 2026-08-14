@@ -1,0 +1,54 @@
+﻿# Project Freedom AI
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Database / local runtime data
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated files
+downloads/*
+!downloads/.gitkeep
+
+static/generated/*
+!static/generated/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# Test cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Windows / macOS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+~$*
