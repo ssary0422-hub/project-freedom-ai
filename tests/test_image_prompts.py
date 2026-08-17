@@ -11,10 +11,13 @@ class ImagePromptTests(unittest.TestCase):
             custom_concept="고양이 유머 컨셉",
         )
         self.assertIn("HIGHEST priority", prompt)
-        self.assertIn("cats as the only characters", prompt)
-        self.assertIn("no human workers", prompt)
-        self.assertIn("adorable 3D animated", prompt)
+        self.assertIn("fluffy baby kitten", prompt)
+        self.assertIn("natural four-legged animals", prompt)
+        self.assertIn("kawaii 3D animated", prompt)
         self.assertIn("Avoid realism", prompt)
+        self.assertIn("exactly two tiny baby animals", prompt)
+        self.assertIn("gently kneads", prompt)
+        self.assertIn("no upright human posture", prompt)
 
     def test_elephant_concept_uses_cute_character_mode(self):
         prompt = build_marketing_image_prompt(
@@ -22,8 +25,8 @@ class ImagePromptTests(unittest.TestCase):
             image_style="코끼리 캐릭터", placement="Instagram",
             custom_concept="코끼리 캐릭터",
         )
-        self.assertIn("cute baby elephant", prompt)
-        self.assertIn("instantly cute and shareable", prompt)
+        self.assertIn("cute round baby elephant", prompt)
+        self.assertIn("instantly lovable, cute and shareable", prompt)
 
     def test_cafe_peach_latte_is_forced_as_main_subject(self):
         prompt = build_marketing_image_prompt(

@@ -27,26 +27,48 @@ def _is_animal_concept(custom_concept: str) -> bool:
     return any(key in lowered for key in ANIMAL_KEYWORDS)
 
 
+def _animal_action(business: str, context: str) -> str:
+    source = f"{business} {context}".lower()
+    if any(key in source for key in ("마사지", "스파", "massage", "spa")):
+        return (
+            "exactly two tiny baby animals in a cozy miniature spa: one stays on four paws "
+            "and gently kneads the other animal's back with its front paws while the other lies "
+            "happily on a small soft cushion"
+        )
+    if any(key in source for key in ("세차", "자동차", "car wash", "car")):
+        return (
+            "exactly two tiny baby animals happily washing a small toy-like car with soft foam "
+            "and a little sponge in a bright miniature car wash"
+        )
+    if any(key in source for key in ("카페", "커피", "라테", "cafe", "coffee", "latte")):
+        return (
+            "one tiny baby animal sitting at a miniature cafe table, happily sipping a colorful "
+            "latte from a small cup held between its front paws"
+        )
+    return (
+        "one or two tiny baby animals clearly performing the business activity in a simple, "
+        "playful miniature setting"
+    )
+
+
 def _creative_subject(custom_concept: str, business: str, context: str) -> str:
     concept = (custom_concept or "").strip()
     lowered = concept.lower()
+    action = _animal_action(business, f"{context} {concept}")
     if any(key in lowered for key in ("고양이", "cat", "kitten")):
         return (
-            "adorable expressive cats as the only characters, acting out the "
-            f"business idea ({business}) in a visibly funny, playful situation; "
-            "no human workers or human customers"
+            f"{action}, and every character is an irresistibly cute fluffy baby kitten; "
+            "the kittens remain natural four-legged animals"
         )
     if any(key in lowered for key in ("강아지", "개", "dog", "puppy")):
         return (
-            "adorable expressive dogs as the only characters, acting out the "
-            f"business idea ({business}) in a visibly funny, playful situation; "
-            "no human workers or human customers"
+            f"{action}, and every character is an irresistibly cute fluffy baby puppy; "
+            "the puppies remain natural four-legged animals"
         )
     if any(key in lowered for key in ("코끼리", "elephant")):
         return (
-            "an irresistibly cute baby elephant as the main character, acting out "
-            f"the business idea ({business}) in a funny and heartwarming situation; "
-            "no human workers or human customers"
+            f"{action}, and every character is an irresistibly cute round baby elephant with "
+            "oversized ears and a short trunk"
         )
     if _is_animal_concept(concept):
         return (
@@ -75,11 +97,13 @@ def build_marketing_image_prompt(*, business: str, context: str, mood: str,
         else ""
     )
     visual_direction = (
-        "Use a polished adorable 3D animated advertising illustration, rounded friendly shapes, "
-        "big expressive eyes, warm cheerful colors, charming poses and clean character design. "
+        "ADORABLE_CHARACTER_MODE. Use a polished kawaii 3D animated advertising illustration, "
+        "soft rounded baby proportions, chubby cheeks, big sparkling expressive eyes, warm pastel "
+        "colors, charming smiles and clean character design. Show no more than two characters. "
         "The animals must look healthy, safe and joyful, with coherent anatomy and the correct "
-        "number of limbs. Avoid realism, horror, distress, uncanny faces, human bodies, human hands "
-        "and human feet. Make it instantly cute and shareable."
+        "number of limbs. They must stay animal-shaped on four paws: no upright human posture, "
+        "clothing, suits, human bodies, human hands or human feet. Avoid realism, horror, distress, "
+        "crowds and uncanny faces. Make it instantly lovable, cute and shareable."
         if _is_animal_concept(custom_concept)
         else "Photorealistic, high detail, commercially usable."
     )
