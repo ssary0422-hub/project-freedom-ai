@@ -676,7 +676,7 @@ def _blog_page():
                 content_type="blog",
                 user_id=session["user_id"]
             )
-            create_blog_word(result, image_path)
+            create_blog_word(result, image_path, company)
             create_blog_pdf(result, image_path)
 
             used_credits = 3 if with_image and image_url else 1

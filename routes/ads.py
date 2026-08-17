@@ -659,7 +659,7 @@ def _home_page():
                 content_type="ads",
                 user_id=session["user_id"]
             )
-            create_word(result, image_path)
+            create_word(result, image_path, company)
             create_pdf(result, image_path)
 
             used_credits = 3 if with_image and image_url else 1

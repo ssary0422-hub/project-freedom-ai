@@ -659,7 +659,7 @@ SNS 게시물용 대표 이미지.
                     content_type="sns",
                     user_id=session["user_id"]
                 )
-                create_sns_word(result, image_path)
+                create_sns_word(result, image_path, company)
                 create_sns_pdf(result, image_path)
 
                 used_credits = 3 if with_image and image_url else 1

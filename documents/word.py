@@ -42,28 +42,28 @@ def _create_word_document(
     return str(output_path)
 
 
-def create_word(result: str, image_path: str = "") -> str:
+def create_word(result: str, image_path: str = "", company: str = "") -> str:
     return _create_word_document(
         WORD_PATH,
-        "Project Freedom AI - Advertisement",
+        company or "광고 콘텐츠",
         result,
         image_path
     )
 
 
-def create_blog_word(result: str, image_path: str = "") -> str:
+def create_blog_word(result: str, image_path: str = "", company: str = "") -> str:
     return _create_word_document(
         BLOG_WORD_PATH,
-        "Project Freedom AI - Blog",
+        f"{company} 블로그" if company else "블로그 콘텐츠",
         result,
         image_path
     )
 
 
-def create_sns_word(result: str, image_path: str = "") -> str:
+def create_sns_word(result: str, image_path: str = "", company: str = "") -> str:
     return _create_word_document(
         SNS_WORD_PATH,
-        "Project Freedom AI - SNS",
+        f"{company} SNS" if company else "SNS 콘텐츠",
         result,
         image_path
     )
