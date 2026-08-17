@@ -55,19 +55,32 @@
     const normalized = (value || "").toLowerCase().replace(/\s/g, "");
     return industries.find(group => group.keys.some(key => normalized.includes(key.toLowerCase().replace(/\s/g, "")))) || general;
   }
-  function addSuggestions(input, type, businessInput) {
+  function addSuggestions(input, type, businessInput, moodInput = null) {
     if (!input || input.dataset.smartSuggestions === "ready") return;
     input.dataset.smartSuggestions = "ready";
     const wrap = document.createElement("div");
     wrap.className = "smart-suggest";
-    wrap.innerHTML = `<div class="smart-suggest-head"><span class="smart-suggest-label">추천 예시를 눌러 바로 입력하세요</span><button class="smart-suggest-refresh" type="button">↻ 다른 추천 보기</button></div><div class="smart-suggest-chips"></div>`;
+    wrap.innerHTML = `<div class="smart-suggest-head"><span class="smart-suggest-label">추천 예시를 눌러 바로 입력하세요</span><span class="smart-suggest-actions">${type === "images" ? '<button class="smart-suggest-dice" type="button">🎲 랜덤 스타일 적용</button>' : ''}<button class="smart-suggest-refresh" type="button">↻ 다른 추천 보기</button></span></div><div class="smart-suggest-chips"></div>`;
     input.insertAdjacentElement("afterend", wrap);
     const chips = wrap.querySelector(".smart-suggest-chips");
-    const render = () => {
+    let currentSource = [];
+    const sourceForCurrentInputs = () => {
       const catalog = catalogFor(businessInput?.value);
       const source = type === "moods" ? catalog.moods : catalog.images;
+      if (type !== "images" || !moodInput?.value.trim()) return source;
+      const mood = moodInput.value.trim();
+      return source.map(style => `${style}, ${mood} 느낌을 살려 표현`);
+    };
+    const rotateImagePlaceholder = () => {
+      if (type !== "images" || input.value || document.activeElement === input) return;
+      currentSource = sourceForCurrentInputs();
+      input.placeholder = `예: ${nextItems("image-placeholder", currentSource, 1)[0]}`;
+    };
+    const render = () => {
+      const catalog = catalogFor(businessInput?.value);
+      currentSource = sourceForCurrentInputs();
       const key = `${type}:${industries.indexOf(catalog)}`;
-      chips.replaceChildren(...nextItems(key, source).map(text => {
+      chips.replaceChildren(...nextItems(key, currentSource).map(text => {
         const button = document.createElement("button");
         button.type = "button"; button.className = "smart-suggest-chip"; button.textContent = text;
         button.addEventListener("click", () => { input.value = text; input.dispatchEvent(new Event("input", { bubbles: true })); });
@@ -75,8 +88,18 @@
       }));
     };
     wrap.querySelector(".smart-suggest-refresh").addEventListener("click", render);
-    businessInput?.addEventListener("input", (() => { let timer; return () => { clearTimeout(timer); timer = setTimeout(render, 250); }; })());
+    const rerenderLater = (() => { let timer; return () => { clearTimeout(timer); timer = setTimeout(() => { render(); rotateImagePlaceholder(); }, 250); }; })();
+    businessInput?.addEventListener("input", rerenderLater);
+    moodInput?.addEventListener("input", rerenderLater);
+    wrap.querySelector(".smart-suggest-dice")?.addEventListener("click", () => {
+      currentSource = sourceForCurrentInputs();
+      input.value = nextItems("image-dice", currentSource, 1)[0];
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    });
+    if (type === "images") setInterval(rotateImagePlaceholder, 3800);
     render();
+    rotateImagePlaceholder();
   }
   function rotatingPlaceholder(input, key, examples) {
     if (!input || input.value) return;
@@ -95,6 +118,6 @@
     rotatingPlaceholder(business, "business", businessExamples);
     rotatingPlaceholder(company, "company", companyExamples);
     addSuggestions(mood, "moods", business);
-    addSuggestions(image, "images", business);
+    addSuggestions(image, "images", business, mood);
   });
 })();
