@@ -18,6 +18,13 @@ class ImagePromptTests(unittest.TestCase):
         self.assertIn("negative space", prompt)
         self.assertIn("STRICTLY NO text", prompt)
 
+    def test_product_named_in_mood_controls_subject(self):
+        prompt = build_marketing_image_prompt(
+            business="카페", context="광고", mood="복숭아 라테 신메뉴",
+            image_style="실사", placement="광고",
+        )
+        self.assertIn("iced peach latte", prompt)
+
 
 if __name__ == "__main__":
     unittest.main()

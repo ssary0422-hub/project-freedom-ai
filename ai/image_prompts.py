@@ -17,7 +17,7 @@ def _subject_for(business: str, context: str) -> str:
 
 def build_marketing_image_prompt(*, business: str, context: str, mood: str,
                                  image_style: str, placement: str) -> str:
-    subject = _subject_for(business, context)
+    subject = _subject_for(business, f"{context} {mood} {image_style}")
     return f"""
 Create one premium commercial photograph for {placement}.
 The main subject MUST be {subject}.
