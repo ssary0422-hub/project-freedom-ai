@@ -9,6 +9,7 @@
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
         rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -216,6 +217,7 @@
 
         {% block extra_style %}{% endblock %}
     </style>
+    <link href="{{ url_for('static', filename='freedom-neon.css') }}" rel="stylesheet">
 </head>
 
 <body {% block body_attrs %}{% endblock %}>

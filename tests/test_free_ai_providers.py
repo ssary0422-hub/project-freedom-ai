@@ -54,7 +54,7 @@ class FreeAIProviderTests(unittest.TestCase):
     )
     @patch("ai.providers.requests.post")
     def test_cloudflare_image_response(self, post):
-        expected = b"fake-image"
+        expected = b"\xff\xd8\xfffake-jpeg"
         response = Mock()
         response.ok = True
         response.headers = {"content-type": "application/json"}

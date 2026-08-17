@@ -136,7 +136,7 @@ def generate_image_bytes(prompt: str) -> bytes:
     response = _post_json(
         url,
         headers={"Authorization": f"Bearer {api_token}"},
-        payload={"prompt": prompt, "num_steps": 4},
+        payload={"prompt": prompt[:2048], "steps": 4},
         timeout=180,
     )
 
@@ -154,4 +154,12 @@ def generate_image_bytes(prompt: str) -> bytes:
         encoded = result
     if not encoded:
         raise RuntimeError("Cloudflare returned no image data.")
-    return base64.b64decode(encoded)
+    if encoded.startswith("data:") and "," in encoded:
+        encoded = encoded.split(",", 1)[1]
+    try:
+        image_bytes = base64.b64decode(encoded, validate=True)
+    except (ValueError, TypeError) as exc:
+        raise RuntimeError("Cloudflare returned invalid base64 image data.") from exc
+    if not image_bytes.startswith((b"\xff\xd8\xff", b"\x89PNG\r\n\x1a\n")):
+        raise RuntimeError("Cloudflare returned an unsupported image format.")
+    return image_bytes

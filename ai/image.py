@@ -43,7 +43,8 @@ def make_image(prompt: str) -> str:
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     unique_id = uuid.uuid4().hex[:8]
-    filename = f"image_{timestamp}_{unique_id}.png"
+    extension = ".jpg" if image_bytes.startswith(b"\xff\xd8\xff") else ".png"
+    filename = f"image_{timestamp}_{unique_id}{extension}"
     filepath = GENERATED_DIR / filename
     filepath.write_bytes(image_bytes)
 
