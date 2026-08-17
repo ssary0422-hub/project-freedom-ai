@@ -89,8 +89,8 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
                     {{ t("v21.tab.sns") }}
                 </a>
 
-                <a href="/package" class="btn btn-success flex-fill">
-                    {{ t("v21.tab.package") }}
+                <a href="/poster" class="btn {% if active_tab == 'poster' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
+                    🖼️ 포스터
                 </a>
 
                 <a href="/profiles" class="btn btn-outline-success flex-fill">

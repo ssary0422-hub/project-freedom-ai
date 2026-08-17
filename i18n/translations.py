@@ -1695,3 +1695,25 @@ TRANSLATIONS["es"].update({
     "v22.custom_image_style_ph": "Ej. ciudad futurista nocturna con neón, estilo cinematográfico fotorrealista",
     "v22.custom_image_style_help": "Si escribes un estilo aquí, tendrá prioridad sobre el estilo seleccionado arriba.",
 })
+
+# Package product was retired in favor of the standalone poster workflow.
+_POSTER_LANDING = {
+    "ko": {
+        "landing.meta.description": "AI로 광고, 블로그, SNS 콘텐츠와 포스터를 만드세요.",
+        "landing.hero.desc": "AI로 광고 문구, 블로그 글, 소셜 콘텐츠와 포스터를 만드세요. 하나의 작업 공간에서 여러 언어로 제작할 수 있습니다.",
+        "landing.preview.label": "PROJECT FREEDOM AI · 콘텐츠 미리보기",
+        "landing.faq.a1": "광고 문구, 블로그 콘텐츠, 소셜 게시물과 포스터를 만들 수 있습니다.",
+    },
+    "en": {
+        "landing.meta.description": "Create ads, blog posts, social content and posters with AI.",
+        "landing.hero.desc": "Create advertising copy, blog posts, social content and posters with AI in one multilingual workspace.",
+        "landing.preview.label": "PROJECT FREEDOM AI · CONTENT PREVIEW",
+        "landing.faq.a1": "Advertising copy, blog content, social posts and posters.",
+    },
+    "ja": {"landing.feature.package": "ポスター", "landing.feature.package_desc": "3種類の広告ポスターを作成して個別に保存できます。"},
+    "th": {"landing.feature.package": "โปสเตอร์", "landing.feature.package_desc": "สร้างโปสเตอร์โฆษณา 3 แบบและบันทึกแยกกัน"},
+    "zh": {"landing.feature.package": "海报", "landing.feature.package_desc": "制作三款广告海报并分别保存。"},
+    "es": {"landing.feature.package": "Póster", "landing.feature.package_desc": "Crea tres pósteres publicitarios y guarda cada uno por separado."},
+}
+for _language, _values in _POSTER_LANDING.items():
+    TRANSLATIONS[_language].update(_values)
