@@ -1,11 +1,5 @@
-import os
-from openai import OpenAI
-
 from ai.language import output_language_instruction
-
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
-)
+from ai.providers import generate_text
 
 
 def make_blog(
@@ -40,9 +34,4 @@ OUTPUT LANGUAGE RULE:
 {language_instruction}
 """
 
-    response = client.responses.create(
-        model="gpt-5.5",
-        input=prompt
-    )
-
-    return response.output_text
+    return generate_text(prompt)
