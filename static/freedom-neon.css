@@ -134,3 +134,16 @@ body {
     .hero { border-radius: 18px !important; }
     .card, .pf-card { border-radius: 17px !important; }
 }
+
+.smart-suggest { margin-top: .7rem; }
+.smart-suggest-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .55rem; }
+.smart-suggest-label { color: var(--pf-muted); font-size: .78rem; font-weight: 700; }
+.smart-suggest-refresh { color: #8db4ff; background: transparent; border: 0; padding: 0; font-size: .78rem; font-weight: 700; }
+.smart-suggest-refresh:hover { color: #fff; }
+.smart-suggest-chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+.smart-suggest-chip {
+    color: #cdd8ec; background: rgba(55,125,255,.08); border: 1px solid rgba(91,139,255,.22);
+    border-radius: 999px; padding: .42rem .72rem; font-size: .78rem; line-height: 1.25;
+    transition: transform .15s ease, color .15s ease, border-color .15s ease, background .15s ease;
+}
+.smart-suggest-chip:hover { color: #fff; background: rgba(118,87,255,.18); border-color: rgba(118,87,255,.50); transform: translateY(-1px); }
