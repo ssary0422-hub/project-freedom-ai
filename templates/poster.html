@@ -6,12 +6,12 @@
 {% block content %}
 <div class="container py-4"><div class="pf-page-header"><div class="pf-eyebrow">ONE-CLICK POSTER</div><h1 class="fw-bold mt-2">원클릭 광고 포스터</h1><p class="text-muted">정확한 한글로 포스터 3종을 만들고 PNG로 바로 저장하세요. AI 비용은 들지 않습니다.</p></div>
 <div class="row g-4"><div class="col-lg-4"><div class="card poster-form"><div class="card-body p-4">
-<div class="mb-3"><label class="form-label">업체명</label><input id="posterCompany" class="form-control" value="Project Freedom AI"></div>
+<div class="mb-3"><label class="form-label">업체명</label><input id="posterCompany" class="form-control" placeholder="예: 오늘의커피"></div>
 <div class="mb-3"><label class="form-label">AI 문구 추천 (1크레딧)</label><div class="input-group"><input id="posterPurpose" class="form-control" placeholder="예: 여름 할인 이벤트"><button id="suggestPoster" class="btn btn-outline-primary" type="button">AI 문구 3개 추천</button></div><div id="copyChoices" class="mt-2 d-grid gap-2"></div></div>
-<div class="mb-3"><label class="form-label">광고 제목</label><input id="posterHeadline" class="form-control" value="아이디어 하나로, 마케팅 완성"></div>
-<div class="mb-3"><label class="form-label">핵심 혜택</label><textarea id="posterBenefit" class="form-control" rows="3">광고·블로그·SNS 콘텐츠를 빠르게 만들어보세요</textarea></div>
-<div class="mb-3"><label class="form-label">가격 또는 이벤트</label><input id="posterOffer" class="form-control" value="지금 무료로 시작하기"></div>
-<div class="mb-3"><label class="form-label">연락처·예약 방법</label><input id="posterContact" class="form-control" value="project-freedom-ai.onrender.com"></div>
+<div class="mb-3"><label class="form-label">광고 제목</label><input id="posterHeadline" class="form-control" placeholder="예: 오늘 한 잔의 여유가 필요한 순간"></div>
+<div class="mb-3"><label class="form-label">핵심 혜택</label><textarea id="posterBenefit" class="form-control" rows="3" placeholder="예: 매일 직접 로스팅한 신선한 원두"></textarea></div>
+<div class="mb-3"><label class="form-label">가격 또는 이벤트</label><input id="posterOffer" class="form-control" placeholder="예: 아메리카노 1+1 이벤트"></div>
+<div class="mb-3"><label class="form-label">연락처·예약 방법</label><input id="posterContact" class="form-control" placeholder="예: 네이버 예약 또는 02-1234-5678"></div>
 <div class="mb-3"><label class="form-label">실제 사진 또는 제품 사진 (선택)</label><input id="posterPhoto" class="form-control" type="file" accept="image/*"><div class="form-text">사진이 없으면 고급 그라데이션 포스터로 만듭니다.</div></div>
 <div class="mb-3"><label class="form-label">AI 배경 이미지 (3크레딧)</label><div class="input-group"><input id="aiBackgroundPrompt" class="form-control" placeholder="예: 자연광이 드는 현대적인 카페"><button id="makeAiBackground" class="btn btn-outline-primary" type="button">AI 배경 만들기</button></div><div id="posterStatus" class="form-text"></div></div>
 <button id="makePosters" class="btn btn-primary btn-lg w-100" type="button">포스터 3종 만들기</button>
