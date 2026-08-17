@@ -31,5 +31,8 @@ def background():
     status=get_plan_status(session["user_id"],required_credits=3)
     if not status["can_generate"]: return jsonify(error="AI 이미지용 크레딧이 부족합니다."),402
     data=request.get_json(silent=True) or {}; prompt=str(data.get("prompt","")).strip()
-    path=make_image((prompt or "premium commercial advertising background")+", vertical poster, clean negative space, no text, no letters, no watermark")
+    try:
+        path=make_image((prompt or "premium commercial advertising background")+", vertical poster, clean negative space, no text, no letters, no watermark")
+    except Exception as error:
+        return jsonify(error=f"이미지 생성 실패: {error}"), 502
     record_ai_credit_usage(session["user_id"],"POSTER_IMAGE",3); return jsonify(image_url="/"+path.replace("\\","/"))
