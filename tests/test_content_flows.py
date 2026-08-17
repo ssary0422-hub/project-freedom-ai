@@ -1,0 +1,152 @@
+import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
+
+from app import app
+
+
+READY = {
+    "can_generate": True,
+    "plan": "TEST",
+    "used": 0,
+    "limit": 100,
+    "remaining": 100,
+    "percent": 0,
+}
+
+
+class ContentFlowTests(unittest.TestCase):
+    def setUp(self):
+        app.config.update(TESTING=True)
+        self.client = app.test_client()
+        with self.client.session_transaction() as session:
+            session["user_id"] = 999999
+            session["user_name"] = "Tester"
+            session["user_email"] = "tester@example.com"
+            session["language"] = "ko"
+
+    def _common_patches(self, module, maker_name, result):
+        return [
+            patch(f"routes.{module}.get_ai_enabled", return_value=True),
+            patch(f"routes.{module}.get_plan_status", return_value=READY),
+            patch(f"routes.{module}.get_profiles", return_value=[]),
+            patch(f"routes.{module}.{maker_name}", return_value=result),
+            patch(f"routes.{module}.save_history", return_value=1),
+            patch(f"routes.{module}.record_ai_credit_usage"),
+        ]
+
+    def _run_with(self, patches, callback):
+        started = [item.start() for item in patches]
+        self.addCleanup(lambda: [item.stop() for item in reversed(patches)])
+        return callback(started)
+
+    def test_ads_text_generation(self):
+        patches = self._common_patches("ads", "make_ads", "ADS_RESULT_OK") + [
+            patch("routes.ads.create_word"),
+            patch("routes.ads.create_pdf"),
+        ]
+        response = self._run_with(patches, lambda _: self.client.post(
+            "/ads-generator",
+            data={"business": "카페", "company": "오늘의커피", "style": "따뜻함"},
+        ))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"ADS_RESULT_OK", response.data)
+
+    def test_blog_text_generation_with_photo_guidance(self):
+        patches = self._common_patches("blog", "make_blog", "BLOG_RESULT_OK") + [
+            patch("routes.blog.save_files", return_value=[(1, "menu.jpg")]),
+            patch("routes.blog.create_blog_word"),
+            patch("routes.blog.create_blog_pdf"),
+        ]
+        response = self._run_with(patches, lambda _: self.client.post(
+            "/blog",
+            data={
+                "business": "카페", "company": "오늘의커피", "topic": "신메뉴",
+                "tone": "친근함", "length": "1000자",
+            },
+        ))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"BLOG_RESULT_OK", response.data)
+
+    def test_sns_text_generation(self):
+        patches = self._common_patches("sns", "make_sns", "SNS_RESULT_OK") + [
+            patch("routes.sns.create_sns_word"),
+            patch("routes.sns.create_sns_pdf"),
+        ]
+        response = self._run_with(patches, lambda _: self.client.post(
+            "/sns",
+            data={
+                "business": "카페", "company": "오늘의커피", "style": "활기참",
+                "platform": "Instagram",
+            },
+        ))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"SNS_RESULT_OK", response.data)
+
+    def test_poster_page_is_generic_and_randomized(self):
+        response = self.client.get("/poster")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(b'value="Project Freedom AI"', response.data)
+        js = self.client.get("/static/poster-maker.js")
+        self.assertIn(b"rotateExamples", js.data)
+        js.close()
+
+    @patch("routes.poster.record_ai_credit_usage")
+    @patch("routes.poster.get_plan_status", return_value=READY)
+    @patch("routes.poster.generate_text", return_value=(
+        "제목1|혜택1|이벤트1|문의1\n제목2|혜택2|이벤트2|문의2\n제목3|혜택3|이벤트3|문의3"
+    ))
+    def test_poster_ai_copy_returns_three_choices(self, *_):
+        response = self.client.post(
+            "/poster/suggest",
+            json={"business": "오늘의커피", "purpose": "여름 행사"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.get_json()["sets"]), 3)
+
+    def test_all_main_pages_render(self):
+        with patch("routes.ads.get_profiles", return_value=[]), \
+             patch("routes.blog.get_profiles", return_value=[]), \
+             patch("routes.sns.get_profiles", return_value=[]), \
+             patch("routes.brand_library.media_for_user", return_value=[]):
+            for path in ("/ads-generator", "/blog", "/sns", "/poster", "/brand-library"):
+                with self.subTest(path=path):
+                    self.assertEqual(self.client.get(path).status_code, 200)
+
+    def test_word_and_pdf_exports_for_all_content_types(self):
+        from documents import pdf, word
+
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            output_paths = {
+                "WORD_PATH": root / "advertisement.docx",
+                "BLOG_WORD_PATH": root / "blog.docx",
+                "SNS_WORD_PATH": root / "sns.docx",
+                "PDF_PATH": root / "advertisement.pdf",
+                "BLOG_PDF_PATH": root / "blog.pdf",
+                "SNS_PDF_PATH": root / "sns.pdf",
+            }
+            with patch.object(word, "WORD_PATH", str(output_paths["WORD_PATH"])), \
+                 patch.object(word, "BLOG_WORD_PATH", str(output_paths["BLOG_WORD_PATH"])), \
+                 patch.object(word, "SNS_WORD_PATH", str(output_paths["SNS_WORD_PATH"])), \
+                 patch.object(pdf, "PDF_PATH", str(output_paths["PDF_PATH"])), \
+                 patch.object(pdf, "BLOG_PDF_PATH", str(output_paths["BLOG_PDF_PATH"])), \
+                 patch.object(pdf, "SNS_PDF_PATH", str(output_paths["SNS_PDF_PATH"])):
+                word.create_word("광고 결과")
+                word.create_blog_word("블로그 결과")
+                word.create_sns_word("SNS 결과")
+                pdf.create_pdf("광고 결과")
+                pdf.create_blog_pdf("블로그 결과")
+                pdf.create_sns_pdf("SNS 결과")
+
+            for name, path in output_paths.items():
+                with self.subTest(name=name):
+                    self.assertTrue(path.exists())
+                    self.assertGreater(path.stat().st_size, 100)
+                    expected = b"%PDF" if name.endswith("PDF_PATH") else b"PK"
+                    self.assertEqual(path.read_bytes()[:len(expected)], expected)
+
+
+if __name__ == "__main__":
+    unittest.main()
