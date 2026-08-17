@@ -1,4 +1,5 @@
 import unittest
+import io
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -68,6 +69,24 @@ class ContentFlowTests(unittest.TestCase):
         ))
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"BLOG_RESULT_OK", response.data)
+
+    @patch("routes.blog.get_profiles", return_value=[])
+    @patch("routes.blog.save_files", return_value=[(77, "store.jpg")])
+    @patch("routes.blog.get_history_item", return_value=(
+        12, "카페", "오늘의커피", "따뜻함", "BLOG_FINAL_OK", "", "blog"
+    ))
+    def test_blog_finalize_adds_photos_without_new_ai_call(self, *_):
+        response = self.client.post(
+            "/blog/finalize",
+            data={
+                "history_id": "12",
+                "blog_photos": (io.BytesIO(b"fake-image"), "store.jpg"),
+            },
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"BLOG_FINAL_OK", response.data)
+        self.assertIn(b"blogFinalPreview", response.data)
 
     def test_sns_text_generation(self):
         patches = self._common_patches("sns", "make_sns", "SNS_RESULT_OK") + [

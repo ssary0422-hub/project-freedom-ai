@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, request, session, send_file
 
 from ai.blog import make_blog
 from ai.image import make_image
-from database.db import save_history
+from database.db import save_history, get_history_item
 from database.profiles import get_profiles, get_profile
 from database.users import (
     get_ai_enabled,
@@ -538,6 +538,39 @@ def generate_blog():
     return _blog_page()
 
 
+@blog_bp.post("/blog/finalize")
+@login_required
+def finalize_blog():
+    history_id = request.form.get("history_id", type=int)
+    item = get_history_item(history_id, session["user_id"]) if history_id else None
+    if not item or item[6] != "blog":
+        return _blog_page()
+
+    uploaded_media = save_files(
+        session["user_id"], request.files.getlist("blog_photos"), "photo"
+    )
+    return render_template(
+        "blog.html",
+        result=item[4] or "",
+        image_url=item[5] or "",
+        business=item[1] or "",
+        company=item[2] or "",
+        topic="",
+        tone=item[3] or "",
+        length="",
+        image_style="고급스러운 실사",
+        custom_image_style="",
+        with_image=False,
+        error="" if uploaded_media else "사진이 선택되지 않았습니다.",
+        saved_profiles=get_profiles(session["user_id"]),
+        selected_profile_id=None,
+        loaded_profile_name="",
+        uploaded_media=uploaded_media,
+        history_id=history_id,
+        final_preview=bool(uploaded_media),
+    )
+
+
 def _blog_page():
     result = ""
     error = ""
@@ -551,6 +584,8 @@ def _blog_page():
     custom_image_style = ""
     with_image = False
     uploaded_media = []
+    history_id = None
+    final_preview = False
 
     user_id = session["user_id"]
     saved_profiles = get_profiles(user_id)
@@ -598,7 +633,6 @@ def _blog_page():
         custom_image_style = request.form.get("custom_image_style", "").strip()
         effective_image_style = custom_image_style or image_style
         with_image = request.form.get("with_image") == "on"
-        uploaded_media = save_files(user_id, request.files.getlist("blog_photos"), "photo")
 
         required_credits = 3 if with_image else 1
         credit_status = get_plan_status(
@@ -635,7 +669,7 @@ def _blog_page():
                 topic, tone, length,
                 language=session.get("language", "ko"),
                 business=business, company=company,
-                uploaded_photo_names=tuple(name for _, name in uploaded_media),
+                uploaded_photo_names=(),
             )
             image_path = ""
 
@@ -671,7 +705,7 @@ def _blog_page():
                         f"오류: {image_error}"
                     )
 
-            save_history(
+            history_id = save_history(
                 business, company, tone, result, image_url,
                 content_type="blog",
                 user_id=session["user_id"]
@@ -710,6 +744,8 @@ def _blog_page():
         saved_profiles=saved_profiles,
         selected_profile_id=selected_profile_id,
         loaded_profile_name=loaded_profile_name,
+        history_id=history_id,
+        final_preview=final_preview,
     )
 
 

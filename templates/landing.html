@@ -17,6 +17,7 @@ h1{font-size:clamp(2.7rem,6vw,5.3rem);line-height:.98;letter-spacing:-.055em;fon
 footer{border-top:1px solid var(--line);color:var(--muted)}
 .price-card{height:100%;padding:1.6rem;position:relative}.price-card.popular{border-color:rgba(13,110,253,.75);box-shadow:0 0 0 1px rgba(13,110,253,.25),0 24px 60px rgba(0,0,0,.2)}
 .price{font-size:2.2rem;font-weight:800}.sample-box{padding:1.4rem;height:100%}.sample-output{background:#fff;color:#172033;border-radius:1rem;padding:1.15rem}
+.preview-tabs{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}.preview-tab{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:.5rem 1rem;font-weight:700}.preview-tab.active{background:#7c5cff;color:#fff;border-color:#7c5cff}.sample-output{min-height:165px;transition:opacity .22s ease,transform .22s ease}.sample-output.switching{opacity:0;transform:translateY(8px)}
 .faqx .accordion-item{background:transparent;border-color:var(--line);color:white}.faqx .accordion-button{background:var(--card);color:white;box-shadow:none}.faqx .accordion-button:not(.collapsed){background:#13243c;color:white}.faqx .accordion-button::after{filter:invert(1)}
 .footer-link{color:var(--muted);text-decoration:none}.footer-link:hover{color:white}
 </style>
@@ -60,9 +61,10 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 
 <section class="section pt-2"><div class="container">
 <div class="text-center mb-5"><span class="badge rounded-pill border p-2 mb-3">{{ t("landing.product.badge") }}</span><h2 class="display-6 fw-bold">{{ t("landing.product.title") }}</h2><p class="muted">{{ t("landing.product.desc") }}</p></div>
+<div class="preview-tabs mb-4" id="productPreviewTabs"><button class="preview-tab active" data-kind="ads">광고</button><button class="preview-tab" data-kind="sns">SNS</button><button class="preview-tab" data-kind="blog">블로그</button><button class="preview-tab" data-kind="poster">포스터</button></div>
 <div class="row g-4">
-<div class="col-lg-5"><div class="glass sample-box"><div class="small muted mb-3">{{ t("landing.product.input") }}</div><div class="mb-3"><small class="muted">{{ t("landing.product.industry") }}</small><div class="fw-bold">{{ t("landing.product.sample_industry") }}</div></div><div class="mb-3"><small class="muted">{{ t("landing.product.business") }}</small><div class="fw-bold">{{ t("landing.product.sample_business") }}</div></div><div><small class="muted">{{ t("landing.product.mood") }}</small><div class="fw-bold">{{ t("landing.product.sample_mood") }}</div></div></div></div>
-<div class="col-lg-7"><div class="glass sample-box"><div class="small muted mb-3">{{ t("landing.product.output") }}</div><div class="sample-output"><div class="fw-bold mb-2">{{ t("landing.product.output_title") }}</div><p class="mb-2">{{ t("landing.product.output_text") }}</p><small class="text-secondary">#Relax #Massage #SelfCare</small></div></div></div>
+<div class="col-lg-5"><div class="glass sample-box"><div class="small muted mb-3">예시 입력</div><div class="mb-3"><small class="muted">업종</small><div class="fw-bold" id="previewIndustry">카페</div></div><div class="mb-3"><small class="muted">업체명</small><div class="fw-bold" id="previewBusiness">오늘의커피</div></div><div><small class="muted">목표·분위기</small><div class="fw-bold" id="previewMood">따뜻함 · 신메뉴 홍보</div></div></div></div>
+<div class="col-lg-7"><div class="glass sample-box"><div class="small muted mb-3" id="previewOutputLabel">AI 광고 출력</div><div class="sample-output" id="productPreviewOutput"><div class="fw-bold mb-2" id="previewTitle">☕ 오늘의 여유를 한 잔에</div><p class="mb-2" id="previewText">직접 로스팅한 원두로 완성한 깊은 향. 오늘의커피 신메뉴를 만나보세요.</p><small class="text-secondary" id="previewMeta">대표 문구 · 혜택 · 행동 유도</small></div></div></div>
 </div></div></section>
 
 <section class="section pt-2"><div class="container">
@@ -93,4 +95,19 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 </div></section>
 <footer class="py-4"><div class="container d-flex justify-content-between flex-wrap gap-3"><span>© Project Freedom AI</span><span><a class="footer-link" href="#">{{ t("landing.footer.terms") }}</a> · <a class="footer-link" href="#">{{ t("landing.footer.privacy") }}</a> · <a class="footer-link" href="#">{{ t("landing.footer.refund") }}</a> · <a class="footer-link" href="mailto:support@projectfreedom.ai">{{ t("landing.footer.contact") }}</a></span></div></footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(() => {
+const items={
+ ads:{industry:'카페',business:'오늘의커피',mood:'따뜻함 · 신메뉴 홍보',label:'AI 광고 출력',title:'☕ 오늘의 여유를 한 잔에',text:'직접 로스팅한 원두로 완성한 깊은 향. 오늘의커피 신메뉴를 만나보세요.',meta:'대표 문구 · 혜택 · 행동 유도'},
+ sns:{industry:'러닝 클래스',business:'런바디 스튜디오',mood:'활기참 · 체험 모집',label:'SNS 게시글 출력',title:'🏃 첫 10km, 혼자 고민하지 마세요',text:'초보 러너도 편안하게 시작하는 맞춤 페이싱. 이번 주 체험 클래스에서 함께 달려요.',meta:'#러닝 #10km #러닝클래스'},
+ blog:{industry:'병원',business:'튼튼정형외과',mood:'신뢰감 · 허리 통증 정보',label:'블로그 미리보기',title:'오래 앉아 있을 때 허리가 아픈 이유',text:'본문 초안과 함께 필요한 사진 위치를 안내합니다. [실제 사진 1: 진료 공간] [실제 사진 2: 스트레칭 안내]',meta:'초안 → 사진 안내 → 최종 완성'},
+ poster:{industry:'베이커리',business:'소담 베이커리',mood:'감성적 · 오픈 이벤트',label:'포스터 미리보기',title:'매일 아침, 갓 구운 행복',text:'OPEN EVENT · 식빵 2개 구매 시 아메리카노 증정',meta:'세 가지 디자인 · 개별 PNG 저장'}
+};
+const order=['ads','sns','blog','poster'];let index=0,timer;
+const output=document.getElementById('productPreviewOutput');
+function show(kind){const x=items[kind];output.classList.add('switching');setTimeout(()=>{previewIndustry.textContent=x.industry;previewBusiness.textContent=x.business;previewMood.textContent=x.mood;previewOutputLabel.textContent=x.label;previewTitle.textContent=x.title;previewText.textContent=x.text;previewMeta.textContent=x.meta;document.querySelectorAll('.preview-tab').forEach(b=>b.classList.toggle('active',b.dataset.kind===kind));output.classList.remove('switching')},180);index=order.indexOf(kind)}
+function autoplay(){clearInterval(timer);timer=setInterval(()=>show(order[index=(index+1)%order.length]),5000)}
+document.querySelectorAll('.preview-tab').forEach(b=>b.addEventListener('click',()=>{show(b.dataset.kind);autoplay()}));autoplay();
+})();
+</script>
 </body></html>
