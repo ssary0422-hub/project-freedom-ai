@@ -13,6 +13,17 @@ class ImagePromptTests(unittest.TestCase):
         self.assertIn("HIGHEST priority", prompt)
         self.assertIn("cats as the only characters", prompt)
         self.assertIn("no human workers", prompt)
+        self.assertIn("adorable 3D animated", prompt)
+        self.assertIn("Avoid realism", prompt)
+
+    def test_elephant_concept_uses_cute_character_mode(self):
+        prompt = build_marketing_image_prompt(
+            business="세차장", context="SNS 홍보", mood="유쾌함",
+            image_style="코끼리 캐릭터", placement="Instagram",
+            custom_concept="코끼리 캐릭터",
+        )
+        self.assertIn("cute baby elephant", prompt)
+        self.assertIn("instantly cute and shareable", prompt)
 
     def test_cafe_peach_latte_is_forced_as_main_subject(self):
         prompt = build_marketing_image_prompt(

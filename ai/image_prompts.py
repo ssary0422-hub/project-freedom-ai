@@ -15,6 +15,18 @@ def _subject_for(business: str, context: str) -> str:
     return f"a realistic commercial scene clearly representing this business: {business}"
 
 
+ANIMAL_KEYWORDS = (
+    "고양이", "cat", "kitten", "강아지", "개", "dog", "puppy",
+    "코끼리", "elephant", "토끼", "rabbit", "bunny", "곰", "bear",
+    "판다", "panda", "여우", "fox", "동물", "animal",
+)
+
+
+def _is_animal_concept(custom_concept: str) -> bool:
+    lowered = (custom_concept or "").lower()
+    return any(key in lowered for key in ANIMAL_KEYWORDS)
+
+
 def _creative_subject(custom_concept: str, business: str, context: str) -> str:
     concept = (custom_concept or "").strip()
     lowered = concept.lower()
@@ -28,6 +40,18 @@ def _creative_subject(custom_concept: str, business: str, context: str) -> str:
         return (
             "adorable expressive dogs as the only characters, acting out the "
             f"business idea ({business}) in a visibly funny, playful situation; "
+            "no human workers or human customers"
+        )
+    if any(key in lowered for key in ("코끼리", "elephant")):
+        return (
+            "an irresistibly cute baby elephant as the main character, acting out "
+            f"the business idea ({business}) in a funny and heartwarming situation; "
+            "no human workers or human customers"
+        )
+    if _is_animal_concept(concept):
+        return (
+            "irresistibly cute, friendly animal characters acting out the "
+            f"business idea ({business}) in a funny and heartwarming situation; "
             "no human workers or human customers"
         )
     return (
@@ -50,6 +74,15 @@ def build_marketing_image_prompt(*, business: str, context: str, mood: str,
         if custom_concept.strip()
         else ""
     )
+    visual_direction = (
+        "Use a polished adorable 3D animated advertising illustration, rounded friendly shapes, "
+        "big expressive eyes, warm cheerful colors, charming poses and clean character design. "
+        "The animals must look healthy, safe and joyful, with coherent anatomy and the correct "
+        "number of limbs. Avoid realism, horror, distress, uncanny faces, human bodies, human hands "
+        "and human feet. Make it instantly cute and shareable."
+        if _is_animal_concept(custom_concept)
+        else "Photorealistic, high detail, commercially usable."
+    )
     return f"""
 Create one premium commercial photograph for {placement}.
 The main subject MUST be {subject}.
@@ -61,7 +94,7 @@ Use believable materials, natural lighting, accurate proportions and a professio
 Keep a clean area for copy to be added later by the website.
 STRICTLY NO text, letters, words, logos, signs, labels, watermarks, captions, borders or fake writing anywhere in the image.
 Do not substitute an unrelated landscape, object, food or location.
-Photorealistic, high detail, commercially usable.
+{visual_direction}
 """.strip()
 
 
