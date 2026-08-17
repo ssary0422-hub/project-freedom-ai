@@ -1,5 +1,6 @@
 import base64
 import os
+import time
 from functools import lru_cache
 from typing import Any
 
@@ -133,12 +134,26 @@ def generate_image_bytes(prompt: str) -> bytes:
         "CLOUDFLARE_IMAGE_MODEL", DEFAULT_CLOUDFLARE_IMAGE_MODEL
     ).strip()
     url = f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/{model}"
-    response = _post_json(
-        url,
-        headers={"Authorization": f"Bearer {api_token}"},
-        payload={"prompt": prompt[:2048], "steps": 4},
-        timeout=180,
-    )
+    response = None
+    last_error = None
+    for attempt in range(3):
+        try:
+            response = _post_json(
+                url,
+                headers={"Authorization": f"Bearer {api_token}"},
+                payload={"prompt": prompt[:2048], "steps": 4},
+                timeout=180,
+            )
+            break
+        except RuntimeError as error:
+            last_error = error
+            message = str(error)
+            if "HTTP 429" not in message and "Capacity temporarily exceeded" not in message:
+                raise
+            if attempt < 2:
+                time.sleep(2 + attempt * 3)
+    if response is None:
+        raise RuntimeError(f"Cloudflare image capacity remained unavailable after retries: {last_error}")
 
     content_type = response.headers.get("content-type", "").lower()
     if content_type.startswith("image/"):

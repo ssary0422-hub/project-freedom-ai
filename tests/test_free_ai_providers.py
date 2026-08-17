@@ -66,6 +66,21 @@ class FreeAIProviderTests(unittest.TestCase):
 
         self.assertEqual(generate_image_bytes("러닝 광고 이미지"), expected)
 
+    @patch.dict(
+        os.environ,
+        {"CLOUDFLARE_ACCOUNT_ID": "account-id", "CLOUDFLARE_API_TOKEN": "token"},
+        clear=True,
+    )
+    @patch("ai.providers.time.sleep")
+    @patch("ai.providers.requests.post")
+    def test_cloudflare_capacity_is_retried(self, post, sleep):
+        busy = Mock(ok=False, status_code=429, text="Capacity temporarily exceeded")
+        ready = Mock(ok=True, headers={"content-type": "image/jpeg"}, content=b"\xff\xd8\xffok")
+        post.side_effect = [busy, ready]
+        self.assertEqual(generate_image_bytes("SNS image"), b"\xff\xd8\xffok")
+        self.assertEqual(post.call_count, 2)
+        sleep.assert_called_once()
+
     @patch.dict(os.environ, {}, clear=True)
     def test_missing_keys_do_not_fall_back_to_paid_ai(self):
         with self.assertRaisesRegex(RuntimeError, "GEMINI_API_KEY"):
