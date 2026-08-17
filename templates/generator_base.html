@@ -54,7 +54,7 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
 
     <div class="text-center pf-page-header">
         <div class="pf-eyebrow mb-2">PROJECT FREEDOM AI</div>
-        <h1 class="fw-bold mb-2">{{ t("v21.gen.title") }}</h1>
+        <h1 class="fw-bold mb-2 d-flex justify-content-center align-items-center gap-3"><img class="pf-title-mascot" src="{{ url_for('static', filename='brand/free-guide.png') }}" alt="Freedom AI 마스코트"><span>AI 콘텐츠 생성기</span></h1>
         <p class="text-muted mb-0">
             {{ t("v21.gen.subtitle") }}
         </p>

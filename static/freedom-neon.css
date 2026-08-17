@@ -40,6 +40,11 @@ body {
     box-shadow: 0 0 24px rgba(55,125,255,.25);
 }
 .pf-logo::after { content: none; }
+.pf-brand-mascot { width: 34px; height: 34px; object-fit: contain; border-radius: 10px; }
+.pf-title-mascot { width: 58px; height: 58px; object-fit: contain; border-radius: 16px; filter: drop-shadow(0 8px 18px rgba(99,102,241,.28)); }
+.pf-card-mascot { width: 30px; height: 30px; object-fit: contain; border-radius: 9px; }
+.hero-actions > .hero-actions-title { display: none !important; }
+.hero-actions-title-new { color: #fff; font-size: 1.05rem; font-weight: 800; margin-bottom: .25rem; }
 a[href="/package"] { display:none !important; }
 .pf-nav-btn {
     color: #c8d0df !important;
