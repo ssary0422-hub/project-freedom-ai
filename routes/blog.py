@@ -628,7 +628,11 @@ def _blog_page():
             )
 
         if business and company and topic and tone and length:
-            result = make_blog(topic, tone, length, language=session.get("language", "ko"))
+            result = make_blog(
+                topic, tone, length,
+                language=session.get("language", "ko"),
+                business=business, company=company,
+            )
             image_path = ""
 
             if with_image:

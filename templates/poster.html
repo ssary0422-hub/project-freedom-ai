@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}원클릭 광고 포스터 - Project Freedom AI{% endblock %}
+{% block extra_style %}
+.poster-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}.poster-preview{width:100%;border-radius:18px;border:1px solid var(--pf-line);background:#080d1a}.poster-form{position:sticky;top:100px}@media(max-width:991px){.poster-grid{grid-template-columns:1fr}.poster-form{position:static}}
+{% endblock %}
+{% block content %}
+<div class="container py-4"><div class="pf-page-header"><div class="pf-eyebrow">ONE-CLICK POSTER</div><h1 class="fw-bold mt-2">원클릭 광고 포스터</h1><p class="text-muted">정확한 한글로 포스터 3종을 만들고 PNG로 바로 저장하세요. AI 비용은 들지 않습니다.</p></div>
+<div class="row g-4"><div class="col-lg-4"><div class="card poster-form"><div class="card-body p-4">
+<div class="mb-3"><label class="form-label">업체명</label><input id="posterCompany" class="form-control" value="Project Freedom AI"></div>
+<div class="mb-3"><label class="form-label">광고 제목</label><input id="posterHeadline" class="form-control" value="아이디어 하나로, 마케팅 완성"></div>
+<div class="mb-3"><label class="form-label">핵심 혜택</label><textarea id="posterBenefit" class="form-control" rows="3">광고·블로그·SNS 콘텐츠를 빠르게 만들어보세요</textarea></div>
+<div class="mb-3"><label class="form-label">가격 또는 이벤트</label><input id="posterOffer" class="form-control" value="지금 무료로 시작하기"></div>
+<div class="mb-3"><label class="form-label">연락처·예약 방법</label><input id="posterContact" class="form-control" value="project-freedom-ai.onrender.com"></div>
+<div class="mb-3"><label class="form-label">실제 사진 또는 제품 사진 (선택)</label><input id="posterPhoto" class="form-control" type="file" accept="image/*"><div class="form-text">사진이 없으면 고급 그라데이션 포스터로 만듭니다.</div></div>
+<button id="makePosters" class="btn btn-primary btn-lg w-100" type="button">포스터 3종 만들기</button>
+</div></div></div><div class="col-lg-8"><div id="posterResults" class="poster-grid"></div></div></div></div>
+<script src="{{ url_for('static', filename='poster-maker.js') }}"></script>
+{% endblock %}
