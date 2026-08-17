@@ -655,6 +655,7 @@ SNS 게시물용 대표 이미지.
                         mood=style,
                         image_style=effective_image_style,
                         placement="a square social media hero image",
+                        custom_concept=custom_image_style,
                     )
                     image_path = make_image(image_prompt)
                     image_url = "/" + Path(image_path).as_posix()

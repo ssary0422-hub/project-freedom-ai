@@ -15,12 +15,45 @@ def _subject_for(business: str, context: str) -> str:
     return f"a realistic commercial scene clearly representing this business: {business}"
 
 
+def _creative_subject(custom_concept: str, business: str, context: str) -> str:
+    concept = (custom_concept or "").strip()
+    lowered = concept.lower()
+    if any(key in lowered for key in ("고양이", "cat", "kitten")):
+        return (
+            "adorable expressive cats as the only characters, acting out the "
+            f"business idea ({business}) in a visibly funny, playful situation; "
+            "no human workers or human customers"
+        )
+    if any(key in lowered for key in ("강아지", "개", "dog", "puppy")):
+        return (
+            "adorable expressive dogs as the only characters, acting out the "
+            f"business idea ({business}) in a visibly funny, playful situation; "
+            "no human workers or human customers"
+        )
+    return (
+        "a scene that literally and unmistakably expresses this user-requested "
+        f"creative concept: {concept}; connected clearly to {business} and {context}"
+    )
+
+
 def build_marketing_image_prompt(*, business: str, context: str, mood: str,
-                                 image_style: str, placement: str) -> str:
-    subject = _subject_for(business, f"{context} {mood} {image_style}")
+                                 image_style: str, placement: str,
+                                 custom_concept: str = "") -> str:
+    subject = (
+        _creative_subject(custom_concept, business, context)
+        if custom_concept.strip()
+        else _subject_for(business, f"{context} {mood} {image_style}")
+    )
+    priority = (
+        f"The user's custom concept is the HIGHEST priority: {custom_concept}. "
+        "Do not replace its characters or idea with a conventional business scene."
+        if custom_concept.strip()
+        else ""
+    )
     return f"""
 Create one premium commercial photograph for {placement}.
 The main subject MUST be {subject}.
+{priority}
 Business category: {business}.
 Campaign context: {context}.
 Mood: {mood}. Visual style: {image_style}.

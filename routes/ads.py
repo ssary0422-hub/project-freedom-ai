@@ -649,6 +649,7 @@ def _home_page():
                         mood=style,
                         image_style=effective_image_style,
                         placement="a square social advertising image",
+                        custom_concept=custom_image_style,
                     )
                     image_path = make_image(image_prompt)
                     image_url = "/" + Path(image_path).as_posix()

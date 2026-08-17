@@ -700,6 +700,7 @@ def _blog_page():
                         mood=tone,
                         image_style=effective_image_style,
                         placement="a clean landscape blog cover photograph",
+                        custom_concept=custom_image_style,
                     )
                     image_path = make_image(image_prompt)
                     image_url = "/" + Path(image_path).as_posix()
