@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Project Freedom AI">
+  <defs><linearGradient id="g" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse"><stop stop-color="#20d8ff"/><stop offset=".48" stop-color="#3478ff"/><stop offset="1" stop-color="#9a45ff"/></linearGradient></defs>
+  <path fill="url(#g)" d="M13 11c0-4 3-7 7-7h29c4 0 7 3 7 7v9H28v10h21v10H28v20H13V11Z"/>
+  <path fill="#fff" fill-opacity=".92" d="M28 20h28L44 30H28V20Z"/>
+</svg>

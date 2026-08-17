@@ -123,6 +123,8 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
 
         <div class="card-body p-4">
 
+            {% block result_media %}{% endblock %}
+
             {% if image_url %}
             <div class="mb-4 text-center">
                 <h5 class="mb-3">{{ t("v21.gen.image") }}</h5>

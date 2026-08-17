@@ -15,6 +15,7 @@ from database.users import (
 from documents.pdf import create_blog_pdf, BLOG_PDF_PATH
 from documents.word import create_blog_word, BLOG_WORD_PATH
 from routes.auth import login_required
+from routes.brand_library import save_files
 
 blog_bp = Blueprint("blog", __name__)
 
@@ -549,6 +550,7 @@ def _blog_page():
     image_style = "고급스러운 실사"
     custom_image_style = ""
     with_image = False
+    uploaded_media = []
 
     user_id = session["user_id"]
     saved_profiles = get_profiles(user_id)
@@ -596,6 +598,7 @@ def _blog_page():
         custom_image_style = request.form.get("custom_image_style", "").strip()
         effective_image_style = custom_image_style or image_style
         with_image = request.form.get("with_image") == "on"
+        uploaded_media = save_files(user_id, request.files.getlist("blog_photos"), "photo")
 
         required_credits = 3 if with_image else 1
         credit_status = get_plan_status(
@@ -632,6 +635,7 @@ def _blog_page():
                 topic, tone, length,
                 language=session.get("language", "ko"),
                 business=business, company=company,
+                uploaded_photo_names=tuple(name for _, name in uploaded_media),
             )
             image_path = ""
 
@@ -699,6 +703,7 @@ def _blog_page():
         tone=tone,
         length=length,
         image_style=image_style,
+        uploaded_media=uploaded_media,
         custom_image_style=custom_image_style,
         with_image=with_image,
         error=error,

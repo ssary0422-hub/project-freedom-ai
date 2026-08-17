@@ -34,11 +34,13 @@ body {
 .navbar-brand { letter-spacing: -.025em; }
 .pf-logo {
     color: transparent !important;
-    background: var(--pf-gradient) !important;
+    font-size: 0 !important;
+    background: url("/static/brand/freedom-portal.svg") center/28px 28px no-repeat !important;
     position: relative;
     box-shadow: 0 0 24px rgba(55,125,255,.25);
 }
-.pf-logo::after { content: "F"; color: white; font-weight: 900; position: absolute; }
+.pf-logo::after { content: none; }
+a[href="/package"] { display:none !important; }
 .pf-nav-btn {
     color: #c8d0df !important;
     background: transparent !important;

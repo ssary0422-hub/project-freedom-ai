@@ -9,6 +9,7 @@ def make_blog(
     language="ko",
     business="",
     company="",
+    uploaded_photo_names=(),
 ):
     language_instruction = output_language_instruction(
         language
@@ -20,6 +21,7 @@ You are a professional blog content writer.
 Topic: {topic}
 Business / industry: {business}
 Company / brand: {company}
+Uploaded real photos ({len(uploaded_photo_names)}): {', '.join(uploaded_photo_names) if uploaded_photo_names else 'none'}
 Writing tone / brand mood: {tone}
 Requested length: {length}
 
@@ -33,7 +35,7 @@ Write a high-quality blog article that satisfies all of these requirements:
 6. 15 relevant hashtags
 7. Follow the requested length as closely as reasonably possible
 8. Preserve company names, brand names and proper nouns as entered by the user
-9. Insert 6 to 10 practical image directions naturally between paragraphs.
+9. Insert 6 to 10 practical image directions naturally between paragraphs. Refer to uploaded images as [업로드 사진 1], [업로드 사진 2], etc., in the given order.
 10. Format each direction on its own line as [실제 사진] or [AI 보조 이미지].
 11. Prefer real photos for actual people, facilities, products, vehicles, food, treatment spaces and proof of condition.
 12. Use AI images only for covers, concepts, checklists, educational diagrams and promotional banners.

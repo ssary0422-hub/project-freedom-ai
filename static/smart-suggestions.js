@@ -31,6 +31,7 @@
 
   const businessExamples = ["정형외과", "동네 카페", "프리미엄 헬스장", "피부관리실", "수제 베이커리", "영어 학원", "인테리어 스튜디오", "반려동물 병원", "한식 맛집", "여행 펜션"];
   const companyExamples = ["튼튼정형외과", "오늘의커피", "런바디 스튜디오", "온리유 스킨", "소담 베이커리", "브라이트 영어학원", "공간한줌", "우리동물병원", "담은식당", "숲속하루"];
+  const topicTemplates = ["처음 방문하기 전 꼭 알아야 할 5가지", "고객들이 가장 자주 묻는 질문 7가지", "전문가가 알려주는 현명한 선택 방법", "비용보다 먼저 확인해야 할 핵심 포인트", "초보자를 위한 완벽 가이드", "실패하지 않기 위한 체크리스트", "요즘 고객들이 가장 궁금해하는 이야기", "실제 이용 전 준비하면 좋은 것들", "우리 업체가 중요하게 생각하는 3가지", "한눈에 보는 서비스 이용 과정"];
   const queues = new Map();
 
   function shuffle(items) {
@@ -107,6 +108,11 @@
     rotate(); const timer = setInterval(rotate, 3800);
     input.addEventListener("input", () => { if (input.value) clearInterval(timer); }, { once: true });
   }
+  function addTopicSuggestions(input, businessInput) {
+    if (!input) return;
+    const wrap=document.createElement("div");wrap.className="smart-suggest";wrap.innerHTML='<div class="smart-suggest-head"><span class="smart-suggest-label">블로그 제목 예시</span><button class="smart-suggest-refresh" type="button">↻ 다른 제목</button></div><div class="smart-suggest-chips"></div>';input.insertAdjacentElement("afterend",wrap);
+    const render=()=>{const business=businessInput?.value.trim()||"우리 업종";const source=topicTemplates.map(t=>`${business}, ${t}`);const chips=wrap.querySelector(".smart-suggest-chips");chips.replaceChildren(...nextItems("topics",source).map(text=>{const b=document.createElement("button");b.type="button";b.className="smart-suggest-chip";b.textContent=text;b.onclick=()=>{input.value=text;input.dispatchEvent(new Event("input",{bubbles:true}))};return b}))};wrap.querySelector("button").onclick=render;businessInput?.addEventListener("input",render);render();setInterval(()=>{if(!input.value&&document.activeElement!==input){const business=businessInput?.value.trim()||"우리 업종";input.placeholder=`예: ${business}, ${nextItems("topic-placeholder",topicTemplates,1)[0]}`}},4200)
+  }
 
   document.addEventListener("DOMContentLoaded", () => {
     const form = document.querySelector("form[method='POST']");
@@ -114,10 +120,12 @@
     const business = form.querySelector("[name='business']");
     const company = form.querySelector("[name='company']");
     const mood = form.querySelector("[name='style'], [name='tone']");
+    const topic = form.querySelector("[name='topic']");
     const image = form.querySelector("[name='custom_image_style']");
     rotatingPlaceholder(business, "business", businessExamples);
     rotatingPlaceholder(company, "company", companyExamples);
     addSuggestions(mood, "moods", business);
+    addTopicSuggestions(topic, business);
     addSuggestions(image, "images", business, mood);
   });
 })();
