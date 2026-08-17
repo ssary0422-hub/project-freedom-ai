@@ -5,6 +5,7 @@ from flask import Blueprint, render_template, request, session, send_file
 
 from ai.sns import make_sns
 from ai.image import make_image
+from ai.image_prompts import build_marketing_image_prompt
 from database.db import save_history
 from database.profiles import get_profiles, get_profile
 from database.users import (
@@ -648,10 +649,14 @@ SNS 게시물용 대표 이미지.
 브랜드 분위기에 어울리는 자연스럽고 고급스러운 이미지.
 이미지 안에는 글자를 넣지 말 것.
 """
-                    image_path = make_image(image_prompt)
-                    image_path = _add_company_name_to_image(
-                        image_path, company, business
+                    image_prompt = build_marketing_image_prompt(
+                        business=business,
+                        context=f"{platform} social post for {company}; {style}",
+                        mood=style,
+                        image_style=effective_image_style,
+                        placement="a square social media hero image",
                     )
+                    image_path = make_image(image_prompt)
                     image_url = "/" + Path(image_path).as_posix()
 
                 save_history(

@@ -8,7 +8,7 @@ import requests
 
 
 DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite"
-DEFAULT_CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell"
+DEFAULT_CLOUDFLARE_IMAGE_MODEL = "@cf/bytedance/stable-diffusion-xl-lightning"
 
 
 def _post_json(url: str, *, headers: dict[str, str] | None = None,
@@ -130,30 +130,44 @@ def generate_image_bytes(prompt: str) -> bytes:
             "CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN are required."
         )
 
-    model = os.getenv(
-        "CLOUDFLARE_IMAGE_MODEL", DEFAULT_CLOUDFLARE_IMAGE_MODEL
-    ).strip()
-    url = f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/{model}"
+    configured = os.getenv("CLOUDFLARE_IMAGE_MODEL", "").strip()
+    models = [model for model in (
+        configured,
+        DEFAULT_CLOUDFLARE_IMAGE_MODEL,
+        "@cf/black-forest-labs/flux-1-schnell",
+    ) if model]
+    models = list(dict.fromkeys(models))
     response = None
     last_error = None
-    for attempt in range(3):
-        try:
-            response = _post_json(
-                url,
-                headers={"Authorization": f"Bearer {api_token}"},
-                payload={"prompt": prompt[:2048], "steps": 4},
-                timeout=180,
-            )
+    for model in models:
+        url = f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/{model}"
+        payload = {"prompt": prompt[:2048]}
+        if "stable-diffusion" in model:
+            payload.update({
+                "negative_prompt": "text, letters, logo, watermark, label, caption, distorted objects, unrelated scenery",
+                "width": 1024, "height": 1024, "num_steps": 8, "guidance": 8,
+            })
+        else:
+            payload["steps"] = 8
+        for attempt in range(3):
+            try:
+                response = _post_json(
+                    url,
+                    headers={"Authorization": f"Bearer {api_token}"},
+                    payload=payload,
+                    timeout=180,
+                )
+                break
+            except RuntimeError as error:
+                last_error = error
+                if attempt < 2 and ("HTTP 429" in str(error) or "Capacity temporarily exceeded" in str(error)):
+                    time.sleep(2 + attempt * 3)
+                    continue
+                break
+        if response is not None:
             break
-        except RuntimeError as error:
-            last_error = error
-            message = str(error)
-            if "HTTP 429" not in message and "Capacity temporarily exceeded" not in message:
-                raise
-            if attempt < 2:
-                time.sleep(2 + attempt * 3)
     if response is None:
-        raise RuntimeError(f"Cloudflare image capacity remained unavailable after retries: {last_error}")
+        raise RuntimeError(f"Every Cloudflare image model failed. Last error: {last_error}")
 
     content_type = response.headers.get("content-type", "").lower()
     if content_type.startswith("image/"):

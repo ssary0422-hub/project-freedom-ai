@@ -5,6 +5,7 @@ from flask import Blueprint, render_template, request, session, send_file
 
 from ai.blog import make_blog
 from ai.image import make_image
+from ai.image_prompts import build_marketing_image_prompt
 from database.db import save_history, get_history_item
 from database.profiles import get_profiles, get_profile
 from database.users import (
@@ -693,10 +694,14 @@ def _blog_page():
 이미지 안에는 글자를 넣지 말 것.
 """
                 try:
-                    image_path = make_image(image_prompt)
-                    image_path = _add_company_name_to_image(
-                        image_path, company, business
+                    image_prompt = build_marketing_image_prompt(
+                        business=business,
+                        context=topic,
+                        mood=tone,
+                        image_style=effective_image_style,
+                        placement="a clean landscape blog cover photograph",
                     )
+                    image_path = make_image(image_prompt)
                     image_url = "/" + Path(image_path).as_posix()
                 except Exception as image_error:
                     print("블로그 이미지 생성 실패:", image_error)

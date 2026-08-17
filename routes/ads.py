@@ -7,6 +7,7 @@ from flask import Blueprint, render_template, request, session, send_file
 
 from ai.ads import make_ads
 from ai.image import make_image
+from ai.image_prompts import build_marketing_image_prompt
 from documents.pdf import create_pdf, PDF_PATH
 from database.db import save_history
 from database.profiles import get_profiles, get_profile
@@ -642,10 +643,14 @@ def _home_page():
 이미지 안에는 글자를 넣지 말 것.
 """
                 try:
-                    image_path = make_image(image_prompt)
-                    image_path = _add_company_name_to_image(
-                        image_path, company, business
+                    image_prompt = build_marketing_image_prompt(
+                        business=business,
+                        context=f"advertising campaign for {company}",
+                        mood=style,
+                        image_style=effective_image_style,
+                        placement="a square social advertising image",
                     )
+                    image_path = make_image(image_prompt)
                     image_url = "/" + Path(image_path).as_posix()
                 except Exception as image_error:
                     print("광고 이미지 생성 실패:", image_error)
