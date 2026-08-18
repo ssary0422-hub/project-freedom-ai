@@ -422,7 +422,7 @@ def get_free_trial_status(user_id):
         "reason": user["trial_reason"] or "",
     }
 
-CREDIT_LIMITS = {"FREE": 6, "PRO": 100}
+CREDIT_LIMITS = {"FREE": 4, "PRO": 100}
 CREDIT_COSTS = {"ADS_TEXT": 1, "ADS_IMAGE": 3, "BLOG_TEXT": 1, "BLOG_IMAGE": 3, "SNS_TEXT": 1, "SNS_IMAGE": 3, "PACKAGE_TEXT": 3, "PACKAGE_IMAGE": 7}
 
 
@@ -450,6 +450,20 @@ def get_monthly_credit_usage(user_id):
         FROM ai_credit_usage
         WHERE user_id = ? AND substr(used_at, 1, 7) = ?
     """, (user_id, month_key))
+    used = int(cursor.fetchone()[0] or 0)
+    conn.close()
+    return used
+
+
+def get_lifetime_credit_usage(user_id):
+    """신규 FREE 체험 크레딧처럼 만료되지 않는 기본 한도의 누적 사용량."""
+    init_users_table()
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT COALESCE(SUM(credits), 0) FROM ai_credit_usage WHERE user_id = ?",
+        (user_id,),
+    )
     used = int(cursor.fetchone()[0] or 0)
     conn.close()
     return used
@@ -537,7 +551,11 @@ def get_plan_status(user_id, required_credits=1):
     if plan not in CREDIT_LIMITS:
         plan = "FREE"
 
-    used = get_monthly_credit_usage(user_id)
+    used = (
+        get_lifetime_credit_usage(user_id)
+        if plan == "FREE"
+        else get_monthly_credit_usage(user_id)
+    )
 
     if plan == "FREE":
         trial_status = get_free_trial_status(user_id)
@@ -563,9 +581,7 @@ def get_plan_status(user_id, required_credits=1):
     }
 
 def record_ai_credit_usage(user_id, usage_type, credits=None):
-    """
-    월 기본 크레딧을 먼저 사용하고, 부족한 부분만 충전 크레딧에서 차감합니다.
-    """
+    """기본 크레딧을 먼저 사용하고, 부족한 부분만 충전 크레딧에서 차감합니다."""
     init_users_table()
     usage_type = (usage_type or "OTHER").strip().upper()
 
@@ -591,15 +607,21 @@ def record_ai_credit_usage(user_id, usage_type, credits=None):
     cursor = conn.cursor()
     cursor.execute("BEGIN IMMEDIATE")
 
-    cursor.execute(
-        """
-        SELECT COALESCE(SUM(credits), 0)
-        FROM ai_credit_usage
-        WHERE user_id = ?
-          AND substr(used_at, 1, 7) = ?
-        """,
-        (user_id, month_key)
-    )
+    if plan == "FREE":
+        cursor.execute(
+            "SELECT COALESCE(SUM(credits), 0) FROM ai_credit_usage WHERE user_id = ?",
+            (user_id,),
+        )
+    else:
+        cursor.execute(
+            """
+            SELECT COALESCE(SUM(credits), 0)
+            FROM ai_credit_usage
+            WHERE user_id = ?
+              AND substr(used_at, 1, 7) = ?
+            """,
+            (user_id, month_key),
+        )
     used_before = int(cursor.fetchone()[0] or 0)
     base_available = max(0, limit - used_before)
     bonus_needed = max(0, credits - base_available)

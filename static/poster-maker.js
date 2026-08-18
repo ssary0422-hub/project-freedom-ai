@@ -3,12 +3,12 @@
   const W = 1080, H = 1350;
   const $ = id => document.getElementById(id);
   const val = id => ($(id)?.value || "").trim();
-  let backgroundImage = null;
+  let backgroundImage = null, logoImage = null;
 
   const themes = [
-    { name: "포커스형", accent: "#ffbf58", panel: "rgba(13,18,31,.90)", ink: "#ffffff", muted: "#d9e0eb", layout: "bottom" },
-    { name: "에디토리얼형", accent: "#ef5b45", panel: "rgba(255,248,239,.94)", ink: "#291b18", muted: "#5f514c", layout: "top" },
-    { name: "프리미엄형", accent: "#72e9b6", panel: "rgba(13,55,52,.89)", ink: "#ffffff", muted: "#d8efea", layout: "full" },
+    { name: "프리미엄 매거진형", accent: "#63dcff", panel: "rgba(4,14,28,.88)", ink: "#ffffff", muted: "#c9d8e8", layout: "bottom", label: "PREMIUM PICK" },
+    { name: "이벤트 집중형", accent: "#ffca62", panel: "rgba(20,12,9,.86)", ink: "#ffffff", muted: "#f0ddd0", layout: "top", label: "SPECIAL EVENT" },
+    { name: "신뢰 정보형", accent: "#8be1bd", panel: "rgba(5,30,31,.90)", ink: "#ffffff", muted: "#cfe7e1", layout: "full", label: "TRUSTED SERVICE" },
   ];
 
   function rounded(ctx, x, y, w, h, radius, color) {
@@ -20,6 +20,15 @@
     const scale = Math.max(W / image.width, H / image.height);
     const sw = W / scale, sh = H / scale;
     ctx.drawImage(image, (image.width - sw) / 2, (image.height - sh) / 2, sw, sh, 0, 0, W, H);
+  }
+
+  function drawLogo(ctx, image) {
+    if (!image) return;
+    const maxW = 190, maxH = 82;
+    const scale = Math.min(maxW / image.width, maxH / image.height, 1);
+    const w = image.width * scale, h = image.height * scale;
+    rounded(ctx, W - w - 80, 62, w + 28, h + 22, 14, "rgba(255,255,255,.92)");
+    ctx.drawImage(image, W - w - 66, 73, w, h);
   }
 
   function linesFor(ctx, text, maxWidth, maxLines) {
@@ -61,6 +70,13 @@
     ctx.fillStyle = gradient; ctx.fillRect(0, 0, W, H);
     if (image) cover(ctx, image);
 
+    const shade = ctx.createLinearGradient(0, 0, 0, H);
+    shade.addColorStop(0, theme.layout === "top" ? "rgba(0,0,0,.26)" : "rgba(0,0,0,.04)");
+    shade.addColorStop(.48, "rgba(0,0,0,.10)");
+    shade.addColorStop(1, "rgba(0,0,0,.58)");
+    ctx.fillStyle = shade; ctx.fillRect(0, 0, W, H);
+    drawLogo(ctx, logoImage);
+
     let panelX = 58, panelY = 600, panelW = 964, panelH = 690;
     if (theme.layout === "top") { panelY = 58; panelH = 690; }
     if (theme.layout === "full") { panelX = 0; panelY = 0; panelW = W; panelH = H; }
@@ -68,21 +84,32 @@
 
     const x = theme.layout === "full" ? 88 : 98;
     const contentWidth = theme.layout === "full" ? 904 : 884;
-    let y = theme.layout === "top" ? 110 : theme.layout === "full" ? 280 : 650;
+    let y = theme.layout === "top" ? 105 : theme.layout === "full" ? 245 : 635;
     ctx.textBaseline = "top";
+    ctx.font = '800 22px Arial, sans-serif';
+    ctx.letterSpacing = "2px";
     ctx.fillStyle = theme.accent;
-    ctx.font = '800 32px "Noto Sans KR", "Malgun Gothic", sans-serif';
-    ctx.fillText(val("posterCompany") || "업체명", x, y); y += 74;
+    ctx.fillText(theme.label, x, y);
+    ctx.fillRect(x, y + 38, 86, 5);
+    y += 70;
+    ctx.letterSpacing = "0px";
+    ctx.fillStyle = theme.accent;
+    ctx.font = '700 29px "Noto Sans KR", "Malgun Gothic", sans-serif';
+    ctx.fillText(val("posterCompany") || "업체명", x, y); y += 62;
 
     const title = val("posterHeadline") || "광고 제목을 입력하세요";
-    const titleSize = fitFont(ctx, title, contentWidth, 3, 70, 42);
+    const titleSize = fitFont(ctx, title, contentWidth, 3, 78, 44);
     ctx.font = `800 ${titleSize}px "Noto Sans KR", "Malgun Gothic", sans-serif`;
     ctx.fillStyle = theme.ink;
-    y = drawLines(ctx, title, x, y, contentWidth, Math.round(titleSize * 1.24), 3) + 24;
+    y = drawLines(ctx, title, x, y, contentWidth, Math.round(titleSize * 1.18), 3) + 28;
+
+    ctx.fillStyle = theme.accent;
+    ctx.fillRect(x, y, Math.min(260, contentWidth * .32), 4);
+    y += 28;
 
     const benefit = val("posterBenefit");
     if (benefit) {
-      ctx.font = '500 31px "Noto Sans KR", "Malgun Gothic", sans-serif';
+      ctx.font = '500 30px "Noto Sans KR", "Malgun Gothic", sans-serif';
       ctx.fillStyle = theme.muted;
       y = drawLines(ctx, benefit, x, y, contentWidth, 47, 3) + 30;
     }
@@ -91,7 +118,7 @@
     if (offer) {
       ctx.font = '800 31px "Noto Sans KR", "Malgun Gothic", sans-serif';
       const offerWidth = Math.min(contentWidth, Math.max(430, ctx.measureText(offer).width + 80));
-      rounded(ctx, x, y, offerWidth, 82, 23, theme.accent);
+      rounded(ctx, x, y, offerWidth, 82, 16, theme.accent);
       ctx.fillStyle = "#171922"; ctx.fillText(offer, x + 36, y + 21); y += 112;
     }
 
@@ -99,6 +126,9 @@
     ctx.fillStyle = theme.ink;
     drawLines(ctx, val("posterContact"), x, Math.min(y, H - 125), contentWidth, 38, 2);
     ctx.fillStyle = theme.accent; ctx.fillRect(x, H - 52, 170, 7);
+    ctx.fillStyle = theme.muted;
+    ctx.font = '500 18px Arial, sans-serif';
+    ctx.fillText("PROJECT FREEDOM AI", W - 292, H - 60);
   }
 
   function render(image = backgroundImage) {
@@ -115,9 +145,11 @@
   }
 
   function usePhoto() {
-    const file = $("posterPhoto").files[0]; if (!file) return render();
-    const image = new Image(); image.onload = () => { backgroundImage = image; render(); };
-    image.src = URL.createObjectURL(file);
+    const photo = $("posterPhoto").files[0];
+    const logo = $("posterLogo").files[0];
+    if (photo) { const image = new Image(); image.onload = () => { backgroundImage = image; render(); }; image.src = URL.createObjectURL(photo); }
+    if (logo) { const image = new Image(); image.onload = () => { logoImage = image; render(); }; image.src = URL.createObjectURL(logo); }
+    if (!photo && !logo) render();
   }
 
   async function suggest() {
@@ -130,7 +162,8 @@
 
   async function createBackground() {
     const status = $("posterStatus"); status.textContent = "AI 배경 생성 중…";
-    const response = await fetch("/poster/background", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: val("aiBackgroundPrompt") }) });
+    const request = [val("posterPurpose"), val("posterImageStyle"), val("aiBackgroundPrompt")].filter(Boolean).join(" · ");
+    const response = await fetch("/poster/background", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: request }) });
     const data = await response.json(); if (!response.ok) { status.textContent = data.error || "생성 실패"; return; }
     const image = new Image(); image.onload = () => { backgroundImage = image; render(); status.textContent = "글자 없는 AI 배경이 적용됐습니다."; }; image.src = data.image_url;
   }
@@ -140,6 +173,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     $("makePosters").onclick = usePhoto; $("suggestPoster").onclick = suggest; $("makeAiBackground").onclick = createBackground;
+    $("posterPhoto").addEventListener("change", usePhoto); $("posterLogo").addEventListener("change", usePhoto);
     ["posterCompany", "posterHeadline", "posterBenefit", "posterOffer", "posterContact"].forEach(id => $(id).addEventListener("input", () => render()));
     rotateExamples(); setInterval(rotateExamples, 4000); render();
   });

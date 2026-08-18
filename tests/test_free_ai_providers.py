@@ -1,4 +1,3 @@
-import base64
 import os
 import unittest
 from unittest.mock import Mock, patch
@@ -44,48 +43,28 @@ class FreeAIProviderTests(unittest.TestCase):
             post.call_args.kwargs["headers"]["x-goog-api-key"], "test-key"
         )
 
-    @patch.dict(
-        os.environ,
-        {
-            "CLOUDFLARE_ACCOUNT_ID": "account-id",
-            "CLOUDFLARE_API_TOKEN": "token",
-        },
-        clear=True,
-    )
-    @patch("ai.providers.requests.post")
-    def test_cloudflare_image_response(self, post):
-        expected = b"\xff\xd8\xfffake-jpeg"
-        response = Mock()
-        response.ok = True
-        response.headers = {"content-type": "application/json"}
-        response.json.return_value = {
-            "success": True,
-            "result": {"image": base64.b64encode(expected).decode("ascii")},
-        }
-        post.return_value = response
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}, clear=True)
+    @patch("ai.providers.OpenAI")
+    def test_openai_image_response(self, openai_cls):
+        import base64
+
+        expected = b"\x89PNG\r\n\x1a\nfake-png"
+        image = Mock(b64_json=base64.b64encode(expected).decode("ascii"))
+        openai_cls.return_value.images.generate.return_value = Mock(data=[image])
 
         self.assertEqual(generate_image_bytes("러닝 광고 이미지"), expected)
-
-    @patch.dict(
-        os.environ,
-        {"CLOUDFLARE_ACCOUNT_ID": "account-id", "CLOUDFLARE_API_TOKEN": "token"},
-        clear=True,
-    )
-    @patch("ai.providers.time.sleep")
-    @patch("ai.providers.requests.post")
-    def test_cloudflare_capacity_is_retried(self, post, sleep):
-        busy = Mock(ok=False, status_code=429, text="Capacity temporarily exceeded")
-        ready = Mock(ok=True, headers={"content-type": "image/jpeg"}, content=b"\xff\xd8\xffok")
-        post.side_effect = [busy, ready]
-        self.assertEqual(generate_image_bytes("SNS image"), b"\xff\xd8\xffok")
-        self.assertEqual(post.call_count, 2)
-        sleep.assert_called_once()
+        openai_cls.return_value.images.generate.assert_called_once_with(
+            model="gpt-image-2",
+            prompt="러닝 광고 이미지",
+            size="1024x1024",
+            quality="medium",
+        )
 
     @patch.dict(os.environ, {}, clear=True)
-    def test_missing_keys_do_not_fall_back_to_paid_ai(self):
+    def test_missing_keys_are_reported(self):
         with self.assertRaisesRegex(RuntimeError, "GEMINI_API_KEY"):
             generate_text("광고")
-        with self.assertRaisesRegex(RuntimeError, "CLOUDFLARE"):
+        with self.assertRaisesRegex(RuntimeError, "OPENAI_API_KEY"):
             generate_image_bytes("이미지")
 
 

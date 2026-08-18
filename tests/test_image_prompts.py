@@ -49,6 +49,14 @@ class ImagePromptTests(unittest.TestCase):
         )
         self.assertIn("iced peach latte", prompt)
 
+    def test_ai_recommend_selects_business_specific_premium_style(self):
+        prompt = build_marketing_image_prompt(
+            business="정형외과", context="첫 방문 상담", mood="신뢰감",
+            image_style="AI 추천", placement="광고",
+        )
+        self.assertIn("premium trustworthy healthcare editorial photography", prompt)
+        self.assertIn("not a generic stock photo or an AI demo", prompt)
+
 
 if __name__ == "__main__":
     unittest.main()

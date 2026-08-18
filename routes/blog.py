@@ -559,7 +559,7 @@ def finalize_blog():
         topic="",
         tone=item[3] or "",
         length="",
-        image_style="고급스러운 실사",
+        image_style="AI 추천",
         custom_image_style="",
         with_image=False,
         error="" if uploaded_media else "사진이 선택되지 않았습니다.",
@@ -581,7 +581,7 @@ def _blog_page():
     topic = ""
     tone = ""
     length = ""
-    image_style = "고급스러운 실사"
+    image_style = "AI 추천"
     custom_image_style = ""
     with_image = False
     uploaded_media = []
@@ -630,7 +630,7 @@ def _blog_page():
         topic = request.form.get("topic", "").strip()
         tone = request.form.get("tone", "").strip()
         length = request.form.get("length", "").strip()
-        image_style = request.form.get("image_style", "고급스러운 실사").strip()
+        image_style = request.form.get("image_style", "AI 추천").strip()
         custom_image_style = request.form.get("custom_image_style", "").strip()
         effective_image_style = custom_image_style or image_style
         with_image = request.form.get("with_image") == "on"

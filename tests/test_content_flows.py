@@ -133,6 +133,22 @@ class ContentFlowTests(unittest.TestCase):
                 with self.subTest(path=path):
                     self.assertEqual(self.client.get(path).status_code, 200)
 
+    def test_main_forms_use_simple_request_first_design(self):
+        with patch("routes.ads.get_profiles", return_value=[]), \
+             patch("routes.blog.get_profiles", return_value=[]), \
+             patch("routes.sns.get_profiles", return_value=[]):
+            expected = {
+                "/ads-generator": "무엇을 홍보하고 싶나요?",
+                "/sns": "어떤 내용을 올리고 싶나요?",
+                "/blog": "어떤 글을 만들고 싶나요?",
+                "/poster": "무엇을 홍보하고 싶나요?",
+            }
+            for path, phrase in expected.items():
+                with self.subTest(path=path):
+                    html = self.client.get(path).get_data(as_text=True)
+                    self.assertIn(phrase, html)
+                    self.assertIn("AI가 업종에 맞게 추천", html)
+
     def test_word_and_pdf_exports_for_all_content_types(self):
         from documents import pdf, word
 

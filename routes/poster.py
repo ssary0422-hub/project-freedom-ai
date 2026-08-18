@@ -18,7 +18,17 @@ def suggest():
     status=get_plan_status(session["user_id"],required_credits=1)
     if not status["can_generate"]: return jsonify(error="AI 크레딧이 부족합니다."),402
     data=request.get_json(silent=True) or {}; business=str(data.get("business","")).strip(); purpose=str(data.get("purpose","")).strip()
-    raw=generate_text(f"Create exactly 3 concise Korean advertising poster copy sets. Business: {business}. Purpose: {purpose}. Each set is one line with headline | benefit | offer | call to action. No numbering or explanation.")
+    raw=generate_text(f"""
+You are a senior Korean advertising copywriter.
+Company / brand: {business}
+User's campaign request and mandatory details: {purpose}
+
+Create exactly 3 premium poster copy sets. Treat every concrete user detail as a hard constraint and never invent a price, date, result, address or contact method. Make the three options meaningfully different: premium editorial, event-focused, and trust-focused. Keep the brand name exactly as entered. Use [직접 입력 필요] if a required business fact is missing.
+
+Return exactly one option per line using this format only:
+headline | customer benefit | offer or key fact | call to action
+No numbering and no explanation.
+""")
     sets=[]
     for line in raw.splitlines():
         parts=[p.strip() for p in line.strip().lstrip("-•0123456789. ").split("|")]

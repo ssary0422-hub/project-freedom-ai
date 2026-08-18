@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}AI 본부 - Project Freedom AI{% endblock %}
+
+{% block extra_style %}
+.office-hero { background: linear-gradient(135deg, #0f172a, #312e81); color: white; border-radius: 24px; }
+.department-card { border-left: 4px solid #6366f1 !important; }
+.report-text { white-space: pre-wrap; line-height: 1.75; }
+.status-review { background: #fff3cd; color: #7c5700; }
+.status-approved { background: #d1e7dd; color: #0f5132; }
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-lg-5">
+    <section class="office-hero shadow-sm p-4 p-lg-5 mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-7">
+                <div class="text-info fw-bold mb-2">PROJECT FREEDOM AI · AI HEADQUARTERS</div>
+                <h1 class="fw-bold">순금이 AI 본부</h1>
+                <p class="text-white-50 mb-0">대표의 업무를 전문 부서에 배정하고, 결과를 하나의 실행 보고서로 정리합니다.</p>
+            </div>
+            <div class="col-lg-5">
+                <div class="p-3 rounded-4 bg-white bg-opacity-10">
+                    <div class="fw-bold mb-2">안전 원칙</div>
+                    <div class="small text-white-50">게시·결제·삭제·고객 연락은 자동 실행하지 않고 대표 승인 대상으로 남깁니다.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <section class="pf-card p-4 mb-4">
+        <h2 class="h4 fw-bold mb-3">대표 업무 지시</h2>
+        {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+        <form method="post">
+            <label class="form-label fw-bold" for="objective">무엇을 달성할까요?</label>
+            <textarea class="form-control mb-3" id="objective" name="objective" rows="3" required minlength="5" placeholder="예: 우리 서비스를 알릴 2주 마케팅 계획과 필요한 랜딩페이지 개선안을 만들어줘">{{ objective }}</textarea>
+            <label class="form-label fw-bold" for="context">추가 배경 또는 조건</label>
+            <textarea class="form-control mb-3" id="context" name="context" rows="2" placeholder="예산, 대상 고객, 마감일, 지켜야 할 조건 등">{{ context }}</textarea>
+            <button class="btn btn-primary btn-lg fw-bold" type="submit">AI 부서에 업무 배정</button>
+        </form>
+    </section>
+
+    <h2 class="h4 fw-bold mb-3">업무 보고</h2>
+    {% for task in tasks %}
+    <article class="pf-card p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
+            <div>
+                <div class="small text-muted">#{{ task.id }} · {{ task.created_at }}</div>
+                <h3 class="h5 fw-bold mb-0">{{ task.objective }}</h3>
+            </div>
+            <span class="badge rounded-pill px-3 py-2 {{ 'status-approved' if task.status == 'APPROVED' else 'status-review' }}">
+                {{ '대표 승인 완료' if task.status == 'APPROVED' else '대표 검토 대기' }}
+            </span>
+        </div>
+
+        <div class="alert alert-primary">
+            <div class="fw-bold mb-2">👑 순금이 총괄 보고</div>
+            <div class="report-text">{{ task.executive_summary }}</div>
+        </div>
+
+        <div class="row g-3">
+            {% for department in task.departments %}
+            <div class="col-lg-6">
+                <div class="card department-card h-100 p-3">
+                    <div class="fw-bold mb-2">{{ department.icon }} {{ department.name }}</div>
+                    <div class="report-text small">{{ department.report }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if task.status == 'REVIEW' %}
+        <form method="post" action="{{ url_for('ai_office.approve', task_id=task.id) }}" class="mt-3">
+            <button class="btn btn-success fw-bold" type="submit">이 실행안 승인</button>
+        </form>
+        {% endif %}
+    </article>
+    {% else %}
+    <div class="pf-card text-center text-muted p-5">아직 접수된 업무가 없습니다. 첫 업무를 지시해 보세요.</div>
+    {% endfor %}
+</div>
+{% endblock %}

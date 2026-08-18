@@ -12,6 +12,7 @@ from routes.auth import auth_bp, login_required
 from routes.plan import plan_bp
 from routes.poster import poster_bp
 from routes.brand_library import brand_library_bp
+from routes.ai_office import ai_office_bp
 
 from i18n.translations import SUPPORTED_LANGUAGES, translate
 from routes.admin import admin_bp
@@ -72,6 +73,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(plan_bp)
 app.register_blueprint(poster_bp)
 app.register_blueprint(brand_library_bp)
+app.register_blueprint(ai_office_bp)
 
 
 # -------------------------

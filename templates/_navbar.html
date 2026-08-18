@@ -56,6 +56,12 @@
                 </a>
 
                 <a
+                    class="btn pf-nav-btn {% if request.path.startswith('/ai-office') %}pf-nav-active{% endif %}"
+                    href="/ai-office">
+                    🏢 AI 본부
+                </a>
+
+                <a
                     class="btn pf-nav-btn {% if request.path.startswith('/poster') %}pf-nav-active{% endif %}"
                     href="/poster">
                     🖼️ 포스터

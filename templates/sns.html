@@ -51,29 +51,33 @@
         </a>
     </div>
     {% endif %}
+    {% include "_content_mode_switch.html" %}
     <div class="mb-3">
-        <label class="form-label">{{ t("v2.business") }}</label>
+        <label class="form-label fw-bold">업종</label>
         <input type="text" class="form-control" name="business"
                value="{{ business or '' }}" placeholder="{{ t('v21.ph.business') }}" required>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">{{ t("v21.company") }}</label>
+        <label class="form-label fw-bold">업체명</label>
         <input type="text" class="form-control" name="company"
                value="{{ company or '' }}" placeholder="{{ t('v21.ph.company') }}" required>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">{{ t("v2.mood") }}</label>
-        <input type="text" class="form-control" name="style"
-               value="{{ style or '' }}" placeholder="{{ t('v21.ph.mood') }}" required>
+        <label class="form-label fw-bold">어떤 내용을 올리고 싶나요?</label>
+        <textarea class="form-control" name="style" rows="4"
+                  placeholder="예: 초보 러너를 위한 토요일 5km 수업을 알리고 싶어요. 첫 체험 할인과 신청 링크를 강조해주세요." required>{{ style or '' }}</textarea>
+        <div class="form-text">AI가 SNS 문구·해시태그·행동 유도 문장을 알아서 구성합니다.</div>
     </div>
 
+    <details class="advanced-settings border rounded-3 p-3 mb-3">
+    <summary class="fw-bold">⚙️ 플랫폼·이미지 스타일 변경 <span class="text-muted fw-normal small">(선택)</span></summary>
+    <div class="pt-3">
     <div class="mb-3">
         <label class="form-label">{{ t("v2.platform") }}</label>
         <select class="form-select" name="platform" required>
-            <option value="">{{ t("v21.select.platform") }}</option>
-            <option value="인스타그램" {% if platform == "인스타그램" %}selected{% endif %}>{{ t("v21.platform.instagram") }}</option>
+            <option value="인스타그램" {% if not platform or platform == "인스타그램" %}selected{% endif %}>{{ t("v21.platform.instagram") }} · 추천</option>
             <option value="페이스북" {% if platform == "페이스북" %}selected{% endif %}>{{ t("v21.platform.facebook") }}</option>
             <option value="네이버 홍보글" {% if platform == "네이버 홍보글" %}selected{% endif %}>{{ t("v21.platform.naver") }}</option>
             <option value="틱톡" {% if platform == "틱톡" %}selected{% endif %}>{{ t("v21.platform.tiktok") }}</option>
@@ -84,6 +88,7 @@
 <div class="mb-3">
     <label class="form-label">{{ t("v2.image_style") }}</label>
     <select name="image_style" class="form-select">
+        <option value="AI 추천" {% if not image_style or image_style == "AI 추천" %}selected{% endif %}>✨ AI가 업종에 맞게 추천</option>
         <option value="고급스러운 실사" {% if image_style == "고급스러운 실사" %}selected{% endif %}>{{ t("v21.style.luxury") }}</option>
         <option value="감성적인 분위기" {% if image_style == "감성적인 분위기" %}selected{% endif %}>{{ t("v21.style.emotional") }}</option>
         <option value="고양이 유머 콘셉트" {% if image_style == "고양이 유머 콘셉트" %}selected{% endif %}>{{ t("v21.style.cat") }}</option>
@@ -107,6 +112,8 @@
     </div>
 
 </div>
+</div>
+</details>
 
 
 <div class="border rounded-3 p-3 mb-3 bg-light">

@@ -82,9 +82,29 @@ def _creative_subject(custom_concept: str, business: str, context: str) -> str:
     )
 
 
+def _recommended_visual_style(business: str, context: str) -> str:
+    source = f"{business} {context}".lower()
+    if any(key in source for key in ("병원", "의원", "정형외과", "치과", "clinic", "hospital")):
+        return "premium trustworthy healthcare editorial photography, clean navy and white palette"
+    if any(key in source for key in ("카페", "커피", "베이커리", "디저트", "cafe", "coffee")):
+        return "warm premium food and beverage editorial photography with refined natural light"
+    if any(key in source for key in ("헬스", "피트니스", "러닝", "마라톤", "요가", "fitness", "running")):
+        return "cinematic premium sports campaign photography with strong but realistic motion"
+    if any(key in source for key in ("미용", "뷰티", "헤어", "네일", "스킨케어", "beauty")):
+        return "elegant premium beauty campaign photography with clean soft lighting"
+    if any(key in source for key in ("식당", "음식", "요리", "restaurant", "food")):
+        return "appetizing premium culinary campaign photography with realistic texture"
+    return "premium modern commercial editorial photography selected to fit the business and campaign"
+
+
 def build_marketing_image_prompt(*, business: str, context: str, mood: str,
                                  image_style: str, placement: str,
                                  custom_concept: str = "") -> str:
+    resolved_image_style = (
+        _recommended_visual_style(business, context)
+        if not image_style.strip() or image_style.strip() == "AI 추천"
+        else image_style.strip()
+    )
     subject = (
         _creative_subject(custom_concept, business, context)
         if custom_concept.strip()
@@ -113,11 +133,12 @@ The main subject MUST be {subject}.
 {priority}
 Business category: {business}.
 Campaign context: {context}.
-Mood: {mood}. Visual style: {image_style}.
+Mood and campaign request: {mood}. Visual style: {resolved_image_style}.
 Use believable materials, natural lighting, accurate proportions and a professional advertising composition.
 Keep a clean area for copy to be added later by the website.
 STRICTLY NO text, letters, words, logos, signs, labels, watermarks, captions, borders or fake writing anywhere in the image.
 Do not substitute an unrelated landscape, object, food or location.
+The result must look like a final premium campaign asset, not a generic stock photo or an AI demo.
 {visual_direction}
 """.strip()
 

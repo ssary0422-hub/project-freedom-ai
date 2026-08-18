@@ -1,5 +1,6 @@
 from ai.language import output_language_instruction
 from ai.providers import generate_text
+from ai.quality import generate_with_quality_check
 
 
 def make_blog(
@@ -18,7 +19,7 @@ def make_blog(
     prompt = f"""
 You are a professional blog content writer.
 
-Topic: {topic}
+User's topic, goal and mandatory details: {topic}
 Business / industry: {business}
 Company / brand: {company}
 Uploaded real photos ({len(uploaded_photo_names)}): {', '.join(uploaded_photo_names) if uploaded_photo_names else 'none'}
@@ -27,23 +28,26 @@ Requested length: {length}
 
 Write a high-quality blog article that satisfies all of these requirements:
 
-1. An appealing title
-2. A natural introduction
-3. Main body with useful subheadings
-4. Easy-to-read paragraph structure
-5. A concise summary at the end
-6. 15 relevant hashtags
+1. Treat every concrete user detail as a hard constraint. Never invent facts, prices, equipment, staff, results, medical claims or contact details.
+2. Write a specific, useful title that accurately matches the article; avoid clickbait.
+3. Open by identifying the reader's real problem and what the article will help them do.
+4. Use descriptive subheadings, short mobile-friendly paragraphs, practical examples and actionable steps.
+5. Remove filler, repeated conclusions and vague marketing superlatives.
+6. Finish with a concise summary, one natural call to action, and 6 to 10 focused hashtags.
 7. Follow the requested length as closely as reasonably possible
 8. Preserve company names, brand names and proper nouns as entered by the user
 9. Insert 6 to 10 practical image directions naturally between paragraphs. Refer to uploaded images as [업로드 사진 1], [업로드 사진 2], etc., in the given order.
 10. Format each direction on its own line as [실제 사진] or [AI 보조 이미지].
 11. Prefer real photos for actual people, facilities, products, vehicles, food, treatment spaces and proof of condition.
 12. Use AI images only for covers, concepts, checklists, educational diagrams and promotional banners.
-13. Never invent facts, prices, equipment, staff, results or contact details. Mark missing facts as [직접 입력 필요].
+13. Mark any missing business-specific fact as [직접 입력 필요]. For health, legal or financial topics, avoid diagnosis or guaranteed outcomes and add an appropriate concise disclaimer.
 14. Finish with a publishing checklist covering map, hours, contact method and relevant disclaimers.
+15. Return the publish-ready article only, without explaining how it was written.
 
 OUTPUT LANGUAGE RULE:
 {language_instruction}
 """
 
-    return generate_text(prompt)
+    return generate_with_quality_check(
+        generate_text, prompt, company=company, min_chars=500
+    )

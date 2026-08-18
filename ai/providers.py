@@ -1,14 +1,15 @@
 import base64
 import os
-import time
 from functools import lru_cache
 from typing import Any
 
 import requests
+from openai import OpenAI
 
 
 DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite"
-DEFAULT_CLOUDFLARE_IMAGE_MODEL = "@cf/bytedance/stable-diffusion-xl-lightning"
+DEFAULT_OPENAI_IMAGE_MODEL = "gpt-image-2"
+DEFAULT_OPENAI_IMAGE_QUALITY = "medium"
 
 
 def _post_json(url: str, *, headers: dict[str, str] | None = None,
@@ -112,83 +113,42 @@ def provider_status() -> dict[str, bool | str]:
     return {
         "text_provider": "gemini",
         "text_ready": bool(os.getenv("GEMINI_API_KEY", "").strip()),
-        "image_provider": "cloudflare-workers-ai",
-        "image_ready": bool(
-            os.getenv("CLOUDFLARE_ACCOUNT_ID", "").strip()
-            and os.getenv("CLOUDFLARE_API_TOKEN", "").strip()
-        ),
+        "image_provider": "openai",
+        "image_ready": bool(os.getenv("OPENAI_API_KEY", "").strip()),
         "paid_fallback": False,
     }
 
 
 def generate_image_bytes(prompt: str) -> bytes:
-    """Generate an image with Cloudflare Workers AI's daily free allocation."""
-    account_id = os.getenv("CLOUDFLARE_ACCOUNT_ID", "").strip()
-    api_token = os.getenv("CLOUDFLARE_API_TOKEN", "").strip()
-    if not account_id or not api_token:
-        raise RuntimeError(
-            "CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN are required."
+    """Generate a consistently high-quality image with OpenAI."""
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY environment variable is required.")
+
+    model = os.getenv("OPENAI_IMAGE_MODEL", DEFAULT_OPENAI_IMAGE_MODEL).strip()
+    quality = os.getenv(
+        "OPENAI_IMAGE_QUALITY", DEFAULT_OPENAI_IMAGE_QUALITY
+    ).strip().lower()
+    if quality not in {"low", "medium", "high", "auto"}:
+        quality = DEFAULT_OPENAI_IMAGE_QUALITY
+
+    try:
+        result = OpenAI(api_key=api_key).images.generate(
+            model=model or DEFAULT_OPENAI_IMAGE_MODEL,
+            prompt=prompt,
+            size="1024x1024",
+            quality=quality,
         )
+    except Exception as exc:
+        raise RuntimeError(f"OpenAI image generation failed: {exc}") from exc
 
-    configured = os.getenv("CLOUDFLARE_IMAGE_MODEL", "").strip()
-    models = [model for model in (
-        configured,
-        DEFAULT_CLOUDFLARE_IMAGE_MODEL,
-        "@cf/black-forest-labs/flux-1-schnell",
-    ) if model]
-    models = list(dict.fromkeys(models))
-    response = None
-    last_error = None
-    for model in models:
-        url = f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/{model}"
-        payload = {"prompt": prompt[:2048]}
-        if "stable-diffusion" in model:
-            payload.update({
-                "negative_prompt": "text, letters, logo, watermark, label, caption, distorted objects, unrelated scenery",
-                "width": 1024, "height": 1024, "num_steps": 8, "guidance": 8,
-            })
-        else:
-            payload["steps"] = 8
-        for attempt in range(3):
-            try:
-                response = _post_json(
-                    url,
-                    headers={"Authorization": f"Bearer {api_token}"},
-                    payload=payload,
-                    timeout=180,
-                )
-                break
-            except RuntimeError as error:
-                last_error = error
-                if attempt < 2 and ("HTTP 429" in str(error) or "Capacity temporarily exceeded" in str(error)):
-                    time.sleep(2 + attempt * 3)
-                    continue
-                break
-        if response is not None:
-            break
-    if response is None:
-        raise RuntimeError(f"Every Cloudflare image model failed. Last error: {last_error}")
-
-    content_type = response.headers.get("content-type", "").lower()
-    if content_type.startswith("image/"):
-        return response.content
-
-    data = response.json()
-    if not data.get("success", True):
-        raise RuntimeError(f"Cloudflare image generation failed: {data.get('errors')}")
-
-    result = data.get("result") or {}
-    encoded = result.get("image") if isinstance(result, dict) else None
-    if not encoded and isinstance(result, str):
-        encoded = result
+    encoded = result.data[0].b64_json if result.data else None
     if not encoded:
-        raise RuntimeError("Cloudflare returned no image data.")
-    if encoded.startswith("data:") and "," in encoded:
-        encoded = encoded.split(",", 1)[1]
+        raise RuntimeError("OpenAI returned no image data.")
     try:
         image_bytes = base64.b64decode(encoded, validate=True)
     except (ValueError, TypeError) as exc:
-        raise RuntimeError("Cloudflare returned invalid base64 image data.") from exc
+        raise RuntimeError("OpenAI returned invalid base64 image data.") from exc
     if not image_bytes.startswith((b"\xff\xd8\xff", b"\x89PNG\r\n\x1a\n")):
-        raise RuntimeError("Cloudflare returned an unsupported image format.")
+        raise RuntimeError("OpenAI returned an unsupported image format.")
     return image_bytes

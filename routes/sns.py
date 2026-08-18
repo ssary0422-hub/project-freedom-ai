@@ -546,7 +546,7 @@ def _sns_page():
     company = ""
     style = ""
     platform = ""
-    image_style = "고급스러운 실사"
+    image_style = "AI 추천"
     custom_image_style = ""
     with_image = False
 
@@ -590,7 +590,7 @@ def _sns_page():
         company = request.form.get("company", "").strip()
         style = request.form.get("style", "").strip()
         platform = request.form.get("platform", "").strip()
-        image_style = request.form.get("image_style", "고급스러운 실사").strip()
+        image_style = request.form.get("image_style", "AI 추천").strip()
         custom_image_style = request.form.get("custom_image_style", "").strip()
         effective_image_style = custom_image_style or image_style
         with_image = request.form.get("with_image") == "on"
