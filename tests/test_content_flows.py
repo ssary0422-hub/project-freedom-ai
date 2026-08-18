@@ -109,7 +109,13 @@ class ContentFlowTests(unittest.TestCase):
         self.assertNotIn(b'value="Project Freedom AI"', response.data)
         js = self.client.get("/static/poster-maker.js")
         self.assertIn(b"rotateExamples", js.data)
+        self.assertIn(b"rawLines", js.data)
         js.close()
+
+    def test_generated_media_has_direct_image_download(self):
+        source = Path("templates/generator_base.html").read_text(encoding="utf-8")
+        self.assertIn('class="btn btn-outline-primary image-download-btn"', source)
+        self.assertIn("download=\"{{ active_tab or 'content' }}-image.png\"", source)
 
     @patch("routes.poster.record_ai_credit_usage")
     @patch("routes.poster.get_plan_status", return_value=READY)

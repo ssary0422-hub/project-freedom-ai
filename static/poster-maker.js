@@ -32,14 +32,21 @@
     ctx.drawImage(image, W - w - 66, 73, w, h);
   }
 
-  function linesFor(ctx, text, maxWidth, maxLines) {
+  function rawLines(ctx, text, maxWidth) {
     const lines = []; let current = "";
-    for (const character of [...text]) {
-      const candidate = current + character;
-      if (current && ctx.measureText(candidate).width > maxWidth) { lines.push(current); current = character; }
-      else current = candidate;
+    const tokens = text.includes(" ") ? text.split(/(\s+)/).filter(Boolean) : [...text];
+    for (const token of tokens) {
+      const candidate = current + token;
+      if (current.trim() && ctx.measureText(candidate.trimEnd()).width > maxWidth) {
+        lines.push(current.trim()); current = token.trimStart();
+      } else current = candidate;
     }
-    if (current) lines.push(current);
+    if (current.trim()) lines.push(current.trim());
+    return lines;
+  }
+
+  function linesFor(ctx, text, maxWidth, maxLines) {
+    const lines = rawLines(ctx, text, maxWidth);
     if (lines.length > maxLines) {
       const clipped = lines.slice(0, maxLines);
       clipped[maxLines - 1] = clipped[maxLines - 1].replace(/.$/, "…");
@@ -51,8 +58,8 @@
   function fitFont(ctx, text, maxWidth, maxLines, start, minimum) {
     for (let size = start; size >= minimum; size -= 2) {
       ctx.font = `800 ${size}px "Noto Sans KR", "Malgun Gothic", sans-serif`;
-      if (linesFor(ctx, text, maxWidth, maxLines).length <= maxLines &&
-          linesFor(ctx, text, maxWidth, maxLines).every(line => ctx.measureText(line).width <= maxWidth)) return size;
+      const lines = rawLines(ctx, text, maxWidth);
+      if (lines.length <= maxLines && lines.every(line => ctx.measureText(line).width <= maxWidth)) return size;
     }
     return minimum;
   }
