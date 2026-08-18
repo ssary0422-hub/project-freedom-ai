@@ -4,11 +4,12 @@
   const $ = id => document.getElementById(id);
   const val = id => ($(id)?.value || "").trim();
   let backgroundImage = null, logoImage = null;
+  let currentThemeIndex = 0;
 
   const themes = [
-    { name: "프리미엄 매거진형", accent: "#63dcff", panel: "rgba(4,14,28,.88)", ink: "#ffffff", muted: "#c9d8e8", layout: "bottom", label: "PREMIUM PICK" },
-    { name: "이벤트 집중형", accent: "#ffca62", panel: "rgba(20,12,9,.86)", ink: "#ffffff", muted: "#f0ddd0", layout: "top", label: "SPECIAL EVENT" },
-    { name: "신뢰 정보형", accent: "#8be1bd", panel: "rgba(5,30,31,.90)", ink: "#ffffff", muted: "#cfe7e1", layout: "full", label: "TRUSTED SERVICE" },
+    { name: "AI 추천 · 사진 중심형", accent: "#63dcff", panel: "rgba(4,18,31,.92)", ink: "#ffffff", muted: "#d5e2ed", layout: "left", label: "" },
+    { name: "무료 배치 · 하단 정보형", accent: "#ffca62", panel: "rgba(16,18,25,.91)", ink: "#ffffff", muted: "#f0e2d5", layout: "bottom", label: "" },
+    { name: "무료 배치 · 미니멀형", accent: "#8be1bd", panel: "rgba(5,30,31,.84)", ink: "#ffffff", muted: "#d5ebe4", layout: "minimal", label: "" },
   ];
 
   function rounded(ctx, x, y, w, h, radius, color) {
@@ -77,31 +78,25 @@
     ctx.fillStyle = shade; ctx.fillRect(0, 0, W, H);
     drawLogo(ctx, logoImage);
 
-    let panelX = 58, panelY = 600, panelW = 964, panelH = 690;
-    if (theme.layout === "top") { panelY = 58; panelH = 690; }
-    if (theme.layout === "full") { panelX = 0; panelY = 0; panelW = W; panelH = H; }
-    rounded(ctx, panelX, panelY, panelW, panelH, theme.layout === "full" ? 0 : 42, theme.panel);
+    let panelX = 48, panelY = 52, panelW = 570, panelH = 1246;
+    if (theme.layout === "bottom") { panelX = 48; panelY = 720; panelW = 984; panelH = 578; }
+    if (theme.layout === "minimal") { panelX = 48; panelY = 790; panelW = 984; panelH = 508; }
+    rounded(ctx, panelX, panelY, panelW, panelH, 36, theme.panel);
 
-    const x = theme.layout === "full" ? 88 : 98;
-    const contentWidth = theme.layout === "full" ? 904 : 884;
-    let y = theme.layout === "top" ? 105 : theme.layout === "full" ? 245 : 635;
+    const x = panelX + 42;
+    const contentWidth = panelW - 84;
+    let y = panelY + 45;
     ctx.textBaseline = "top";
-    ctx.font = '800 22px Arial, sans-serif';
-    ctx.letterSpacing = "2px";
-    ctx.fillStyle = theme.accent;
-    ctx.fillText(theme.label, x, y);
-    ctx.fillRect(x, y + 38, 86, 5);
-    y += 70;
     ctx.letterSpacing = "0px";
     ctx.fillStyle = theme.accent;
-    ctx.font = '700 29px "Noto Sans KR", "Malgun Gothic", sans-serif';
-    ctx.fillText(val("posterCompany") || "업체명", x, y); y += 62;
+    ctx.font = '700 25px "Noto Sans KR", "Malgun Gothic", sans-serif';
+    ctx.fillText(val("posterCompany") || "업체명", x, y); y += 66;
 
     const title = val("posterHeadline") || "광고 제목을 입력하세요";
-    const titleSize = fitFont(ctx, title, contentWidth, 3, 78, 44);
+    const titleSize = fitFont(ctx, title, contentWidth, 2, theme.layout === "left" ? 58 : 52, 38);
     ctx.font = `800 ${titleSize}px "Noto Sans KR", "Malgun Gothic", sans-serif`;
     ctx.fillStyle = theme.ink;
-    y = drawLines(ctx, title, x, y, contentWidth, Math.round(titleSize * 1.18), 3) + 28;
+    y = drawLines(ctx, title, x, y, contentWidth, Math.round(titleSize * 1.2), 2) + 24;
 
     ctx.fillStyle = theme.accent;
     ctx.fillRect(x, y, Math.min(260, contentWidth * .32), 4);
@@ -109,39 +104,43 @@
 
     const benefit = val("posterBenefit");
     if (benefit) {
-      ctx.font = '500 30px "Noto Sans KR", "Malgun Gothic", sans-serif';
+      ctx.font = '500 27px "Noto Sans KR", "Malgun Gothic", sans-serif';
       ctx.fillStyle = theme.muted;
-      y = drawLines(ctx, benefit, x, y, contentWidth, 47, 3) + 30;
+      y = drawLines(ctx, benefit, x, y, contentWidth, 42, 2) + 28;
     }
 
     const offer = val("posterOffer");
     if (offer) {
-      ctx.font = '800 31px "Noto Sans KR", "Malgun Gothic", sans-serif';
-      const offerWidth = Math.min(contentWidth, Math.max(430, ctx.measureText(offer).width + 80));
-      rounded(ctx, x, y, offerWidth, 82, 16, theme.accent);
-      ctx.fillStyle = "#171922"; ctx.fillText(offer, x + 36, y + 21); y += 112;
+      ctx.font = '800 25px "Noto Sans KR", "Malgun Gothic", sans-serif';
+      const offerWidth = Math.min(contentWidth, Math.max(330, ctx.measureText(offer).width + 64));
+      rounded(ctx, x, y, offerWidth, 70, 15, theme.accent);
+      ctx.fillStyle = "#171922"; ctx.fillText(offer, x + 28, y + 19); y += 94;
     }
 
-    ctx.font = '700 27px "Noto Sans KR", "Malgun Gothic", sans-serif';
+    ctx.font = '700 24px "Noto Sans KR", "Malgun Gothic", sans-serif';
     ctx.fillStyle = theme.ink;
     drawLines(ctx, val("posterContact"), x, Math.min(y, H - 125), contentWidth, 38, 2);
     ctx.fillStyle = theme.accent; ctx.fillRect(x, H - 52, 170, 7);
-    ctx.fillStyle = theme.muted;
-    ctx.font = '500 18px Arial, sans-serif';
-    ctx.fillText("PROJECT FREEDOM AI", W - 292, H - 60);
+    if ($("posterWatermark")?.checked) {
+      ctx.fillStyle = theme.muted;
+      ctx.font = '500 18px Arial, sans-serif';
+      ctx.fillText("PROJECT FREEDOM AI", W - 292, H - 60);
+    }
   }
 
   function render(image = backgroundImage) {
     const root = $("posterResults"); root.innerHTML = "";
-    themes.forEach((theme, index) => {
-      const card = document.createElement("div"); card.className = "card p-2";
-      const canvas = document.createElement("canvas"); canvas.className = "poster-preview";
-      draw(canvas, theme, image);
-      const button = document.createElement("button"); button.className = "btn btn-outline-light mt-2";
-      button.textContent = `${theme.name} PNG 저장`;
-      button.onclick = () => { const link = document.createElement("a"); link.download = `poster-${index + 1}.png`; link.href = canvas.toDataURL("image/png"); link.click(); };
-      card.append(canvas, button); root.append(card);
-    });
+    const theme = themes[currentThemeIndex];
+    const card = document.createElement("div"); card.className = "card p-3";
+    const label = document.createElement("div"); label.className = "fw-bold mb-2"; label.textContent = theme.name;
+    const canvas = document.createElement("canvas"); canvas.className = "poster-preview";
+    draw(canvas, theme, image);
+    const controls = document.createElement("div"); controls.className = "d-grid gap-2 mt-3";
+    const download = document.createElement("button"); download.className = "btn btn-primary"; download.textContent = "이 포스터 PNG 저장";
+    download.onclick = () => { const link = document.createElement("a"); link.download = "poster.png"; link.href = canvas.toDataURL("image/png"); link.click(); };
+    const alternate = document.createElement("button"); alternate.className = "btn btn-outline-primary"; alternate.textContent = "다른 무료 글자 배치 보기";
+    alternate.onclick = () => { currentThemeIndex = (currentThemeIndex + 1) % themes.length; render(image); };
+    controls.append(download, alternate); card.append(label, canvas, controls); root.append(card);
   }
 
   function usePhoto() {
@@ -162,8 +161,7 @@
 
   async function createBackground() {
     const status = $("posterStatus"); status.textContent = "AI 배경 생성 중…";
-    const request = [val("posterPurpose"), val("posterImageStyle"), val("aiBackgroundPrompt")].filter(Boolean).join(" · ");
-    const response = await fetch("/poster/background", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: request }) });
+    const response = await fetch("/poster/background", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ business: val("posterCompany"), purpose: val("posterPurpose"), style: val("posterImageStyle"), prompt: val("aiBackgroundPrompt") }) });
     const data = await response.json(); if (!response.ok) { status.textContent = data.error || "생성 실패"; return; }
     const image = new Image(); image.onload = () => { backgroundImage = image; render(); status.textContent = "글자 없는 AI 배경이 적용됐습니다."; }; image.src = data.image_url;
   }
@@ -174,6 +172,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     $("makePosters").onclick = usePhoto; $("suggestPoster").onclick = suggest; $("makeAiBackground").onclick = createBackground;
     $("posterPhoto").addEventListener("change", usePhoto); $("posterLogo").addEventListener("change", usePhoto);
+    $("posterWatermark").addEventListener("change", () => render());
     ["posterCompany", "posterHeadline", "posterBenefit", "posterOffer", "posterContact"].forEach(id => $(id).addEventListener("input", () => render()));
     rotateExamples(); setInterval(rotateExamples, 4000); render();
   });

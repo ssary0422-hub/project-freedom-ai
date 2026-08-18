@@ -20,9 +20,9 @@
             <div class="navbar-nav ms-auto gap-2 align-items-xl-center">
 
                 <a
-                    class="btn pf-nav-btn {% if request.path == '/' or request.path.startswith('/ads-generator') or request.path.startswith('/blog') or request.path.startswith('/sns') %}pf-nav-active{% endif %}"
+                    class="btn pf-nav-btn {% if request.path.startswith('/ads-generator') %}pf-nav-active{% endif %}"
                     href="{% if session.get('user_id') %}/ads-generator{% else %}/{% endif %}">
-                    🏠 {{ t("nav.home") }}
+                    📢 광고
                 </a>
 
                 <div class="dropdown">
@@ -50,39 +50,21 @@
 
                 {% if session.get("user_id") %}
                 <a
-                    class="btn pf-nav-btn {% if request.path.startswith('/dashboard') %}pf-nav-active{% endif %}"
-                    href="/dashboard">
-                    📊 {{ t("nav.dashboard") }}
+                    class="btn pf-nav-btn {% if request.path.startswith('/sns') %}pf-nav-active{% endif %}"
+                    href="/sns">
+                    📱 SNS
                 </a>
 
                 <a
-                    class="btn pf-nav-btn {% if request.path.startswith('/ai-office') %}pf-nav-active{% endif %}"
-                    href="/ai-office">
-                    🏢 AI 본부
+                    class="btn pf-nav-btn {% if request.path.startswith('/blog') %}pf-nav-active{% endif %}"
+                    href="/blog">
+                    📝 블로그
                 </a>
 
                 <a
                     class="btn pf-nav-btn {% if request.path.startswith('/poster') %}pf-nav-active{% endif %}"
                     href="/poster">
                     🖼️ 포스터
-                </a>
-
-                <a
-                    class="btn pf-nav-btn {% if request.path.startswith('/poster') %}pf-nav-active{% endif %}"
-                    href="/brand-library">
-                    브랜드 보관함
-                </a>
-
-                <a
-                    class="btn pf-nav-btn {% if request.path.startswith('/poster') %}pf-nav-active{% endif %}"
-                    href="/poster">
-                    포스터
-                </a>
-
-                <a
-                    class="btn pf-nav-btn {% if request.path.startswith('/profiles') %}pf-nav-active{% endif %}"
-                    href="/profiles">
-                    🏢 {{ t("nav.brand") }}
                 </a>
 
                 <a

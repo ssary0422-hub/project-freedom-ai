@@ -20,13 +20,14 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 .preview-tabs{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}.preview-tab{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:.5rem 1rem;font-weight:700}.preview-tab.active{background:#7c5cff;color:#fff;border-color:#7c5cff}.sample-output{min-height:165px;transition:opacity .22s ease,transform .22s ease}.sample-output.switching{opacity:0;transform:translateY(8px)}
 .faqx .accordion-item{background:transparent;border-color:var(--line);color:white}.faqx .accordion-button{background:var(--card);color:white;box-shadow:none}.faqx .accordion-button:not(.collapsed){background:#13243c;color:white}.faqx .accordion-button::after{filter:invert(1)}
 .footer-link{color:var(--muted);text-decoration:none}.footer-link:hover{color:white}
+.work-card{height:100%;overflow:hidden}.work-visual{aspect-ratio:4/3;background:#13243c center/cover no-repeat;display:flex;align-items:end;padding:1rem}.work-copy{background:rgba(4,12,24,.88);border-radius:.8rem;padding:.85rem;width:100%}.work-body{padding:1.1rem}.work-type{color:#78dfff;font-weight:800;font-size:.78rem;letter-spacing:.08em}
 </style>
 <link href="{{ url_for('static', filename='freedom-neon.css') }}" rel="stylesheet">
 </head>
 <body>
 <nav class="navbar navbar-dark fixed-top navx"><div class="container py-2">
 <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/"><img class="pf-brand-mascot" src="{{ url_for('static', filename='brand/free-guide.png') }}" alt="Freedom AI 마스코트"> Project Freedom AI</a><div class="d-flex gap-2">
-{% if session.get("user_id") %}<a class="btn btn-outline-light" href="/dashboard">{{ t("nav.dashboard") }}</a>
+{% if session.get("user_id") %}<a class="btn btn-outline-light" href="/ads-generator">콘텐츠 만들기</a>
 {% else %}<a class="btn btn-outline-light" href="/login">{{ t("nav.login") }}</a><a class="btn btn-primary" href="/register">{{ t("landing.cta.start_free") }}</a>{% endif %}
 </div></div></nav>
 
@@ -35,7 +36,7 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 <h1>{{ t("landing.hero.title") }}</h1>
 <p class="leadx mt-4">{{ t("landing.hero.desc") }}</p>
 <div class="d-flex flex-wrap gap-3 mt-4">
-{% if session.get("user_id") %}<a href="/dashboard" class="btn btn-primary btn-lg">{{ t("landing.cta.dashboard") }}</a>
+{% if session.get("user_id") %}<a href="/ads-generator" class="btn btn-primary btn-lg">광고 만들기</a>
 {% else %}<a href="/register" class="btn btn-primary btn-lg">{{ t("landing.cta.start_free_arrow") }}</a><a href="/login" class="btn btn-outline-light btn-lg">{{ t("nav.login") }}</a>{% endif %}
 </div><div class="d-flex flex-wrap gap-2 mt-4">
 <a class="pill text-decoration-none" href="/language/ko">🇰🇷 한국어</a><a class="pill text-decoration-none" href="/language/en">🇺🇸 English</a><a class="pill text-decoration-none" href="/language/ja">🇯🇵 日本語</a><a class="pill text-decoration-none" href="/language/th">🇹🇭 ไทย</a><a class="pill text-decoration-none" href="/language/zh">🇨🇳 中文</a><a class="pill text-decoration-none" href="/language/es">🇪🇸 Español</a>
@@ -49,10 +50,10 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 
 <section class="section"><div class="container"><div class="text-center mb-5"><h2 class="display-6 fw-bold">{{ t("landing.workspace.title") }}</h2><p class="muted">{{ t("landing.workspace.desc") }}</p></div>
 <div class="row g-4">
-<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">📢</div><h3 class="h5 mt-3">{{ t("landing.feature.ads") }}</h3><p class="muted mb-0">{{ t("landing.feature.ads_desc") }}</p></div></div>
-<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">📝</div><h3 class="h5 mt-3">{{ t("landing.feature.blog") }}</h3><p class="muted mb-0">{{ t("landing.feature.blog_desc") }}</p></div></div>
-<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">📱</div><h3 class="h5 mt-3">{{ t("landing.feature.social") }}</h3><p class="muted mb-0">{{ t("landing.feature.social_desc") }}</p></div></div>
-<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">🖼️</div><h3 class="h5 mt-3">포스터</h3><p class="muted mb-0">문구와 사진을 조합해 세 가지 광고 포스터를 만들고 각각 PNG로 저장하세요.</p></div></div>
+<div class="col-md-6 col-lg-3"><a href="/ads-generator" class="glass feature d-block text-white text-decoration-none"><div class="icon">📢</div><h3 class="h5 mt-3">광고</h3><p class="muted mb-0">{{ t("landing.feature.ads_desc") }}</p></a></div>
+<div class="col-md-6 col-lg-3"><a href="/sns" class="glass feature d-block text-white text-decoration-none"><div class="icon">📱</div><h3 class="h5 mt-3">SNS</h3><p class="muted mb-0">{{ t("landing.feature.social_desc") }}</p></a></div>
+<div class="col-md-6 col-lg-3"><a href="/blog" class="glass feature d-block text-white text-decoration-none"><div class="icon">📝</div><h3 class="h5 mt-3">블로그</h3><p class="muted mb-0">{{ t("landing.feature.blog_desc") }}</p></a></div>
+<div class="col-md-6 col-lg-3"><a href="/poster" class="glass feature d-block text-white text-decoration-none"><div class="icon">🖼️</div><h3 class="h5 mt-3">포스터</h3><p class="muted mb-0">문구와 사진을 조합해 광고 포스터를 만들고 PNG로 저장하세요.</p></a></div>
 </div></div></section>
 
 <section class="section pt-2"><div class="container"><div class="glass p-5 text-center"><div class="icon">🌍</div><h2 class="fw-bold mt-3">{{ t("landing.global.title") }}</h2>
@@ -67,11 +68,18 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 <div class="col-lg-7"><div class="glass sample-box"><div class="small muted mb-3" id="previewOutputLabel">AI 광고 출력</div><div class="sample-output" id="productPreviewOutput"><div class="fw-bold mb-2" id="previewTitle">☕ 오늘의 여유를 한 잔에</div><p class="mb-2" id="previewText">직접 로스팅한 원두로 완성한 깊은 향. 오늘의커피 신메뉴를 만나보세요.</p><small class="text-secondary" id="previewMeta">대표 문구 · 혜택 · 행동 유도</small></div></div></div>
 </div></div></section>
 
+<section class="section pt-2"><div class="container"><div class="text-center mb-5"><span class="badge rounded-pill border p-2 mb-3">REAL OUTPUT</span><h2 class="display-6 fw-bold">설명보다 결과로 확인하세요</h2><p class="muted">업체명과 홍보 내용을 입력하면 네 가지 형태로 바로 완성합니다.</p></div><div class="row g-4">
+<div class="col-md-6 col-lg-3"><a href="/ads-generator" class="glass work-card d-block text-white text-decoration-none"><div class="work-visual" style="background-image:linear-gradient(180deg,transparent,rgba(4,12,24,.7)),url('{{ url_for('static', filename='showcase/orthopedic-clinic-v2.png') }}')"><div class="work-copy"><div class="work-type">광고</div><b>무릎 통증, 원인부터 꼼꼼하게</b></div></div><div class="work-body muted">짧고 명확한 제목·핵심 이점·예약 행동</div></a></div>
+<div class="col-md-6 col-lg-3"><a href="/sns" class="glass work-card d-block text-white text-decoration-none"><div class="work-visual" style="background:linear-gradient(135deg,#ff8a63,#7c5cff)"><div class="work-copy"><div class="work-type">SNS</div><b>오늘의 고민을 한 장으로 알기 쉽게</b></div></div><div class="work-body muted">모바일용 본문·해시태그·이미지 세트</div></a></div>
+<div class="col-md-6 col-lg-3"><a href="/blog" class="glass work-card d-block text-white text-decoration-none"><div class="work-visual" style="background:linear-gradient(135deg,#0f766e,#102a43)"><div class="work-copy"><div class="work-type">블로그</div><b>고객이 검색하는 질문부터 답합니다</b></div></div><div class="work-body muted">제목·본문 구조·사진 위치까지 완성</div></a></div>
+<div class="col-md-6 col-lg-3"><a href="/poster" class="glass work-card d-block text-white text-decoration-none"><div class="work-visual" style="background-image:linear-gradient(180deg,transparent,rgba(4,12,24,.76)),url('{{ url_for('static', filename='showcase/orthopedic-clinic-v2.png') }}')"><div class="work-copy"><div class="work-type">포스터</div><b>사진을 살리는 서로 다른 3가지 배치</b></div></div><div class="work-body muted">업종 일치 배경·광고 문구·PNG 저장</div></a></div>
+</div></div></section>
+
 <section class="section pt-2"><div class="container">
 <div class="text-center mb-5"><span class="badge rounded-pill border p-2 mb-3">{{ t("landing.pricing.badge") }}</span><h2 class="display-6 fw-bold">{{ t("landing.pricing.title") }}</h2><p class="muted">{{ t("landing.pricing.desc") }}</p></div>
 <div class="row g-4 justify-content-center">
 <div class="col-md-6 col-lg-4"><div class="glass price-card"><h3 class="h4">{{ t("landing.pricing.free") }}</h3><div class="price mt-3">₩0</div><p class="muted">{{ t("landing.pricing.free_desc") }}</p><hr class="border-secondary"><p>✓ {{ t("landing.pricing.ai") }}</p><p>✓ {{ t("landing.pricing.brand") }}</p><p>✓ {{ t("landing.pricing.history") }}</p><p class="muted">{{ t("landing.pricing.testing") }}</p><a href="/register" class="btn btn-outline-light w-100 mt-2">{{ t("landing.cta.start_free") }}</a></div></div>
-<div class="col-md-6 col-lg-4"><div class="glass price-card popular"><span class="badge bg-primary position-absolute top-0 start-50 translate-middle">POPULAR</span><h3 class="h4">PRO</h3><div class="price mt-3">100 {{ t("landing.pricing.credits") }}</div><p class="muted">{{ t("landing.pricing.pro_desc") }}</p><hr class="border-secondary"><p>✓ {{ t("landing.pricing.more_credits") }}</p><p>✓ 광고 · 블로그 · SNS</p><p>✓ 포스터 3종 제작 및 개별 저장</p><p>✓ {{ t("landing.pricing.exports") }}</p><a href="{% if session.get('user_id') %}/credits{% else %}/register{% endif %}" class="btn btn-primary w-100 mt-2">{% if session.get("user_id") %}{{ t("landing.pricing.view_credits") }}{% else %}{{ t("landing.pricing.create_account") }}{% endif %}</a></div></div>
+<div class="col-md-6 col-lg-4"><div class="glass price-card popular"><span class="badge bg-primary position-absolute top-0 start-50 translate-middle">POPULAR</span><h3 class="h4">PRO</h3><div class="price mt-3">100 {{ t("landing.pricing.credits") }}</div><p class="muted">{{ t("landing.pricing.pro_desc") }}</p><hr class="border-secondary"><p>✓ {{ t("landing.pricing.more_credits") }}</p><p>✓ 광고 · 블로그 · SNS</p><p>✓ 고품질 포스터와 무료 글자 배치 변경</p><p>✓ {{ t("landing.pricing.exports") }}</p><a href="{% if session.get('user_id') %}/credits{% else %}/register{% endif %}" class="btn btn-primary w-100 mt-2">{% if session.get("user_id") %}{{ t("landing.pricing.view_credits") }}{% else %}{{ t("landing.pricing.create_account") }}{% endif %}</a></div></div>
 </div><p class="text-center muted small mt-4">{{ t("landing.pricing.notice") }}</p></div></section>
 
 <section class="section pt-2"><div class="container"><div class="text-center mb-5"><h2 class="display-6 fw-bold">{{ t("landing.why.title") }}</h2></div>
@@ -91,7 +99,7 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 </div></div></section>
 
 <section class="section text-center"><div class="container"><h2 class="display-6 fw-bold">{{ t("landing.final.title") }}</h2><p class="muted">{{ t("landing.final.desc") }}</p>
-{% if session.get("user_id") %}<a href="/dashboard" class="btn btn-primary btn-lg">{{ t("landing.cta.dashboard_arrow") }}</a>{% else %}<a href="/register" class="btn btn-primary btn-lg">{{ t("landing.cta.start_free_arrow") }}</a>{% endif %}
+{% if session.get("user_id") %}<a href="/ads-generator" class="btn btn-primary btn-lg">광고 만들기 →</a>{% else %}<a href="/register" class="btn btn-primary btn-lg">{{ t("landing.cta.start_free_arrow") }}</a>{% endif %}
 </div></section>
 <footer class="py-4"><div class="container d-flex justify-content-between flex-wrap gap-3"><span>© Project Freedom AI</span><span><a class="footer-link" href="#">{{ t("landing.footer.terms") }}</a> · <a class="footer-link" href="#">{{ t("landing.footer.privacy") }}</a> · <a class="footer-link" href="#">{{ t("landing.footer.refund") }}</a> · <a class="footer-link" href="mailto:support@projectfreedom.ai">{{ t("landing.footer.contact") }}</a></span></div></footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

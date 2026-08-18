@@ -149,6 +149,21 @@ class ContentFlowTests(unittest.TestCase):
                     self.assertIn(phrase, html)
                     self.assertIn("AI가 업종에 맞게 추천", html)
 
+    def test_customer_navigation_focuses_on_four_creation_tools(self):
+        with self.client.session_transaction() as session:
+            session["user_id"] = 1
+            session["user_name"] = "테스트"
+            session["is_admin"] = False
+        html = self.client.get("/").get_data(as_text=True)
+        for path in ("/ads-generator", "/sns", "/blog", "/poster"):
+            self.assertIn(f'href="{path}"', html)
+
+        with patch("routes.ads.get_profiles", return_value=[]):
+            page = self.client.get("/ads-generator").get_data(as_text=True)
+            navbar = page.split("</nav>", 1)[0]
+        for hidden_path in ("/dashboard", "/ai-office", "/brand-library", "/profiles"):
+            self.assertNotIn(f'href="{hidden_path}"', navbar)
+
     def test_word_and_pdf_exports_for_all_content_types(self):
         from documents import pdf, word
 

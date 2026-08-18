@@ -23,7 +23,7 @@ You are a senior Korean advertising copywriter.
 Company / brand: {business}
 User's campaign request and mandatory details: {purpose}
 
-Create exactly 3 premium poster copy sets. Treat every concrete user detail as a hard constraint and never invent a price, date, result, address or contact method. Make the three options meaningfully different: premium editorial, event-focused, and trust-focused. Keep the brand name exactly as entered. Use [직접 입력 필요] if a required business fact is missing.
+Create exactly 3 conversion-focused Korean poster copy sets. Treat every concrete user detail as a hard constraint and never invent a price, date, result, address, medical outcome or contact method. Write specific advertising copy that a customer can understand immediately; never use vague philosophical phrases such as "본질에 집중", "정직한 진단", "새로운 경험", or "특별한 가치". The headline must name the customer's concrete need or the promoted service. The benefit must explain a practical reason to choose the business. The offer field must contain only a verified offer or key service fact from the user; otherwise write "상담 및 예약 문의". The call to action must use only contact information supplied by the user. Make the three options meaningfully different: customer-problem focused, service-strength focused, and action focused. Keep the brand name exactly as entered.
 
 Return exactly one option per line using this format only:
 headline | customer benefit | offer or key fact | call to action
@@ -41,9 +41,14 @@ No numbering and no explanation.
 def background():
     status=get_plan_status(session["user_id"],required_credits=3)
     if not status["can_generate"]: return jsonify(error="AI 이미지용 크레딧이 부족합니다."),402
-    data=request.get_json(silent=True) or {}; prompt=str(data.get("prompt","")).strip()
+    data=request.get_json(silent=True) or {}
+    business=str(data.get("business","")).strip()
+    purpose=str(data.get("purpose","")).strip()
+    style=str(data.get("style","")).strip()
+    prompt=str(data.get("prompt","")).strip()
+    full_prompt = " · ".join(part for part in (business, purpose, style, prompt) if part)
     try:
-        path=make_image(build_poster_background_prompt(prompt or "premium commercial advertising background"))
+        path=make_image(build_poster_background_prompt(full_prompt or "업종에 맞는 광고 배경"))
     except Exception as error:
         return jsonify(error=f"이미지 생성 실패: {error}"), 502
     record_ai_credit_usage(session["user_id"],"POSTER_IMAGE",3); return jsonify(image_url="/"+path.replace("\\","/"))
