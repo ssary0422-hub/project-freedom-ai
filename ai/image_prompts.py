@@ -115,6 +115,28 @@ def build_marketing_image_prompt(*, business: str, context: str, mood: str,
         if custom_concept.strip()
         else _subject_for(business, f"{context} {mood} {image_style}")
     )
+    placement_source = placement.lower()
+    source = f"{business} {context}".lower()
+    is_ai_marketing = any(
+        key in source
+        for key in ("ai 마케팅", "마케팅 콘텐츠", "광고 제작 플랫폼", "project freedom")
+    )
+    if is_ai_marketing and not custom_concept.strip():
+        if "blog" in placement_source:
+            subject = (
+                "a real independent shop owner planning a practical weekly marketing calendar "
+                "on a laptop inside their authentic small retail store"
+            )
+        elif "advertising" in placement_source or "advertisement" in placement_source:
+            subject = (
+                "a clean hero laptop on a small-business counter with four polished blank visual "
+                "campaign cards emerging in an organized fan shape, clearly symbolizing one-click content production; no person"
+            )
+        else:
+            subject = (
+                "a close-up hand holding a modern smartphone surrounded by four vivid blank social "
+                "content tiles with energetic depth and strong contrast; no visible words and no office worker"
+            )
     priority = (
         f"The user's custom concept is the HIGHEST priority: {custom_concept}. "
         "Do not replace its characters or idea with a conventional business scene."
@@ -132,7 +154,6 @@ def build_marketing_image_prompt(*, business: str, context: str, mood: str,
         if _is_animal_concept(custom_concept)
         else "Photorealistic, high detail, commercially usable."
     )
-    placement_source = placement.lower()
     if "blog" in placement_source:
         channel_direction = (
             "BLOG COVER: show credible real-world business context and useful visual storytelling. "

@@ -57,6 +57,23 @@ class ImagePromptTests(unittest.TestCase):
         self.assertIn("premium trustworthy healthcare editorial photography", prompt)
         self.assertIn("not a generic stock photo or an AI demo", prompt)
 
+    def test_ai_marketing_platform_gets_different_channel_subjects(self):
+        ads = build_marketing_image_prompt(
+            business="AI 마케팅 플랫폼", context="Project Freedom AI 홍보", mood="실용적",
+            image_style="AI 추천", placement="a square social advertising image",
+        )
+        sns = build_marketing_image_prompt(
+            business="AI 마케팅 플랫폼", context="Project Freedom AI 홍보", mood="활기찬",
+            image_style="AI 추천", placement="a square social media hero image",
+        )
+        blog = build_marketing_image_prompt(
+            business="AI 마케팅 플랫폼", context="Project Freedom AI 활용법", mood="신뢰감",
+            image_style="AI 추천", placement="a clean landscape blog cover photograph",
+        )
+        self.assertIn("hero laptop", ads)
+        self.assertIn("close-up hand", sns)
+        self.assertIn("independent shop owner", blog)
+
 
 if __name__ == "__main__":
     unittest.main()
