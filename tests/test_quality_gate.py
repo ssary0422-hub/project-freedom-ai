@@ -22,6 +22,25 @@ class ContentQualityGateTests(unittest.TestCase):
         self.assertEqual(generate_with_quality_check(generate, "광고 작성", company="싸리런", min_chars=30), good)
         self.assertEqual(generate.call_count, 1)
 
+    def test_detects_unfinished_placeholder(self):
+        issues = content_quality_issues(
+            "싸리런 자세한 내용은 [직접 입력 필요]에서 확인하세요.",
+            company="싸리런",
+            min_chars=20,
+        )
+        self.assertIn("사용자에게 노출하면 안 되는 미완성 표식 포함", issues)
+
+    def test_repair_never_returns_placeholder(self):
+        generate = Mock(side_effect=[
+            "싸리런은 좋은 서비스입니다. 지금 [직접 입력 필요]에서 확인해보세요.",
+            "싸리런은 좋은 서비스입니다. 지금 [직접 입력 필요]에서 확인해보세요.",
+        ])
+        result = generate_with_quality_check(
+            generate, "광고 작성", company="싸리런", min_chars=20
+        )
+        self.assertNotIn("직접 입력 필요", result)
+        self.assertIn("업체에 문의", result)
+
 
 if __name__ == "__main__":
     unittest.main()

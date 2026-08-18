@@ -4,6 +4,7 @@ from pathlib import Path
 
 import emoji
 import requests
+from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
@@ -554,30 +555,38 @@ def _create_document(
 
     width, height = A4
 
-    left_margin = 50
-    right_margin = 50
+    left_margin = 48
+    right_margin = 48
     usable_width = (
         width
         - left_margin
         - right_margin
     )
 
-    title_size = 18
-    body_size = 11
-    line_height = 18
+    title_size = 22
+    body_size = 10.5
+    line_height = 17
 
-    pdf.setFont(
-        FONT_NAME,
-        title_size
-    )
+    def draw_page_frame(first_page=False):
+        pdf.setFillColor(colors.HexColor("#07111F"))
+        pdf.rect(0, 0, width, height, fill=1, stroke=0)
+        pdf.setFillColor(colors.HexColor("#101C31"))
+        pdf.roundRect(30, 28, width - 60, height - 56, 18, fill=1, stroke=0)
+        pdf.setFillColor(colors.HexColor("#63DCFF"))
+        pdf.roundRect(48, height - 65, 92, 5, 2.5, fill=1, stroke=0)
+        pdf.setFillColor(colors.HexColor("#A9BBD3"))
+        pdf.setFont(FONT_NAME, 8.5)
+        pdf.drawRightString(width - 48, 42, "PROJECT FREEDOM AI · READY TO SHARE")
+        if first_page:
+            pdf.setFillColor(colors.HexColor("#63DCFF"))
+            pdf.setFont(FONT_NAME, 9)
+            pdf.drawString(left_margin, height - 88, "AI MARKETING CONTENT")
+            pdf.setFillColor(colors.white)
+            pdf.setFont(FONT_NAME, title_size)
+            pdf.drawString(left_margin, height - 120, title)
 
-    pdf.drawString(
-        left_margin,
-        height - 50,
-        title
-    )
-
-    y = height - 90
+    draw_page_frame(first_page=True)
+    y = height - 155
 
     y = _draw_image(
         pdf,
@@ -586,6 +595,12 @@ def _create_document(
         y,
         image_max_height
     )
+
+    pdf.setFillColor(colors.HexColor("#63DCFF"))
+    pdf.setFont(FONT_NAME, 9)
+    pdf.drawString(left_margin, y, "PUBLISH-READY COPY")
+    y -= 24
+    pdf.setFillColor(colors.HexColor("#E8F0FA"))
 
     for paragraph in (
         result or ""
@@ -605,13 +620,10 @@ def _create_document(
 
             if y < 60:
                 pdf.showPage()
-
-                pdf.setFont(
-                    FONT_NAME,
-                    body_size
-                )
-
-                y = height - 60
+                draw_page_frame(first_page=False)
+                pdf.setFillColor(colors.HexColor("#E8F0FA"))
+                pdf.setFont(FONT_NAME, body_size)
+                y = height - 70
 
             _draw_rich_line(
                 pdf,

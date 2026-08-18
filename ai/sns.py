@@ -29,7 +29,7 @@ Create a social media post that satisfies all requirements:
 3. Naturally include the company / brand name exactly as entered.
 4. Use short paragraphs and generous line breaks for mobile reading.
 5. Explain one clear customer benefit before the promotional message.
-6. Include one concrete call to action; use [직접 입력 필요] for missing links or contact details.
+6. Include one natural call to action. If no link or contact was supplied, invite the reader to contact the business without inventing a channel. Never output placeholders.
 7. End with 6 to 10 highly relevant hashtags instead of generic hashtag stuffing.
 8. Adapt length, rhythm and emoji use to the selected platform; use no more than three emojis total.
 9. Return only the publish-ready post, with no analysis or prefacing explanation.

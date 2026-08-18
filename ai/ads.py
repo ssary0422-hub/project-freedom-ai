@@ -29,7 +29,7 @@ Requirements:
 - Prefer concrete benefits over vague superlatives such as "최고", "혁신", or "특별한 경험".
 - Make the options meaningfully different: benefit-led, event-led, trust-led, urgency-led, and friendly conversational.
 - Keep the company / brand name exactly as the user entered it.
-- If essential information is missing, use [직접 입력 필요] instead of inventing it.
+- If information is missing, omit that claim. Never output placeholders or instructions such as [직접 입력 필요].
 - Avoid unnecessary explanations before or after the copy.
 - Use natural marketing language for the target audience.
 - Use at most one emoji per option and only when it improves clarity.

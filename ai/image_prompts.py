@@ -1,5 +1,10 @@
 def _subject_for(business: str, context: str) -> str:
     source = f"{business} {context}".lower()
+    if any(key in source for key in ("ai 마케팅", "마케팅 콘텐츠", "광고 제작 플랫폼", "project freedom")):
+        return (
+            "a real small-business owner using a laptop to organize four visually distinct blank "
+            "marketing content cards for advertising, social media, blog and poster work"
+        )
     if any(key in source for key in ("카페", "coffee", "cafe", "베이커리", "bakery")):
         if any(key in source for key in ("복숭아", "peach")):
             return "a photorealistic iced peach latte in a clear glass, visible peach pieces, soft pink and cream layers"
@@ -127,6 +132,25 @@ def build_marketing_image_prompt(*, business: str, context: str, mood: str,
         if _is_animal_concept(custom_concept)
         else "Photorealistic, high detail, commercially usable."
     )
+    placement_source = placement.lower()
+    if "blog" in placement_source:
+        channel_direction = (
+            "BLOG COVER: show credible real-world business context and useful visual storytelling. "
+            "Use a calm editorial composition with room for a headline."
+        )
+    elif "advertising" in placement_source or "advertisement" in placement_source:
+        channel_direction = (
+            "ADVERTISEMENT: communicate the campaign benefit in one glance with a clear hero subject, "
+            "purposeful commercial lighting, a stronger problem-to-solution visual idea and clean negative "
+            "space for one short headline and CTA. Do not look like a casual office stock photograph."
+        )
+    elif any(key in placement_source for key in ("social", "sns", "instagram")):
+        channel_direction = (
+            "SOCIAL FEED: create a stop-scroll square composition with one unmistakable focal action, "
+            "closer framing, lively depth and strong color contrast. Avoid a passive person simply looking at a laptop."
+        )
+    else:
+        channel_direction = "Use a clear campaign-specific hero composition with intentional copy space."
     return f"""
 Create one premium commercial photograph for {placement}.
 The main subject MUST be {subject}.
@@ -139,6 +163,7 @@ Keep a clean area for copy to be added later by the website.
 STRICTLY NO text, letters, words, logos, signs, labels, watermarks, captions, borders or fake writing anywhere in the image.
 Do not substitute an unrelated landscape, object, food or location.
 The result must look like a final premium campaign asset, not a generic stock photo or an AI demo.
+{channel_direction}
 {visual_direction}
 """.strip()
 

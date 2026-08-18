@@ -40,8 +40,8 @@ Write a high-quality blog article that satisfies all of these requirements:
 10. Format each direction on its own line as [실제 사진] or [AI 보조 이미지].
 11. Prefer real photos for actual people, facilities, products, vehicles, food, treatment spaces and proof of condition.
 12. Use AI images only for covers, concepts, checklists, educational diagrams and promotional banners.
-13. Mark any missing business-specific fact as [직접 입력 필요]. For health, legal or financial topics, avoid diagnosis or guaranteed outcomes and add an appropriate concise disclaimer.
-14. Finish with a publishing checklist covering map, hours, contact method and relevant disclaimers.
+13. Omit missing business-specific facts instead of showing placeholders. For health, legal or financial topics, avoid diagnosis or guaranteed outcomes and add an appropriate concise disclaimer.
+14. Finish with a publishing checklist only for verified details already supplied by the user; never expose internal editing instructions.
 15. Return the publish-ready article only, without explaining how it was written.
 
 OUTPUT LANGUAGE RULE:
