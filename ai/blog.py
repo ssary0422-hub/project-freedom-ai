@@ -36,10 +36,10 @@ Write a high-quality blog article that satisfies all of these requirements:
 6. Finish with a concise summary, one natural call to action, and 6 to 10 focused hashtags.
 7. Follow the requested length as closely as reasonably possible
 8. Preserve company names, brand names and proper nouns as entered by the user
-9. Insert 6 to 10 practical image directions naturally between paragraphs. Refer to uploaded images as [업로드 사진 1], [업로드 사진 2], etc., in the given order.
-10. Format each direction on its own line as [실제 사진] or [AI 보조 이미지].
-11. Prefer real photos for actual people, facilities, products, vehicles, food, treatment spaces and proof of condition.
-12. Use AI images only for covers, concepts, checklists, educational diagrams and promotional banners.
+9. Write a complete article that can be pasted directly into a blog. Do not include image directions, editing notes, bracketed placeholders or production instructions in the article.
+10. If uploaded photos were supplied, refer only to facts visibly supported by those photos and never expose their file names or internal ordering labels.
+11. Prefer concrete, useful explanations over generic promotional filler.
+12. Keep the generated cover image separate from the article body; do not describe where an editor should insert it.
 13. Omit missing business-specific facts instead of showing placeholders. For health, legal or financial topics, avoid diagnosis or guaranteed outcomes and add an appropriate concise disclaimer.
 14. Finish with a publishing checklist only for verified details already supplied by the user; never expose internal editing instructions.
 15. Return the publish-ready article only, without explaining how it was written.

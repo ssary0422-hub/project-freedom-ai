@@ -8,6 +8,11 @@ def _remove_unfinished_markers(text):
         "자세한 내용은 업체에 문의해 주세요.",
         value,
     )
+    blocked = ("[AI 보조 이미지]", "[실제 사진]", "[업로드 사진")
+    value = "\n".join(
+        line for line in value.splitlines()
+        if not any(marker in line for marker in blocked)
+    )
     return value.replace("{{", "").replace("}}", "").strip()
 
 
@@ -21,7 +26,10 @@ def content_quality_issues(text, *, company="", min_chars=80):
     lowered = value.lower()
     if any(marker in lowered for marker in ("as an ai", "i cannot", "요청하신 내용을 작성", "다음은 요청")):
         issues.append("불필요한 AI 설명 포함")
-    if any(marker in value for marker in ("[직접 입력 필요]", "[입력 필요]", "{{", "}}")):
+    if any(marker in value for marker in (
+        "[직접 입력 필요]", "[입력 필요]", "[AI 보조 이미지]", "[실제 사진]",
+        "[업로드 사진", "{{", "}}",
+    )):
         issues.append("사용자에게 노출하면 안 되는 미완성 표식 포함")
     return issues
 

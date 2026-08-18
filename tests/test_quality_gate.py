@@ -41,6 +41,14 @@ class ContentQualityGateTests(unittest.TestCase):
         self.assertNotIn("직접 입력 필요", result)
         self.assertIn("업체에 문의", result)
 
+    def test_detects_internal_image_direction(self):
+        issues = content_quality_issues(
+            "싸리런 이용법을 안내합니다.\n[AI 보조 이미지]\n꾸준히 실천해 보세요.",
+            company="싸리런",
+            min_chars=20,
+        )
+        self.assertIn("사용자에게 노출하면 안 되는 미완성 표식 포함", issues)
+
 
 if __name__ == "__main__":
     unittest.main()
