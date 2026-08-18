@@ -63,6 +63,18 @@
     return y + lines.length * lineHeight;
   }
 
+  function drawPill(ctx, text, x, y, maxWidth, accent) {
+    if (!text) return y;
+    const size = fitFont(ctx, text, maxWidth - 56, 1, 25, 17);
+    ctx.font = `800 ${size}px "Noto Sans KR", "Malgun Gothic", sans-serif`;
+    const safeText = linesFor(ctx, text, maxWidth - 56, 1)[0] || "";
+    const width = Math.min(maxWidth, Math.max(210, ctx.measureText(safeText).width + 56));
+    rounded(ctx, x, y, width, 66, 15, accent);
+    ctx.fillStyle = "#101923";
+    ctx.fillText(safeText, x + 28, y + Math.round((66 - size) / 2) - 2);
+    return y + 88;
+  }
+
   function draw(canvas, theme, image) {
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext("2d");
@@ -78,9 +90,9 @@
     ctx.fillStyle = shade; ctx.fillRect(0, 0, W, H);
     drawLogo(ctx, logoImage);
 
-    let panelX = 48, panelY = 52, panelW = 570, panelH = 1246;
-    if (theme.layout === "bottom") { panelX = 48; panelY = 720; panelW = 984; panelH = 578; }
-    if (theme.layout === "minimal") { panelX = 48; panelY = 790; panelW = 984; panelH = 508; }
+    let panelX = 48, panelY = 52, panelW = 610, panelH = 690;
+    if (theme.layout === "bottom") { panelX = 48; panelY = 735; panelW = 984; panelH = 563; }
+    if (theme.layout === "minimal") { panelX = 48; panelY = 805; panelW = 984; panelH = 493; }
     rounded(ctx, panelX, panelY, panelW, panelH, 36, theme.panel);
 
     const x = panelX + 42;
@@ -111,16 +123,13 @@
 
     const offer = val("posterOffer");
     if (offer) {
-      ctx.font = '800 25px "Noto Sans KR", "Malgun Gothic", sans-serif';
-      const offerWidth = Math.min(contentWidth, Math.max(330, ctx.measureText(offer).width + 64));
-      rounded(ctx, x, y, offerWidth, 70, 15, theme.accent);
-      ctx.fillStyle = "#171922"; ctx.fillText(offer, x + 28, y + 19); y += 94;
+      y = drawPill(ctx, offer, x, y, contentWidth, theme.accent);
     }
 
     ctx.font = '700 24px "Noto Sans KR", "Malgun Gothic", sans-serif';
     ctx.fillStyle = theme.ink;
-    drawLines(ctx, val("posterContact"), x, Math.min(y, H - 125), contentWidth, 38, 2);
-    ctx.fillStyle = theme.accent; ctx.fillRect(x, H - 52, 170, 7);
+    drawLines(ctx, val("posterContact"), x, Math.min(y, panelY + panelH - 82), contentWidth, 38, 2);
+    ctx.fillStyle = theme.accent; ctx.fillRect(x, panelY + panelH - 20, 170, 7);
     if ($("posterWatermark")?.checked) {
       ctx.fillStyle = theme.muted;
       ctx.font = '500 18px Arial, sans-serif';

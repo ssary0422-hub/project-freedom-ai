@@ -124,6 +124,23 @@ class ContentFlowTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.get_json()["sets"]), 3)
 
+    @patch("routes.poster.record_ai_credit_usage")
+    @patch("routes.poster.get_plan_status", return_value=READY)
+    @patch("routes.poster.generate_text", return_value=(
+        "파타야 터미널21 근처 마사지 찾는 분|가까운 위치에서 가성비 좋고 전문적인 마사지로 여행 중 피로를 편하게 풀어보세요|파타야 터미널21 인근 가성비좋고 전문적인 마사지샵|상담 및 예약 문의 01031255836"
+    ))
+    def test_poster_ai_copy_compacts_overflow_and_formats_phone(self, *_):
+        response = self.client.post(
+            "/poster/suggest",
+            json={"business": "7day's massage", "purpose": "마사지 예약 01031255836"},
+        )
+        self.assertEqual(response.status_code, 200)
+        result = response.get_json()["sets"][0]
+        self.assertLessEqual(len(result[0]), 22)
+        self.assertLessEqual(len(result[1]), 42)
+        self.assertLessEqual(len(result[2]), 18)
+        self.assertEqual(result[3], "예약 문의 010-3125-5836")
+
     def test_all_main_pages_render(self):
         with patch("routes.ads.get_profiles", return_value=[]), \
              patch("routes.blog.get_profiles", return_value=[]), \
