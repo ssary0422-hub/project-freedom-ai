@@ -112,6 +112,10 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
                 </div>
             </div>
 
+            {% if active_tab in ["ads", "sns", "blog"] %}
+                {% include "_sungeum_page_guide.html" %}
+            {% endif %}
+
             {% block form %}{% endblock %}
         </div>
     </div>
