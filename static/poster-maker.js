@@ -67,9 +67,13 @@
     ctx.save(); ctx.translate(907, 1210); ctx.rotate(-0.06);
     ctx.strokeStyle = accent; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, 86, 0, Math.PI * 2); ctx.stroke();
     ctx.beginPath(); ctx.arc(0, 0, 73, 0, Math.PI * 2); ctx.stroke();
-    ctx.fillStyle = accent; ctx.textAlign = "center";
-    ctx.font = '900 24px "Malgun Gothic", sans-serif'; ctx.fillText("순금 검수", 0, -12);
-    ctx.font = '900 22px "Malgun Gothic", sans-serif'; ctx.fillText("완 료", 0, 22);
+    ctx.fillStyle = accent;
+    ctx.beginPath(); ctx.ellipse(0, -4, 24, 20, 0, 0, Math.PI * 2); ctx.fill();
+    [[-30, -31, 10, 14, -.35], [-10, -43, 10, 14, -.12], [12, -43, 10, 14, .12], [31, -30, 10, 14, .35]].forEach(([x, y, rx, ry, rotation]) => {
+      ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rotation, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.textAlign = "center"; ctx.font = '900 18px "Malgun Gothic", sans-serif';
+    ctx.fillText("순금 검수", 0, 27); ctx.fillText("완료", 0, 50);
     ctx.restore(); ctx.textAlign = "left";
   }
 
