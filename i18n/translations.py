@@ -324,11 +324,11 @@ TRANSLATIONS["es"].update({'v2.business': 'Sector',
 # -------------------------
 TRANSLATIONS["ko"].update({'v21.company': '업체명',
  'v21.desired_mood': '원하는 분위기',
- 'v21.ph.business': '예) 마사지샵',
- 'v21.ph.company': '예) 7데이즈',
+ 'v21.ph.business': '예) 독립서점',
+ 'v21.ph.company': '예) 달빛책방',
  'v21.ph.mood': '예) 고급스럽고 친절한',
  'v21.ph.blog_business': '예) 헬스장',
- 'v21.ph.blog_company': '예) 런바디스튜디오',
+ 'v21.ph.blog_company': '예) 모모식물상점',
  'v21.ph.topic': '예) 초보자를 위한 러닝 자세',
  'v21.ph.tone': '예) 친근하고 전문적으로',
  'v21.select.length': '길이를 선택하세요',
@@ -876,7 +876,7 @@ TRANSLATIONS["ko"].update({'v3.dash.title': 'MY DASHBOARD',
  'v3.register.email': '이메일',
  'v3.register.password': '비밀번호',
  'v3.register.confirm': '비밀번호 확인',
- 'v3.register.name_ph': '예) 성현',
+ 'v3.register.name_ph': '예) 담당자 이름',
  'v3.register.password_ph': '8자 이상',
  'v3.register.confirm_ph': '비밀번호를 다시 입력',
  'v3.register.button': '계정 만들기',
@@ -1717,3 +1717,10 @@ _POSTER_LANDING = {
 }
 for _language, _values in _POSTER_LANDING.items():
     TRANSLATIONS[_language].update(_values)
+
+# Keep public examples fictional and unrelated to personal or past test data.
+TRANSLATIONS["ko"].update({
+    "landing.product.sample_industry": "독립서점",
+    "landing.product.sample_business": "달빛책방",
+    "landing.product.sample_mood": "차분함 · 다정함 · 호기심",
+})

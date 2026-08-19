@@ -7,7 +7,7 @@
 <div class="container py-4"><div class="pf-page-header"><div class="pf-eyebrow">ONE-CLICK POSTER</div><h1 class="fw-bold mt-2 d-flex align-items-center gap-3"><img class="pf-title-mascot" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="3D 순금 마스코트"><span>원클릭 광고 포스터</span></h1><p class="text-muted">사진을 살리는 가장 좋은 포스터 하나를 먼저 만들고, 다른 글자 배치는 무료로 확인하세요.</p></div>
 <div class="row g-4"><div class="col-lg-4"><div class="card poster-form"><div class="card-body p-4">
 {% include "_content_mode_switch.html" %}
-<div class="mb-3"><label class="form-label fw-bold">업체명</label><input id="posterCompany" class="form-control" placeholder="예: 오늘의커피"></div>
+<div class="mb-3"><label class="form-label fw-bold">업체명</label><input id="posterCompany" class="form-control" placeholder="예: 윤슬도자기"></div>
 <div class="mb-3"><label class="form-label fw-bold">무엇을 홍보하고 싶나요?</label><textarea id="posterPurpose" class="form-control" rows="4" placeholder="예: 여름 신메뉴 복숭아라테를 홍보하고 싶어요. 이번 주까지 20% 할인이고 네이버 예약 문구를 꼭 넣어주세요."></textarea><div class="form-text">혜택·기간·가격·꼭 들어갈 문구를 말하듯 적어주세요.</div></div>
 <button id="suggestPoster" class="btn btn-outline-primary w-100 mb-3" type="button">✨ AI가 광고 문구 구성하기 (1크레딧)</button><div id="copyChoices" class="mb-3 d-grid gap-2"></div>
 <div class="row g-2 mb-2"><div class="col-6"><label class="form-label">로고 (선택)</label><input id="posterLogo" class="form-control" type="file" accept="image/*"></div><div class="col-6"><label class="form-label">제품·캐릭터 사진 (선택)</label><input id="posterPhoto" class="form-control" type="file" accept="image/*"></div></div>

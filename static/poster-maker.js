@@ -201,7 +201,7 @@
     const image = new Image(); image.onload = () => { backgroundImage = image; hasUserResult = true; render(); status.textContent = "글자 없는 AI 배경이 적용됐습니다."; }; image.src = data.image_url;
   }
 
-  const examples = { posterCompany: ["오늘의커피", "튼튼정형외과", "런바디 스튜디오"], posterHeadline: ["한 모금으로 만나는 여름", "통증 없는 일상으로", "오늘 시작하는 건강한 변화"], posterBenefit: ["신선한 재료로 완성한 시그니처 메뉴", "꼼꼼한 상담과 맞춤 진료", "초보자도 편안한 맞춤 코칭"], posterOffer: ["신메뉴 출시 기념 할인", "첫 방문 상담 혜택", "체험 수업 신청하기"], posterContact: ["네이버 예약 또는 매장 문의", "카카오톡으로 문의하세요", "프로필 링크에서 예약하세요"] };
+  const examples = { posterCompany: ["윤슬도자기", "달빛책방", "모모식물상점"], posterHeadline: ["손끝에서 시작되는 나만의 그릇", "금요일 밤, 작가와 책 사이", "우리 집 식물에게 새 화분을"], posterBenefit: ["처음이어도 편안한 소규모 원데이 클래스", "열두 명만 함께하는 깊이 있는 북토크", "흙과 화분이 모두 준비된 분갈이 수업"], posterOffer: ["이번 주말 클래스 모집", "선착순 12명 예약", "재료비 포함 신청"], posterContact: ["프로필 링크에서 신청하세요", "DM으로 예약해주세요", "온라인 예약 또는 매장 문의"] };
   function rotateExamples() { Object.entries(examples).forEach(([id, list]) => { const input = $(id); if (input && !input.value && document.activeElement !== input) input.placeholder = `예: ${list[Math.floor(Math.random() * list.length)]}`; }); }
 
   document.addEventListener("DOMContentLoaded", () => {
