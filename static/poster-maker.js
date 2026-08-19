@@ -3,18 +3,17 @@
   const W = 1080, H = 1350;
   const $ = id => document.getElementById(id);
   const val = id => ($(id)?.value || "").trim();
-  let backgroundImage = null, logoImage = null;
-  let currentThemeIndex = 0;
+  let subjectImage = null, backgroundImage = null, logoImage = null, currentThemeIndex = 0;
+  let hasUserResult = false;
 
   const themes = [
-    { name: "AI 추천 · 사진 중심형", accent: "#63dcff", panel: "rgba(4,18,31,.92)", ink: "#ffffff", muted: "#d5e2ed", layout: "left", label: "" },
-    { name: "무료 배치 · 하단 정보형", accent: "#ffca62", panel: "rgba(16,18,25,.91)", ink: "#ffffff", muted: "#f0e2d5", layout: "bottom", label: "" },
-    { name: "무료 배치 · 미니멀형", accent: "#8be1bd", panel: "rgba(5,30,31,.84)", ink: "#ffffff", muted: "#d5ebe4", layout: "minimal", label: "" },
+    { name: "순금 추천 · 브랜드 에디토리얼형", layout: "editorial", accent: "#ffc85c", ink: "#fff", muted: "#d9ddea" },
+    { name: "사진 중심 · 정보 패널형", layout: "left", accent: "#63dcff", ink: "#fff", muted: "#d5e2ed" },
+    { name: "하단 집중 · 프로모션형", layout: "bottom", accent: "#ffca62", ink: "#fff", muted: "#f0e2d5" },
   ];
 
   function rounded(ctx, x, y, w, h, radius, color) {
-    ctx.fillStyle = color;
-    ctx.beginPath(); ctx.roundRect(x, y, w, h, radius); ctx.fill();
+    ctx.fillStyle = color; ctx.beginPath(); ctx.roundRect(x, y, w, h, radius); ctx.fill();
   }
 
   function cover(ctx, image) {
@@ -23,13 +22,10 @@
     ctx.drawImage(image, (image.width - sw) / 2, (image.height - sh) / 2, sw, sh, 0, 0, W, H);
   }
 
-  function drawLogo(ctx, image) {
-    if (!image) return;
-    const maxW = 190, maxH = 82;
-    const scale = Math.min(maxW / image.width, maxH / image.height, 1);
-    const w = image.width * scale, h = image.height * scale;
-    rounded(ctx, W - w - 80, 62, w + 28, h + 22, 14, "rgba(255,255,255,.92)");
-    ctx.drawImage(image, W - w - 66, 73, w, h);
+  function contain(ctx, image, x, y, w, h) {
+    const scale = Math.min(w / image.width, h / image.height);
+    const dw = image.width * scale, dh = image.height * scale;
+    ctx.drawImage(image, x + (w - dw) / 2, y + h - dh, dw, dh);
   }
 
   function rawLines(ctx, text, maxWidth) {
@@ -45,141 +41,160 @@
     return lines;
   }
 
-  function linesFor(ctx, text, maxWidth, maxLines) {
-    const lines = rawLines(ctx, text, maxWidth);
-    if (lines.length > maxLines) {
-      const clipped = lines.slice(0, maxLines);
-      clipped[maxLines - 1] = clipped[maxLines - 1].replace(/.$/, "…");
-      return clipped;
-    }
-    return lines;
-  }
-
   function fitFont(ctx, text, maxWidth, maxLines, start, minimum) {
     for (let size = start; size >= minimum; size -= 2) {
       ctx.font = `800 ${size}px "Noto Sans KR", "Malgun Gothic", sans-serif`;
-      const lines = rawLines(ctx, text, maxWidth);
-      if (lines.length <= maxLines && lines.every(line => ctx.measureText(line).width <= maxWidth)) return size;
+      if (rawLines(ctx, text, maxWidth).length <= maxLines) return size;
     }
     return minimum;
   }
 
   function drawLines(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
-    const lines = linesFor(ctx, text, maxWidth, maxLines);
+    const lines = rawLines(ctx, text, maxWidth).slice(0, maxLines);
     lines.forEach((line, index) => ctx.fillText(line, x, y + index * lineHeight));
     return y + lines.length * lineHeight;
   }
 
-  function drawPill(ctx, text, x, y, maxWidth, accent) {
-    if (!text) return y;
-    const size = fitFont(ctx, text, maxWidth - 56, 1, 25, 17);
-    ctx.font = `800 ${size}px "Noto Sans KR", "Malgun Gothic", sans-serif`;
-    const safeText = linesFor(ctx, text, maxWidth - 56, 1)[0] || "";
-    const width = Math.min(maxWidth, Math.max(210, ctx.measureText(safeText).width + 56));
-    rounded(ctx, x, y, width, 66, 15, accent);
-    ctx.fillStyle = "#101923";
-    ctx.fillText(safeText, x + 28, y + Math.round((66 - size) / 2) - 2);
-    return y + 88;
+  function drawLogo(ctx, image) {
+    if (!image) return;
+    const scale = Math.min(180 / image.width, 70 / image.height, 1);
+    const w = image.width * scale, h = image.height * scale;
+    rounded(ctx, W - w - 76, 54, w + 28, h + 22, 14, "rgba(255,255,255,.94)");
+    ctx.drawImage(image, W - w - 62, 65, w, h);
   }
 
-  function draw(canvas, theme, image) {
-    canvas.width = W; canvas.height = H;
-    const ctx = canvas.getContext("2d");
-    const gradient = ctx.createLinearGradient(0, 0, W, H);
-    gradient.addColorStop(0, "#19243d"); gradient.addColorStop(1, "#684873");
-    ctx.fillStyle = gradient; ctx.fillRect(0, 0, W, H);
-    if (image) cover(ctx, image);
+  function drawQualitySeal(ctx, accent) {
+    ctx.save(); ctx.translate(907, 1210); ctx.rotate(-0.06);
+    ctx.strokeStyle = accent; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, 86, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, 73, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = accent; ctx.textAlign = "center";
+    ctx.font = '900 24px "Malgun Gothic", sans-serif'; ctx.fillText("순금 검수", 0, -12);
+    ctx.font = '900 22px "Malgun Gothic", sans-serif'; ctx.fillText("완 료", 0, 22);
+    ctx.restore(); ctx.textAlign = "left";
+  }
 
-    const shade = ctx.createLinearGradient(0, 0, 0, H);
-    shade.addColorStop(0, theme.layout === "top" ? "rgba(0,0,0,.26)" : "rgba(0,0,0,.04)");
-    shade.addColorStop(.48, "rgba(0,0,0,.10)");
-    shade.addColorStop(1, "rgba(0,0,0,.58)");
-    ctx.fillStyle = shade; ctx.fillRect(0, 0, W, H);
-    drawLogo(ctx, logoImage);
+  function qualityCheck(ctx, theme) {
+    const issues = [];
+    const required = [["posterCompany", "업체명"], ["posterHeadline", "광고 제목"], ["posterBenefit", "핵심 혜택"], ["posterContact", "연락처·예약 방법"]];
+    required.forEach(([id, label]) => { if (!val(id)) issues.push(`${label}을 입력하세요`); });
+    const forbidden = /직접 입력|미정|없음|TODO|example/i;
+    ["posterCompany", "posterHeadline", "posterBenefit", "posterOffer", "posterContact"].forEach(id => {
+      if (forbidden.test(val(id))) issues.push("임시 문구를 실제 내용으로 바꾸세요");
+    });
+    const headlineWidth = theme.layout === "editorial" ? 590 : (theme.layout === "left" ? 526 : 900);
+    ctx.font = `800 ${fitFont(ctx, val("posterHeadline"), headlineWidth, 3, theme.layout === "editorial" ? 82 : 58, 38)}px "Malgun Gothic", sans-serif`;
+    if (rawLines(ctx, val("posterHeadline"), headlineWidth).length > 3) issues.push("제목이 너무 깁니다");
+    ctx.font = '600 28px "Malgun Gothic", sans-serif';
+    if (rawLines(ctx, val("posterBenefit"), theme.layout === "editorial" ? 530 : 900).length > 4) issues.push("핵심 혜택이 너무 깁니다");
+    return [...new Set(issues)];
+  }
 
-    let panelX = 48, panelY = 52, panelW = 610, panelH = 690;
-    if (theme.layout === "bottom") { panelX = 48; panelY = 735; panelW = 984; panelH = 563; }
-    if (theme.layout === "minimal") { panelX = 48; panelY = 805; panelW = 984; panelH = 493; }
-    rounded(ctx, panelX, panelY, panelW, panelH, 36, theme.panel);
+  function drawEditorial(ctx, theme, approved) {
+    const bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, "#090d1d"); bg.addColorStop(.55, "#17132a"); bg.addColorStop(1, "#34213d");
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "rgba(255,200,92,.13)"; ctx.beginPath(); ctx.arc(910, 280, 330, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(103,220,255,.08)"; ctx.beginPath(); ctx.arc(160, 1120, 370, 0, Math.PI * 2); ctx.fill();
+    if (backgroundImage) { ctx.save(); ctx.globalAlpha = .38; cover(ctx, backgroundImage); ctx.restore(); ctx.fillStyle = "rgba(5,8,20,.6)"; ctx.fillRect(0, 0, W, H); }
 
-    const x = panelX + 42;
-    const contentWidth = panelW - 84;
-    let y = panelY + 45;
     ctx.textBaseline = "top";
-    ctx.letterSpacing = "0px";
-    ctx.fillStyle = theme.accent;
-    ctx.font = '700 25px "Noto Sans KR", "Malgun Gothic", sans-serif';
-    ctx.fillText(val("posterCompany") || "업체명", x, y); y += 66;
-
-    const title = val("posterHeadline") || "광고 제목을 입력하세요";
-    const titleSize = fitFont(ctx, title, contentWidth, 2, theme.layout === "left" ? 58 : 52, 38);
-    ctx.font = `800 ${titleSize}px "Noto Sans KR", "Malgun Gothic", sans-serif`;
-    ctx.fillStyle = theme.ink;
-    y = drawLines(ctx, title, x, y, contentWidth, Math.round(titleSize * 1.2), 2) + 24;
-
-    ctx.fillStyle = theme.accent;
-    ctx.fillRect(x, y, Math.min(260, contentWidth * .32), 4);
-    y += 28;
-
-    const benefit = val("posterBenefit");
-    if (benefit) {
-      ctx.font = '500 27px "Noto Sans KR", "Malgun Gothic", sans-serif';
-      ctx.fillStyle = theme.muted;
-      y = drawLines(ctx, benefit, x, y, contentWidth, 42, 2) + 28;
-    }
-
+    ctx.fillStyle = theme.accent; ctx.font = '800 25px "Malgun Gothic", sans-serif';
+    ctx.fillText((val("posterCompany") || "BRAND").toUpperCase(), 66, 62);
     const offer = val("posterOffer");
     if (offer) {
-      y = drawPill(ctx, offer, x, y, contentWidth, theme.accent);
+      ctx.font = '800 22px "Malgun Gothic", sans-serif'; const width = Math.min(350, ctx.measureText(offer).width + 54);
+      rounded(ctx, W - width - 64, 52, width, 58, 29, theme.accent); ctx.fillStyle = "#17131f"; ctx.fillText(offer, W - width - 37, 68);
     }
 
-    ctx.font = '700 24px "Noto Sans KR", "Malgun Gothic", sans-serif';
-    ctx.fillStyle = theme.ink;
-    drawLines(ctx, val("posterContact"), x, Math.min(y, panelY + panelH - 82), contentWidth, 38, 2);
-    ctx.fillStyle = theme.accent; ctx.fillRect(x, panelY + panelH - 20, 170, 7);
-    if ($("posterWatermark")?.checked) {
-      ctx.fillStyle = theme.muted;
-      ctx.font = '500 18px Arial, sans-serif';
-      ctx.fillText("PROJECT FREEDOM AI", W - 292, H - 60);
+    const title = val("posterHeadline") || "광고 제목을 입력하세요";
+    const titleSize = fitFont(ctx, title, 600, 3, 82, 52);
+    ctx.font = `900 ${titleSize}px "Malgun Gothic", sans-serif`; ctx.fillStyle = theme.ink;
+    const titleBottom = drawLines(ctx, title, 64, 165, 600, Math.round(titleSize * 1.14), 3);
+    ctx.fillStyle = theme.accent; ctx.fillRect(66, titleBottom + 14, 170, 7);
+
+    if (subjectImage) contain(ctx, subjectImage, 525, 310, 540, 720);
+    else {
+      ctx.fillStyle = "rgba(255,255,255,.045)"; ctx.beginPath(); ctx.arc(825, 650, 250, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.36)"; ctx.font = '700 25px "Malgun Gothic", sans-serif'; ctx.textAlign = "center";
+      ctx.fillText("제품·업체 사진을 넣으면", 825, 620); ctx.fillText("이 영역에 크게 배치됩니다", 825, 660); ctx.textAlign = "left";
     }
+
+    rounded(ctx, 64, 610, 525, 350, 32, "rgba(10,15,31,.9)");
+    ctx.fillStyle = theme.accent; ctx.font = '900 22px "Malgun Gothic", sans-serif'; ctx.fillText("WHY THIS BRAND", 102, 652);
+    ctx.fillStyle = theme.muted; ctx.font = '600 29px "Malgun Gothic", sans-serif';
+    drawLines(ctx, val("posterBenefit") || "핵심 혜택을 입력하면 고객이 읽기 쉽게 정리됩니다", 102, 708, 450, 48, 4);
+
+    rounded(ctx, 64, 1004, 950, 210, 30, "rgba(255,255,255,.08)");
+    ctx.fillStyle = "#fff"; ctx.font = '900 27px "Malgun Gothic", sans-serif'; ctx.fillText("지금 바로 확인하세요", 104, 1046);
+    ctx.fillStyle = theme.muted; ctx.font = '700 28px "Malgun Gothic", sans-serif';
+    drawLines(ctx, val("posterContact") || "연락처·예약 방법", 104, 1094, 650, 42, 2);
+    if (approved) drawQualitySeal(ctx, theme.accent);
+    drawLogo(ctx, logoImage);
   }
 
-  function render(image = backgroundImage) {
-    const root = $("posterResults"); root.innerHTML = "";
-    const theme = themes[currentThemeIndex];
+  function drawClassic(ctx, theme, approved) {
+    const gradient = ctx.createLinearGradient(0, 0, W, H); gradient.addColorStop(0, "#19243d"); gradient.addColorStop(1, "#684873");
+    ctx.fillStyle = gradient; ctx.fillRect(0, 0, W, H);
+    if (subjectImage) cover(ctx, subjectImage); else if (backgroundImage) cover(ctx, backgroundImage);
+    ctx.fillStyle = "rgba(0,0,0,.42)"; ctx.fillRect(0, 0, W, H);
+    const bottom = theme.layout === "bottom"; const x = 48, y = bottom ? 720 : 52, w = bottom ? 984 : 610, h = bottom ? 578 : 700;
+    rounded(ctx, x, y, w, h, 36, "rgba(6,15,28,.91)");
+    const tx = x + 42, tw = w - 84; let ty = y + 44; ctx.textBaseline = "top";
+    ctx.fillStyle = theme.accent; ctx.font = '800 25px "Malgun Gothic", sans-serif'; ctx.fillText(val("posterCompany") || "업체명", tx, ty); ty += 62;
+    const title = val("posterHeadline") || "광고 제목을 입력하세요"; const size = fitFont(ctx, title, tw, 3, bottom ? 58 : 62, 38);
+    ctx.fillStyle = theme.ink; ctx.font = `900 ${size}px "Malgun Gothic", sans-serif`; ty = drawLines(ctx, title, tx, ty, tw, size * 1.18, 3) + 25;
+    ctx.fillStyle = theme.accent; ctx.fillRect(tx, ty, 180, 5); ty += 28;
+    ctx.fillStyle = theme.muted; ctx.font = '600 27px "Malgun Gothic", sans-serif'; ty = drawLines(ctx, val("posterBenefit"), tx, ty, tw, 42, 4) + 24;
+    if (val("posterOffer")) { rounded(ctx, tx, ty, Math.min(tw, 450), 62, 16, theme.accent); ctx.fillStyle = "#101923"; ctx.font = '800 23px "Malgun Gothic", sans-serif'; ctx.fillText(val("posterOffer"), tx + 24, ty + 17); ty += 82; }
+    ctx.fillStyle = theme.ink; ctx.font = '700 24px "Malgun Gothic", sans-serif'; drawLines(ctx, val("posterContact"), tx, Math.min(ty, y + h - 70), tw, 38, 2);
+    if (approved) drawQualitySeal(ctx, theme.accent); drawLogo(ctx, logoImage);
+  }
+
+  function draw(canvas, theme) {
+    canvas.width = W; canvas.height = H; const ctx = canvas.getContext("2d");
+    const issues = qualityCheck(ctx, theme); const approved = hasUserResult && issues.length === 0;
+    if (theme.layout === "editorial") drawEditorial(ctx, theme, approved); else drawClassic(ctx, theme, approved);
+    if ($("posterWatermark")?.checked) { ctx.fillStyle = theme.muted; ctx.font = '500 18px Arial'; ctx.fillText("PROJECT FREEDOM AI", 64, H - 54); }
+    return { approved, issues };
+  }
+
+  function makeQualityStatus(result) {
+    const stamp = document.createElement("div"); stamp.className = `sungeum-quality-stamp mb-3${result.approved ? "" : " is-pending"}`; stamp.setAttribute("role", "status");
+    stamp.innerHTML = `<svg class="sungeum-paw" viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="39" rx="17" ry="15"/><ellipse cx="14" cy="25" rx="7" ry="9"/><ellipse cx="27" cy="16" rx="7" ry="9"/><ellipse cx="40" cy="16" rx="7" ry="9"/><ellipse cx="52" cy="26" rx="7" ry="9"/></svg><span><strong>${result.approved ? "순금 검수 완료" : "순금 확인 필요"}</strong><small>${result.approved ? "글자 넘침과 필수 정보를 확인했어요" : (result.issues[0] || "내용을 입력하면 자동 검수해요")}</small></span>`;
+    return stamp;
+  }
+
+  function render() {
+    const root = $("posterResults"); root.innerHTML = ""; const theme = themes[currentThemeIndex];
     const card = document.createElement("div"); card.className = "card p-3";
+    const canvas = document.createElement("canvas"); canvas.className = "poster-preview"; const result = draw(canvas, theme);
     const label = document.createElement("div"); label.className = "fw-bold mb-2"; label.textContent = theme.name;
-    const canvas = document.createElement("canvas"); canvas.className = "poster-preview";
-    draw(canvas, theme, image);
     const controls = document.createElement("div"); controls.className = "d-grid gap-2 mt-3";
     const download = document.createElement("button"); download.className = "btn btn-primary"; download.textContent = "이 포스터 PNG 저장";
-    download.onclick = () => { const link = document.createElement("a"); link.download = "poster.png"; link.href = canvas.toDataURL("image/png"); link.click(); };
+    download.disabled = !result.approved; download.title = result.approved ? "" : "순금 검수를 먼저 통과하세요";
+    download.onclick = () => { const link = document.createElement("a"); link.download = "sungeum-approved-poster.png"; link.href = canvas.toDataURL("image/png"); link.click(); };
     const alternate = document.createElement("button"); alternate.className = "btn btn-outline-primary"; alternate.textContent = "다른 무료 글자 배치 보기";
-    alternate.onclick = () => { currentThemeIndex = (currentThemeIndex + 1) % themes.length; render(image); };
-    controls.append(download, alternate); card.append(label, canvas, controls); root.append(card);
+    alternate.onclick = () => { currentThemeIndex = (currentThemeIndex + 1) % themes.length; render(); };
+    controls.append(download, alternate); card.append(makeQualityStatus(result), label, canvas, controls); root.append(card);
   }
 
+  function loadFile(file, setter) { if (!file) return; const image = new Image(); image.onload = () => { setter(image); render(); }; image.src = URL.createObjectURL(file); }
   function usePhoto() {
-    const photo = $("posterPhoto").files[0];
-    const logo = $("posterLogo").files[0];
-    if (photo) { const image = new Image(); image.onload = () => { backgroundImage = image; render(); }; image.src = URL.createObjectURL(photo); }
-    if (logo) { const image = new Image(); image.onload = () => { logoImage = image; render(); }; image.src = URL.createObjectURL(logo); }
-    if (!photo && !logo) render();
+    hasUserResult = true; loadFile($("posterPhoto").files[0], image => { subjectImage = image; }); loadFile($("posterLogo").files[0], image => { logoImage = image; }); render();
   }
 
   async function suggest() {
     const root = $("copyChoices"); root.textContent = "추천 중…";
     const response = await fetch("/poster/suggest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ business: val("posterCompany"), purpose: val("posterPurpose") }) });
-    const data = await response.json(); if (!response.ok) { root.textContent = data.error || "추천 실패"; return; }
-    root.innerHTML = "";
-    data.sets.forEach((set, index) => { const button = document.createElement("button"); button.type = "button"; button.className = "btn btn-outline-light text-start"; button.textContent = `${index + 1}. ${set[0]} · ${set[2]}`; button.onclick = () => { ["posterHeadline", "posterBenefit", "posterOffer", "posterContact"].forEach((id, i) => $(id).value = set[i]); render(); }; root.append(button); });
+    const data = await response.json(); if (!response.ok) { root.textContent = data.error || "추천 실패"; return; } root.innerHTML = "";
+    data.sets.forEach((set, index) => { const button = document.createElement("button"); button.type = "button"; button.className = "btn btn-outline-light text-start"; button.textContent = `${index + 1}. ${set[0]} · ${set[2]}`; button.onclick = () => { ["posterHeadline", "posterBenefit", "posterOffer", "posterContact"].forEach((id, i) => $(id).value = set[i]); hasUserResult = true; render(); }; root.append(button); });
   }
 
   async function createBackground() {
     const status = $("posterStatus"); status.textContent = "AI 배경 생성 중…";
     const response = await fetch("/poster/background", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ business: val("posterCompany"), purpose: val("posterPurpose"), style: val("posterImageStyle"), prompt: val("aiBackgroundPrompt") }) });
     const data = await response.json(); if (!response.ok) { status.textContent = data.error || "생성 실패"; return; }
-    const image = new Image(); image.onload = () => { backgroundImage = image; render(); status.textContent = "글자 없는 AI 배경이 적용됐습니다."; }; image.src = data.image_url;
+    const image = new Image(); image.onload = () => { backgroundImage = image; hasUserResult = true; render(); status.textContent = "글자 없는 AI 배경이 적용됐습니다."; }; image.src = data.image_url;
   }
 
   const examples = { posterCompany: ["오늘의커피", "튼튼정형외과", "런바디 스튜디오"], posterHeadline: ["한 모금으로 만나는 여름", "통증 없는 일상으로", "오늘 시작하는 건강한 변화"], posterBenefit: ["신선한 재료로 완성한 시그니처 메뉴", "꼼꼼한 상담과 맞춤 진료", "초보자도 편안한 맞춤 코칭"], posterOffer: ["신메뉴 출시 기념 할인", "첫 방문 상담 혜택", "체험 수업 신청하기"], posterContact: ["네이버 예약 또는 매장 문의", "카카오톡으로 문의하세요", "프로필 링크에서 예약하세요"] };
@@ -187,9 +202,8 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     $("makePosters").onclick = usePhoto; $("suggestPoster").onclick = suggest; $("makeAiBackground").onclick = createBackground;
-    $("posterPhoto").addEventListener("change", usePhoto); $("posterLogo").addEventListener("change", usePhoto);
-    $("posterWatermark").addEventListener("change", () => render());
-    ["posterCompany", "posterHeadline", "posterBenefit", "posterOffer", "posterContact"].forEach(id => $(id).addEventListener("input", () => render()));
+    $("posterPhoto").addEventListener("change", usePhoto); $("posterLogo").addEventListener("change", usePhoto); $("posterWatermark").addEventListener("change", render);
+    ["posterCompany", "posterHeadline", "posterBenefit", "posterOffer", "posterContact"].forEach(id => $(id).addEventListener("input", () => { hasUserResult = true; render(); }));
     rotateExamples(); setInterval(rotateExamples, 4000); render();
   });
 })();

@@ -1,0 +1,15 @@
+<button class="sungeum-assistant-trigger" id="sungeumAssistantTrigger" type="button" aria-controls="sungeumAssistantPanel" aria-expanded="false">
+  <img src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt=""><span><strong>순금이</strong><small>오늘 홍보 맡기기</small></span><b class="sungeum-online-dot"></b>
+</button>
+<aside class="sungeum-assistant-panel" id="sungeumAssistantPanel" aria-hidden="true">
+  <header class="sungeum-assistant-head"><div><img src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="순금이"><span><small>AI 홍보실장 · 근무 중</small><strong>순금이</strong></span></div><button id="sungeumAssistantClose" type="button" aria-label="닫기">×</button></header>
+  <div class="sungeum-assistant-body">
+    <section class="sungeum-briefing"><label>오늘의 순금 브리핑</label><h3>오늘 홍보, 제가 먼저 준비할게요.</h3><p>행사나 남은 재고만 알려주면 문구·이미지·검수까지 한 번에 진행해요.</p><button data-sungeum-action="campaign">이번 주 홍보 맡기기 <b>→</b></button></section>
+    <section><label>지금 상황은 어떤가요?</label><div class="sungeum-emergency"><button data-sungeum-action="quiet">😥<span>손님이 없어요</span></button><button data-sungeum-action="stock">📦<span>재고가 남았어요</span></button><button data-sungeum-action="weather">🌧️<span>날씨가 안 좋아요</span></button></div></section>
+    <section class="sungeum-conversation"><label for="sungeumRequest">순금이에게 바로 말하기</label><div class="sungeum-input-row"><textarea id="sungeumRequest" rows="2" placeholder="예: 카페에 딸기 케이크가 남았어. 오늘 다 팔고 싶어"></textarea><button id="sungeumRequestSend" type="button">보내기</button></div><div class="sungeum-next-step" id="sungeumNextStep" hidden><p id="sungeumPlanSummary"></p><a id="sungeumCreateAd" href="/ads-generator">광고 제작 화면으로 이동 →</a></div></section>
+    <section class="sungeum-check"><div class="sungeum-check-title"><span><label>순금 책임 검수</label><strong>게시 전에 다섯 번 확인해요</strong></span><span class="sungeum-stamp-ready">🐾 검수 준비</span></div><ul><li>✓ 맞춤법과 문구</li><li>✓ 가격·날짜</li><li>✓ 연락처·주소</li><li>✓ 글자 잘림</li><li>✓ 과장·위험 표현</li></ul><small>광고 생성 후 실제 검사를 통과해야 `순금 검수 완료` 도장을 찍어요.</small></section>
+    <div class="sungeum-chat" id="sungeumChatLine"><span>🐾</span><p><strong>순금이</strong><br>무엇을 홍보할지만 말씀해 주세요. 나머지는 제가 챙길게요.</p></div>
+  </div>
+</aside>
+<div class="sungeum-assistant-backdrop" id="sungeumAssistantBackdrop"></div>
+<script src="{{ url_for('static', filename='sungeum-assistant.js') }}" defer></script>

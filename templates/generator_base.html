@@ -41,9 +41,10 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
         align-items:center;
         justify-content:center;
     ">
-    <div class="text-center bg-white shadow rounded-4 p-5 mx-3" style="min-width:min(320px, 90vw);">
+    <div class="sungeum-loading-card text-center bg-white shadow rounded-4 p-5 mx-3" style="min-width:min(320px, 90vw);">
+        <img class="sungeum-loading-mascot" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="작업 중인 3D 순금">
         <div class="spinner-border text-primary mb-3" role="status"></div>
-        <h4 class="fw-bold mb-2">{{ t("v21.gen.loading") }}</h4>
+        <h4 class="fw-bold mb-2">순금이가 만들고 있어요</h4>
         <div class="text-muted">
             {{ t("v21.gen.loading_desc") }}
         </div>
@@ -54,7 +55,7 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
 
     <div class="text-center pf-page-header">
         <div class="pf-eyebrow mb-2">PROJECT FREEDOM AI</div>
-        <h1 class="fw-bold mb-2 d-flex justify-content-center align-items-center gap-3"><img class="pf-title-mascot" src="{{ url_for('static', filename='brand/free-guide.png') }}" alt="Freedom AI 마스코트"><span>AI 콘텐츠 생성기</span></h1>
+        <h1 class="fw-bold mb-2 d-flex justify-content-center align-items-center gap-3"><img class="pf-title-mascot" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="3D 순금 마스코트"><span>AI 콘텐츠 생성기</span></h1>
         <p class="text-muted mb-0">
             {{ t("v21.gen.subtitle") }}
         </p>
@@ -118,7 +119,10 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
     {% if result %}
     <div class="card shadow main-card mt-4">
         <div class="card-header bg-white fw-bold py-3">
-            {% block result_title %}{{ t("v21.gen.title") }}{% endblock %}
+            <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                <span>{% block result_title %}{{ t("v21.gen.title") }}{% endblock %}</span>
+                {% include "_sungeum_quality_stamp.html" %}
+            </div>
         </div>
 
         <div class="card-body p-4">

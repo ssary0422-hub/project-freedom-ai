@@ -21,12 +21,17 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 .faqx .accordion-item{background:transparent;border-color:var(--line);color:white}.faqx .accordion-button{background:var(--card);color:white;box-shadow:none}.faqx .accordion-button:not(.collapsed){background:#13243c;color:white}.faqx .accordion-button::after{filter:invert(1)}
 .footer-link{color:var(--muted);text-decoration:none}.footer-link:hover{color:white}
 .work-card{height:100%;overflow:hidden}.work-visual{aspect-ratio:4/3;background:#13243c center/cover no-repeat;display:flex;align-items:end;padding:1rem}.work-copy{background:rgba(4,12,24,.88);border-radius:.8rem;padding:.85rem;width:100%}.work-body{padding:1.1rem}.work-type{color:#78dfff;font-weight:800;font-size:.78rem;letter-spacing:.08em}
+.hero-mascot{position:relative;min-height:520px;display:grid;place-items:end center;overflow:hidden;padding:1.5rem;background:radial-gradient(circle at 50% 46%,rgba(124,92,255,.38),transparent 48%),linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.025))}
+.hero-mascot::after{content:"";position:absolute;inset:auto 10% 6% 10%;height:54px;border-radius:50%;background:rgba(0,0,0,.34);filter:blur(22px)}
+.hero-mascot img{position:relative;z-index:1;width:min(100%,390px);max-height:470px;object-fit:contain;object-position:50% 50%;filter:drop-shadow(0 30px 32px rgba(0,0,0,.48))}
+.hero-mascot-bubble{position:absolute;z-index:2;top:28px;right:24px;max-width:190px;padding:.8rem 1rem;border:1px solid rgba(255,255,255,.18);border-radius:18px 18px 4px;background:rgba(7,17,31,.9);font-weight:750;box-shadow:0 16px 45px rgba(0,0,0,.3);animation:sungeum-bob 1.8s ease-in-out infinite}
+@media(max-width:991.98px){.hero-mascot{min-height:440px}.hero-mascot img{max-height:390px}.hero-mascot-bubble{right:8%}}
 </style>
 <link href="{{ url_for('static', filename='freedom-neon.css') }}" rel="stylesheet">
 </head>
 <body>
 <nav class="navbar navbar-dark fixed-top navx"><div class="container py-2">
-<a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/"><img class="pf-brand-mascot" src="{{ url_for('static', filename='brand/free-guide.png') }}" alt="Freedom AI 마스코트"> Project Freedom AI</a><div class="d-flex gap-2">
+<a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/"><img class="pf-brand-mascot" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="3D 순금 마스코트"> Project Freedom AI</a><div class="d-flex gap-2">
 {% if session.get("user_id") %}<a class="btn btn-outline-light" href="/ads-generator">콘텐츠 만들기</a>
 {% else %}<a class="btn btn-outline-light" href="/login">{{ t("nav.login") }}</a><a class="btn btn-primary" href="/register">{{ t("landing.cta.start_free") }}</a>{% endif %}
 </div></div></nav>
@@ -41,11 +46,9 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 </div><div class="d-flex flex-wrap gap-2 mt-4">
 <a class="pill text-decoration-none" href="/language/ko">🇰🇷 한국어</a><a class="pill text-decoration-none" href="/language/en">🇺🇸 English</a><a class="pill text-decoration-none" href="/language/ja">🇯🇵 日本語</a><a class="pill text-decoration-none" href="/language/th">🇹🇭 ไทย</a><a class="pill text-decoration-none" href="/language/zh">🇨🇳 中文</a><a class="pill text-decoration-none" href="/language/es">🇪🇸 Español</a>
 </div></div>
-<div class="col-lg-5"><div class="glass preview">
-<div class="small muted mb-3">{{ t("landing.preview.label") }}</div>
-<div class="pc mb-3"><small class="text-secondary">{{ t("landing.feature.ads") }}</small><div class="fw-bold">{{ t("landing.preview.ads") }}</div></div>
-<div class="pc mb-3"><small class="text-secondary">{{ t("landing.feature.blog") }}</small><div class="fw-bold">{{ t("landing.preview.blog") }}</div></div>
-<div class="pc"><small class="text-secondary">{{ t("landing.feature.social") }}</small><div class="fw-bold">{{ t("landing.preview.social") }}</div></div>
+<div class="col-lg-5"><div class="glass hero-mascot">
+<div class="hero-mascot-bubble">안녕하세요! 순금이가 함께 만들게요 🐾</div>
+<img src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="Project Freedom AI를 안내하는 3D 순금 마스코트">
 </div></div></div></div></header>
 
 <section class="section"><div class="container"><div class="text-center mb-5"><h2 class="display-6 fw-bold">{{ t("landing.workspace.title") }}</h2><p class="muted">{{ t("landing.workspace.desc") }}</p></div>
@@ -102,6 +105,7 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 {% if session.get("user_id") %}<a href="/ads-generator" class="btn btn-primary btn-lg">광고 만들기 →</a>{% else %}<a href="/register" class="btn btn-primary btn-lg">{{ t("landing.cta.start_free_arrow") }}</a>{% endif %}
 </div></section>
 <footer class="py-4"><div class="container d-flex justify-content-between flex-wrap gap-3"><span>© Project Freedom AI</span><span><a class="footer-link" href="#">{{ t("landing.footer.terms") }}</a> · <a class="footer-link" href="#">{{ t("landing.footer.privacy") }}</a> · <a class="footer-link" href="#">{{ t("landing.footer.refund") }}</a> · <a class="footer-link" href="mailto:support@projectfreedom.ai">{{ t("landing.footer.contact") }}</a></span></div></footer>
+{% include "_sungeum_assistant.html" %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 (() => {
