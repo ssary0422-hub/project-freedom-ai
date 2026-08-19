@@ -24,7 +24,7 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 .hero-mascot{position:relative;min-height:520px;display:grid;place-items:end center;overflow:hidden;padding:1.5rem;background:radial-gradient(circle at 50% 46%,rgba(124,92,255,.38),transparent 48%),linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.025))}
 .hero-mascot::after{content:"";position:absolute;inset:auto 10% 6% 10%;height:54px;border-radius:50%;background:rgba(0,0,0,.34);filter:blur(22px)}
 .hero-mascot img{position:relative;z-index:1;width:min(100%,390px);max-height:470px;object-fit:contain;object-position:50% 50%;filter:drop-shadow(0 30px 32px rgba(0,0,0,.48))}
-.hero-mascot-bubble{position:absolute;z-index:2;top:28px;right:24px;max-width:190px;padding:.8rem 1rem;border:1px solid rgba(255,255,255,.18);border-radius:18px 18px 4px;background:rgba(7,17,31,.9);font-weight:750;box-shadow:0 16px 45px rgba(0,0,0,.3);animation:sungeum-bob 1.8s ease-in-out infinite}
+.hero-mascot-bubble{position:absolute;z-index:2;top:28px;right:24px;max-width:190px;padding:.8rem 1rem;border:1px solid rgba(255,255,255,.18);border-radius:18px 18px 4px;background:rgba(7,17,31,.9);font-weight:750;box-shadow:0 16px 45px rgba(0,0,0,.3);animation:sungeum-bubble-float 5.8s ease-in-out infinite}
 @media(max-width:991.98px){.hero-mascot{min-height:440px}.hero-mascot img{max-height:390px}.hero-mascot-bubble{right:8%}}
 </style>
 <link href="{{ url_for('static', filename='freedom-neon.css') }}" rel="stylesheet">
@@ -48,7 +48,7 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 </div></div>
 <div class="col-lg-5"><div class="glass hero-mascot">
 <div class="hero-mascot-bubble">안녕하세요! 순금이가 함께 만들게요 🐾</div>
-<img src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="Project Freedom AI를 안내하는 3D 순금 마스코트">
+<img class="sungeum-alive sungeum-alive-hero" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="Project Freedom AI를 안내하는 3D 순금 마스코트">
 </div></div></div></div></header>
 
 <section class="section"><div class="container"><div class="text-center mb-5"><h2 class="display-6 fw-bold">{{ t("landing.workspace.title") }}</h2><p class="muted">{{ t("landing.workspace.desc") }}</p></div>

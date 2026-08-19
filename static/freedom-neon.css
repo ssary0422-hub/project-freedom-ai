@@ -160,6 +160,19 @@ a[href="/package"] { display:none !important; }
     .card, .pf-card { border-radius: 17px !important; }
 }
 
+/* 승인된 순금이 원본을 보존하면서 시선을 방해하지 않는 미세 동작만 적용한다. */
+.sungeum-alive{transform-origin:50% 88%;will-change:transform;animation:sungeum-idle-breathe 6.4s cubic-bezier(.45,.05,.55,.95) infinite}
+.sungeum-assistant-trigger:hover .sungeum-alive,.sungeum-alive.is-listening{animation:sungeum-curious 1.7s ease-in-out infinite}
+.sungeum-alive.is-working{animation:sungeum-working 1.15s ease-in-out infinite}
+.sungeum-alive.is-approved{animation:sungeum-approved .85s cubic-bezier(.22,.9,.34,1) 1}
+.sungeum-alive-hero{animation-duration:7.2s}
+@keyframes sungeum-idle-breathe{0%,100%{transform:translateY(0) scale(1)}36%{transform:translateY(-2px) scale(1.006,1.012)}52%{transform:translateY(-3px) rotate(.35deg) scale(1.008,1.014)}68%{transform:translateY(-1px) rotate(-.2deg) scale(1.004,1.008)}}
+@keyframes sungeum-curious{0%,100%{transform:translateY(0) rotate(0)}45%{transform:translateY(-3px) rotate(-2deg)}70%{transform:translateY(-2px) rotate(1deg)}}
+@keyframes sungeum-working{0%,100%{transform:translateY(0) rotate(-.45deg)}50%{transform:translateY(-3px) rotate(.45deg)}}
+@keyframes sungeum-approved{0%{transform:scale(1)}38%{transform:translateY(-8px) rotate(-3deg) scale(1.05)}68%{transform:translateY(1px) rotate(1.5deg) scale(.99)}100%{transform:translateY(0) scale(1)}}
+@keyframes sungeum-bubble-float{0%,100%{transform:translateY(0)}48%,56%{transform:translateY(-5px)}62%{transform:translateY(-3px)}}
+@media(prefers-reduced-motion:reduce){.sungeum-alive,.hero-mascot-bubble{animation:none!important}}
+
 .smart-suggest { margin-top: .7rem; }
 .smart-suggest-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .55rem; }
 .smart-suggest-label { color: var(--pf-muted); font-size: .78rem; font-weight: 700; }
