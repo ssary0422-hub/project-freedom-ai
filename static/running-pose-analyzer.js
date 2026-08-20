@@ -141,24 +141,24 @@ export async function analyzePose(video, canvas, onProgress = () => {}) {
         }
       }
       const selected = selectSide(landmarks);
-      const p = selected.points;
-      const bodyIndexes = [0, p.shoulder, p.hip, p.knee, p.ankle, p.heel, p.toe];
+      const selectedPoints = selected.points;
+      const bodyIndexes = [0, selectedPoints.shoulder, selectedPoints.hip, selectedPoints.knee, selectedPoints.ankle, selectedPoints.heel, selectedPoints.toe];
       const bodyVisibility = bodyIndexes.reduce((sum, pointIndex) => sum + (landmarks[pointIndex]?.visibility ?? 0), 0);
-      const footVisible = [p.ankle, p.heel, p.toe].every(pointIndex => visible(landmarks[pointIndex]));
+      const footVisible = [selectedPoints.ankle, selectedPoints.heel, selectedPoints.toe].every(pointIndex => visible(landmarks[pointIndex]));
       const inFrame = bodyIndexes.every(pointIndex => {
         const point = landmarks[pointIndex];
         return point && point.x >= .015 && point.x <= .985 && point.y >= .015 && point.y <= .985;
       });
       // Prefer a complete side view, then the moment the visible ankle is
       // closest to the ground. This makes the evidence frame match a strike analysis.
-      const contactBonus = footVisible ? landmarks[p.ankle].y * 12 : 0;
+      const contactBonus = footVisible ? landmarks[selectedPoints.ankle].y * 12 : 0;
       const quality = bodyVisibility + (footVisible ? 18 : 0) + (inFrame ? 24 : 0) + contactBonus;
       if (quality > bestQuality) {
         bestQuality = quality;
         best = landmarks;
         bestFootFocus = footVisible ? {
-          x: (landmarks[p.ankle].x + landmarks[p.heel].x + landmarks[p.toe].x) / 3,
-          y: (landmarks[p.ankle].y + landmarks[p.heel].y + landmarks[p.toe].y) / 3,
+          x: (landmarks[selectedPoints.ankle].x + landmarks[selectedPoints.heel].x + landmarks[selectedPoints.toe].x) / 3,
+          y: (landmarks[selectedPoints.ankle].y + landmarks[selectedPoints.heel].y + landmarks[selectedPoints.toe].y) / 3,
         } : null;
         drawPose(canvas, video, landmarks);
       }
