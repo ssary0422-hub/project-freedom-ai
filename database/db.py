@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import mimetypes
 from pathlib import Path
 from datetime import datetime
 
@@ -96,6 +97,21 @@ def _table_columns(cursor, table_name):
 
     cursor.execute(f"PRAGMA table_info({table_name})")
     return {row[1] for row in cursor.fetchall()}
+
+
+def _history_image_payload(image_url):
+    """Read a generated local image so it survives Render redeploys in the DB."""
+    if not image_url or str(image_url).startswith(("http://", "https://")):
+        return None, None
+    try:
+        relative = str(image_url).lstrip("/").replace("\\", "/")
+        path = (BASE_DIR / relative).resolve()
+        if BASE_DIR.resolve() not in path.parents or not path.is_file():
+            return None, None
+        mime = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+        return path.read_bytes(), mime
+    except OSError:
+        return None, None
 
 def init_db():
     conn = _connect()
@@ -205,6 +221,13 @@ def init_db():
                 """
             )
 
+    history_columns = _table_columns(cursor, "history")
+    image_blob_type = "BYTEA" if USE_POSTGRES else "BLOB"
+    if "image_data" not in history_columns:
+        cursor.execute(f"ALTER TABLE history ADD COLUMN image_data {image_blob_type}")
+    if "image_mime" not in history_columns:
+        cursor.execute("ALTER TABLE history ADD COLUMN image_mime TEXT")
+
     # 기존 데이터 중 생성일이 비어 있으면 현재 시각으로 채움
     cursor.execute("""
         UPDATE history
@@ -252,6 +275,7 @@ def save_history(
         "%Y-%m-%d %H:%M:%S"
     )
 
+    image_data, image_mime = _history_image_payload(image_url)
     insert_sql = """
         INSERT INTO history (
             business,
@@ -263,9 +287,11 @@ def save_history(
             package_id,
             brand_profile_id,
             created_at,
-            user_id
+            user_id,
+            image_data,
+            image_mime
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
     if USE_POSTGRES:
         insert_sql += " RETURNING id"
@@ -280,7 +306,9 @@ def save_history(
         package_id,
         brand_profile_id,
         created_at,
-        user_id
+        user_id,
+        image_data,
+        image_mime
     ))
 
     conn.commit()
@@ -309,7 +337,8 @@ def get_history(user_id):
             style,
             result,
             image_url,
-            COALESCE(content_type, 'general')
+            COALESCE(content_type, 'general'),
+            CASE WHEN image_data IS NOT NULL THEN 1 ELSE 0 END
         FROM history
         WHERE user_id = ?
         ORDER BY id DESC
@@ -526,9 +555,6 @@ def save_history_version(
           AND brand_profile_id = ?
           AND user_id = ?
     """
-    if USE_POSTGRES:
-        insert_sql += " RETURNING id"
-
     cursor.execute(insert_sql, (
         package_id,
         content_type,
@@ -560,7 +586,8 @@ def save_history_version(
         "%Y-%m-%d %H:%M:%S"
     )
 
-    cursor.execute("""
+    image_data, image_mime = _history_image_payload(image_url)
+    version_insert_sql = """
         INSERT INTO history (
             business,
             company,
@@ -573,10 +600,15 @@ def save_history_version(
             created_at,
             version,
             is_current,
-            user_id
+            user_id,
+            image_data,
+            image_mime
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
-    """, (
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)
+    """
+    if USE_POSTGRES:
+        version_insert_sql += " RETURNING id"
+    cursor.execute(version_insert_sql, (
         business,
         company,
         style,
@@ -587,7 +619,9 @@ def save_history_version(
         brand_profile_id,
         created_at,
         next_version,
-        user_id
+        user_id,
+        image_data,
+        image_mime
     ))
 
     if USE_POSTGRES:
@@ -762,20 +796,42 @@ def update_history_image(history_id, user_id, image_url, content_type="sns"):
     init_db()
     conn = _connect()
     cursor = conn.cursor()
+    image_data, image_mime = _history_image_payload(image_url)
     cursor.execute(
         """
         UPDATE history
-        SET image_url = ?
+        SET image_url = ?, image_data = ?, image_mime = ?
         WHERE id = ?
           AND user_id = ?
           AND COALESCE(content_type, 'general') = ?
         """,
-        (image_url, history_id, user_id, content_type),
+        (image_url, image_data, image_mime, history_id, user_id, content_type),
     )
     updated = cursor.rowcount == 1
     conn.commit()
     conn.close()
     return updated
+
+
+def get_history_image(history_id, user_id):
+    """Return a user's durable generated image bytes and MIME type."""
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT image_data, image_mime
+        FROM history
+        WHERE id = ? AND user_id = ?
+        """,
+        (history_id, user_id),
+    )
+    row = cursor.fetchone()
+    conn.close()
+    if not row or row[0] is None:
+        return None
+    data = bytes(row[0])
+    return data, (row[1] or "application/octet-stream")
 
 
 
