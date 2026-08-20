@@ -1,5 +1,4 @@
 import os
-import sqlite3
 
 from routes.ads import ads_bp
 from routes.blog import blog_bp
@@ -41,10 +40,8 @@ from documents.pdf import (
     PDF_PATH
 )
 
-from ai.ads import make_ads
 from ai.blog import make_blog
 from ai.sns import make_sns
-from ai.image import make_image
 
 app = Flask(__name__)
 
@@ -124,7 +121,6 @@ def set_language(language_code):
 app.register_blueprint(admin_bp)
 app.register_blueprint(credits_bp)
 
-DB_PATH = "project.db"
 WORD_PATH = "downloads/advertisement.docx"
 BLOG_WORD_PATH = "downloads/blog.docx"
 SNS_WORD_PATH = "downloads/sns.docx"
@@ -132,108 +128,6 @@ SNS_WORD_PATH = "downloads/sns.docx"
 # -------------------------
 # 데이터베이스
 # -------------------------
-
-def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS history (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            business TEXT,
-            company TEXT,
-            style TEXT,
-            result TEXT
-        )
-    """)
-
-    cursor.execute("PRAGMA table_info(history)")
-    columns = [column[1] for column in cursor.fetchall()]
-
-    if "image_url" not in columns:
-        cursor.execute("""
-            ALTER TABLE history
-            ADD COLUMN image_url TEXT
-        """)
-
-    conn.commit()
-    conn.close()
-
-
-def save_history(business, company, style, result, image_url=""):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        INSERT INTO history (
-            business,
-            company,
-            style,
-            result,
-            image_url
-        )
-        VALUES (?, ?, ?, ?, ?)
-    """, (
-        business,
-        company,
-        style,
-        result,
-        image_url
-    ))
-
-    conn.commit()
-    conn.close()
-
-
-def get_history():
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT
-            id,
-            business,
-            company,
-            style,
-            result,
-            image_url
-        FROM history
-        ORDER BY id DESC
-    """)
-
-    rows = cursor.fetchall()
-
-    conn.close()
-
-    return rows
-
-@app.route("/delete/<int:id>")
-def delete(id):
-
-    delete_history(id)
-
-    return redirect("/history")
-
-    
-def delete_history(id):
-
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "DELETE FROM history WHERE id=?",
-        (id,)
-    )
-
-    conn.commit()
-    conn.close()
-
-
-# 프로그램 시작 시 DB 준비
-init_db()
-
-
-
 
 @app.route("/")
 def landing():
@@ -327,8 +221,7 @@ def create_sns_word(result, image_path=""):
 # 광고 생성 페이지
 # -------------------------
 
-@app.route("/", methods=["GET", "POST"])
-def home():
+def _legacy_home_disabled():
     result = ""
     image_url = ""
     business = ""
