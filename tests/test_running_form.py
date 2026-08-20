@@ -64,8 +64,10 @@ class RunningFormTests(unittest.TestCase):
 
     def test_landing_has_dedicated_running_ai_entry(self):
         response = self.client.get("/")
-        self.assertIn("AI 러닝 코치 순금".encode(), response.data)
-        self.assertIn("내 러닝폼 분석하기".encode(), response.data)
+        self.assertIn("오늘 순금이에게 무엇을 맡길까요?".encode(), response.data)
+        self.assertIn("사업 홍보 맡기기".encode(), response.data)
+        self.assertIn("내 러닝폼 봐주기".encode(), response.data)
+        self.assertIn(b"hero-task-card", response.data)
         self.assertIn(b'data-kind="running"', response.data)
 
     def test_preflight_accepts_supported_side_video(self):
