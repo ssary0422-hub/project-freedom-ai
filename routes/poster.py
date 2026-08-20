@@ -1,11 +1,33 @@
+import base64
+import binascii
+from pathlib import Path
+from uuid import uuid4
+
 from flask import Blueprint, jsonify, render_template, request, session
 from ai.image import make_image
 from ai.providers import generate_text
 from ai.image_prompts import build_poster_background_prompt
 from database.users import get_plan_status, record_ai_credit_usage
+from database.db import save_history
 from routes.auth import login_required
 
 poster_bp = Blueprint("poster", __name__)
+
+def _save_poster_result_image(data_url, user_id):
+    prefix = "data:image/png;base64,"
+    if not isinstance(data_url, str) or not data_url.startswith(prefix):
+        raise ValueError("PNG 포스터 결과만 저장할 수 있어요.")
+    try:
+        image_bytes = base64.b64decode(data_url[len(prefix):], validate=True)
+    except (binascii.Error, ValueError) as exc:
+        raise ValueError("포스터 이미지 형식을 확인하지 못했어요.") from exc
+    if not image_bytes or len(image_bytes) > 8 * 1024 * 1024 or not image_bytes.startswith(b"\x89PNG\r\n\x1a\n"):
+        raise ValueError("포스터 이미지가 비어 있거나 저장 가능한 크기를 넘었어요.")
+    relative = Path("generated") / "poster" / str(user_id) / f"{uuid4().hex}.png"
+    target = Path("static") / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(image_bytes)
+    return f"/static/{relative.as_posix()}"
 
 def _compact_copy(value, limit, fallback=""):
     text = " ".join(str(value or "").split()).strip(" -•")
@@ -78,3 +100,25 @@ def background():
     except Exception as error:
         return jsonify(error=f"이미지 생성 실패: {error}"), 502
     record_ai_credit_usage(session["user_id"],"POSTER_IMAGE",3); return jsonify(image_url="/"+path.replace("\\","/"))
+
+@poster_bp.post("/poster/history")
+@login_required
+def save_poster_history():
+    data = request.get_json(silent=True) or {}
+    company = str(data.get("company", "")).strip()[:120]
+    headline = str(data.get("headline", "")).strip()[:240]
+    benefit = str(data.get("benefit", "")).strip()[:500]
+    if not company or not headline or not data.get("image"):
+        return jsonify(ok=False, error="완성된 포스터 정보가 부족해요."), 400
+    try:
+        image_url = _save_poster_result_image(data["image"], session["user_id"])
+    except (TypeError, ValueError) as exc:
+        return jsonify(ok=False, error=str(exc)), 400
+    offer = str(data.get("offer", "")).strip()[:240]
+    contact = str(data.get("contact", "")).strip()[:240]
+    result = f"포스터 제목: {headline}\n핵심 혜택: {benefit}\n핵심 정보: {offer or '-'}\n행동 유도: {contact or '-'}\n\n🐾 순금 검수 완료"
+    history_id = save_history(
+        "AI 광고 포스터", company, "순금 추천 포스터", result,
+        image_url=image_url, content_type="poster", user_id=session["user_id"],
+    )
+    return jsonify(ok=True, history_id=history_id, image_url=image_url)

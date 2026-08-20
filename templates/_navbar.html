@@ -1,121 +1,50 @@
 <nav class="navbar navbar-expand-xl navbar-dark pf-navbar sticky-top">
+    <svg class="position-absolute" width="0" height="0" aria-hidden="true" focusable="false">
+        <symbol id="pf-i-megaphone" viewBox="0 0 24 24"><path d="M3 11v2a2 2 0 0 0 2 2h2l2 5h3l-2-5 9-4V7L7 11H5a2 2 0 0 0-2 2Z"/><path d="M19 8c1 .6 2 1.6 2 3s-1 2.4-2 3"/></symbol>
+        <symbol id="pf-i-sns" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 5h4M11 18h2"/></symbol>
+        <symbol id="pf-i-blog" viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5z"/><path d="M15 3v5h5M8 12h8M8 16h8"/></symbol>
+        <symbol id="pf-i-poster" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m4 18 5-5 3 3 3-4 5 6"/></symbol>
+        <symbol id="pf-i-run" viewBox="0 0 24 24"><circle cx="14" cy="4" r="2"/><path d="m10 22 2-6-3-3 3-5 4 3 3 1M12 8 8 10 6 14M15 15l4 5"/></symbol>
+        <symbol id="pf-i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol>
+        <symbol id="pf-i-wallet" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M3 9h18M16 13h3"/></symbol>
+        <symbol id="pf-i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+        <symbol id="pf-i-tool" viewBox="0 0 24 24"><path d="M14 6a4 4 0 0 0-5-4l2 3-3 3-3-2a4 4 0 0 0 5 5l8 8 3-3-8-8Z"/></symbol>
+    </svg>
+    {% macro nav_icon(name) %}<svg class="pf-nav-icon" aria-hidden="true"><use href="#pf-i-{{ name }}"></use></svg>{% endmacro %}
     <div class="container-fluid px-3 px-lg-4">
         <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
-            <img class="pf-brand-mascot" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="3D 순금 마스코트">
+            <img class="pf-brand-mascot" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="순금이">
             <span>Project Freedom AI</span>
         </a>
-
-        <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#pfMainNav"
-            aria-controls="pfMainNav"
-            aria-expanded="false"
-            aria-label="{{ t('nav.open_menu') }}">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#pfMainNav" aria-controls="pfMainNav" aria-expanded="false" aria-label="{{ t('nav.open_menu') }}"><span class="navbar-toggler-icon"></span></button>
         <div class="collapse navbar-collapse mt-3 mt-xl-0" id="pfMainNav">
             <div class="navbar-nav ms-auto gap-2 align-items-xl-center">
-
-                <a
-                    class="btn pf-nav-btn {% if request.path.startswith('/ads-generator') %}pf-nav-active{% endif %}"
-                    href="{% if session.get('user_id') %}/ads-generator{% else %}/{% endif %}">
-                    📢 광고
-                </a>
-
                 <div class="dropdown">
-                    <button
-                        class="btn pf-nav-btn dropdown-toggle"
-                        type="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        🌐 {{ supported_languages[current_language]["flag"] }}
-                        {{ supported_languages[current_language]["label"] }}
-                    </button>
-
-                    <ul class="dropdown-menu dropdown-menu-end shadow">
-                        {% for code, language in supported_languages.items() %}
-                        <li>
-                            <a
-                                class="dropdown-item {% if code == current_language %}active{% endif %}"
-                                href="/language/{{ code }}?next={{ request.full_path|urlencode }}">
-                                {{ language["flag"] }} {{ language["label"] }}
-                            </a>
-                        </li>
-                        {% endfor %}
+                    <button class="btn pf-nav-btn dropdown-toggle {% if request.path.startswith(('/ads-generator','/sns','/blog','/poster')) %}pf-nav-active{% endif %}" type="button" data-bs-toggle="dropdown" aria-expanded="false">{{ nav_icon('megaphone') }} 홍보 만들기</button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow pf-nav-menu">
+                        <li><a class="dropdown-item" href="{% if session.get('user_id') %}/ads-generator{% else %}/register{% endif %}">{{ nav_icon('megaphone') }}<span><strong>광고</strong><small>핵심 문구와 홍보 이미지</small></span></a></li>
+                        {% if session.get("user_id") %}
+                        <li><a class="dropdown-item" href="/sns">{{ nav_icon('sns') }}<span><strong>SNS</strong><small>게시글·해시태그·이미지</small></span></a></li>
+                        <li><a class="dropdown-item" href="/blog">{{ nav_icon('blog') }}<span><strong>블로그</strong><small>검색형 장문 콘텐츠</small></span></a></li>
+                        <li><a class="dropdown-item" href="/poster">{{ nav_icon('poster') }}<span><strong>포스터</strong><small>바로 저장하는 1080×1350</small></span></a></li>
+                        {% endif %}
                     </ul>
                 </div>
-
+                <a class="btn pf-nav-btn {% if request.path.startswith('/running-form') %}pf-nav-active{% endif %}" href="{% if session.get('user_id') %}/running-form{% else %}/login{% endif %}">{{ nav_icon('run') }} 러닝 분석</a>
                 {% if session.get("user_id") %}
-                <a
-                    class="btn pf-nav-btn {% if request.path.startswith('/sns') %}pf-nav-active{% endif %}"
-                    href="/sns">
-                    📱 SNS
-                </a>
-
-                <a
-                    class="btn pf-nav-btn {% if request.path.startswith('/blog') %}pf-nav-active{% endif %}"
-                    href="/blog">
-                    📝 블로그
-                </a>
-
-                <a
-                    class="btn pf-nav-btn {% if request.path.startswith('/poster') %}pf-nav-active{% endif %}"
-                    href="/poster">
-                    🖼️ 포스터
-                </a>
-
-                <a
-                    class="btn pf-nav-btn {% if request.path.startswith('/running-form') %}pf-nav-active{% endif %}"
-                    href="/running-form">
-                    🏃 러닝폼 AI
-                </a>
-
-                <a
-                    class="btn pf-nav-btn {% if request.path.startswith('/history') %}pf-nav-active{% endif %}"
-                    href="/history">
-                    📚 {{ t("nav.history") }}
-                </a>
-
-                <a
-                    class="btn pf-credit-pill {% if request.path.startswith('/credits') %}pf-credit-active{% endif %}"
-                    href="/credits"
-                    title="{{ t('nav.credit_title') }}">
-                    💳 {{ session.get("plan_remaining", 0) }} {{ t("nav.credits") }}
-                </a>
-
-                {% if session.get("is_admin") %}
-                <a
-                    class="btn pf-admin-btn {% if request.path.startswith('/admin') %}pf-admin-active{% endif %}"
-                    href="/admin">
-                    🛠 ADMIN
-                </a>
-                {% endif %}
-
-                <div class="pf-user-chip">
-                    👤 {{ session.get("user_name") }}{{ t("nav.user_suffix") }}
+                <a class="btn pf-nav-btn {% if request.path.startswith('/history') %}pf-nav-active{% endif %}" href="/history">{{ nav_icon('history') }} {{ t("nav.history") }}</a>
+                <a class="btn pf-credit-pill {% if request.path.startswith('/credits') %}pf-credit-active{% endif %}" href="/credits" title="{{ t('nav.credit_title') }}">{{ nav_icon('wallet') }} {{ session.get("plan_remaining", 0) }} {{ t("nav.credits") }}</a>
+                <div class="dropdown">
+                    <button class="btn pf-user-menu dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">{{ nav_icon('user') }} {{ session.get("user_name") }}{{ t("nav.user_suffix") }}</button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow pf-account-menu">
+                        <li><h6 class="dropdown-header">언어 · {{ supported_languages[current_language]["flag"] }} {{ supported_languages[current_language]["label"] }}</h6></li>
+                        {% for code, language in supported_languages.items() %}<li><a class="dropdown-item {% if code == current_language %}active{% endif %}" href="/language/{{ code }}?next={{ request.full_path|urlencode }}">{{ language["flag"] }} {{ language["label"] }}</a></li>{% endfor %}
+                        {% if session.get("is_admin") %}<li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="/admin">{{ nav_icon('tool') }} ADMIN</a></li>{% endif %}
+                        <li><hr class="dropdown-divider"></li><li><a class="dropdown-item text-danger fw-bold" href="/logout">{{ t("nav.logout") }}</a></li>
+                    </ul>
                 </div>
-
-                <a class="btn btn-warning fw-semibold" href="/logout">
-                    {{ t("nav.logout") }}
-                </a>
-
                 {% else %}
-
-                <a
-                    class="btn pf-nav-btn {% if request.path.startswith('/login') %}pf-nav-active{% endif %}"
-                    href="/login">
-                    🔐 {{ t("nav.login") }}
-                </a>
-
-                <a
-                    class="btn btn-info fw-semibold {% if request.path.startswith('/register') %}shadow-sm{% endif %}"
-                    href="/register">
-                    ✨ {{ t("nav.register") }}
-                </a>
-
+                <a class="btn pf-nav-btn" href="/login">{{ t("nav.login") }}</a><a class="btn btn-info fw-semibold" href="/register">{{ t("nav.register") }}</a>
                 {% endif %}
             </div>
         </div>

@@ -73,6 +73,19 @@ class RunningFormTests(unittest.TestCase):
         self.assertIn("오늘 무엇을 맡길까요?".encode(), response.data)
         self.assertIn("홍보·러닝 함께 보기".encode(), response.data)
 
+    @patch("routes.poster.save_history", return_value=91)
+    @patch("routes.poster._save_poster_result_image", return_value="/static/generated/poster/999999/result.png")
+    def test_completed_poster_is_saved_to_history(self, save_image, save_history):
+        response = self.client.post("/poster/history", json={"company":"테스트 상점","headline":"오늘 필요한 포스터","benefit":"한눈에 읽히는 핵심 혜택","offer":"지금 확인","contact":"온라인 예약","image":"data:image/png;base64,test"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["history_id"], 91)
+        self.assertEqual(save_history.call_args.kwargs["content_type"], "poster")
+
+    def test_poster_browser_saves_completed_result(self):
+        response = self.client.get("/static/poster-maker.js")
+        self.assertIn(b"savePosterHistory", response.data)
+        self.assertIn(b"/poster/history", response.data)
+
     def test_preflight_accepts_supported_side_video(self):
         response = self.client.post("/running-form/preflight", data={"video": (io.BytesIO(b"test-video"), "run.mp4"), "pace": "marathon", "view": "side"}, content_type="multipart/form-data")
         self.assertEqual(response.status_code, 200)

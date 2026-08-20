@@ -222,6 +222,13 @@
     } catch (error) { status.textContent = error.message; return false; }
   }
 
+  async function savePosterHistory(canvas) {
+    const response = await fetch("/poster/history", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({company:val("posterCompany"),headline:val("posterHeadline"),benefit:val("posterBenefit"),offer:val("posterOffer"),contact:val("posterContact"),image:canvas.toDataURL("image/png")})});
+    const saved = await response.json();
+    if (!response.ok || !saved.ok) throw new Error(saved.error || "생성 기록 저장에 실패했어요.");
+    return saved;
+  }
+
   async function makeOneClick() {
     const button = $("makeOneClickPoster"), status = $("posterMainStatus");
     if (!val("posterCompany") || !val("posterPurpose")) { status.className = "poster-main-status text-danger mb-3"; status.textContent = "업체명과 홍보 내용을 먼저 입력해주세요."; return; }
@@ -239,7 +246,11 @@
       button.textContent = "🎨 AI 배경을 만들고 있어요…"; currentStep = "2/2 포스터 배경과 최종 배치를 만들고 있습니다."; showProgress();
       const backgroundReady = await createBackground();
       status.className = `poster-main-status ${backgroundReady ? "text-success" : "text-warning"} mb-3`;
-      status.textContent = backgroundReady ? "완성! 오른쪽 결과에서 바로 저장할 수 있어요." : "문구 포스터는 완성했지만 AI 배경은 실패했어요. 아래에서 배경만 다시 만들 수 있어요.";
+      status.textContent = backgroundReady ? "포스터 완성! 생성 기록에 저장하고 있어요…" : "문구 포스터는 완성했지만 AI 배경은 실패했어요. 아래에서 배경만 다시 만들 수 있어요.";
+      if (backgroundReady) {
+        try { const saved=await savePosterHistory($("posterResults")?.querySelector("canvas")); status.innerHTML=`완성! 생성 기록에도 저장했어요. <a href="/history">기록 보기</a>`; status.dataset.historyId=saved.history_id; }
+        catch (saveError) { status.className="poster-main-status text-warning mb-3"; status.textContent=`포스터는 완성됐지만 기록 저장에 실패했어요: ${saveError.message}`; }
+      }
       $("posterResults")?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) { status.className = "poster-main-status text-danger mb-3"; status.textContent = error.message; }
     finally { clearInterval(progressTimer); setButtonBusy(button, false); }

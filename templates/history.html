@@ -1,193 +1,98 @@
 {% extends "base.html" %}
 
-{% block title %}{{ t("v3.history.title") }} - Project Freedom AI{% endblock %}
+{% block title %}생성 기록 - Project Freedom AI{% endblock %}
 
 {% block extra_style %}
-.history-image {
-            width: 100%;
-            max-height: 420px;
-            object-fit: cover;
-        }
-
-        .result-text {
-            white-space: pre-wrap;
-            font-family: inherit;
-            margin-bottom: 0;
-            line-height: 1.7;
-        }
-
-        .history-card {
-            border: 0;
-            border-radius: 18px;
-            overflow: hidden;
-        }
-
-        .history-meta {
-            font-size: 0.95rem;
-        }
+.history-shell { max-width: 1120px; }
+.history-kicker { color: #61e6d4; font-size: .82rem; font-weight: 800; letter-spacing: .12em; }
+.history-title { color: #f7f9ff; font-weight: 900; letter-spacing: -.04em; }
+.history-lead { color: #9ba8c4; }
+.history-grid { display: grid; gap: 18px; }
+.history-card { background: linear-gradient(145deg, rgba(19,29,52,.96), rgba(11,18,34,.98)); border: 1px solid rgba(142,160,200,.2); border-radius: 22px; overflow: hidden; box-shadow: 0 18px 55px rgba(0,0,0,.22); }
+.history-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; padding: 22px 24px; border-bottom: 1px solid rgba(142,160,200,.14); }
+.history-type { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 10px; padding: 6px 10px; color: #89fff0; background: rgba(51,214,191,.1); border: 1px solid rgba(70,230,205,.25); border-radius: 999px; font-size: .78rem; font-weight: 800; }
+.history-name { margin: 0; color: #fff; font-size: 1.1rem; font-weight: 800; }
+.history-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 7px; color: #8996b1; font-size: .88rem; }
+.history-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.history-action { min-height: 36px; padding: 7px 12px; color: #d9e1f2; background: rgba(255,255,255,.035); border: 1px solid rgba(147,164,201,.25); border-radius: 10px; font-size: .82rem; font-weight: 700; text-decoration: none; }
+.history-action:hover { color: #fff; border-color: #61e6d4; background: rgba(51,214,191,.08); }
+.history-action-danger:hover { border-color: #ff6d87; background: rgba(255,76,110,.08); }
+.history-body { display: grid; grid-template-columns: minmax(230px, 390px) minmax(0, 1fr); gap: 24px; padding: 24px; }
+.history-body.no-image { grid-template-columns: 1fr; }
+.history-image-wrap { overflow: hidden; background: #060b17; border: 1px solid rgba(142,160,200,.18); border-radius: 16px; }
+.history-image { display: block; width: 100%; max-height: 430px; object-fit: contain; }
+.result-text { margin: 0; color: #d7def0; white-space: pre-wrap; font-family: inherit; font-size: .95rem; line-height: 1.75; }
+.history-empty { padding: 64px 24px; text-align: center; background: linear-gradient(145deg, rgba(19,29,52,.9), rgba(11,18,34,.96)); border: 1px solid rgba(142,160,200,.2); border-radius: 24px; }
+.history-empty-mark { display: grid; place-items: center; width: 58px; height: 58px; margin: 0 auto 18px; color: #61e6d4; background: rgba(51,214,191,.1); border-radius: 18px; font-size: 1.55rem; font-weight: 900; }
+.history-empty h2 { color: #fff; font-size: 1.35rem; font-weight: 850; }
+.history-empty p { color: #909db8; }
+.history-cta { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 18px; border-radius: 12px; font-weight: 800; text-decoration: none; }
+.history-cta-primary { color: #fff; background: linear-gradient(135deg, #397dff, #8055ff); }
+.history-cta-secondary { color: #dffffa; background: rgba(51,214,191,.1); border: 1px solid rgba(70,230,205,.35); }
+@media (max-width: 767px) {
+  .history-card-top { display: block; padding: 18px; }
+  .history-actions { justify-content: flex-start; margin-top: 16px; }
+  .history-body { grid-template-columns: 1fr; padding: 18px; }
+  .history-title { font-size: 2rem; }
+}
 {% endblock %}
 
 {% block content %}
-<div class="container pb-5">
+<main class="container history-shell pb-5">
+  <header class="mb-5">
+    <div class="history-kicker mb-2">MY CREATIONS</div>
+    <h1 class="history-title mb-2">내가 만든 결과</h1>
+    <p class="history-lead mb-0">순금이와 만든 홍보 콘텐츠와 러닝 분석 결과를 다시 확인하세요.</p>
+  </header>
 
-    <div class="text-center mb-5">
-
-        <h1 class="mb-2">
-            📚 {{ t("v3.history.title") }}
-        </h1>
-
-        <p class="text-muted mb-0">
-            {{ t("v3.history.subtitle") }}
-        </p>
-
+  {% if history_list %}
+  <section class="history-grid" aria-label="생성 기록">
+    {% for item in history_list %}
+      {% set content_type = item[6] or 'ads' %}
+      {% set type_label = {'ads':'광고', 'sns':'SNS', 'blog':'블로그', 'poster':'포스터', 'running_form':'러닝 분석'}.get(content_type, '콘텐츠') %}
+      {% set item_name = '나의 러닝폼 분석' if content_type == 'running_form' else (item[2] or '이름 없는 콘텐츠') %}
+      <article class="history-card">
+        <div class="history-card-top">
+          <div>
+            <span class="history-type">{{ type_label }}</span>
+            <h2 class="history-name">{{ item_name }}</h2>
+            <div class="history-meta">
+              {% if item[1] %}<span>{{ item[1] }}</span>{% endif %}
+              {% if item[3] %}<span>{{ item[3] }}</span>{% endif %}
+            </div>
+          </div>
+          <div class="history-actions">
+            {% if content_type not in ('running_form', 'poster') %}
+              <a href="/history/download/{{ item[0] }}/pdf" class="history-action">PDF</a>
+              <a href="/history/download/{{ item[0] }}/word" class="history-action">Word</a>
+            {% endif %}
+            {% if item[5] %}<a href="/history/download/{{ item[0] }}/image" class="history-action">이미지 저장</a>{% endif %}
+            <form method="GET" action="/delete/{{ item[0] }}" onsubmit="return confirm('이 기록을 삭제할까요?');">
+              <button type="submit" class="history-action history-action-danger">삭제</button>
+            </form>
+          </div>
+        </div>
+        <div class="history-body{% if not item[5] %} no-image{% endif %}">
+          {% if item[5] %}
+          <div class="history-image-wrap">
+            <img src="{{ item[5] }}" class="history-image" alt="{{ type_label }} 결과 이미지" loading="lazy">
+          </div>
+          {% endif %}
+          <pre class="result-text">{{ item[4] }}</pre>
+        </div>
+      </article>
+    {% endfor %}
+  </section>
+  {% else %}
+  <section class="history-empty">
+    <div class="history-empty-mark">✓</div>
+    <h2>아직 저장된 결과가 없어요</h2>
+    <p class="mb-4">새 콘텐츠나 러닝 분석을 만들면 이곳에 자동으로 모아드릴게요.</p>
+    <div class="d-flex flex-wrap justify-content-center gap-2">
+      <a href="/ads-generator" class="history-cta history-cta-primary">홍보 콘텐츠 만들기</a>
+      <a href="/running-form" class="history-cta history-cta-secondary">내 러닝폼 분석하기</a>
     </div>
-
-    {% if history_list %}
-
-        <div class="row g-4">
-
-            {% for item in history_list %}
-
-            <div class="col-12">
-
-                <div class="card shadow-sm history-card">
-
-                    <div class="card-header bg-white py-3">
-
-                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-
-                            <div>
-
-                                <h5 class="mb-1">
-                                    {{ item[2] or t("v3.history.no_company") }}
-                                </h5>
-
-                                <div class="text-muted history-meta">
-                                    <span class="me-3">
-                                        🏷 {{ t("v3.history.industry") }} {{ item[1] or "-" }}
-                                    </span>
-
-                                    <span>
-                                        🎨 {{ t("v3.history.mood") }} {{ item[3] or "-" }}
-                                    </span>
-                                </div>
-
-                            </div>
-
-                            <div class="d-flex gap-2 flex-wrap">
-
-                                {% if item[6] != 'running_form' %}<a
-                                    href="/history/download/{{ item[0] }}/pdf"
-                                    class="btn btn-sm btn-outline-danger">
-                                    📄 PDF
-                                </a>
-
-                                <a
-                                    href="/history/download/{{ item[0] }}/word"
-                                    class="btn btn-sm btn-outline-primary">
-                                    📝 Word
-                                </a>
-                                {% endif %}
-
-                                {% if item[5] %}
-                                <a
-                                    href="/history/download/{{ item[0] }}/image"
-                                    class="btn btn-sm btn-outline-success">
-                                    🖼 {{ t("v3.history.image") }}
-                                </a>
-                                {% endif %}
-
-                                <form
-                                    method="GET"
-                                    action="/delete/{{ item[0] }}"
-                                    onsubmit="return confirm({{ t('v3.history.delete_confirm') | tojson }});">
-
-                                    <button
-                                        type="submit"
-                                        class="btn btn-sm btn-outline-danger">
-                                        🗑 {{ t("v3.history.delete") }}
-                                    </button>
-
-                                </form>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="card-body p-4">
-
-                        {% if item[5] %}
-
-                        <div class="row g-4 align-items-start">
-
-                            <div class="col-lg-5">
-
-                                <img
-                                    src="{{ item[5] }}"
-                                    class="img-fluid rounded history-image"
-                                    alt="{{ t('v3.history.image_alt') }}">
-
-                            </div>
-
-                            <div class="col-lg-7">
-
-                                <pre class="result-text">{{ item[4] }}</pre>
-
-                            </div>
-
-                        </div>
-
-                        {% else %}
-
-                        <pre class="result-text">{{ item[4] }}</pre>
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            {% endfor %}
-
-        </div>
-
-    {% else %}
-
-        <div class="card shadow-sm border-0">
-            <div class="card-body text-center py-5">
-
-                <div class="fs-1 mb-3">
-                    📭
-                </div>
-
-                <h4>
-                    {{ t("v3.history.empty") }}
-                </h4>
-
-                <p class="text-muted">
-                    {{ t("v3.history.empty_desc") }}
-                </p>
-
-                <a
-                    href="/"
-                    class="btn btn-primary me-2">
-                    📢 {{ t("v3.history.make_ad") }}
-                </a>
-
-                <a
-                    href="/package"
-                    class="btn btn-success">
-                    🚀 {{ t("v3.history.make_package") }}
-                </a>
-
-            </div>
-        </div>
-
-    {% endif %}
-
-</div>
+  </section>
+  {% endif %}
+</main>
 {% endblock %}
