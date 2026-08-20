@@ -68,6 +68,12 @@
                 </a>
 
                 <a
+                    class="btn pf-nav-btn {% if request.path.startswith('/running-form') %}pf-nav-active{% endif %}"
+                    href="/running-form">
+                    🏃 러닝폼 AI
+                </a>
+
+                <a
                     class="btn pf-nav-btn {% if request.path.startswith('/history') %}pf-nav-active{% endif %}"
                     href="/history">
                     📚 {{ t("nav.history") }}
