@@ -46,6 +46,9 @@ class RunningFormTests(unittest.TestCase):
         self.assertIn(b"drawApprovalStamp", response.data)
         self.assertIn("순금 검수 완료".encode(), response.data)
         self.assertIn(b"strikeConfidence", response.data)
+        self.assertIn(b"nextScoreTip", response.data)
+        self.assertIn("권장 범위 105~125°".encode(), response.data)
+        self.assertIn("그러면 자세가 더 편안하고 안정적으로".encode(), self.client.get("/static/running-pose-analyzer.js").data)
         self.assertIn("촬영 각도·속도·조명에 따라".encode(), response.data)
 
     def test_preflight_accepts_supported_side_video(self):

@@ -66,12 +66,12 @@ function evaluateForm(detectionRate, knee, trunk, footSamples) {
   const strengths = [], improvements = [];
   if (detectionRate >= 85) strengths.push("측면 자세가 선명해 관절 움직임을 안정적으로 추적했어요.");
   if (trunk >= 6 && trunk <= 14) strengths.push("상체 기울기가 자연스러운 추진 범위에 있어요.");
-  else if (trunk > 14) improvements.push("허리를 굽히기보다 발목부터 몸 전체를 살짝 기울여 보세요.");
-  else improvements.push("상체가 다소 세워져 있어 발목에서 아주 조금 전방으로 기울여 보세요.");
+  else if (trunk > 14) improvements.push("지금 상체가 조금 앞으로 숙여져 있어. 허리만 굽히지 말고 발목부터 몸 전체를 살짝 기울여서 달려봐. 그러면 자세가 더 편안하고 안정적으로 좋아질 거야.");
+  else improvements.push("지금 상체가 조금 곧게 서 있어. 발목부터 몸 전체를 앞쪽으로 살짝 기울여서 달려봐. 그러면 앞으로 나가는 힘을 더 편하게 받을 수 있을 거야.");
   if (knee >= 95 && knee <= 135) strengths.push("무릎 굴곡이 충격 흡수와 추진을 함께 만들 수 있는 범위예요.");
-  else improvements.push("보폭을 조금 줄이고 발이 몸 아래에 닿게 연습해 보세요.");
-  if (strikeType === "리어풋형") improvements.push("뒤꿈치가 몸보다 멀리 앞서 닿지 않는지 확인하고 케이던스를 3~5%만 높여 보세요.");
-  else if (strikeType === "포어풋형") improvements.push("종아리에 부담이 몰리지 않도록 뒤꿈치가 자연스럽게 내려오는지 확인해 보세요.");
+  else improvements.push("보폭을 지금보다 조금만 줄여봐. 발이 몸 바로 아래에 닿는 느낌으로 달리면 충격을 줄이고 리듬도 더 편해질 거야.");
+  if (strikeType === "리어풋형") improvements.push("뒤꿈치가 몸보다 너무 앞에서 닿지 않는지 한번 확인해봐. 케이던스를 3~5%만 높이면 착지가 몸 아래로 들어오는 데 도움이 될 거야.");
+  else if (strikeType === "포어풋형") improvements.push("앞꿈치로 잘 달리고 있어. 다만 종아리에 힘이 몰리지 않게 뒤꿈치가 지면으로 자연스럽게 내려오도록 해봐. 그러면 오래 달릴 때 더 편해질 거야.");
   else strengths.push("발바닥 중앙에 가까운 착지 패턴이 감지됐어요.");
   return { score, strikeType, strikeConfidence, runnerType, strengths: strengths.slice(0, 3), improvements: improvements.slice(0, 3) };
 }

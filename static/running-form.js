@@ -39,6 +39,13 @@
     ctx.font = '800 23px "Malgun Gothic", sans-serif'; ctx.fillText("순금 검수 완료", 72, 34); ctx.fillStyle = "#a7f3d0"; ctx.font = '600 16px "Malgun Gothic", sans-serif'; ctx.fillText("러닝폼 AI 결과 확인", 72, 57); ctx.restore();
   }
 
+  function nextScoreTip(result) {
+    if (result.averageTrunkLean > 14) return "다음 목표 · 상체 기울기를 권장 범위로 조절하면 약 +4점";
+    if (result.averageTrunkLean < 6) return "다음 목표 · 상체를 조금만 기울이면 추진 점수 향상 가능";
+    if (result.averageKneeAngle < 105 || result.averageKneeAngle > 125) return "다음 목표 · 착지 때 무릎 각도를 조절하면 점수 향상 가능";
+    return "다음 목표 · 같은 조건으로 다시 촬영해 자세 변화를 비교해봐";
+  }
+
   function drawFootInset(ctx, image, focus, x, y, size) {
     if (!focus) return;
     const sourceSize = Math.min(image.width, image.height) * .34;
@@ -59,9 +66,10 @@
     ctx.fillStyle = "#fff"; ctx.font = "800 38px Arial"; ctx.fillText("/ 100", 300, 430);
     if (analysisFrame?.width) { drawContain(ctx, analysisFrame, 500, 265, 500, 300); drawFootInset(ctx, analysisFrame, result.footFocus, 820, 385, 160); ctx.fillStyle="rgba(7,17,31,.82)";ctx.fillRect(520,492,268,50);ctx.fillStyle="#61e6d3";ctx.font='700 19px "Malgun Gothic", sans-serif';ctx.fillText(`AI 착지 프레임 · ${result.side}`,535,523); }
     ctx.font = '800 44px "Malgun Gothic", sans-serif'; ctx.fillStyle="#fff"; ctx.fillText(result.runnerType, 76, 625);
-    [["착지 유형",result.strikeType,`신뢰도 ${result.strikeConfidence}%`],["무릎 각도",`${result.averageKneeAngle}°`,"측면 평균"],["상체 기울기",`${result.averageTrunkLean}°`,"측면 평균"]].forEach(([label,value,detail],index)=>{const x=76+index*310;ctx.fillStyle="rgba(255,255,255,.09)";ctx.fillRect(x,690,280,170);ctx.fillStyle="#9fb3c8";ctx.font='600 24px "Malgun Gothic", sans-serif';ctx.fillText(label,x+24,735);ctx.fillStyle="#fff";ctx.font='800 36px "Malgun Gothic", sans-serif';ctx.fillText(value,x+24,790);ctx.fillStyle="#9fb3c8";ctx.font='600 18px "Malgun Gothic", sans-serif';ctx.fillText(detail,x+24,827)});
+    [["착지 유형",result.strikeType,`분석 신뢰도 ${result.strikeConfidence}%`],["무릎 각도",`${result.averageKneeAngle}°`,"권장 범위 105~125°"],["상체 기울기",`${result.averageTrunkLean}°`,"권장 범위 6~14°"]].forEach(([label,value,detail],index)=>{const x=76+index*310;ctx.fillStyle="rgba(255,255,255,.09)";ctx.fillRect(x,690,280,170);ctx.fillStyle="#9fb3c8";ctx.font='600 24px "Malgun Gothic", sans-serif';ctx.fillText(label,x+24,735);ctx.fillStyle="#fff";ctx.font='800 36px "Malgun Gothic", sans-serif';ctx.fillText(value,x+24,790);ctx.fillStyle="#9fb3c8";ctx.font='600 18px "Malgun Gothic", sans-serif';ctx.fillText(detail,x+24,827)});
     ctx.fillStyle="#fff";ctx.font='800 34px "Malgun Gothic", sans-serif';ctx.fillText("순금이의 한마디",76,950);drawApprovalStamp(ctx,742,900);ctx.fillStyle="#d8e5ee";ctx.font='600 29px "Malgun Gothic", sans-serif';
-    const words=(result.improvements[0]||"지금의 균형을 유지하며 편안하게 달려보세요.").split(" ");let line="",y=1010;words.forEach(word=>{const test=`${line}${word} `;if(ctx.measureText(test).width>900){ctx.fillText(line,76,y);line=`${word} `;y+=46}else line=test});ctx.fillText(line,76,y);
+    const words=(result.improvements[0]||"지금 자세 좋아. 이 리듬을 유지하면서 편안하게 달려봐.").split(" ");let line="",y=1010;words.forEach(word=>{const test=`${line}${word} `;if(ctx.measureText(test).width>900){ctx.fillText(line,76,y);line=`${word} `;y+=42}else line=test});ctx.fillText(line,76,y);
+    ctx.fillStyle="rgba(97,230,211,.13)";ctx.beginPath();ctx.roundRect(76,1120,900,54,18);ctx.fill();ctx.fillStyle="#9df3e5";ctx.font='700 21px "Malgun Gothic", sans-serif';ctx.fillText(nextScoreTip(result),100,1155);
     ctx.fillStyle="#d8e5ee";ctx.font='600 22px "Malgun Gothic", sans-serif';ctx.fillText("※ 촬영 각도·속도·조명에 따라 결과가 달라질 수 있으며 의료 진단이 아닙니다.",76,1205);
     ctx.fillStyle="#61e6d3";ctx.font="700 25px Arial";ctx.fillText("PROJECT FREEDOM AI · AI-assisted estimate",76,1270);return card;
   }
