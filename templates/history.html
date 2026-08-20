@@ -76,7 +76,7 @@
 
                             <div class="d-flex gap-2 flex-wrap">
 
-                                <a
+                                {% if item[6] != 'running_form' %}<a
                                     href="/history/download/{{ item[0] }}/pdf"
                                     class="btn btn-sm btn-outline-danger">
                                     📄 PDF
@@ -87,6 +87,7 @@
                                     class="btn btn-sm btn-outline-primary">
                                     📝 Word
                                 </a>
+                                {% endif %}
 
                                 {% if item[5] %}
                                 <a

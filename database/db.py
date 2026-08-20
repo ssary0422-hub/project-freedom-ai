@@ -308,7 +308,8 @@ def get_history(user_id):
             company,
             style,
             result,
-            image_url
+            image_url,
+            COALESCE(content_type, 'general')
         FROM history
         WHERE user_id = ?
         ORDER BY id DESC

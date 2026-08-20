@@ -46,6 +46,13 @@
     return "다음 목표 · 같은 조건으로 다시 촬영해 자세 변화를 비교해봐";
   }
 
+  async function saveRunningHistory(result, card) {
+    const response = await fetch("/running-form/history", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...result,coachMessage:result.improvements[0]||"",image:card.toDataURL("image/png")})});
+    const saved = await response.json();
+    if (!response.ok || !saved.ok) throw new Error(saved.error || "생성 기록에 저장하지 못했어요.");
+    return saved;
+  }
+
   function drawFootInset(ctx, image, focus, x, y, size) {
     if (!focus) return;
     const sourceSize = Math.min(image.width, image.height) * .34;
@@ -123,6 +130,8 @@
         </div><div class="run-result-section mt-3"><strong>좋았던 점</strong><ul class="mt-2 mb-0">${strengths}</ul></div><div class="run-result-section mt-3"><strong>개선하면 좋은 점</strong><ul class="mt-2 mb-0">${improvements}</ul></div><div id="runShareArea" class="mt-3"><h3 class="h5 fw-bold">SNS 공유 결과지</h3></div><div class="small text-secondary mt-3">AI 영상 기반 참고 분석이며 의료 진단이 아닙니다. 촬영 각도와 속도에 따라 판정이 달라질 수 있어요.</div>`;
       const card = makeShareCard(result, canvas), shareArea = document.getElementById("runShareArea"); shareArea.appendChild(card);
       const download = document.createElement("button"); download.type="button"; download.className="btn btn-success w-100 fw-bold"; download.textContent="SNS 결과 이미지 저장"; download.onclick=()=>{const link=document.createElement("a");link.download="sungeum-running-form-result.png";link.href=card.toDataURL("image/png");link.click()};shareArea.appendChild(download);
+      const saveState=document.createElement("div");saveState.className="small text-secondary mt-2";saveState.textContent="생성 기록에 저장하는 중…";shareArea.appendChild(saveState);
+      try{const saved=await saveRunningHistory(result,card);saveState.innerHTML=`✓ 생성 기록에 저장했어요 · <a href="/history">기록 보기</a>`;saveState.dataset.historyId=saved.history_id}catch(saveError){saveState.textContent=`결과는 완성됐지만 생성 기록 저장에 실패했어요: ${friendlyError(saveError)}`}
     } catch (error) {
       status.className = "alert alert-danger mt-4"; status.textContent = friendlyError(error);
     } finally {
