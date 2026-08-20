@@ -180,6 +180,38 @@ def _rounded(draw, box, radius, fill, outline=None, width=1):
     draw.rounded_rectangle(box, radius=radius, fill=fill, outline=outline, width=width)
 
 
+def _cover(source: Image.Image, size: tuple[int, int]) -> Image.Image:
+    """Crop an uploaded photo to a predictable area without stretching it."""
+    target_width, target_height = size
+    scale = max(target_width / source.width, target_height / source.height)
+    resized = source.resize(
+        (max(target_width, round(source.width * scale)), max(target_height, round(source.height * scale))),
+        Image.Resampling.LANCZOS,
+    )
+    left = (resized.width - target_width) // 2
+    top = (resized.height - target_height) // 2
+    return resized.crop((left, top, left + target_width, top + target_height))
+
+
+def card_quality_score(*, headline: str, benefit: str, cta: str, subject_path: str = "") -> int:
+    """Return the renderer's release score; anything below 90 is not publish-ready."""
+    score = 100
+    if not all((_clean(headline), _clean(benefit), _clean(cta))):
+        score -= 20
+    if len(_clean(headline)) > 42:
+        score -= 5
+    if len(_clean(benefit)) > 92:
+        score -= 5
+    if len(_clean(cta)) > 48:
+        score -= 5
+    combined = " ".join((headline, benefit, cta))
+    if "\ufffd" in combined or re.search(r"\?{2,}", combined):
+        score -= 30
+    if subject_path and not Path(subject_path).exists():
+        score -= 15
+    return max(0, score)
+
+
 def create_finished_promo_card(
     *,
     business: str,
@@ -202,6 +234,14 @@ def create_finished_promo_card(
     language = language if language in CARD_LABELS else "ko"
     labels = CARD_LABELS[language]
     headline, benefit, cta = extract_card_copy(result, campaign_request, company)
+    quality_score = card_quality_score(
+        headline=headline,
+        benefit=benefit,
+        cta=cta,
+        subject_path=subject_path,
+    )
+    if quality_score < 90:
+        raise ValueError(f"Promotional card failed the 90-point release gate: {quality_score}")
 
     image = Image.new("RGB", (WIDTH, HEIGHT), "#07111f")
     pixels = image.load()
@@ -221,20 +261,31 @@ def create_finished_promo_card(
     for x, y, r in ((835, 205, 9), (940, 330, 6), (760, 440, 5), (150, 1060, 7)):
         draw.ellipse((x-r, y-r, x+r, y+r), fill=(100, 245, 216, 150))
 
-    if subject_path and Path(subject_path).exists():
-        subject = Image.open(subject_path).convert("RGBA")
-        subject.thumbnail((480, 610), Image.Resampling.LANCZOS)
-        shadow = Image.new("RGBA", subject.size, (0, 0, 0, 0))
-        shadow.putalpha(subject.getchannel("A").filter(ImageFilter.GaussianBlur(18)))
-        sx, sy = WIDTH - subject.width - 42, HEIGHT - subject.height - 150
-        image.paste(shadow, (sx + 12, sy + 20), shadow)
-        image.paste(subject, (sx, sy), subject)
+    has_subject = bool(subject_path and Path(subject_path).exists())
+    photo_box = (574, 708, 1022, 1092)
+    if has_subject:
+        subject = _cover(Image.open(subject_path).convert("RGBA"), (448, 384))
+        mask = Image.new("L", subject.size, 0)
+        ImageDraw.Draw(mask).rounded_rectangle((0, 0, 447, 383), radius=30, fill=255)
+        shadow = Image.new("RGBA", (472, 408), (0, 0, 0, 0))
+        ImageDraw.Draw(shadow).rounded_rectangle((12, 12, 459, 395), radius=30, fill=(0, 0, 0, 165))
+        shadow = shadow.filter(ImageFilter.GaussianBlur(14))
+        image.paste(shadow, (photo_box[0] - 12, photo_box[1] - 8), shadow)
+        image.paste(subject, (photo_box[0], photo_box[1]), mask)
 
     if logo_path and Path(logo_path).exists():
         logo = Image.open(logo_path).convert("RGBA")
-        logo.thumbnail((190, 100), Image.Resampling.LANCZOS)
+        alpha_box = logo.getchannel("A").getbbox()
+        if alpha_box:
+            logo = logo.crop(alpha_box)
+        logo.thumbnail((158, 158), Image.Resampling.LANCZOS)
         lx, ly = WIDTH - logo.width - 72, 62
-        _rounded(draw, (lx - 18, ly - 12, lx + logo.width + 18, ly + logo.height + 12), 20, (255, 255, 255, 235))
+        if logo.getchannel("A").getextrema()[0] == 255:
+            _rounded(draw, (lx - 18, ly - 12, lx + logo.width + 18, ly + logo.height + 12), 20, (255, 255, 255, 235))
+        else:
+            logo_shadow = Image.new("RGBA", logo.size, (0, 0, 0, 0))
+            logo_shadow.putalpha(logo.getchannel("A").filter(ImageFilter.GaussianBlur(10)))
+            image.paste(logo_shadow, (lx + 5, ly + 8), logo_shadow)
         image.paste(logo, (lx, ly), logo)
 
     badge_font = _font(24, True, language)
@@ -245,10 +296,8 @@ def create_finished_promo_card(
     business_label = business or "BUSINESS"
     _draw_text(draw, (64, 166), business_label, _font(27, True, language), (93, 235, 205, 255), language, True)
 
-    headline_font = _font(82, True, language)
-    while headline_font.size > 54 and len(_wrap(draw, headline, headline_font, 900, 3, language, True)) > 3:
-        headline_font = _font(headline_font.size - 4, True, language)
-    title_lines = _wrap(draw, headline, headline_font, 900, 3, language, True)
+    headline_font = _font(76, True, language)
+    title_lines = _wrap(draw, headline, headline_font, 900, 2, language, True)
     y = 226
     for line in title_lines:
         _draw_text(draw, (62, y), line, headline_font, (247, 250, 255, 255), language, True, stroke_width=1, stroke_fill=(247, 250, 255, 90))
@@ -257,13 +306,18 @@ def create_finished_promo_card(
     draw.rounded_rectangle((62, y + 18, 152, y + 28), radius=5, fill=(93, 235, 205, 255))
     y += 72
     benefit_font = _font(38, False, language)
-    for line in _wrap(draw, benefit, benefit_font, 820 if subject_path else 900, 4, language):
+    benefit_lines = _wrap(draw, benefit, benefit_font, 900, 2, language)
+    while y + len(benefit_lines) * 58 > 654 and benefit_font.size > 28:
+        benefit_font = _font(benefit_font.size - 2, False, language)
+        benefit_lines = _wrap(draw, benefit, benefit_font, 900, 2, language)
+    for line in benefit_lines:
         _draw_text(draw, (66, y), line, benefit_font, (202, 214, 231, 255), language)
         y += 58
 
-    card_top = max(y + 42, 785)
-    card_width = 610 if subject_path else 950
-    _rounded(draw, (58, card_top, 58 + card_width, card_top + 260), 34, (255, 255, 255, 18), (255, 255, 255, 45), 2)
+    card_top = max(y + 34, 708)
+    card_width = 480 if has_subject else 964
+    card_height = 384 if has_subject else 300
+    _rounded(draw, (58, card_top, 58 + card_width, card_top + card_height), 34, (255, 255, 255, 18), (255, 255, 255, 45), 2)
     _draw_text(draw, (92, card_top + 42), labels["fact"], _font(25, True, language), (93, 235, 205, 255), language, True)
     request_text = _clean(campaign_request) or benefit
     ry = card_top + 92
@@ -271,11 +325,11 @@ def create_finished_promo_card(
         _draw_text(draw, (92, ry), line, _font(31, True, language), (246, 248, 252, 255), language, True)
         ry += 47
 
-    cta_y = 1162
-    _rounded(draw, (58, cta_y, 720, cta_y + 92), 46, (93, 235, 205, 255))
+    cta_y = 1148
+    _rounded(draw, (58, cta_y, 1022, cta_y + 92), 46, (93, 235, 205, 255))
     cta_font = _font(30, True, language)
     cta_text = cta
-    while _text_width(draw, cta_text, cta_font, language, True) > 595 and cta_font.size > 22:
+    while _text_width(draw, cta_text, cta_font, language, True) > 890 and cta_font.size > 22:
         cta_font = _font(cta_font.size - 2, True, language)
     _draw_text(draw, (96, cta_y + 26), cta_text, cta_font, (5, 31, 39, 255), language, True)
     _draw_text(draw, (60, 1282), company or "업체명", _font(28, True, language), (247, 250, 255, 255), language, True)
@@ -286,13 +340,15 @@ def create_finished_promo_card(
     link_labels = []
     if website_url:
         parsed = urlparse(website_url if "://" in website_url else f"https://{website_url}")
-        link_labels.append((parsed.netloc or website_url).replace("www.", "")[:30])
+        link_labels.append((parsed.netloc or website_url).replace("www.", ""))
     if map_url:
         link_labels.append({"ko": "지도에서 위치 확인", "en": "View on map", "ja": "地図で確認", "th": "ดูตำแหน่งบนแผนที่", "zh": "在地图上查看", "es": "Ver en el mapa"}[language])
     if link_labels:
         link_text = "  ·  ".join(link_labels)
-        link_font = _font(18, True, language)
-        _draw_text(draw, (60, 1122), link_text, link_font, (93, 235, 205, 255), language, True)
+        link_font = _font(22, True, language)
+        while _text_width(draw, link_text, link_font, language, True) > 950 and link_font.size > 18:
+            link_font = _font(link_font.size - 1, True, language)
+        _draw_text(draw, (60, 1107), link_text, link_font, (93, 235, 205, 255), language, True)
 
     safe_name = re.sub(r"[^a-zA-Z0-9._-]", "-", output_name) or "finished-promo-card.png"
     output_path = OUTPUT_DIR / safe_name

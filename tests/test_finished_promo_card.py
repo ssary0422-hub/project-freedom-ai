@@ -7,14 +7,34 @@ from PIL import Image
 
 from services.finished_promo_card import (
     CARD_LABELS,
+    _cover,
     _font,
     _thai_font_runs,
+    card_quality_score,
     create_finished_promo_card,
     extract_card_copy,
 )
 
 
 class FinishedPromoCardTests(unittest.TestCase):
+    def test_release_score_rejects_missing_or_invalid_material(self):
+        self.assertGreaterEqual(
+            card_quality_score(headline="Headline", benefit="Benefit", cta="Start now"),
+            90,
+        )
+        self.assertLess(
+            card_quality_score(headline="Headline", benefit="Benefit", cta="Start now", subject_path="missing.png"),
+            90,
+        )
+        self.assertLess(
+            card_quality_score(headline="?? ??", benefit="Benefit", cta="Start now"),
+            90,
+        )
+
+    def test_uploaded_photo_is_cropped_to_the_fixed_non_overlapping_frame(self):
+        portrait = Image.new("RGBA", (300, 900), "#ffffff")
+        self.assertEqual(_cover(portrait, (448, 384)).size, (448, 384))
+
     def test_all_supported_languages_have_localized_card_labels(self):
         self.assertEqual(set(CARD_LABELS), {"ko", "en", "ja", "th", "zh", "es"})
         for labels in CARD_LABELS.values():
