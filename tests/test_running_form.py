@@ -25,7 +25,14 @@ class RunningFormTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"PoseLandmarker", response.data)
         self.assertIn(b"detectForVideo", response.data)
+        self.assertIn(b"lastVideoTimestamp", response.data)
+        self.assertIn(b"timestampBase + index", response.data)
         response.close()
+
+    def test_browser_hides_raw_mediapipe_errors(self):
+        response = self.client.get("/static/running-form.js")
+        self.assertIn(b"friendlyError", response.data)
+        self.assertIn("AI 자세 추적을 다시 준비하고 있어요".encode(), response.data)
 
     def test_preflight_accepts_supported_side_video(self):
         response = self.client.post("/running-form/preflight", data={"video": (io.BytesIO(b"test-video"), "run.mp4"), "pace": "marathon", "view": "side"}, content_type="multipart/form-data")

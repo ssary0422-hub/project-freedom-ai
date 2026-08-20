@@ -10,6 +10,7 @@ const LEFT = { shoulder: 11, hip: 23, knee: 25, ankle: 27 };
 const RIGHT = { shoulder: 12, hip: 24, knee: 26, ankle: 28 };
 
 let landmarkerPromise;
+let lastVideoTimestamp = 0;
 
 async function createLandmarker() {
   if (!landmarkerPromise) {
@@ -86,11 +87,16 @@ export async function analyzePose(video, canvas, onProgress = () => {}) {
   const sampleCount = Math.max(12, Math.min(60, Math.round(duration * 6)));
   const samples = [];
   let best = null;
+  // MediaPipe VIDEO mode requires timestamps to keep increasing even when the
+  // user analyzes the same video again in the same browser tab.
+  const timestampBase = Math.max(lastVideoTimestamp + 1, Math.ceil(performance.now()));
 
   for (let index = 0; index < sampleCount; index += 1) {
     const time = sampleCount === 1 ? 0 : (duration * index / (sampleCount - 1));
     await seek(video, time);
-    const result = landmarker.detectForVideo(video, Math.round(time * 1000) + index);
+    const timestamp = timestampBase + index;
+    lastVideoTimestamp = timestamp;
+    const result = landmarker.detectForVideo(video, timestamp);
     const landmarks = result.landmarks?.[0];
     if (landmarks) {
       const side = selectSide(landmarks);

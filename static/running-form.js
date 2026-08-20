@@ -13,6 +13,13 @@
   let previewUrl = null;
   const selectedFile = () => input.files && input.files[0];
   const sync = () => { button.disabled = !(selectedFile() && consent.checked); };
+  const friendlyError = error => {
+    const message = String(error?.message || error || "");
+    if (/timestamp|CalculatorGraph|Packet|mediapipe/i.test(message)) {
+      return "AI 자세 추적을 다시 준비하고 있어요. 잠시 후 분석 버튼을 다시 눌러주세요.";
+    }
+    return message || "영상 분석 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요.";
+  };
 
   function showFile(file) {
     if (!file) return;
@@ -58,10 +65,9 @@
           <div class="col-6"><div class="run-check"><small>평균 상체 기울기</small><br><strong>${result.averageTrunkLean}°</strong></div></div>
         </div><div class="small text-secondary mt-3">현재는 관절 추출 기술검증 단계예요. 착지·점수·러너 유형은 다음 분석 엔진에서 연결됩니다.</div>`;
     } catch (error) {
-      status.className = "alert alert-danger mt-4"; status.textContent = error.message;
+      status.className = "alert alert-danger mt-4"; status.textContent = friendlyError(error);
     } finally {
       button.textContent = "순금이에게 분석 맡기기"; sync();
     }
   });
 })();
-
