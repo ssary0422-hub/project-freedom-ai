@@ -6,7 +6,7 @@
 {% block generator_subtitle %}{{ t("v2.sns") }}{% endblock %}
 
 {% block form %}
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
     <input type="hidden" name="image_output_mode" value="finished_card">
     {% if saved_profiles %}
     <div class="border rounded-3 p-3 mb-4 bg-light">
@@ -76,6 +76,16 @@
         <strong>사진이나 홈페이지가 없어도 괜찮아요.</strong>
         <div class="small text-muted mt-1">순금이가 확인된 내용만으로 정확한 한글이 들어간 게시용 홍보물 한 장을 완성합니다.</div>
     </div>
+
+    <details class="border rounded-3 p-3 mb-3">
+        <summary class="fw-bold">📎 실제 자료 추가하기 <span class="text-muted fw-normal small">(선택)</span></summary>
+        <div class="row g-3 pt-3">
+            <div class="col-md-6"><label class="form-label">매장·제품 사진</label><input class="form-control" type="file" name="real_photos" accept="image/jpeg,image/png,image/webp" multiple><div class="form-text">최대 10장 · 첫 번째 적합한 사진을 대표로 사용</div></div>
+            <div class="col-md-6"><label class="form-label">로고</label><input class="form-control" type="file" name="real_logo" accept="image/jpeg,image/png,image/webp"></div>
+            <div class="col-md-6"><label class="form-label">홈페이지 주소</label><input class="form-control" type="url" name="website_url" placeholder="https://example.com"></div>
+            <div class="col-md-6"><label class="form-label">지도 주소</label><input class="form-control" type="url" name="map_url" placeholder="Google 지도·네이버 지도 링크"></div>
+        </div>
+    </details>
 
     <details class="advanced-settings border rounded-3 p-3 mb-3">
     <summary class="fw-bold">⚙️ 플랫폼·이미지 스타일 변경 <span class="text-muted fw-normal small">(선택)</span></summary>

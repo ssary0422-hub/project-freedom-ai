@@ -18,6 +18,7 @@ from documents.pdf import create_sns_pdf, SNS_PDF_PATH
 from documents.word import create_sns_word, SNS_WORD_PATH
 from routes.auth import login_required
 from services.finished_promo_card import create_finished_promo_card
+from services.uploaded_materials import first_valid_uploaded_image, save_uploaded_image
 
 sns_bp = Blueprint("sns", __name__)
 
@@ -652,12 +653,18 @@ def _sns_page():
                 if with_image:
                     try:
                         if image_output_mode == "finished_card":
+                            subject_path = first_valid_uploaded_image(request.files.getlist("real_photos"), "sns-photo")
+                            logo_path = save_uploaded_image(request.files.get("real_logo"), "sns-logo")
                             image_path = create_finished_promo_card(
                                 business=business,
                                 company=company,
                                 campaign_request=style,
                                 result=result,
                                 output_name=f"finished-sns-{uuid4().hex[:10]}.png",
+                                subject_path=subject_path,
+                                logo_path=logo_path,
+                                website_url=request.form.get("website_url", "").strip(),
+                                map_url=request.form.get("map_url", "").strip(),
                                 language=session.get("language", "ko"),
                             )
                         else:

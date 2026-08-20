@@ -20,6 +20,7 @@ from database.users import (
 from documents.word import create_word, WORD_PATH
 from routes.auth import login_required
 from services.finished_promo_card import create_finished_promo_card
+from services.uploaded_materials import first_valid_uploaded_image, save_uploaded_image
 
 ads_bp = Blueprint("ads", __name__)
 
@@ -694,12 +695,18 @@ def _home_page():
 """
                 try:
                     if image_output_mode == "finished_card":
+                        subject_path = first_valid_uploaded_image(request.files.getlist("real_photos"), "ad-photo")
+                        logo_path = save_uploaded_image(request.files.get("real_logo"), "ad-logo")
                         image_path = create_finished_promo_card(
                             business=business,
                             company=company,
                             campaign_request=style,
                             result=result,
                             output_name=f"finished-ad-{uuid4().hex[:10]}.png",
+                            subject_path=subject_path,
+                            logo_path=logo_path,
+                            website_url=request.form.get("website_url", "").strip(),
+                            map_url=request.form.get("map_url", "").strip(),
                             language=session.get("language", "ko"),
                         )
                     else:

@@ -1,6 +1,7 @@
 import re
 import textwrap
 from pathlib import Path
+from urllib.parse import urlparse
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
@@ -187,6 +188,9 @@ def create_finished_promo_card(
     result: str,
     output_name: str = "finished-promo-card.png",
     subject_path: str = "",
+    logo_path: str = "",
+    website_url: str = "",
+    map_url: str = "",
     language: str = "ko",
 ):
     """Create a publish-ready portrait card using verified user copy.
@@ -225,6 +229,13 @@ def create_finished_promo_card(
         sx, sy = WIDTH - subject.width - 42, HEIGHT - subject.height - 150
         image.paste(shadow, (sx + 12, sy + 20), shadow)
         image.paste(subject, (sx, sy), subject)
+
+    if logo_path and Path(logo_path).exists():
+        logo = Image.open(logo_path).convert("RGBA")
+        logo.thumbnail((190, 100), Image.Resampling.LANCZOS)
+        lx, ly = WIDTH - logo.width - 72, 62
+        _rounded(draw, (lx - 18, ly - 12, lx + logo.width + 18, ly + logo.height + 12), 20, (255, 255, 255, 235))
+        image.paste(logo, (lx, ly), logo)
 
     badge_font = _font(24, True, language)
     badge_width = min(930, max(332, _text_width(draw, labels["badge"], badge_font, language, True) + 60))
@@ -271,6 +282,17 @@ def create_finished_promo_card(
     footer_font = _font(17, True, language)
     footer_width = _text_width(draw, labels["footer"], footer_font, language, True)
     _draw_text(draw, (WIDTH - footer_width - 58, 1288), labels["footer"], footer_font, (133, 153, 181, 255), language, True)
+
+    link_labels = []
+    if website_url:
+        parsed = urlparse(website_url if "://" in website_url else f"https://{website_url}")
+        link_labels.append((parsed.netloc or website_url).replace("www.", "")[:30])
+    if map_url:
+        link_labels.append({"ko": "지도에서 위치 확인", "en": "View on map", "ja": "地図で確認", "th": "ดูตำแหน่งบนแผนที่", "zh": "在地图上查看", "es": "Ver en el mapa"}[language])
+    if link_labels:
+        link_text = "  ·  ".join(link_labels)
+        link_font = _font(18, True, language)
+        _draw_text(draw, (60, 1122), link_text, link_font, (93, 235, 205, 255), language, True)
 
     safe_name = re.sub(r"[^a-zA-Z0-9._-]", "-", output_name) or "finished-promo-card.png"
     output_path = OUTPUT_DIR / safe_name

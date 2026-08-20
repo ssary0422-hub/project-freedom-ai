@@ -3,3 +3,4 @@ Languages: ko, en, ja, th, zh, es
 Fonts: bundled Noto language fonts
 Labels: localized
 Mixed scripts: Thai and Latin brand names supported
+Real materials: photos, logo, website and map supported
