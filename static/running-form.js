@@ -20,6 +20,22 @@
     }
     return message || "영상 분석 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요.";
   };
+  const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"})[char]);
+
+  function makeShareCard(result) {
+    const card = document.createElement("canvas"); card.width = 1080; card.height = 1350; card.className = "run-share-card";
+    const ctx = card.getContext("2d"), gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
+    gradient.addColorStop(0, "#07111f"); gradient.addColorStop(.55, "#12344c"); gradient.addColorStop(1, "#0d766f"); ctx.fillStyle = gradient; ctx.fillRect(0, 0, 1080, 1350);
+    ctx.fillStyle = "#61e6d3"; ctx.font = "800 30px Arial"; ctx.fillText("SUNGEUM AI RUNNING LAB", 76, 95);
+    ctx.fillStyle = "#fff"; ctx.font = '900 70px "Malgun Gothic", sans-serif'; ctx.fillText("나의 러닝폼 분석", 76, 205);
+    ctx.fillStyle = "#61e6d3"; ctx.font = "900 190px Arial"; ctx.fillText(String(result.score), 70, 450);
+    ctx.fillStyle = "#fff"; ctx.font = "800 42px Arial"; ctx.fillText("/ 100", 330, 440);
+    ctx.font = '800 48px "Malgun Gothic", sans-serif'; ctx.fillText(result.runnerType, 76, 555);
+    [["착지 유형",result.strikeType],["무릎 각도",`${result.averageKneeAngle}°`],["상체 기울기",`${result.averageTrunkLean}°`]].forEach(([label,value],index)=>{const x=76+index*310;ctx.fillStyle="rgba(255,255,255,.09)";ctx.fillRect(x,650,280,180);ctx.fillStyle="#9fb3c8";ctx.font='600 25px "Malgun Gothic", sans-serif';ctx.fillText(label,x+24,705);ctx.fillStyle="#fff";ctx.font='800 37px "Malgun Gothic", sans-serif';ctx.fillText(value,x+24,770)});
+    ctx.fillStyle="#fff";ctx.font='800 34px "Malgun Gothic", sans-serif';ctx.fillText("순금이의 한마디",76,940);ctx.fillStyle="#d8e5ee";ctx.font='600 29px "Malgun Gothic", sans-serif';
+    const words=(result.improvements[0]||"지금의 균형을 유지하며 편안하게 달려보세요.").split(" ");let line="",y=1000;words.forEach(word=>{const test=`${line}${word} `;if(ctx.measureText(test).width>900){ctx.fillText(line,76,y);line=`${word} `;y+=48}else line=test});ctx.fillText(line,76,y);
+    ctx.fillStyle="#61e6d3";ctx.font="700 25px Arial";ctx.fillText("PROJECT FREEDOM AI · AI-assisted estimate",76,1265);return card;
+  }
 
   function showFile(file) {
     if (!file) return;
@@ -56,14 +72,20 @@
       const result = await analyzePose(preview, canvas, progress => {
         status.textContent = `순금이가 관절을 추적하고 있어요 · ${progress}%`;
       });
+      const strengths = result.strengths.map(item => `<li>${escapeHtml(item)}</li>`).join("");
+      const improvements = result.improvements.map(item => `<li>${escapeHtml(item)}</li>`).join("");
       status.className = "mt-4";
-      status.innerHTML = `<div class="alert alert-success"><strong>🐾 자세 추출 AI 검사 완료</strong><br>실제 영상 프레임에서 관절을 찾았어요.</div>
+      status.innerHTML = `<div class="alert alert-success"><strong>🐾 순금이 러닝폼 분석 완료</strong><br>실제 영상 프레임을 바탕으로 결과를 정리했어요.</div>
         <div class="row g-2">
-          <div class="col-6"><div class="run-check" data-status="pass"><small>관절 추출 성공률</small><br><strong>${result.detectionRate}%</strong></div></div>
-          <div class="col-6"><div class="run-check" data-status="pass"><small>인식 방향</small><br><strong>${result.side}</strong></div></div>
+          <div class="col-6"><div class="run-check" data-status="pass"><small>러닝폼 종합 점수</small><br><strong>${result.score}점</strong></div></div>
+          <div class="col-6"><div class="run-check" data-status="pass"><small>러너 유형</small><br><strong>${escapeHtml(result.runnerType)}</strong></div></div>
+          <div class="col-6"><div class="run-check"><small>착지 유형</small><br><strong>${result.strikeType}</strong><br><small>신뢰도 ${result.strikeConfidence}%</small></div></div>
           <div class="col-6"><div class="run-check"><small>평균 무릎 각도</small><br><strong>${result.averageKneeAngle}°</strong></div></div>
           <div class="col-6"><div class="run-check"><small>평균 상체 기울기</small><br><strong>${result.averageTrunkLean}°</strong></div></div>
-        </div><div class="small text-secondary mt-3">현재는 관절 추출 기술검증 단계예요. 착지·점수·러너 유형은 다음 분석 엔진에서 연결됩니다.</div>`;
+          <div class="col-6"><div class="run-check"><small>관절 추출 성공률</small><br><strong>${result.detectionRate}%</strong></div></div>
+        </div><div class="run-result-section mt-3"><strong>좋았던 점</strong><ul class="mt-2 mb-0">${strengths}</ul></div><div class="run-result-section mt-3"><strong>개선하면 좋은 점</strong><ul class="mt-2 mb-0">${improvements}</ul></div><div id="runShareArea" class="mt-3"><h3 class="h5 fw-bold">SNS 공유 결과지</h3></div><div class="small text-secondary mt-3">AI 영상 기반 참고 분석이며 의료 진단이 아닙니다. 촬영 각도와 속도에 따라 판정이 달라질 수 있어요.</div>`;
+      const card = makeShareCard(result), shareArea = document.getElementById("runShareArea"); shareArea.appendChild(card);
+      const download = document.createElement("button"); download.type="button"; download.className="btn btn-success w-100 fw-bold"; download.textContent="SNS 결과 이미지 저장"; download.onclick=()=>{const link=document.createElement("a");link.download="sungeum-running-form-result.png";link.href=card.toDataURL("image/png");link.click()};shareArea.appendChild(download);
     } catch (error) {
       status.className = "alert alert-danger mt-4"; status.textContent = friendlyError(error);
     } finally {

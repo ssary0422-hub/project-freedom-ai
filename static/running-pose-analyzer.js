@@ -6,8 +6,8 @@ const CONNECTIONS = [
   [11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],
   [23,25],[25,27],[27,29],[29,31],[24,26],[26,28],[28,30],[30,32]
 ];
-const LEFT = { shoulder: 11, hip: 23, knee: 25, ankle: 27 };
-const RIGHT = { shoulder: 12, hip: 24, knee: 26, ankle: 28 };
+const LEFT = { shoulder: 11, hip: 23, knee: 25, ankle: 27, heel: 29, toe: 31 };
+const RIGHT = { shoulder: 12, hip: 24, knee: 26, ankle: 28, heel: 30, toe: 32 };
 
 let landmarkerPromise;
 let lastVideoTimestamp = 0;
@@ -46,6 +46,34 @@ function visible(landmark) {
 function selectSide(landmarks) {
   const score = side => Object.values(side).reduce((sum, index) => sum + (landmarks[index]?.visibility ?? 0), 0);
   return score(LEFT) >= score(RIGHT) ? { name: "왼쪽 측면", points: LEFT } : { name: "오른쪽 측면", points: RIGHT };
+}
+
+function median(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+}
+
+function evaluateForm(detectionRate, knee, trunk, footSamples) {
+  const contacts = [...footSamples].sort((a, b) => b.ankleY - a.ankleY).slice(0, Math.max(3, Math.ceil(footSamples.length * .3)));
+  const footDelta = contacts.length ? median(contacts.map(item => item.toeY - item.heelY)) : 0;
+  const strikeType = footDelta > .012 ? "포어풋형" : footDelta < -.012 ? "리어풋형" : "미드풋형";
+  const strikeConfidence = Math.min(95, Math.max(55, Math.round(58 + Math.abs(footDelta) * 900 + contacts.length)));
+  const trunkPoints = Math.max(8, 25 - Math.abs(trunk - 9) * 1.5);
+  const kneePoints = Math.max(8, 25 - Math.abs(knee - 115) * .55);
+  const score = Math.round(Math.max(55, Math.min(96, detectionRate * .3 + trunkPoints + kneePoints + (strikeType === "미드풋형" ? 20 : 16))));
+  const runnerType = trunk > 16 ? `${strikeType} · 전방 추진형` : trunk < 6 ? `${strikeType} · 안정 중심형` : `${strikeType} · 균형 추진형`;
+  const strengths = [], improvements = [];
+  if (detectionRate >= 85) strengths.push("측면 자세가 선명해 관절 움직임을 안정적으로 추적했어요.");
+  if (trunk >= 6 && trunk <= 14) strengths.push("상체 기울기가 자연스러운 추진 범위에 있어요.");
+  else if (trunk > 14) improvements.push("상체가 많이 숙여져 있어 허리보다 발목에서 가볍게 기울이는 연습이 좋아요.");
+  else improvements.push("상체가 다소 세워져 있어 발목에서 아주 조금 전방으로 기울여 보세요.");
+  if (knee >= 95 && knee <= 135) strengths.push("무릎 굴곡이 충격 흡수와 추진을 함께 만들 수 있는 범위예요.");
+  else improvements.push("보폭을 조금 줄이고 발이 몸 아래에 닿게 연습해 보세요.");
+  if (strikeType === "리어풋형") improvements.push("뒤꿈치가 몸보다 멀리 앞서 닿지 않는지 확인하고 케이던스를 3~5%만 높여 보세요.");
+  else if (strikeType === "포어풋형") improvements.push("종아리에 부담이 몰리지 않도록 뒤꿈치가 자연스럽게 내려오는지 확인해 보세요.");
+  else strengths.push("발바닥 중앙에 가까운 착지 패턴이 감지됐어요.");
+  return { score, strikeType, strikeConfidence, runnerType, strengths: strengths.slice(0, 3), improvements: improvements.slice(0, 3) };
 }
 
 function drawPose(canvas, video, landmarks) {
@@ -106,6 +134,9 @@ export async function analyzePose(video, canvas, onProgress = () => {}) {
         const shoulder = landmarks[p.shoulder], hip = landmarks[p.hip];
         const trunk = Math.abs(Math.atan2(shoulder.x - hip.x, hip.y - shoulder.y) * 180 / Math.PI);
         samples.push({ knee, trunk, side: side.name });
+        if ([p.heel, p.toe].every(i => visible(landmarks[i]))) {
+          samples[samples.length - 1].foot = { ankleY: landmarks[p.ankle].y, heelY: landmarks[p.heel].y, toeY: landmarks[p.toe].y };
+        }
       }
       best = landmarks;
       drawPose(canvas, video, landmarks);
@@ -115,11 +146,15 @@ export async function analyzePose(video, canvas, onProgress = () => {}) {
 
   if (!samples.length || !best) throw new Error("전신 관절을 안정적으로 찾지 못했어요. 정확한 측면으로 다시 촬영해 주세요.");
   const average = key => samples.reduce((sum, item) => sum + item[key], 0) / samples.length;
+  const averageKneeAngle = Math.round(average("knee"));
+  const averageTrunkLean = Math.round(average("trunk") * 10) / 10;
+  const evaluation = evaluateForm(Math.round(samples.length / sampleCount * 100), averageKneeAngle, averageTrunkLean, samples.map(item => item.foot).filter(Boolean));
   return {
     detectionRate: Math.round(samples.length / sampleCount * 100),
     side: samples[0].side,
-    averageKneeAngle: Math.round(average("knee")),
-    averageTrunkLean: Math.round(average("trunk") * 10) / 10,
+    averageKneeAngle,
+    averageTrunkLean,
     sampledFrames: sampleCount,
+    ...evaluation,
   };
 }
