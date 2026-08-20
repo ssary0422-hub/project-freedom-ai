@@ -29,6 +29,7 @@ class RunningFormTests(unittest.TestCase):
         self.assertIn(b"timestampBase + index", response.data)
         self.assertIn(b"strikeType", response.data)
         self.assertIn(b"runnerType", response.data)
+        self.assertIn(b"bestQuality", response.data)
         response.close()
 
     def test_browser_hides_raw_mediapipe_errors(self):
@@ -37,6 +38,8 @@ class RunningFormTests(unittest.TestCase):
         self.assertIn("AI 자세 추적을 다시 준비하고 있어요".encode(), response.data)
         self.assertIn(b"makeShareCard", response.data)
         self.assertIn("SNS 결과 이미지 저장".encode(), response.data)
+        self.assertIn("AI 분석 프레임".encode(), response.data)
+        self.assertIn("촬영 각도·속도·조명에 따라".encode(), response.data)
 
     def test_preflight_accepts_supported_side_video(self):
         response = self.client.post("/running-form/preflight", data={"video": (io.BytesIO(b"test-video"), "run.mp4"), "pace": "marathon", "view": "side"}, content_type="multipart/form-data")

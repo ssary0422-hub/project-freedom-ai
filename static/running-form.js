@@ -22,19 +22,27 @@
   };
   const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"})[char]);
 
-  function makeShareCard(result) {
+  function drawCover(ctx, image, x, y, width, height) {
+    const scale = Math.max(width / image.width, height / image.height), sourceWidth = width / scale, sourceHeight = height / scale;
+    const sourceX = Math.max(0, (image.width - sourceWidth) / 2), sourceY = Math.max(0, (image.height - sourceHeight) / 2);
+    ctx.save(); ctx.beginPath(); ctx.roundRect(x, y, width, height, 28); ctx.clip(); ctx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height); ctx.restore();
+  }
+
+  function makeShareCard(result, analysisFrame) {
     const card = document.createElement("canvas"); card.width = 1080; card.height = 1350; card.className = "run-share-card";
     const ctx = card.getContext("2d"), gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
     gradient.addColorStop(0, "#07111f"); gradient.addColorStop(.55, "#12344c"); gradient.addColorStop(1, "#0d766f"); ctx.fillStyle = gradient; ctx.fillRect(0, 0, 1080, 1350);
     ctx.fillStyle = "#61e6d3"; ctx.font = "800 30px Arial"; ctx.fillText("SUNGEUM AI RUNNING LAB", 76, 95);
     ctx.fillStyle = "#fff"; ctx.font = '900 70px "Malgun Gothic", sans-serif'; ctx.fillText("나의 러닝폼 분석", 76, 205);
-    ctx.fillStyle = "#61e6d3"; ctx.font = "900 190px Arial"; ctx.fillText(String(result.score), 70, 450);
-    ctx.fillStyle = "#fff"; ctx.font = "800 42px Arial"; ctx.fillText("/ 100", 330, 440);
-    ctx.font = '800 48px "Malgun Gothic", sans-serif'; ctx.fillText(result.runnerType, 76, 555);
-    [["착지 유형",result.strikeType],["무릎 각도",`${result.averageKneeAngle}°`],["상체 기울기",`${result.averageTrunkLean}°`]].forEach(([label,value],index)=>{const x=76+index*310;ctx.fillStyle="rgba(255,255,255,.09)";ctx.fillRect(x,650,280,180);ctx.fillStyle="#9fb3c8";ctx.font='600 25px "Malgun Gothic", sans-serif';ctx.fillText(label,x+24,705);ctx.fillStyle="#fff";ctx.font='800 37px "Malgun Gothic", sans-serif';ctx.fillText(value,x+24,770)});
-    ctx.fillStyle="#fff";ctx.font='800 34px "Malgun Gothic", sans-serif';ctx.fillText("순금이의 한마디",76,940);ctx.fillStyle="#d8e5ee";ctx.font='600 29px "Malgun Gothic", sans-serif';
-    const words=(result.improvements[0]||"지금의 균형을 유지하며 편안하게 달려보세요.").split(" ");let line="",y=1000;words.forEach(word=>{const test=`${line}${word} `;if(ctx.measureText(test).width>900){ctx.fillText(line,76,y);line=`${word} `;y+=48}else line=test});ctx.fillText(line,76,y);
-    ctx.fillStyle="#61e6d3";ctx.font="700 25px Arial";ctx.fillText("PROJECT FREEDOM AI · AI-assisted estimate",76,1265);return card;
+    ctx.fillStyle = "#61e6d3"; ctx.font = "900 170px Arial"; ctx.fillText(String(result.score), 70, 440);
+    ctx.fillStyle = "#fff"; ctx.font = "800 38px Arial"; ctx.fillText("/ 100", 300, 430);
+    if (analysisFrame?.width) { drawCover(ctx, analysisFrame, 500, 265, 500, 300); ctx.fillStyle="rgba(7,17,31,.78)";ctx.fillRect(520,500,190,42);ctx.fillStyle="#61e6d3";ctx.font='700 21px "Malgun Gothic", sans-serif';ctx.fillText("AI 분석 프레임",535,528); }
+    ctx.font = '800 44px "Malgun Gothic", sans-serif'; ctx.fillStyle="#fff"; ctx.fillText(result.runnerType, 76, 625);
+    [["착지 유형",result.strikeType],["무릎 각도",`${result.averageKneeAngle}°`],["상체 기울기",`${result.averageTrunkLean}°`]].forEach(([label,value],index)=>{const x=76+index*310;ctx.fillStyle="rgba(255,255,255,.09)";ctx.fillRect(x,690,280,170);ctx.fillStyle="#9fb3c8";ctx.font='600 25px "Malgun Gothic", sans-serif';ctx.fillText(label,x+24,742);ctx.fillStyle="#fff";ctx.font='800 37px "Malgun Gothic", sans-serif';ctx.fillText(value,x+24,805)});
+    ctx.fillStyle="#fff";ctx.font='800 34px "Malgun Gothic", sans-serif';ctx.fillText("순금이의 한마디",76,950);ctx.fillStyle="#d8e5ee";ctx.font='600 29px "Malgun Gothic", sans-serif';
+    const words=(result.improvements[0]||"지금의 균형을 유지하며 편안하게 달려보세요.").split(" ");let line="",y=1010;words.forEach(word=>{const test=`${line}${word} `;if(ctx.measureText(test).width>900){ctx.fillText(line,76,y);line=`${word} `;y+=46}else line=test});ctx.fillText(line,76,y);
+    ctx.fillStyle="#9fb3c8";ctx.font='500 20px "Malgun Gothic", sans-serif';ctx.fillText("촬영 각도·속도·조명에 따라 결과가 달라질 수 있으며 의료 진단이 아닙니다.",76,1205);
+    ctx.fillStyle="#61e6d3";ctx.font="700 25px Arial";ctx.fillText("PROJECT FREEDOM AI · AI-assisted estimate",76,1270);return card;
   }
 
   function showFile(file) {
@@ -84,7 +92,7 @@
           <div class="col-6"><div class="run-check"><small>평균 상체 기울기</small><br><strong>${result.averageTrunkLean}°</strong></div></div>
           <div class="col-6"><div class="run-check"><small>관절 추출 성공률</small><br><strong>${result.detectionRate}%</strong></div></div>
         </div><div class="run-result-section mt-3"><strong>좋았던 점</strong><ul class="mt-2 mb-0">${strengths}</ul></div><div class="run-result-section mt-3"><strong>개선하면 좋은 점</strong><ul class="mt-2 mb-0">${improvements}</ul></div><div id="runShareArea" class="mt-3"><h3 class="h5 fw-bold">SNS 공유 결과지</h3></div><div class="small text-secondary mt-3">AI 영상 기반 참고 분석이며 의료 진단이 아닙니다. 촬영 각도와 속도에 따라 판정이 달라질 수 있어요.</div>`;
-      const card = makeShareCard(result), shareArea = document.getElementById("runShareArea"); shareArea.appendChild(card);
+      const card = makeShareCard(result, canvas), shareArea = document.getElementById("runShareArea"); shareArea.appendChild(card);
       const download = document.createElement("button"); download.type="button"; download.className="btn btn-success w-100 fw-bold"; download.textContent="SNS 결과 이미지 저장"; download.onclick=()=>{const link=document.createElement("a");link.download="sungeum-running-form-result.png";link.href=card.toDataURL("image/png");link.click()};shareArea.appendChild(download);
     } catch (error) {
       status.className = "alert alert-danger mt-4"; status.textContent = friendlyError(error);

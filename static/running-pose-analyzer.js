@@ -115,6 +115,7 @@ export async function analyzePose(video, canvas, onProgress = () => {}) {
   const sampleCount = Math.max(12, Math.min(60, Math.round(duration * 6)));
   const samples = [];
   let best = null;
+  let bestQuality = -1;
   // MediaPipe VIDEO mode requires timestamps to keep increasing even when the
   // user analyzes the same video again in the same browser tab.
   const timestampBase = Math.max(lastVideoTimestamp + 1, Math.ceil(performance.now()));
@@ -138,8 +139,12 @@ export async function analyzePose(video, canvas, onProgress = () => {}) {
           samples[samples.length - 1].foot = { ankleY: landmarks[p.ankle].y, heelY: landmarks[p.heel].y, toeY: landmarks[p.toe].y };
         }
       }
-      best = landmarks;
-      drawPose(canvas, video, landmarks);
+      const quality = landmarks.reduce((sum, point) => sum + (point.visibility ?? 0), 0);
+      if (quality > bestQuality) {
+        bestQuality = quality;
+        best = landmarks;
+        drawPose(canvas, video, landmarks);
+      }
     }
     onProgress(Math.round((index + 1) / sampleCount * 100));
   }
