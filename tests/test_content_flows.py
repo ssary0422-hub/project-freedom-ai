@@ -103,6 +103,45 @@ class ContentFlowTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"SNS_RESULT_OK", response.data)
 
+    def test_sns_image_failure_keeps_text_and_offers_image_only_retry(self):
+        patches = self._common_patches("sns", "make_sns", "SNS_TEXT_SURVIVES") + [
+            patch("routes.sns.make_image", side_effect=RuntimeError("image provider down")),
+            patch("routes.sns.create_sns_word"),
+            patch("routes.sns.create_sns_pdf"),
+        ]
+        response = self._run_with(patches, lambda _: self.client.post(
+            "/sns",
+            data={
+                "business": "카페", "company": "테스트카페",
+                "style": "따뜻한 신메뉴 홍보", "platform": "Instagram",
+                "with_image": "on", "image_style": "AI 추천",
+            },
+        ))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"SNS_TEXT_SURVIVES", response.data)
+        self.assertIn("이미지만 다시 생성".encode(), response.data)
+
+    @patch("routes.sns.get_profiles", return_value=[])
+    @patch("routes.sns.record_ai_credit_usage")
+    @patch("routes.sns.create_sns_pdf")
+    @patch("routes.sns.create_sns_word")
+    @patch("routes.sns.update_history_image", return_value=True)
+    @patch("routes.sns.make_image", return_value="static/generated/retry.png")
+    @patch("routes.sns.get_history_item", return_value=(
+        77, "카페", "테스트카페", "따뜻한 홍보", "SNS_RETRY_RESULT", "", "sns"
+    ))
+    @patch("routes.sns.get_plan_status", return_value=READY)
+    def test_sns_image_only_retry_attaches_image_and_charges_two(self, *mocks):
+        response = self.client.post(
+            "/sns/retry-image",
+            data={"history_id": "77", "platform": "Instagram", "image_style": "AI 추천"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"SNS_RETRY_RESULT", response.data)
+        self.assertIn(b"/static/generated/retry.png", response.data)
+        record_usage = mocks[6]
+        record_usage.assert_called_once_with(999999, "SNS_IMAGE_RETRY", 2)
+
     def test_poster_page_is_generic_and_randomized(self):
         response = self.client.get("/poster")
         self.assertEqual(response.status_code, 200)

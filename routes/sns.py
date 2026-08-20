@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, request, session, send_file
 from ai.sns import make_sns
 from ai.image import make_image
 from ai.image_prompts import build_marketing_image_prompt
-from database.db import save_history
+from database.db import get_history_item, save_history, update_history_image
 from database.profiles import get_profiles, get_profile
 from database.users import (
     get_ai_enabled,
@@ -526,6 +526,19 @@ def _image_style_instruction(image_style):
     )
 
 
+def _generate_sns_image(business, company, style, platform, image_style, custom_image_style=""):
+    effective_image_style = custom_image_style or image_style
+    prompt = build_marketing_image_prompt(
+        business=business,
+        context=f"{platform} social post for {company}; {style}",
+        mood=style,
+        image_style=effective_image_style,
+        placement="a square social media hero image",
+        custom_concept=custom_image_style,
+    )
+    return make_image(prompt)
+
+
 @sns_bp.route("/sns", methods=["GET"])
 @login_required
 def sns():
@@ -549,6 +562,8 @@ def _sns_page():
     image_style = "AI 추천"
     custom_image_style = ""
     with_image = False
+    image_error = ""
+    image_retry_history_id = None
 
     user_id = session["user_id"]
     saved_profiles = get_profiles(user_id)
@@ -632,35 +647,20 @@ def _sns_page():
                 image_path = ""
 
                 if with_image:
-                    image_style_instruction = _image_style_instruction(effective_image_style)
-                    image_prompt = f"""
-SNS 게시물용 대표 이미지.
+                    try:
+                        image_path = _generate_sns_image(
+                            business, company, style, platform,
+                            image_style, custom_image_style,
+                        )
+                        image_url = "/" + Path(image_path).as_posix()
+                    except Exception as image_exception:
+                        image_error = (
+                            "글은 안전하게 완성했지만 이미지 생성에 실패했어요. "
+                            "같은 글을 유지한 채 이미지만 다시 만들 수 있어요."
+                        )
+                        print("SNS image generation failed:", image_exception)
 
-회사명: {company}
-업종: {business}
-플랫폼: {platform}
-브랜드 분위기: {style}
-적용 이미지 스타일: {effective_image_style}
-스타일 지시: {image_style_instruction}
-
-업종과 회사명에 정확히 맞는 소셜미디어 광고 이미지.
-마사지샵이 아닌 업종에는 마사지 장면이나 스파 소품을 임의로 넣지 말 것.
-세련되고 시선을 끄는 구성.
-브랜드 분위기에 어울리는 자연스럽고 고급스러운 이미지.
-이미지 안에는 글자를 넣지 말 것.
-"""
-                    image_prompt = build_marketing_image_prompt(
-                        business=business,
-                        context=f"{platform} social post for {company}; {style}",
-                        mood=style,
-                        image_style=effective_image_style,
-                        placement="a square social media hero image",
-                        custom_concept=custom_image_style,
-                    )
-                    image_path = make_image(image_prompt)
-                    image_url = "/" + Path(image_path).as_posix()
-
-                save_history(
+                image_retry_history_id = save_history(
                     business, company, style, result, image_url,
                     content_type="sns",
                     user_id=session["user_id"]
@@ -700,7 +700,60 @@ SNS 게시물용 대표 이미지.
         platform=platform,
         image_style=image_style,
         custom_image_style=custom_image_style,
-        with_image=with_image
+        with_image=with_image,
+        image_error=image_error,
+        image_retry_history_id=image_retry_history_id,
+    )
+
+
+@sns_bp.post("/sns/retry-image")
+@login_required
+def retry_sns_image():
+    history_id = request.form.get("history_id", type=int)
+    item = get_history_item(history_id, session["user_id"]) if history_id else None
+    if not item or item[6] != "sns":
+        return "다시 만들 SNS 결과를 찾을 수 없어요.", 404
+
+    business, company, style, result = item[1], item[2], item[3], item[4]
+    platform = request.form.get("platform", "Instagram").strip()
+    image_style = request.form.get("image_style", "AI 추천").strip()
+    custom_image_style = request.form.get("custom_image_style", "").strip()
+    credit_status = get_plan_status(session["user_id"], required_credits=2)
+    image_url = ""
+    image_error = ""
+    error = ""
+
+    if not credit_status["can_generate"]:
+        error = "이미지 재생성에는 2크레딧이 필요해요."
+    else:
+        try:
+            image_path = _generate_sns_image(
+                business, company, style, platform,
+                image_style, custom_image_style,
+            )
+            image_url = "/" + Path(image_path).as_posix()
+            if not update_history_image(history_id, session["user_id"], image_url):
+                raise RuntimeError("생성 기록에 이미지를 연결하지 못했습니다.")
+            create_sns_word(result, image_path, company)
+            create_sns_pdf(result, image_path)
+            record_ai_credit_usage(session["user_id"], "SNS_IMAGE_RETRY", 2)
+            credit_status = get_plan_status(session["user_id"])
+            session["plan_remaining"] = credit_status["remaining"]
+        except Exception as image_exception:
+            print("SNS image retry failed:", image_exception)
+            image_url = ""
+            image_error = (
+                "이미지 재생성에 실패했어요. 크레딧은 차감하지 않았습니다. "
+                "잠시 후 다시 눌러주세요."
+            )
+
+    return render_template(
+        "sns.html", result=result, image_url=image_url,
+        image_error=image_error, image_retry_history_id=history_id,
+        error=error, saved_profiles=get_profiles(session["user_id"]),
+        selected_profile_id=None, loaded_profile_name="", business=business,
+        company=company, style=style, platform=platform, image_style=image_style,
+        custom_image_style=custom_image_style, with_image=True,
     )
 
 

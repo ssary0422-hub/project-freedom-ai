@@ -756,6 +756,27 @@ def get_history_item(history_id, user_id):
     return row
 
 
+def update_history_image(history_id, user_id, image_url):
+    """Attach a regenerated image only to the owning user's SNS history item."""
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE history
+        SET image_url = ?
+        WHERE id = ?
+          AND user_id = ?
+          AND COALESCE(content_type, 'general') = 'sns'
+        """,
+        (image_url, history_id, user_id),
+    )
+    updated = cursor.rowcount == 1
+    conn.commit()
+    conn.close()
+    return updated
+
+
 
 def create_test_payment(
     user_id,
