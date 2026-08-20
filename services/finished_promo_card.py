@@ -282,16 +282,14 @@ def create_finished_promo_card(
         lx, ly = WIDTH - logo.width - 72, 62
         if logo.getchannel("A").getextrema()[0] == 255:
             _rounded(draw, (lx - 18, ly - 12, lx + logo.width + 18, ly + logo.height + 12), 20, (255, 255, 255, 235))
-        else:
-            logo_shadow = Image.new("RGBA", logo.size, (0, 0, 0, 0))
-            logo_shadow.putalpha(logo.getchannel("A").filter(ImageFilter.GaussianBlur(10)))
-            image.paste(logo_shadow, (lx + 5, ly + 8), logo_shadow)
         image.paste(logo, (lx, ly), logo)
 
     badge_font = _font(24, True, language)
-    badge_width = min(930, max(332, _text_width(draw, labels["badge"], badge_font, language, True) + 60))
+    badge_text_width = _text_width(draw, labels["badge"], badge_font, language, True)
+    badge_width = min(930, max(332, badge_text_width + 60))
     _rounded(draw, (58, 58, 58 + badge_width, 116), 29, (255, 255, 255, 22), (255, 255, 255, 55), 2)
-    _draw_text(draw, (88, 73), labels["badge"], badge_font, (198, 255, 240, 255), language, True)
+    badge_x = 58 + (badge_width - badge_text_width) / 2
+    _draw_text(draw, (badge_x, 73), labels["badge"], badge_font, (198, 255, 240, 255), language, True)
 
     business_label = business or "BUSINESS"
     _draw_text(draw, (64, 166), business_label, _font(27, True, language), (93, 235, 205, 255), language, True)
