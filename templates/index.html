@@ -169,6 +169,21 @@
 {% block result_title %}{{ t("v21.result.ads") }}{% endblock %}
 
 {% block result_actions %}
+{% if image_error and image_retry_history_id %}
+<div class="alert alert-warning w-100 mb-3">
+    <strong>광고 문구는 안전하게 저장됐어요.</strong><br>
+    {{ image_error }}
+</div>
+<form method="POST" action="/ads-generator/retry-image" class="w-100 mb-3">
+    <input type="hidden" name="history_id" value="{{ image_retry_history_id }}">
+    <input type="hidden" name="image_style" value="{{ image_style }}">
+    <input type="hidden" name="custom_image_style" value="{{ custom_image_style }}">
+    <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold">
+        이미지 생성 다시 시도
+    </button>
+    <div class="small text-muted mt-2">성공했을 때만 이미지 비용 2크레딧이 차감됩니다.</div>
+</form>
+{% endif %}
 <a href="/download" class="btn btn-success me-2">
     {{ t("v21.download.word") }}
 </a>

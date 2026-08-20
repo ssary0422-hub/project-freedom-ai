@@ -9,7 +9,7 @@ from ai.ads import make_ads
 from ai.image import make_image
 from ai.image_prompts import build_marketing_image_prompt
 from documents.pdf import create_pdf, PDF_PATH
-from database.db import save_history
+from database.db import save_history, get_history_item, update_history_image
 from database.profiles import get_profiles, get_profile
 from database.users import (
     get_ai_enabled,
@@ -20,6 +20,32 @@ from documents.word import create_word, WORD_PATH
 from routes.auth import login_required
 
 ads_bp = Blueprint("ads", __name__)
+
+
+def _generate_ad_image(business, company, style, image_style, custom_image_style=""):
+    prompt = build_marketing_image_prompt(
+        business=business,
+        context=f"advertising campaign for {company}",
+        mood=style,
+        image_style=image_style,
+        placement="a square social advertising image",
+        custom_concept=custom_image_style,
+    )
+    try:
+        return make_image(prompt)
+    except Exception as exc:
+        reason = str(exc).lower()
+        if not any(word in reason for word in ("moderation", "safety", "sexual")):
+            raise
+        safe_prompt = f"""
+Create a family-friendly square commercial brand image for {company}.
+Show only an elegant business reception or storefront interior, tasteful furniture,
+soft lighting, plants and neatly arranged products. No people, no human body, no skin,
+no treatment scene, no text, no logo and no watermark. Mood: {style}.
+Professional, welcoming, premium advertising photography.
+"""
+        print("광고 이미지 안전 대체 프롬프트로 재시도합니다.")
+        return make_image(safe_prompt)
 
 
 def _find_brand_font(size: int):
@@ -550,11 +576,24 @@ def _home_page():
     custom_image_style = ""
     with_image = False
     error = ""
+    image_error = ""
+    image_retry_history_id = None
 
     user_id = session["user_id"]
     saved_profiles = get_profiles(user_id=user_id)
     selected_profile_id = request.args.get("profile_id", type=int)
     loaded_profile_name = ""
+
+    if request.method == "GET" and not selected_profile_id and not result:
+        pending_id = session.get("ads_image_retry_id")
+        pending = get_history_item(pending_id, user_id) if pending_id else None
+        if pending and pending[6] == "ads" and not pending[5]:
+            image_retry_history_id = pending_id
+            business, company, style, result = pending[1], pending[2], pending[3], pending[4]
+            with_image = True
+            image_error = "이미지가 아직 완성되지 않았어요. 아래 버튼으로 이미지만 다시 생성할 수 있어요."
+        elif pending_id:
+            session.pop("ads_image_retry_id", None)
 
     if request.method == "GET" and not selected_profile_id:
         assistant_brief = request.args.get("assistant_brief", "").strip()
@@ -651,28 +690,23 @@ def _home_page():
 이미지 안에는 글자를 넣지 말 것.
 """
                 try:
-                    image_prompt = build_marketing_image_prompt(
-                        business=business,
-                        context=f"advertising campaign for {company}",
-                        mood=style,
-                        image_style=effective_image_style,
-                        placement="a square social advertising image",
-                        custom_concept=custom_image_style,
+                    image_path = _generate_ad_image(
+                        business, company, style, effective_image_style, custom_image_style
                     )
-                    image_path = make_image(image_prompt)
                     image_url = "/" + Path(image_path).as_posix()
-                except Exception as image_error:
-                    print("광고 이미지 생성 실패:", image_error)
-                    error = (
-                        "광고 문구는 생성되었지만 이미지 생성에 실패했습니다. "
-                        f"오류: {image_error}"
-                    )
+                except Exception as image_exception:
+                    print("광고 이미지 생성 실패:", image_exception)
+                    image_error = "광고 문구는 완성됐어요. 이미지만 다시 생성할 수 있습니다."
 
-            save_history(
+            image_retry_history_id = save_history(
                 business, company, style, result, image_url,
                 content_type="ads",
                 user_id=session["user_id"]
             )
+            if with_image and not image_url:
+                session["ads_image_retry_id"] = image_retry_history_id
+            else:
+                session.pop("ads_image_retry_id", None)
             create_word(result, image_path, company)
             create_pdf(result, image_path)
 
@@ -704,6 +738,52 @@ def _home_page():
         saved_profiles=saved_profiles,
         selected_profile_id=selected_profile_id,
         loaded_profile_name=loaded_profile_name,
+        image_error=image_error,
+        image_retry_history_id=image_retry_history_id,
+    )
+
+
+@ads_bp.post("/ads-generator/retry-image")
+@login_required
+def retry_ads_image():
+    history_id = request.form.get("history_id", type=int)
+    item = get_history_item(history_id, session["user_id"]) if history_id else None
+    if not item or item[6] != "ads":
+        return "다시 만들 광고 결과를 찾을 수 없어요.", 404
+
+    business, company, style, result = item[1], item[2], item[3], item[4]
+    image_style = request.form.get("image_style", "AI 추천").strip()
+    custom_image_style = request.form.get("custom_image_style", "").strip()
+    image_url = ""
+    image_error = ""
+    error = ""
+    status = get_plan_status(session["user_id"], required_credits=2)
+    if not status["can_generate"]:
+        error = "이미지 재생성에는 2크레딧이 필요해요."
+    else:
+        try:
+            image_path = _generate_ad_image(
+                business, company, style, custom_image_style or image_style, custom_image_style
+            )
+            image_url = "/" + Path(image_path).as_posix()
+            if not update_history_image(history_id, session["user_id"], image_url, "ads"):
+                raise RuntimeError("생성 기록에 이미지를 연결하지 못했습니다.")
+            create_word(result, image_path, company)
+            create_pdf(result, image_path)
+            record_ai_credit_usage(session["user_id"], "ADS_IMAGE_RETRY", 2)
+            session.pop("ads_image_retry_id", None)
+        except Exception as exc:
+            print("광고 이미지 재생성 실패:", exc)
+            image_error = "이미지 재생성에 실패했어요. 크레딧은 차감하지 않았습니다. 다시 눌러주세요."
+            session["ads_image_retry_id"] = history_id
+
+    return render_template(
+        "index.html", result=result, image_url=image_url, error=error,
+        image_error=image_error, image_retry_history_id=history_id,
+        business=business, company=company, style=style, image_style=image_style,
+        custom_image_style=custom_image_style, with_image=True,
+        saved_profiles=get_profiles(session["user_id"]), selected_profile_id=None,
+        loaded_profile_name="",
     )
 
 

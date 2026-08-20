@@ -54,6 +54,38 @@ class ContentFlowTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"ADS_RESULT_OK", response.data)
 
+    def test_ads_image_failure_keeps_retry_available_after_refresh(self):
+        patches = self._common_patches("ads", "make_ads", "ADS_TEXT_SURVIVES") + [
+            patch("routes.ads.make_image", side_effect=RuntimeError("provider down")),
+            patch("routes.ads.create_word"),
+            patch("routes.ads.create_pdf"),
+            patch("routes.ads.get_history_item", return_value=(
+                1, "massage", "Seven Days", "premium", "ADS_TEXT_SURVIVES", "", "ads"
+            )),
+        ]
+        def run(_):
+            first = self.client.post("/ads-generator", data={
+                "business": "massage", "company": "Seven Days", "style": "premium",
+                "with_image": "on", "image_style": "AI 추천",
+            })
+            refreshed = self.client.get("/ads-generator")
+            return first, refreshed
+        first, refreshed = self._run_with(patches, run)
+        self.assertIn("이미지 생성 다시 시도".encode(), first.data)
+        self.assertIn("이미지 생성 다시 시도".encode(), refreshed.data)
+
+    @patch("routes.ads.make_image", side_effect=[
+        RuntimeError("moderation_blocked safety_violations sexual"),
+        "static/generated/safe.png",
+    ])
+    def test_ads_safety_block_uses_family_friendly_fallback(self, make_image_mock):
+        path = __import__("routes.ads", fromlist=["_generate_ad_image"])._generate_ad_image(
+            "massage", "Seven Days", "premium", "AI 추천"
+        )
+        self.assertEqual(path, "static/generated/safe.png")
+        self.assertEqual(make_image_mock.call_count, 2)
+        self.assertIn("No people", make_image_mock.call_args_list[1].args[0])
+
     def test_blog_text_generation_with_photo_guidance(self):
         patches = self._common_patches("blog", "make_blog", "BLOG_RESULT_OK") + [
             patch("routes.blog.save_files", return_value=[(1, "menu.jpg")]),
