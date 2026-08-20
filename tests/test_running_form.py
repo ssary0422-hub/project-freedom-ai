@@ -69,6 +69,9 @@ class RunningFormTests(unittest.TestCase):
         self.assertIn("내 러닝폼 봐주기".encode(), response.data)
         self.assertIn(b"hero-task-card", response.data)
         self.assertIn(b'data-kind="running"', response.data)
+        self.assertIn("AI 총괄실장 순금이".encode(), response.data)
+        self.assertIn("오늘 무엇을 맡길까요?".encode(), response.data)
+        self.assertIn("홍보·러닝 함께 보기".encode(), response.data)
 
     def test_preflight_accepts_supported_side_video(self):
         response = self.client.post("/running-form/preflight", data={"video": (io.BytesIO(b"test-video"), "run.mp4"), "pace": "marathon", "view": "side"}, content_type="multipart/form-data")
