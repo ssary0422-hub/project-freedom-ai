@@ -658,6 +658,7 @@ def _sns_page():
                                 campaign_request=style,
                                 result=result,
                                 output_name=f"finished-sns-{uuid4().hex[:10]}.png",
+                                language=session.get("language", "ko"),
                             )
                         else:
                             image_path = _generate_sns_image(

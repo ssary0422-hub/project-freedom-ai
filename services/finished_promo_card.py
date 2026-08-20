@@ -9,17 +9,66 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 OUTPUT_DIR = BASE_DIR / "static" / "generated"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 WIDTH, HEIGHT = 1080, 1350
+FONT_DIR = BASE_DIR / "assets" / "fonts"
+
+CARD_LABELS = {
+    "ko": {
+        "badge": "순금이 완성형 홍보물",
+        "fact": "오늘 고객에게 알려야 할 한 가지",
+        "footer": "사실 기반 · 바로 게시 가능",
+    },
+    "en": {
+        "badge": "Sungeum Ready-to-Post",
+        "fact": "One thing customers should know today",
+        "footer": "FACT-BASED · READY TO POST",
+    },
+    "ja": {
+        "badge": "スングム 完成型プロモーション",
+        "fact": "今日お客様に伝えたいこと",
+        "footer": "事実に基づく · 投稿準備完了",
+    },
+    "th": {
+        "badge": "สื่อโปรโมตพร้อมโพสต์โดยซุนกึม",
+        "fact": "สิ่งสำคัญที่ลูกค้าควรรู้วันนี้",
+        "footer": "ข้อมูลจริง - พร้อมโพสต์",
+    },
+    "zh": {
+        "badge": "顺金成品宣传图",
+        "fact": "今天最想告诉顾客的一件事",
+        "footer": "基于事实 · 可直接发布",
+    },
+    "es": {
+        "badge": "Promoción lista por Sungeum",
+        "fact": "Lo que tus clientes deben saber hoy",
+        "footer": "BASADO EN HECHOS · LISTO PARA PUBLICAR",
+    },
+}
 
 
-def _font(size: int, bold: bool = False):
+def _font(size: int, bold: bool = False, language: str = "ko"):
+    bundled = {
+        "ko": FONT_DIR / "NotoSansKR-VF.otf",
+        "en": FONT_DIR / "NotoSansKR-VF.otf",
+        "ja": FONT_DIR / "NotoSansJP-VF.otf",
+        "th": FONT_DIR / ("NotoSansThai-Bold.ttf" if bold else "NotoSansThai-Regular.ttf"),
+        "zh": FONT_DIR / "NotoSansSC-VF.otf",
+        "es": FONT_DIR / "NotoSansKR-VF.otf",
+    }
     candidates = [
+        bundled.get(language, bundled["ko"]),
         Path(r"C:\Windows\Fonts\malgunbd.ttf" if bold else r"C:\Windows\Fonts\malgun.ttf"),
         Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc" if bold else "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
         Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
     ]
     for candidate in candidates:
         if candidate.exists():
-            return ImageFont.truetype(str(candidate), size=size)
+            font = ImageFont.truetype(str(candidate), size=size)
+            if bold and candidate.name.endswith("-VF.otf"):
+                try:
+                    font.set_variation_by_name("Bold")
+                except (OSError, ValueError):
+                    pass
+            return font
     return ImageFont.load_default()
 
 
@@ -89,8 +138,9 @@ def _wrap(draw, text, font, max_width, max_lines):
     if current and len(lines) < max_lines:
         lines.append(current)
     consumed = " ".join(lines)
-    if _clean(consumed) != _clean(text) and lines:
-        lines[-1] = lines[-1].rstrip(" .,·") + "…"
+    without_spacing = lambda value: re.sub(r"\s+", "", value)
+    if without_spacing(consumed) != without_spacing(text) and lines:
+        lines[-1] = lines[-1].rstrip(" .,·") + "..."
     return lines
 
 
@@ -106,6 +156,7 @@ def create_finished_promo_card(
     result: str,
     output_name: str = "finished-promo-card.png",
     subject_path: str = "",
+    language: str = "ko",
 ):
     """Create a publish-ready portrait card using verified user copy.
 
@@ -113,6 +164,8 @@ def create_finished_promo_card(
     subject image can be supplied; otherwise it creates a typography-led card.
     """
     business, company = _clean(business), _clean(company)
+    language = language if language in CARD_LABELS else "ko"
+    labels = CARD_LABELS[language]
     headline, benefit, cta = extract_card_copy(result, campaign_request, company)
 
     image = Image.new("RGB", (WIDTH, HEIGHT), "#07111f")
@@ -142,15 +195,17 @@ def create_finished_promo_card(
         image.paste(shadow, (sx + 12, sy + 20), shadow)
         image.paste(subject, (sx, sy), subject)
 
-    _rounded(draw, (58, 58, 390, 116), 29, (255, 255, 255, 22), (255, 255, 255, 55), 2)
-    draw.text((88, 73), "순금이 완성형 홍보물", font=_font(24, True), fill=(198, 255, 240, 255))
+    badge_font = _font(24, True, language)
+    badge_width = min(930, max(332, draw.textbbox((0, 0), labels["badge"], font=badge_font)[2] + 60))
+    _rounded(draw, (58, 58, 58 + badge_width, 116), 29, (255, 255, 255, 22), (255, 255, 255, 55), 2)
+    draw.text((88, 73), labels["badge"], font=badge_font, fill=(198, 255, 240, 255))
 
     business_label = business or "BUSINESS"
-    draw.text((64, 166), business_label, font=_font(27, True), fill=(93, 235, 205, 255))
+    draw.text((64, 166), business_label, font=_font(27, True, language), fill=(93, 235, 205, 255))
 
-    headline_font = _font(82, True)
+    headline_font = _font(82, True, language)
     while headline_font.size > 54 and len(_wrap(draw, headline, headline_font, 900, 3)) > 3:
-        headline_font = _font(headline_font.size - 4, True)
+        headline_font = _font(headline_font.size - 4, True, language)
     title_lines = _wrap(draw, headline, headline_font, 900, 3)
     y = 226
     for line in title_lines:
@@ -159,7 +214,7 @@ def create_finished_promo_card(
 
     draw.rounded_rectangle((62, y + 18, 152, y + 28), radius=5, fill=(93, 235, 205, 255))
     y += 72
-    benefit_font = _font(38, False)
+    benefit_font = _font(38, False, language)
     for line in _wrap(draw, benefit, benefit_font, 820 if subject_path else 900, 4):
         draw.text((66, y), line, font=benefit_font, fill=(202, 214, 231, 255))
         y += 58
@@ -167,22 +222,24 @@ def create_finished_promo_card(
     card_top = max(y + 42, 785)
     card_width = 610 if subject_path else 950
     _rounded(draw, (58, card_top, 58 + card_width, card_top + 260), 34, (255, 255, 255, 18), (255, 255, 255, 45), 2)
-    draw.text((92, card_top + 42), "오늘 고객에게 알려야 할 한 가지", font=_font(25, True), fill=(93, 235, 205, 255))
+    draw.text((92, card_top + 42), labels["fact"], font=_font(25, True, language), fill=(93, 235, 205, 255))
     request_text = _clean(campaign_request) or benefit
     ry = card_top + 92
-    for line in _wrap(draw, request_text, _font(31, True), card_width - 68, 3):
-        draw.text((92, ry), line, font=_font(31, True), fill=(246, 248, 252, 255))
+    for line in _wrap(draw, request_text, _font(31, True, language), card_width - 68, 3):
+        draw.text((92, ry), line, font=_font(31, True, language), fill=(246, 248, 252, 255))
         ry += 47
 
     cta_y = 1162
     _rounded(draw, (58, cta_y, 720, cta_y + 92), 46, (93, 235, 205, 255))
-    cta_font = _font(30, True)
+    cta_font = _font(30, True, language)
     cta_text = cta
     while draw.textbbox((0, 0), cta_text, font=cta_font)[2] > 595 and cta_font.size > 22:
-        cta_font = _font(cta_font.size - 2, True)
+        cta_font = _font(cta_font.size - 2, True, language)
     draw.text((96, cta_y + 26), cta_text, font=cta_font, fill=(5, 31, 39, 255))
-    draw.text((60, 1282), company or "업체명", font=_font(28, True), fill=(247, 250, 255, 255))
-    draw.text((WIDTH - 332, 1288), "FACT-BASED · READY TO POST", font=_font(17, True), fill=(133, 153, 181, 255))
+    draw.text((60, 1282), company or "업체명", font=_font(28, True, language), fill=(247, 250, 255, 255))
+    footer_font = _font(17, True, language)
+    footer_width = draw.textbbox((0, 0), labels["footer"], font=footer_font)[2]
+    draw.text((WIDTH - footer_width - 58, 1288), labels["footer"], font=footer_font, fill=(133, 153, 181, 255))
 
     safe_name = re.sub(r"[^a-zA-Z0-9._-]", "-", output_name) or "finished-promo-card.png"
     output_path = OUTPUT_DIR / safe_name

@@ -6,12 +6,31 @@ from unittest.mock import patch
 from PIL import Image
 
 from services.finished_promo_card import (
+    CARD_LABELS,
+    _font,
     create_finished_promo_card,
     extract_card_copy,
 )
 
 
 class FinishedPromoCardTests(unittest.TestCase):
+    def test_all_supported_languages_have_localized_card_labels(self):
+        self.assertEqual(set(CARD_LABELS), {"ko", "en", "ja", "th", "zh", "es"})
+        for labels in CARD_LABELS.values():
+            self.assertTrue(labels["badge"])
+            self.assertTrue(labels["fact"])
+            self.assertTrue(labels["footer"])
+
+    def test_bundled_fonts_cover_cjk_and_thai(self):
+        missing_character = "\U0010ffff"
+        for language, character in (("ko", "가"), ("ja", "あ"), ("zh", "中"), ("th", "ก")):
+            font = _font(40, language=language)
+            self.assertNotEqual(
+                bytes(font.getmask(character)),
+                bytes(font.getmask(missing_character)),
+                language,
+            )
+
     def test_extracts_structured_ad_copy(self):
         self.assertEqual(
             extract_card_copy(

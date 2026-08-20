@@ -700,6 +700,7 @@ def _home_page():
                             campaign_request=style,
                             result=result,
                             output_name=f"finished-ad-{uuid4().hex[:10]}.png",
+                            language=session.get("language", "ko"),
                         )
                     else:
                         image_path = _generate_ad_image(
