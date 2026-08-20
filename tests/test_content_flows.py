@@ -182,13 +182,19 @@ class ContentFlowTests(unittest.TestCase):
         self.assertIn(b"rotateExamples", js.data)
         self.assertIn(b"rawLines", js.data)
         self.assertIn(b"makeOneClick", js.data)
-        self.assertIn("포스터 한 번에 완성".encode(), response.data)
+        self.assertIn("순금이가 포스터 완성".encode(), response.data)
+        self.assertIn("보통 1~2분 정도 걸려요".encode(), response.data)
+        self.assertIn("원하는 분만 직접 설정하기".encode(), response.data)
         js.close()
 
     def test_all_post_forms_show_loading_overlay(self):
         source = Path("templates/generator_base.html").read_text(encoding="utf-8")
         self.assertIn('querySelectorAll("form[method=\'POST\']")', source)
         self.assertIn("⏳ 이미지 생성 중", source)
+
+    def test_sungeum_assistant_has_visible_click_guidance(self):
+        source = Path("templates/_sungeum_assistant.html").read_text(encoding="utf-8")
+        self.assertIn("순금이에게 물어보기", source)
 
     def test_generated_media_has_direct_image_download(self):
         source = Path("templates/generator_base.html").read_text(encoding="utf-8")

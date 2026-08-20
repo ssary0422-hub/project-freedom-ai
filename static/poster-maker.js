@@ -225,16 +225,24 @@
   async function makeOneClick() {
     const button = $("makeOneClickPoster"), status = $("posterMainStatus");
     if (!val("posterCompany") || !val("posterPurpose")) { status.className = "poster-main-status text-danger mb-3"; status.textContent = "업체명과 홍보 내용을 먼저 입력해주세요."; return; }
-    setButtonBusy(button, true, "⏳ 순금이가 문구를 만들고 있어요…"); status.className = "poster-main-status text-primary mb-3"; status.textContent = "1/2 광고 문구를 구성하고 있습니다.";
+    const startedAt = Date.now();
+    let currentStep = "1/2 광고 문구를 구성하고 있습니다.";
+    const showProgress = () => {
+      const seconds = Math.floor((Date.now() - startedAt) / 1000), minutes = Math.floor(seconds / 60), rest = seconds % 60;
+      const elapsed = minutes ? `${minutes}분 ${rest}초` : `${rest}초`;
+      status.textContent = `${currentStep} · 경과 ${elapsed}${seconds >= 120 ? " · 정상적으로 계속 작업 중이에요. 화면을 닫지 마세요." : ""}`;
+    };
+    setButtonBusy(button, true, "⏳ 순금이가 문구를 만들고 있어요…"); status.className = "poster-main-status text-primary mb-3"; showProgress();
+    const progressTimer = setInterval(showProgress, 1000);
     try {
       if (!await suggest({ autoApply: true })) throw new Error("문구를 만들지 못했습니다. 다시 눌러주세요.");
-      button.textContent = "🎨 AI 배경을 만들고 있어요…"; status.textContent = "2/2 포스터 배경과 최종 배치를 만들고 있습니다. 잠시만 기다려주세요.";
+      button.textContent = "🎨 AI 배경을 만들고 있어요…"; currentStep = "2/2 포스터 배경과 최종 배치를 만들고 있습니다."; showProgress();
       const backgroundReady = await createBackground();
       status.className = `poster-main-status ${backgroundReady ? "text-success" : "text-warning"} mb-3`;
       status.textContent = backgroundReady ? "완성! 오른쪽 결과에서 바로 저장할 수 있어요." : "문구 포스터는 완성했지만 AI 배경은 실패했어요. 아래에서 배경만 다시 만들 수 있어요.";
       $("posterResults")?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) { status.className = "poster-main-status text-danger mb-3"; status.textContent = error.message; }
-    finally { setButtonBusy(button, false); }
+    finally { clearInterval(progressTimer); setButtonBusy(button, false); }
   }
 
   const examples = { posterCompany: ["윤슬도자기", "달빛책방", "모모식물상점"], posterHeadline: ["손끝에서 시작되는 나만의 그릇", "금요일 밤, 작가와 책 사이", "우리 집 식물에게 새 화분을"], posterBenefit: ["처음이어도 편안한 소규모 원데이 클래스", "열두 명만 함께하는 깊이 있는 북토크", "흙과 화분이 모두 준비된 분갈이 수업"], posterOffer: ["이번 주말 클래스 모집", "선착순 12명 예약", "재료비 포함 신청"], posterContact: ["프로필 링크에서 신청하세요", "DM으로 예약해주세요", "온라인 예약 또는 매장 문의"] };
