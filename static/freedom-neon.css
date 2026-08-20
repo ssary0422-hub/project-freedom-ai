@@ -138,10 +138,7 @@ a[href="/package"] { display:none !important; }
 .pf-footer { color: #66728a !important; }
 
 /* Public landing: 70% premium blue/violet, 30% creator energy. */
-.navx .navbar-brand::before {
-    content: "F"; display: inline-grid; place-items: center; width: 35px; height: 35px;
-    margin-right: 10px; border-radius: 11px; color: white; background: var(--pf-gradient);
-}
+.navx .navbar-brand::before { content: none; }
 .landing-hot, .navx .btn-primary, .hero .btn-primary { background: var(--pf-hot-gradient) !important; }
 .hero h1 { text-shadow: 0 12px 55px rgba(55,125,255,.15); }
 .hero h1::first-line { color: #fff; }
