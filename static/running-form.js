@@ -135,7 +135,7 @@
     } catch (error) {
       status.className = "alert alert-danger mt-4"; status.textContent = friendlyError(error);
     } finally {
-      button.textContent = "순금이에게 분석 맡기기"; sync();
+      button.textContent = "순금이에게 분석 맡기기 · 3크레딧"; sync();
     }
   });
 })();

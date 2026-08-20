@@ -53,14 +53,18 @@ class RunningFormTests(unittest.TestCase):
         self.assertIn("촬영 각도·속도·조명에 따라".encode(), response.data)
         self.assertIn(b"saveRunningHistory", response.data)
 
+    @patch("routes.running_form.record_ai_credit_usage")
+    @patch("routes.running_form.get_plan_status", side_effect=[{"can_generate":True,"remaining":4}, {"used":3,"remaining":1,"percent":75}])
     @patch("routes.running_form.save_history", return_value=81)
     @patch("routes.running_form._save_result_image", return_value="/static/generated/running/999999/result.png")
-    def test_completed_running_analysis_is_saved_to_history(self, save_image, save_history):
+    def test_completed_running_analysis_is_saved_to_history(self, save_image, save_history, get_status, record_usage):
         response = self.client.post("/running-form/history", json={"score":78,"runnerType":"포어풋형 · 전방 추진형","strikeType":"포어풋형","averageKneeAngle":104,"averageTrunkLean":17,"strikeConfidence":95,"side":"왼쪽 측면","coachMessage":"발목부터 몸 전체를 기울여서 달려봐.","image":"data:image/png;base64,test"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["history_id"], 81)
         save_history.assert_called_once()
         self.assertEqual(save_history.call_args.kwargs["content_type"], "running_form")
+        record_usage.assert_called_once_with(999999, "RUNNING_FORM", 3)
+        self.assertEqual(response.get_json()["remaining_credits"], 1)
 
     def test_landing_has_dedicated_running_ai_entry(self):
         response = self.client.get("/")
@@ -86,7 +90,8 @@ class RunningFormTests(unittest.TestCase):
         self.assertIn(b"savePosterHistory", response.data)
         self.assertIn(b"/poster/history", response.data)
 
-    def test_preflight_accepts_supported_side_video(self):
+    @patch("routes.running_form.get_plan_status", return_value={"can_generate":True,"remaining":4})
+    def test_preflight_accepts_supported_side_video(self, get_status):
         response = self.client.post("/running-form/preflight", data={"video": (io.BytesIO(b"test-video"), "run.mp4"), "pace": "marathon", "view": "side"}, content_type="multipart/form-data")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.get_json()["ok"])
@@ -95,6 +100,12 @@ class RunningFormTests(unittest.TestCase):
         response = self.client.post("/running-form/preflight", data={"video": (io.BytesIO(b"not-video"), "run.txt"), "view": "side"}, content_type="multipart/form-data")
         self.assertEqual(response.status_code, 400)
         self.assertFalse(response.get_json()["ok"])
+
+    @patch("routes.running_form.get_plan_status", return_value={"can_generate":False,"remaining":1})
+    def test_preflight_requires_three_credits(self, get_status):
+        response = self.client.post("/running-form/preflight", data={"video": (io.BytesIO(b"test-video"), "run.mp4"), "view": "side"}, content_type="multipart/form-data")
+        self.assertEqual(response.status_code, 402)
+        self.assertEqual(response.get_json()["required_credits"], 3)
 
 
 if __name__ == "__main__":
