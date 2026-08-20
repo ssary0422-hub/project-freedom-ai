@@ -29,7 +29,14 @@
   function drawContain(ctx, image, x, y, width, height) {
     const scale = Math.min(width / image.width, height / image.height), drawWidth = image.width * scale, drawHeight = image.height * scale;
     const drawX = x + (width - drawWidth) / 2, drawY = y + (height - drawHeight) / 2;
-    ctx.save(); roundedClip(ctx, x, y, width, height); ctx.fillStyle = "#07111f"; ctx.fillRect(x, y, width, height); ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight); ctx.restore();
+    const backdropScale = Math.max(width / image.width, height / image.height), backdropWidth = image.width * backdropScale, backdropHeight = image.height * backdropScale;
+    ctx.save(); roundedClip(ctx, x, y, width, height); ctx.filter = "blur(18px)"; ctx.globalAlpha = .46; ctx.drawImage(image, x + (width - backdropWidth) / 2 - 12, y + (height - backdropHeight) / 2 - 12, backdropWidth + 24, backdropHeight + 24); ctx.filter = "none"; ctx.globalAlpha = 1; ctx.fillStyle = "rgba(7,17,31,.30)"; ctx.fillRect(x, y, width, height); ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight); ctx.restore();
+  }
+
+  function drawApprovalStamp(ctx, x, y) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(-.07); ctx.fillStyle = "rgba(16,185,129,.13)"; ctx.strokeStyle = "#61e6d3"; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(0, 0, 238, 74, 20); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#61e6d3"; [[34,39,15,13],[18,20,6,8],[31,13,6,8],[44,15,6,8],[54,25,6,8]].forEach(([cx,cy,rx,ry])=>{ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.fill()});
+    ctx.font = '800 23px "Malgun Gothic", sans-serif'; ctx.fillText("순금 검수 완료", 72, 34); ctx.fillStyle = "#a7f3d0"; ctx.font = '600 16px "Malgun Gothic", sans-serif'; ctx.fillText("러닝폼 AI 결과 확인", 72, 57); ctx.restore();
   }
 
   function drawFootInset(ctx, image, focus, x, y, size) {
@@ -50,10 +57,10 @@
     ctx.fillStyle = "#fff"; ctx.font = '900 70px "Malgun Gothic", sans-serif'; ctx.fillText("나의 러닝폼 분석", 76, 205);
     ctx.fillStyle = "#61e6d3"; ctx.font = "900 170px Arial"; ctx.fillText(String(result.score), 70, 440);
     ctx.fillStyle = "#fff"; ctx.font = "800 38px Arial"; ctx.fillText("/ 100", 300, 430);
-    if (analysisFrame?.width) { drawContain(ctx, analysisFrame, 500, 265, 500, 300); drawFootInset(ctx, analysisFrame, result.footFocus, 820, 385, 160); ctx.fillStyle="rgba(7,17,31,.82)";ctx.fillRect(520,500,190,42);ctx.fillStyle="#61e6d3";ctx.font='700 21px "Malgun Gothic", sans-serif';ctx.fillText("AI 착지 프레임",535,528); }
+    if (analysisFrame?.width) { drawContain(ctx, analysisFrame, 500, 265, 500, 300); drawFootInset(ctx, analysisFrame, result.footFocus, 820, 385, 160); ctx.fillStyle="rgba(7,17,31,.82)";ctx.fillRect(520,492,268,50);ctx.fillStyle="#61e6d3";ctx.font='700 19px "Malgun Gothic", sans-serif';ctx.fillText(`AI 착지 프레임 · ${result.side}`,535,523); }
     ctx.font = '800 44px "Malgun Gothic", sans-serif'; ctx.fillStyle="#fff"; ctx.fillText(result.runnerType, 76, 625);
-    [["착지 유형",result.strikeType],["무릎 각도",`${result.averageKneeAngle}°`],["상체 기울기",`${result.averageTrunkLean}°`]].forEach(([label,value],index)=>{const x=76+index*310;ctx.fillStyle="rgba(255,255,255,.09)";ctx.fillRect(x,690,280,170);ctx.fillStyle="#9fb3c8";ctx.font='600 25px "Malgun Gothic", sans-serif';ctx.fillText(label,x+24,742);ctx.fillStyle="#fff";ctx.font='800 37px "Malgun Gothic", sans-serif';ctx.fillText(value,x+24,805)});
-    ctx.fillStyle="#fff";ctx.font='800 34px "Malgun Gothic", sans-serif';ctx.fillText("순금이의 한마디",76,950);ctx.fillStyle="#d8e5ee";ctx.font='600 29px "Malgun Gothic", sans-serif';
+    [["착지 유형",result.strikeType,`신뢰도 ${result.strikeConfidence}%`],["무릎 각도",`${result.averageKneeAngle}°`,"측면 평균"],["상체 기울기",`${result.averageTrunkLean}°`,"측면 평균"]].forEach(([label,value,detail],index)=>{const x=76+index*310;ctx.fillStyle="rgba(255,255,255,.09)";ctx.fillRect(x,690,280,170);ctx.fillStyle="#9fb3c8";ctx.font='600 24px "Malgun Gothic", sans-serif';ctx.fillText(label,x+24,735);ctx.fillStyle="#fff";ctx.font='800 36px "Malgun Gothic", sans-serif';ctx.fillText(value,x+24,790);ctx.fillStyle="#9fb3c8";ctx.font='600 18px "Malgun Gothic", sans-serif';ctx.fillText(detail,x+24,827)});
+    ctx.fillStyle="#fff";ctx.font='800 34px "Malgun Gothic", sans-serif';ctx.fillText("순금이의 한마디",76,950);drawApprovalStamp(ctx,742,900);ctx.fillStyle="#d8e5ee";ctx.font='600 29px "Malgun Gothic", sans-serif';
     const words=(result.improvements[0]||"지금의 균형을 유지하며 편안하게 달려보세요.").split(" ");let line="",y=1010;words.forEach(word=>{const test=`${line}${word} `;if(ctx.measureText(test).width>900){ctx.fillText(line,76,y);line=`${word} `;y+=46}else line=test});ctx.fillText(line,76,y);
     ctx.fillStyle="#d8e5ee";ctx.font='600 22px "Malgun Gothic", sans-serif';ctx.fillText("※ 촬영 각도·속도·조명에 따라 결과가 달라질 수 있으며 의료 진단이 아닙니다.",76,1205);
     ctx.fillStyle="#61e6d3";ctx.font="700 25px Arial";ctx.fillText("PROJECT FREEDOM AI · AI-assisted estimate",76,1270);return card;

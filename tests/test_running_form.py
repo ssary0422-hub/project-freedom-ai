@@ -43,6 +43,9 @@ class RunningFormTests(unittest.TestCase):
         self.assertIn("AI 착지 프레임".encode(), response.data)
         self.assertIn("착지 확대".encode(), response.data)
         self.assertIn(b"drawContain", response.data)
+        self.assertIn(b"drawApprovalStamp", response.data)
+        self.assertIn("순금 검수 완료".encode(), response.data)
+        self.assertIn(b"strikeConfidence", response.data)
         self.assertIn("촬영 각도·속도·조명에 따라".encode(), response.data)
 
     def test_preflight_accepts_supported_side_video(self):
