@@ -1,4 +1,5 @@
-const WASM_ROOT = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm";
+const MEDIAPIPE_VERSION = "0.10.21";
+const WASM_ROOT = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MEDIAPIPE_VERSION}/wasm`;
 const MODEL_URL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
 
 const CONNECTIONS = [
@@ -12,7 +13,7 @@ let landmarkerPromise;
 
 async function createLandmarker() {
   if (!landmarkerPromise) {
-    landmarkerPromise = import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/+esm")
+    landmarkerPromise = import(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MEDIAPIPE_VERSION}/+esm`)
       .then(async ({ FilesetResolver, PoseLandmarker }) => {
         const vision = await FilesetResolver.forVisionTasks(WASM_ROOT);
         return PoseLandmarker.createFromOptions(vision, {
@@ -116,4 +117,3 @@ export async function analyzePose(video, canvas, onProgress = () => {}) {
     sampledFrames: sampleCount,
   };
 }
-

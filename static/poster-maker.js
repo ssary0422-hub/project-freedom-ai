@@ -6,6 +6,13 @@
   let subjectImage = null, backgroundImage = null, logoImage = null, currentThemeIndex = 0;
   let hasUserResult = false;
 
+  function setButtonBusy(button, busy, busyLabel) {
+    if (!button) return;
+    if (busy) button.dataset.originalLabel = button.textContent;
+    button.disabled = busy;
+    button.textContent = busy ? busyLabel : (button.dataset.originalLabel || button.textContent);
+  }
+
   const themes = [
     { name: "순금 추천 · 브랜드 에디토리얼형", layout: "editorial", accent: "#ffc85c", ink: "#fff", muted: "#d9ddea" },
     { name: "사진 중심 · 정보 패널형", layout: "left", accent: "#63dcff", ink: "#fff", muted: "#d5e2ed" },
@@ -187,25 +194,54 @@
     hasUserResult = true; loadFile($("posterPhoto").files[0], image => { subjectImage = image; }); loadFile($("posterLogo").files[0], image => { logoImage = image; }); render();
   }
 
-  async function suggest() {
+  function applyCopySet(set) {
+    ["posterHeadline", "posterBenefit", "posterOffer", "posterContact"].forEach((id, i) => $(id).value = set[i]);
+    hasUserResult = true;
+    render();
+  }
+
+  async function suggest({ autoApply = false } = {}) {
     const root = $("copyChoices"); root.textContent = "추천 중…";
-    const response = await fetch("/poster/suggest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ business: val("posterCompany"), purpose: val("posterPurpose") }) });
-    const data = await response.json(); if (!response.ok) { root.textContent = data.error || "추천 실패"; return; } root.innerHTML = "";
-    data.sets.forEach((set, index) => { const button = document.createElement("button"); button.type = "button"; button.className = "btn btn-outline-light text-start"; button.textContent = `${index + 1}. ${set[0]} · ${set[2]}`; button.onclick = () => { ["posterHeadline", "posterBenefit", "posterOffer", "posterContact"].forEach((id, i) => $(id).value = set[i]); hasUserResult = true; render(); }; root.append(button); });
+    try {
+      const response = await fetch("/poster/suggest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ business: val("posterCompany"), purpose: val("posterPurpose") }) });
+      const data = await response.json(); if (!response.ok) throw new Error(data.error || "문구 추천 실패"); root.innerHTML = "";
+      data.sets.forEach((set, index) => { const button = document.createElement("button"); button.type = "button"; button.className = "btn btn-outline-primary text-start"; button.textContent = `${index + 1}. ${set[0]} · ${set[2]}`; button.onclick = () => applyCopySet(set); root.append(button); });
+      if (autoApply && data.sets[0]) applyCopySet(data.sets[0]);
+      return true;
+    } catch (error) { root.textContent = error.message; return false; }
   }
 
   async function createBackground() {
     const status = $("posterStatus"); status.textContent = "AI 배경 생성 중…";
-    const response = await fetch("/poster/background", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ business: val("posterCompany"), purpose: val("posterPurpose"), style: val("posterImageStyle"), prompt: val("aiBackgroundPrompt") }) });
-    const data = await response.json(); if (!response.ok) { status.textContent = data.error || "생성 실패"; return; }
-    const image = new Image(); image.onload = () => { backgroundImage = image; hasUserResult = true; render(); status.textContent = "글자 없는 AI 배경이 적용됐습니다."; }; image.src = data.image_url;
+    try {
+      const response = await fetch("/poster/background", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ business: val("posterCompany"), purpose: val("posterPurpose"), style: val("posterImageStyle"), prompt: val("aiBackgroundPrompt") }) });
+      const data = await response.json(); if (!response.ok) throw new Error(data.error || "배경 생성 실패");
+      await new Promise((resolve, reject) => { const image = new Image(); image.onload = () => { backgroundImage = image; hasUserResult = true; render(); resolve(); }; image.onerror = () => reject(new Error("생성된 배경 이미지를 불러오지 못했습니다.")); image.src = `${data.image_url}?v=${Date.now()}`; });
+      status.textContent = "글자 없는 AI 배경이 적용됐습니다.";
+      return true;
+    } catch (error) { status.textContent = error.message; return false; }
+  }
+
+  async function makeOneClick() {
+    const button = $("makeOneClickPoster"), status = $("posterMainStatus");
+    if (!val("posterCompany") || !val("posterPurpose")) { status.className = "poster-main-status text-danger mb-3"; status.textContent = "업체명과 홍보 내용을 먼저 입력해주세요."; return; }
+    setButtonBusy(button, true, "⏳ 순금이가 문구를 만들고 있어요…"); status.className = "poster-main-status text-primary mb-3"; status.textContent = "1/2 광고 문구를 구성하고 있습니다.";
+    try {
+      if (!await suggest({ autoApply: true })) throw new Error("문구를 만들지 못했습니다. 다시 눌러주세요.");
+      button.textContent = "🎨 AI 배경을 만들고 있어요…"; status.textContent = "2/2 포스터 배경과 최종 배치를 만들고 있습니다. 잠시만 기다려주세요.";
+      const backgroundReady = await createBackground();
+      status.className = `poster-main-status ${backgroundReady ? "text-success" : "text-warning"} mb-3`;
+      status.textContent = backgroundReady ? "완성! 오른쪽 결과에서 바로 저장할 수 있어요." : "문구 포스터는 완성했지만 AI 배경은 실패했어요. 아래에서 배경만 다시 만들 수 있어요.";
+      $("posterResults")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (error) { status.className = "poster-main-status text-danger mb-3"; status.textContent = error.message; }
+    finally { setButtonBusy(button, false); }
   }
 
   const examples = { posterCompany: ["윤슬도자기", "달빛책방", "모모식물상점"], posterHeadline: ["손끝에서 시작되는 나만의 그릇", "금요일 밤, 작가와 책 사이", "우리 집 식물에게 새 화분을"], posterBenefit: ["처음이어도 편안한 소규모 원데이 클래스", "열두 명만 함께하는 깊이 있는 북토크", "흙과 화분이 모두 준비된 분갈이 수업"], posterOffer: ["이번 주말 클래스 모집", "선착순 12명 예약", "재료비 포함 신청"], posterContact: ["프로필 링크에서 신청하세요", "DM으로 예약해주세요", "온라인 예약 또는 매장 문의"] };
   function rotateExamples() { Object.entries(examples).forEach(([id, list]) => { const input = $(id); if (input && !input.value && document.activeElement !== input) input.placeholder = `예: ${list[Math.floor(Math.random() * list.length)]}`; }); }
 
   document.addEventListener("DOMContentLoaded", () => {
-    $("makePosters").onclick = usePhoto; $("suggestPoster").onclick = suggest; $("makeAiBackground").onclick = createBackground;
+    $("makePosters").onclick = usePhoto; $("suggestPoster").onclick = () => suggest(); $("makeAiBackground").onclick = createBackground; $("makeOneClickPoster").onclick = makeOneClick;
     $("posterPhoto").addEventListener("change", usePhoto); $("posterLogo").addEventListener("change", usePhoto); $("posterWatermark").addEventListener("change", render);
     ["posterCompany", "posterHeadline", "posterBenefit", "posterOffer", "posterContact"].forEach(id => $(id).addEventListener("input", () => { hasUserResult = true; render(); }));
     rotateExamples(); setInterval(rotateExamples, 4000); render();

@@ -192,6 +192,7 @@ async function copyResult() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    const forms = document.querySelectorAll("form[method='POST']");
     const form = document.querySelector("form[method='POST']");
     const overlay = document.getElementById("ai-loading-overlay");
 
@@ -239,18 +240,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
     updateEstimatedCredit();
 
-    if (!form || !overlay) {
+    if (!forms.length || !overlay) {
         return;
     }
 
-    form.addEventListener("submit", function () {
-        overlay.style.display = "flex";
+    forms.forEach(function (submittedForm) {
+        submittedForm.addEventListener("submit", function () {
+            overlay.style.display = "flex";
+            overlay.setAttribute("aria-busy", "true");
 
-        const submitButton = form.querySelector("button[type='submit']");
-        if (submitButton) {
-            submitButton.disabled = true;
-            submitButton.innerHTML = "{{ t("v21.gen.loading") }}";
-        }
+            const submitButton = submittedForm.querySelector("button[type='submit']");
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.dataset.originalLabel = submitButton.innerHTML;
+                submitButton.innerHTML = "⏳ 이미지 생성 중… 잠시만 기다려주세요";
+            }
+        });
     });
 });
 </script>

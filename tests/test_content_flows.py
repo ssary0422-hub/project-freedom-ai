@@ -149,7 +149,14 @@ class ContentFlowTests(unittest.TestCase):
         js = self.client.get("/static/poster-maker.js")
         self.assertIn(b"rotateExamples", js.data)
         self.assertIn(b"rawLines", js.data)
+        self.assertIn(b"makeOneClick", js.data)
+        self.assertIn("포스터 한 번에 완성".encode(), response.data)
         js.close()
+
+    def test_all_post_forms_show_loading_overlay(self):
+        source = Path("templates/generator_base.html").read_text(encoding="utf-8")
+        self.assertIn('querySelectorAll("form[method=\'POST\']")', source)
+        self.assertIn("⏳ 이미지 생성 중", source)
 
     def test_generated_media_has_direct_image_download(self):
         source = Path("templates/generator_base.html").read_text(encoding="utf-8")
