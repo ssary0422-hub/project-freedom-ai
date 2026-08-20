@@ -74,6 +74,22 @@ class ContentFlowTests(unittest.TestCase):
         self.assertIn("이미지 생성 다시 시도".encode(), first.data)
         self.assertIn("이미지 생성 다시 시도".encode(), refreshed.data)
 
+    def test_ads_finished_card_uses_fact_based_renderer(self):
+        patches = self._common_patches("ads", "make_ads", "제목 | 확인된 혜택 | 문의하기") + [
+            patch("routes.ads.create_finished_promo_card", return_value="static/generated/ad-card.png"),
+            patch("routes.ads.create_word"),
+            patch("routes.ads.create_pdf"),
+        ]
+        response = self._run_with(patches, lambda _: self.client.post(
+            "/ads-generator",
+            data={
+                "business": "카페", "company": "오늘의커피", "style": "주차 가능",
+                "with_image": "on", "image_output_mode": "finished_card",
+            },
+        ))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"/static/generated/ad-card.png", response.data)
+
     @patch("routes.ads.make_image", side_effect=[
         RuntimeError("moderation_blocked safety_violations sexual"),
         "static/generated/safe.png",
@@ -152,6 +168,23 @@ class ContentFlowTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"SNS_TEXT_SURVIVES", response.data)
         self.assertIn("이미지만 다시 생성".encode(), response.data)
+
+    def test_sns_finished_card_uses_fact_based_renderer(self):
+        patches = self._common_patches("sns", "make_sns", "오늘 소식 | 확인된 내용 | 문의하기") + [
+            patch("routes.sns.create_finished_promo_card", return_value="static/generated/sns-card.png"),
+            patch("routes.sns.create_sns_word"),
+            patch("routes.sns.create_sns_pdf"),
+        ]
+        response = self._run_with(patches, lambda _: self.client.post(
+            "/sns",
+            data={
+                "business": "카페", "company": "오늘의커피", "style": "오늘 예약 가능",
+                "platform": "인스타그램", "with_image": "on",
+                "image_output_mode": "finished_card",
+            },
+        ))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"/static/generated/sns-card.png", response.data)
 
     @patch("routes.sns.get_profiles", return_value=[])
     @patch("routes.sns.record_ai_credit_usage")

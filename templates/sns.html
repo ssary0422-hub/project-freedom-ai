@@ -7,6 +7,7 @@
 
 {% block form %}
 <form method="POST">
+    <input type="hidden" name="image_output_mode" value="finished_card">
     {% if saved_profiles %}
     <div class="border rounded-3 p-3 mb-4 bg-light">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
@@ -71,6 +72,11 @@
         <div class="form-text">AI가 SNS 문구·해시태그·행동 유도 문장을 알아서 구성합니다.</div>
     </div>
 
+    <div class="alert alert-light border rounded-3 mb-3">
+        <strong>사진이나 홈페이지가 없어도 괜찮아요.</strong>
+        <div class="small text-muted mt-1">순금이가 확인된 내용만으로 정확한 한글이 들어간 게시용 홍보물 한 장을 완성합니다.</div>
+    </div>
+
     <details class="advanced-settings border rounded-3 p-3 mb-3">
     <summary class="fw-bold">⚙️ 플랫폼·이미지 스타일 변경 <span class="text-muted fw-normal small">(선택)</span></summary>
     <div class="pt-3">
@@ -124,7 +130,7 @@
                id="with_image"
                {% if with_image %}checked{% endif %}>
         <label class="form-check-label fw-bold" for="with_image">
-            🎨 {{ t("v2.image") }}
+            🎨 바로 올릴 완성형 SNS 홍보물 1장
         </label>
     </div>
 

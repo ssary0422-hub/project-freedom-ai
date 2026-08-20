@@ -1,4 +1,5 @@
 from pathlib import Path
+from uuid import uuid4
 
 from PIL import Image, ImageDraw, ImageFont
 from flask import Blueprint, render_template, request, session, send_file
@@ -16,6 +17,7 @@ from database.users import (
 from documents.pdf import create_sns_pdf, SNS_PDF_PATH
 from documents.word import create_sns_word, SNS_WORD_PATH
 from routes.auth import login_required
+from services.finished_promo_card import create_finished_promo_card
 
 sns_bp = Blueprint("sns", __name__)
 
@@ -609,6 +611,7 @@ def _sns_page():
         custom_image_style = request.form.get("custom_image_style", "").strip()
         effective_image_style = custom_image_style or image_style
         with_image = request.form.get("with_image") == "on"
+        image_output_mode = request.form.get("image_output_mode", "ai_photo").strip()
 
         required_credits = 3 if with_image else 1
         credit_status = get_plan_status(
@@ -648,10 +651,19 @@ def _sns_page():
 
                 if with_image:
                     try:
-                        image_path = _generate_sns_image(
-                            business, company, style, platform,
-                            image_style, custom_image_style,
-                        )
+                        if image_output_mode == "finished_card":
+                            image_path = create_finished_promo_card(
+                                business=business,
+                                company=company,
+                                campaign_request=style,
+                                result=result,
+                                output_name=f"finished-sns-{uuid4().hex[:10]}.png",
+                            )
+                        else:
+                            image_path = _generate_sns_image(
+                                business, company, style, platform,
+                                image_style, custom_image_style,
+                            )
                         image_url = "/" + Path(image_path).as_posix()
                     except Exception as image_exception:
                         image_error = (

@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from uuid import uuid4
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -18,6 +19,7 @@ from database.users import (
 )
 from documents.word import create_word, WORD_PATH
 from routes.auth import login_required
+from services.finished_promo_card import create_finished_promo_card
 
 ads_bp = Blueprint("ads", __name__)
 
@@ -639,6 +641,7 @@ def _home_page():
         custom_image_style = request.form.get("custom_image_style", "").strip()
         effective_image_style = custom_image_style or image_style
         with_image = request.form.get("with_image") == "on"
+        image_output_mode = request.form.get("image_output_mode", "ai_photo").strip()
 
         required_credits = 3 if with_image else 1
         credit_status = get_plan_status(
@@ -690,9 +693,18 @@ def _home_page():
 이미지 안에는 글자를 넣지 말 것.
 """
                 try:
-                    image_path = _generate_ad_image(
-                        business, company, style, effective_image_style, custom_image_style
-                    )
+                    if image_output_mode == "finished_card":
+                        image_path = create_finished_promo_card(
+                            business=business,
+                            company=company,
+                            campaign_request=style,
+                            result=result,
+                            output_name=f"finished-ad-{uuid4().hex[:10]}.png",
+                        )
+                    else:
+                        image_path = _generate_ad_image(
+                            business, company, style, effective_image_style, custom_image_style
+                        )
                     image_url = "/" + Path(image_path).as_posix()
                 except Exception as image_exception:
                     print("광고 이미지 생성 실패:", image_exception)
