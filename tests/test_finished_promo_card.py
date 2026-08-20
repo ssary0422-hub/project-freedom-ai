@@ -8,6 +8,7 @@ from PIL import Image
 from services.finished_promo_card import (
     CARD_LABELS,
     _font,
+    _thai_font_runs,
     create_finished_promo_card,
     extract_card_copy,
 )
@@ -30,6 +31,14 @@ class FinishedPromoCardTests(unittest.TestCase):
                 bytes(font.getmask(missing_character)),
                 language,
             )
+
+    def test_thai_copy_uses_latin_fallback_for_brand_names(self):
+        thai_font = _font(40, bold=True, language="th")
+        runs = _thai_font_runs("บริการ AI · Project Freedom AI", thai_font, bold=True)
+        rendered_text = "".join(text for text, _ in runs)
+        font_names = {font.path for _, font in runs}
+        self.assertEqual(rendered_text, "บริการ AI · Project Freedom AI")
+        self.assertGreaterEqual(len(font_names), 2)
 
     def test_extracts_structured_ad_copy(self):
         self.assertEqual(

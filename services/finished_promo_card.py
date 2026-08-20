@@ -76,6 +76,37 @@ def _clean(value: str) -> str:
     return re.sub(r"\s+", " ", (value or "")).strip()
 
 
+def _thai_font_runs(text, primary_font, bold=False):
+    """Split Thai and non-Thai text so Latin brand names use a Latin font."""
+    latin_font = _font(primary_font.size, bold, "en")
+    runs = []
+    for char in text:
+        font = primary_font if "\u0e00" <= char <= "\u0e7f" else latin_font
+        if char.isspace() and runs:
+            font = runs[-1][1]
+        if runs and runs[-1][1] is font:
+            runs[-1] = (runs[-1][0] + char, font)
+        else:
+            runs.append((char, font))
+    return runs
+
+
+def _text_width(draw, text, font, language="ko", bold=False):
+    if language != "th":
+        return draw.textlength(text, font=font)
+    return sum(draw.textlength(run, font=run_font) for run, run_font in _thai_font_runs(text, font, bold))
+
+
+def _draw_text(draw, position, text, font, fill, language="ko", bold=False, **kwargs):
+    if language != "th":
+        draw.text(position, text, font=font, fill=fill, **kwargs)
+        return
+    x, y = position
+    for run, run_font in _thai_font_runs(text, font, bold):
+        draw.text((x, y), run, font=run_font, fill=fill, **kwargs)
+        x += draw.textlength(run, font=run_font)
+
+
 def _first_publishable_line(text: str) -> str:
     for raw in (text or "").splitlines():
         line = _clean(re.sub(r"^(?:\d+[.)]|[-*•])\s*", "", raw))
@@ -105,12 +136,12 @@ def extract_card_copy(result: str, campaign_request: str, company: str):
     )
 
 
-def _wrap(draw, text, font, max_width, max_lines):
+def _wrap(draw, text, font, max_width, max_lines, language="ko", bold=False):
     lines, current = [], ""
     words = text.split()
     for word in words:
         candidate = f"{current} {word}".strip()
-        if draw.textbbox((0, 0), candidate, font=font)[2] <= max_width:
+        if _text_width(draw, candidate, font, language, bold) <= max_width:
             current = candidate
             continue
         if current:
@@ -118,13 +149,13 @@ def _wrap(draw, text, font, max_width, max_lines):
             current = ""
             if len(lines) == max_lines:
                 break
-        if draw.textbbox((0, 0), word, font=font)[2] <= max_width:
+        if _text_width(draw, word, font, language, bold) <= max_width:
             current = word
             continue
         chunk = ""
         for char in word:
             candidate = chunk + char
-            if draw.textbbox((0, 0), candidate, font=font)[2] <= max_width:
+            if _text_width(draw, candidate, font, language, bold) <= max_width:
                 chunk = candidate
             else:
                 if chunk:
@@ -196,50 +227,50 @@ def create_finished_promo_card(
         image.paste(subject, (sx, sy), subject)
 
     badge_font = _font(24, True, language)
-    badge_width = min(930, max(332, draw.textbbox((0, 0), labels["badge"], font=badge_font)[2] + 60))
+    badge_width = min(930, max(332, _text_width(draw, labels["badge"], badge_font, language, True) + 60))
     _rounded(draw, (58, 58, 58 + badge_width, 116), 29, (255, 255, 255, 22), (255, 255, 255, 55), 2)
-    draw.text((88, 73), labels["badge"], font=badge_font, fill=(198, 255, 240, 255))
+    _draw_text(draw, (88, 73), labels["badge"], badge_font, (198, 255, 240, 255), language, True)
 
     business_label = business or "BUSINESS"
-    draw.text((64, 166), business_label, font=_font(27, True, language), fill=(93, 235, 205, 255))
+    _draw_text(draw, (64, 166), business_label, _font(27, True, language), (93, 235, 205, 255), language, True)
 
     headline_font = _font(82, True, language)
-    while headline_font.size > 54 and len(_wrap(draw, headline, headline_font, 900, 3)) > 3:
+    while headline_font.size > 54 and len(_wrap(draw, headline, headline_font, 900, 3, language, True)) > 3:
         headline_font = _font(headline_font.size - 4, True, language)
-    title_lines = _wrap(draw, headline, headline_font, 900, 3)
+    title_lines = _wrap(draw, headline, headline_font, 900, 3, language, True)
     y = 226
     for line in title_lines:
-        draw.text((62, y), line, font=headline_font, fill=(247, 250, 255, 255), stroke_width=1, stroke_fill=(247, 250, 255, 90))
+        _draw_text(draw, (62, y), line, headline_font, (247, 250, 255, 255), language, True, stroke_width=1, stroke_fill=(247, 250, 255, 90))
         y += headline_font.size + 18
 
     draw.rounded_rectangle((62, y + 18, 152, y + 28), radius=5, fill=(93, 235, 205, 255))
     y += 72
     benefit_font = _font(38, False, language)
-    for line in _wrap(draw, benefit, benefit_font, 820 if subject_path else 900, 4):
-        draw.text((66, y), line, font=benefit_font, fill=(202, 214, 231, 255))
+    for line in _wrap(draw, benefit, benefit_font, 820 if subject_path else 900, 4, language):
+        _draw_text(draw, (66, y), line, benefit_font, (202, 214, 231, 255), language)
         y += 58
 
     card_top = max(y + 42, 785)
     card_width = 610 if subject_path else 950
     _rounded(draw, (58, card_top, 58 + card_width, card_top + 260), 34, (255, 255, 255, 18), (255, 255, 255, 45), 2)
-    draw.text((92, card_top + 42), labels["fact"], font=_font(25, True, language), fill=(93, 235, 205, 255))
+    _draw_text(draw, (92, card_top + 42), labels["fact"], _font(25, True, language), (93, 235, 205, 255), language, True)
     request_text = _clean(campaign_request) or benefit
     ry = card_top + 92
-    for line in _wrap(draw, request_text, _font(31, True, language), card_width - 68, 3):
-        draw.text((92, ry), line, font=_font(31, True, language), fill=(246, 248, 252, 255))
+    for line in _wrap(draw, request_text, _font(31, True, language), card_width - 68, 3, language, True):
+        _draw_text(draw, (92, ry), line, _font(31, True, language), (246, 248, 252, 255), language, True)
         ry += 47
 
     cta_y = 1162
     _rounded(draw, (58, cta_y, 720, cta_y + 92), 46, (93, 235, 205, 255))
     cta_font = _font(30, True, language)
     cta_text = cta
-    while draw.textbbox((0, 0), cta_text, font=cta_font)[2] > 595 and cta_font.size > 22:
+    while _text_width(draw, cta_text, cta_font, language, True) > 595 and cta_font.size > 22:
         cta_font = _font(cta_font.size - 2, True, language)
-    draw.text((96, cta_y + 26), cta_text, font=cta_font, fill=(5, 31, 39, 255))
-    draw.text((60, 1282), company or "업체명", font=_font(28, True, language), fill=(247, 250, 255, 255))
+    _draw_text(draw, (96, cta_y + 26), cta_text, cta_font, (5, 31, 39, 255), language, True)
+    _draw_text(draw, (60, 1282), company or "업체명", _font(28, True, language), (247, 250, 255, 255), language, True)
     footer_font = _font(17, True, language)
-    footer_width = draw.textbbox((0, 0), labels["footer"], font=footer_font)[2]
-    draw.text((WIDTH - footer_width - 58, 1288), labels["footer"], font=footer_font, fill=(133, 153, 181, 255))
+    footer_width = _text_width(draw, labels["footer"], footer_font, language, True)
+    _draw_text(draw, (WIDTH - footer_width - 58, 1288), labels["footer"], footer_font, (133, 153, 181, 255), language, True)
 
     safe_name = re.sub(r"[^a-zA-Z0-9._-]", "-", output_name) or "finished-promo-card.png"
     output_path = OUTPUT_DIR / safe_name
