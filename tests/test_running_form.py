@@ -30,6 +30,8 @@ class RunningFormTests(unittest.TestCase):
         self.assertIn(b"strikeType", response.data)
         self.assertIn(b"runnerType", response.data)
         self.assertIn(b"bestQuality", response.data)
+        self.assertIn(b"contactBonus", response.data)
+        self.assertIn(b"footFocus", response.data)
         response.close()
 
     def test_browser_hides_raw_mediapipe_errors(self):
@@ -38,7 +40,9 @@ class RunningFormTests(unittest.TestCase):
         self.assertIn("AI 자세 추적을 다시 준비하고 있어요".encode(), response.data)
         self.assertIn(b"makeShareCard", response.data)
         self.assertIn("SNS 결과 이미지 저장".encode(), response.data)
-        self.assertIn("AI 분석 프레임".encode(), response.data)
+        self.assertIn("AI 착지 프레임".encode(), response.data)
+        self.assertIn("착지 확대".encode(), response.data)
+        self.assertIn(b"drawContain", response.data)
         self.assertIn("촬영 각도·속도·조명에 따라".encode(), response.data)
 
     def test_preflight_accepts_supported_side_video(self):

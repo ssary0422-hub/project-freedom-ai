@@ -66,7 +66,7 @@ function evaluateForm(detectionRate, knee, trunk, footSamples) {
   const strengths = [], improvements = [];
   if (detectionRate >= 85) strengths.push("측면 자세가 선명해 관절 움직임을 안정적으로 추적했어요.");
   if (trunk >= 6 && trunk <= 14) strengths.push("상체 기울기가 자연스러운 추진 범위에 있어요.");
-  else if (trunk > 14) improvements.push("상체가 많이 숙여져 있어 허리보다 발목에서 가볍게 기울이는 연습이 좋아요.");
+  else if (trunk > 14) improvements.push("허리를 굽히기보다 발목부터 몸 전체를 살짝 기울여 보세요.");
   else improvements.push("상체가 다소 세워져 있어 발목에서 아주 조금 전방으로 기울여 보세요.");
   if (knee >= 95 && knee <= 135) strengths.push("무릎 굴곡이 충격 흡수와 추진을 함께 만들 수 있는 범위예요.");
   else improvements.push("보폭을 조금 줄이고 발이 몸 아래에 닿게 연습해 보세요.");
@@ -116,6 +116,7 @@ export async function analyzePose(video, canvas, onProgress = () => {}) {
   const samples = [];
   let best = null;
   let bestQuality = -1;
+  let bestFootFocus = null;
   // MediaPipe VIDEO mode requires timestamps to keep increasing even when the
   // user analyzes the same video again in the same browser tab.
   const timestampBase = Math.max(lastVideoTimestamp + 1, Math.ceil(performance.now()));
@@ -139,10 +140,26 @@ export async function analyzePose(video, canvas, onProgress = () => {}) {
           samples[samples.length - 1].foot = { ankleY: landmarks[p.ankle].y, heelY: landmarks[p.heel].y, toeY: landmarks[p.toe].y };
         }
       }
-      const quality = landmarks.reduce((sum, point) => sum + (point.visibility ?? 0), 0);
+      const selected = selectSide(landmarks);
+      const p = selected.points;
+      const bodyIndexes = [0, p.shoulder, p.hip, p.knee, p.ankle, p.heel, p.toe];
+      const bodyVisibility = bodyIndexes.reduce((sum, pointIndex) => sum + (landmarks[pointIndex]?.visibility ?? 0), 0);
+      const footVisible = [p.ankle, p.heel, p.toe].every(pointIndex => visible(landmarks[pointIndex]));
+      const inFrame = bodyIndexes.every(pointIndex => {
+        const point = landmarks[pointIndex];
+        return point && point.x >= .015 && point.x <= .985 && point.y >= .015 && point.y <= .985;
+      });
+      // Prefer a complete side view, then the moment the visible ankle is
+      // closest to the ground. This makes the evidence frame match a strike analysis.
+      const contactBonus = footVisible ? landmarks[p.ankle].y * 12 : 0;
+      const quality = bodyVisibility + (footVisible ? 18 : 0) + (inFrame ? 24 : 0) + contactBonus;
       if (quality > bestQuality) {
         bestQuality = quality;
         best = landmarks;
+        bestFootFocus = footVisible ? {
+          x: (landmarks[p.ankle].x + landmarks[p.heel].x + landmarks[p.toe].x) / 3,
+          y: (landmarks[p.ankle].y + landmarks[p.heel].y + landmarks[p.toe].y) / 3,
+        } : null;
         drawPose(canvas, video, landmarks);
       }
     }
@@ -160,6 +177,7 @@ export async function analyzePose(video, canvas, onProgress = () => {}) {
     averageKneeAngle,
     averageTrunkLean,
     sampledFrames: sampleCount,
+    footFocus: bestFootFocus,
     ...evaluation,
   };
 }
