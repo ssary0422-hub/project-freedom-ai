@@ -261,6 +261,26 @@ class ContentFlowTests(unittest.TestCase):
         source = Path("templates/_sungeum_assistant.html").read_text(encoding="utf-8")
         self.assertIn("순금이에게 물어보기", source)
 
+    def test_sungeum_emergency_choices_offer_three_prefilled_outputs(self):
+        template = Path("templates/_sungeum_assistant.html").read_text(encoding="utf-8")
+        script = Path("static/sungeum-assistant.js").read_text(encoding="utf-8")
+        poster_script = Path("static/poster-maker.js").read_text(encoding="utf-8")
+        for element_id in ("sungeumCreateAd", "sungeumCreateSns", "sungeumCreatePoster"):
+            self.assertIn(element_id, template)
+            self.assertIn(element_id, script)
+        self.assertIn("/sns?assistant_brief=", script)
+        self.assertIn("/poster?assistant_brief=", script)
+        self.assertIn('get("assistant_brief")', poster_script)
+
+    @patch("routes.sns.get_profiles", return_value=[])
+    def test_sns_accepts_sungeum_assistant_brief(self, _):
+        response = self.client.get(
+            "/sns?assistant_brief=오늘+손님이+없어요&style=타임세일"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("오늘 손님이 없어요".encode(), response.data)
+        self.assertIn("타임세일".encode(), response.data)
+
     def test_generated_media_has_direct_image_download(self):
         source = Path("templates/generator_base.html").read_text(encoding="utf-8")
         self.assertIn('class="btn btn-outline-primary image-download-btn"', source)

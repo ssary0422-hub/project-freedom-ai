@@ -615,6 +615,12 @@ def _sns_page():
     selected_profile_id = request.args.get("profile_id", type=int)
     loaded_profile_name = ""
 
+    if request.method == "GET" and not selected_profile_id:
+        assistant_brief = request.args.get("assistant_brief", "").strip()
+        style = request.args.get("style", "").strip()
+        if assistant_brief:
+            style = f"{style}. 순금이 요청 정리: {assistant_brief}".strip(". ")
+
     if request.method == "GET" and selected_profile_id:
         selected_profile = get_profile(
             selected_profile_id,

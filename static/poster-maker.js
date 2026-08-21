@@ -6,6 +6,9 @@
   let subjectImage = null, backgroundImage = null, logoImage = null, currentThemeIndex = 0;
   let hasUserResult = false;
 
+  const assistantBrief = new URLSearchParams(window.location.search).get("assistant_brief");
+  if (assistantBrief && $("posterPurpose")) $("posterPurpose").value = assistantBrief;
+
   function setButtonBusy(button, busy, busyLabel) {
     if (!button) return;
     if (busy) button.dataset.originalLabel = button.textContent;
