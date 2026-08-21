@@ -4,7 +4,9 @@
   const callout=trigger.querySelector('.sungeum-click-callout');
   const mascots=()=>document.querySelectorAll('.sungeum-assistant-trigger .sungeum-alive,.sungeum-assistant-head .sungeum-alive');
   let moodTimer;
-  const setMood=(mood,duration=0)=>{clearTimeout(moodTimer);mascots().forEach(m=>{m.classList.remove('is-listening','is-working','is-approved');if(mood)m.classList.add(`is-${mood}`)});if(duration)moodTimer=setTimeout(()=>setMood(panel.classList.contains('is-open')?'listening':''),duration)};
+  const setMood=(mood,duration=0)=>{clearTimeout(moodTimer);mascots().forEach(m=>{m.classList.remove('is-listening','is-working','is-approved','is-failed');if(mood)m.classList.add(`is-${mood}`)});if(duration)moodTimer=setTimeout(()=>setMood(panel.classList.contains('is-open')?'listening':''),duration)};
+  window.SungeumMotion={setState:setMood};
+  document.addEventListener('sungeum:state',event=>{const detail=event.detail||{};setMood(detail.state||'',Number(detail.duration)||0)});
   const open=value=>{panel.classList.toggle('is-open',value);backdrop?.classList.toggle('is-open',value);panel.setAttribute('aria-hidden',String(!value));trigger.setAttribute('aria-expanded',String(value));if(value&&callout){callout.textContent='순금이';localStorage.setItem('sungeum_assistant_opened','1')}setMood(value?'listening':'')};
   if(callout&&localStorage.getItem('sungeum_assistant_opened')==='1')callout.textContent='순금이';
   trigger.onclick=()=>open(true);close.onclick=()=>open(false);backdrop.onclick=()=>open(false);document.addEventListener('keydown',e=>e.key==='Escape'&&open(false));

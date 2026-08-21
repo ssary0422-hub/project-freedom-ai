@@ -224,6 +224,19 @@ class ContentFlowTests(unittest.TestCase):
         source = Path("templates/generator_base.html").read_text(encoding="utf-8")
         self.assertIn('querySelectorAll("form[method=\'POST\']")', source)
         self.assertIn("⏳ 이미지 생성 중", source)
+        self.assertIn("요청 확인", source)
+        self.assertIn("순금이 검수·저장", source)
+        self.assertIn("보통 1~3분 걸려요", source)
+        self.assertIn('dataset.submitting === "true"', source)
+
+    def test_sungeum_motion_supports_generation_states(self):
+        script = Path("static/sungeum-assistant.js").read_text(encoding="utf-8")
+        styles = Path("static/freedom-neon.css").read_text(encoding="utf-8")
+        self.assertIn("window.SungeumMotion", script)
+        self.assertIn("sungeum:state", script)
+        self.assertIn("is-failed", script)
+        self.assertIn("@keyframes sungeum-failed", styles)
+        self.assertIn("prefers-reduced-motion:reduce", styles)
 
     def test_sungeum_assistant_has_visible_click_guidance(self):
         source = Path("templates/_sungeum_assistant.html").read_text(encoding="utf-8")

@@ -36,23 +36,30 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
 
 <div
     id="ai-loading-overlay"
-    style="
-        display:none;
-        position:fixed;
-        inset:0;
-        z-index:9999;
-        background:rgba(255,255,255,.90);
-        backdrop-filter:blur(3px);
-        align-items:center;
-        justify-content:center;
-    ">
-    <div class="sungeum-loading-card text-center bg-white shadow rounded-4 p-5 mx-3" style="min-width:min(320px, 90vw);">
-        <img class="sungeum-loading-mascot" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="작업 중인 3D 순금">
-        <div class="spinner-border text-primary mb-3" role="status"></div>
-        <h4 class="fw-bold mb-2">순금이가 만들고 있어요</h4>
-        <div class="text-muted">
-            {{ t("v21.gen.loading_desc") }}
+    class="ai-loading-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="ai-loading-title">
+    <div class="sungeum-loading-card">
+        <div class="sungeum-loading-hero">
+            <img class="sungeum-loading-mascot sungeum-alive is-working" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="작업 중인 3D 순금">
+            <span class="sungeum-working-dot" aria-hidden="true"></span>
         </div>
+        <p class="sungeum-loading-kicker">Sungeum AI is working</p>
+        <h3 id="ai-loading-title">순금이가 만들고 있어요</h3>
+        <p id="ai-loading-message" class="sungeum-loading-message">요청을 읽고 작업을 준비하고 있어요.</p>
+        <div class="sungeum-progress" aria-hidden="true"><span id="ai-loading-progress"></span></div>
+        <ol class="sungeum-loading-steps" aria-label="생성 진행 단계">
+            <li class="is-active" data-loading-step="0"><span>1</span>요청 확인</li>
+            <li data-loading-step="1"><span>2</span>문구 생성</li>
+            <li data-loading-step="2"><span>3</span>이미지 제작</li>
+            <li data-loading-step="3"><span>4</span>순금이 검수·저장</li>
+        </ol>
+        <div class="sungeum-loading-meta">
+            <strong id="ai-loading-time">보통 1~3분 걸려요</strong>
+            <span id="ai-loading-elapsed">0초 경과</span>
+        </div>
+        <p class="sungeum-loading-note">창을 닫지 않아도 돼요. 실패하면 크레딧은 이미지 비용까지 차감되지 않아요.</p>
     </div>
 </div>
 
@@ -177,6 +184,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const forms = document.querySelectorAll("form[method='POST']");
     const form = document.querySelector("form[method='POST']");
     const overlay = document.getElementById("ai-loading-overlay");
+    const loadingMessage = document.getElementById("ai-loading-message");
+    const loadingProgress = document.getElementById("ai-loading-progress");
+    const loadingElapsed = document.getElementById("ai-loading-elapsed");
+    const loadingTime = document.getElementById("ai-loading-time");
+    const loadingSteps = Array.from(document.querySelectorAll("[data-loading-step]"));
 
     const currentCredit = Number(
         document.body.dataset.remainingCredits || "0"
@@ -228,17 +240,64 @@ document.addEventListener("DOMContentLoaded", function () {
 
     forms.forEach(function (submittedForm) {
         submittedForm.addEventListener("submit", function () {
+            if (submittedForm.dataset.submitting === "true") return;
+            submittedForm.dataset.submitting = "true";
             overlay.style.display = "flex";
             overlay.setAttribute("aria-busy", "true");
+            document.body.classList.add("is-generating");
+            document.dispatchEvent(new CustomEvent("sungeum:state", { detail: { state: "working" } }));
+
+            const createsImage = Boolean(imageToggle && imageToggle.checked);
+            const stages = createsImage
+                ? [
+                    [0, 0, "요청 내용을 꼼꼼히 읽고 있어요."],
+                    [1, 6, "업체에 맞는 문구를 만들고 있어요."],
+                    [2, 18, "이미지를 제작하고 있어요. 이 단계가 가장 오래 걸려요."],
+                    [3, 70, "결과를 검수하고 안전하게 저장하고 있어요."]
+                ]
+                : [
+                    [0, 0, "요청 내용을 꼼꼼히 읽고 있어요."],
+                    [1, 3, "업체에 맞는 문구를 만들고 있어요."],
+                    [3, 18, "결과를 검수하고 안전하게 저장하고 있어요."]
+                ];
+            const expected = createsImage ? "보통 1~3분 걸려요" : "보통 20~60초 걸려요";
+            if (loadingTime) loadingTime.textContent = expected;
+
+            const startedAt = Date.now();
+            const updateLoading = function () {
+                const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+                let activeStage = stages[0];
+                stages.forEach(function (stage) { if (elapsed >= stage[1]) activeStage = stage; });
+                loadingSteps.forEach(function (step) {
+                    const index = Number(step.dataset.loadingStep);
+                    step.classList.toggle("is-active", index === activeStage[0]);
+                    step.classList.toggle("is-done", index < activeStage[0] || (!createsImage && index === 2));
+                });
+                if (loadingMessage) loadingMessage.textContent = activeStage[2];
+                if (loadingElapsed) loadingElapsed.textContent = elapsed + "초 경과";
+                if (loadingProgress) {
+                    const ceiling = createsImage ? 94 : 92;
+                    const pace = createsImage ? 0.55 : 2.1;
+                    loadingProgress.style.width = Math.min(ceiling, 8 + elapsed * pace) + "%";
+                }
+            };
+            updateLoading();
+            window.setInterval(updateLoading, 1000);
 
             const submitButton = submittedForm.querySelector("button[type='submit']");
             if (submitButton) {
                 submitButton.disabled = true;
                 submitButton.dataset.originalLabel = submitButton.innerHTML;
-                submitButton.innerHTML = "⏳ 이미지 생성 중… 잠시만 기다려주세요";
+                submitButton.innerHTML = createsImage ? "⏳ 이미지 생성 중 · 순금이가 제작하고 있어요" : "⏳ 순금이가 문구 작성 중…";
             }
         });
     });
+
+    if (document.querySelector(".alert-warning")) {
+        document.dispatchEvent(new CustomEvent("sungeum:state", { detail: { state: "failed", duration: 1800 } }));
+    } else if (document.getElementById("result")) {
+        document.dispatchEvent(new CustomEvent("sungeum:state", { detail: { state: "approved", duration: 1400 } }));
+    }
 });
 </script>
 <script src="{{ url_for('static', filename='smart-suggestions.js') }}"></script>
