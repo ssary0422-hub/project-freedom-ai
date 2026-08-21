@@ -45,7 +45,7 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 <div class="hero-task-label">오늘 순금이에게 무엇을 맡길까요?</div>
 <div class="hero-task-grid">
 <a class="hero-task-card marketing" href="{% if session.get('user_id') %}/ads-generator{% else %}/register{% endif %}"><span class="hero-task-icon">📣</span><span class="hero-task-copy"><strong>사업 홍보 맡기기</strong><small>광고·SNS·블로그·포스터를 한곳에서</small></span><span class="hero-task-arrow">→</span></a>
-<a class="hero-task-card running" href="{% if session.get('user_id') %}/running-form{% else %}/login{% endif %}"><span class="hero-task-new">NEW</span><span class="hero-task-icon">🏃</span><span class="hero-task-copy"><strong>내 러닝폼 봐주기</strong><small>영상 한 편으로 점수·착지·순금이 코칭</small></span><span class="hero-task-arrow">→</span></a>
+<a class="hero-task-card running" href="{% if session.get('user_id') %}/running-form{% else %}/login{% endif %}"><span class="hero-task-new">AI COACH</span><span class="hero-task-icon">🏃</span><span class="hero-task-copy"><strong>순금이 AI 러닝코치</strong><small>영상만 올려봐 · 착지 분석부터 다음 러닝 미션까지</small></span><span class="hero-task-arrow">→</span></a>
 </div><div class="d-flex flex-wrap gap-2 mt-4">
 <a class="pill text-decoration-none" href="/language/ko">🇰🇷 한국어</a><a class="pill text-decoration-none" href="/language/en">🇺🇸 English</a><a class="pill text-decoration-none" href="/language/ja">🇯🇵 日本語</a><a class="pill text-decoration-none" href="/language/th">🇹🇭 ไทย</a><a class="pill text-decoration-none" href="/language/zh">🇨🇳 中文</a><a class="pill text-decoration-none" href="/language/es">🇪🇸 Español</a>
 </div></div>
@@ -116,7 +116,7 @@ const items={
  sns:{industry:'반려식물 공방',business:'모모식물상점',mood:'싱그러움 · 클래스 모집',label:'SNS 게시글 출력',title:'🌿 우리 집 식물에게 새 화분을',text:'흙과 화분이 모두 준비된 일요일 분갈이 클래스. 초보 식집사도 편하게 참여하세요.',meta:'#반려식물 #분갈이클래스 #식집사'},
  blog:{industry:'도자기 작업실',business:'윤슬도자기',mood:'편안함 · 원데이클래스 안내',label:'블로그 미리보기',title:'처음 만드는 나만의 머그컵',text:'준비물부터 제작 과정, 완성품 수령 방법까지 한눈에 읽히는 글로 정리합니다.',meta:'도입 → 제작 과정 → 신청 안내'},
  poster:{industry:'베이커리',business:'소담 베이커리',mood:'감성적 · 오픈 이벤트',label:'포스터 미리보기',title:'매일 아침, 갓 구운 행복',text:'OPEN EVENT · 식빵 2개 구매 시 아메리카노 증정',meta:'세 가지 디자인 · 개별 PNG 저장'},
- running:{industry:'러닝 영상 분석',business:'AI 러닝 코치 순금',mood:'측면 영상 · 편안한 조깅',label:'AI 러닝폼 결과',title:'🏃 78점 · 포어풋형 전방 추진형',text:'상체 기울기와 무릎 각도를 확인하고, 다음 러닝에서 바로 적용할 한 가지를 순금이가 알려드려요.',meta:'착지 확대 · AI 참고 범위 · SNS 결과지 · 생성 기록'}
+ running:{industry:'러닝 영상 분석',business:'순금이 AI 러닝코치',mood:'측면 영상 · 편안한 조깅',label:'순금이 코치의 러닝폼 리포트',title:'🏃 78점 · 포어풋형 전방 추진형',text:'상체 기울기와 무릎 각도를 확인하고, 다음 러닝에서 바로 실천할 한 가지 미션을 순금이가 알려드려요.',meta:'착지 확대 · 친구 같은 코칭 · SNS 결과지 · 성장 기록'}
 };
 const order=['ads','sns','blog','poster','running'];let index=0,timer;
 const output=document.getElementById('productPreviewOutput');

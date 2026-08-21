@@ -22,6 +22,13 @@
   };
   const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"})[char]);
 
+  const progressStages = ["영상 확인", "관절 찾기", "착지 분석", "코칭 정리"];
+  function showCoachProgress(message, percent = 5) {
+    const activeIndex = Math.min(3, Math.floor(Math.max(0, percent - 1) / 25));
+    status.className = "run-progress-card mt-4";
+    status.innerHTML = `<div class="run-progress-head"><img class="sungeum-alive is-working" src="/static/brand/sungeum-3d-official.png" alt=""><div><strong>순금이 코치가 분석하고 있어요</strong><div class="small text-secondary mt-1">${escapeHtml(message)}</div></div></div><div class="run-progress-track"><div class="run-progress-bar" style="width:${Math.max(5, percent)}%"></div></div><div class="run-progress-steps">${progressStages.map((stage,index)=>`<span class="${index <= activeIndex ? "is-active" : ""}">${stage}</span>`).join("")}</div>`;
+  }
+
   function roundedClip(ctx, x, y, width, height, radius = 28) {
     ctx.beginPath(); ctx.roundRect(x, y, width, height, radius); ctx.clip();
   }
@@ -67,14 +74,14 @@
     const card = document.createElement("canvas"); card.width = 1080; card.height = 1350; card.className = "run-share-card";
     const ctx = card.getContext("2d"), gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
     gradient.addColorStop(0, "#07111f"); gradient.addColorStop(.55, "#12344c"); gradient.addColorStop(1, "#0d766f"); ctx.fillStyle = gradient; ctx.fillRect(0, 0, 1080, 1350);
-    ctx.fillStyle = "#61e6d3"; ctx.font = "800 30px Arial"; ctx.fillText("SUNGEUM AI RUNNING LAB", 76, 95);
-    ctx.fillStyle = "#fff"; ctx.font = '900 70px "Malgun Gothic", sans-serif'; ctx.fillText("나의 러닝폼 분석", 76, 205);
+    ctx.fillStyle = "#61e6d3"; ctx.font = "800 30px Arial"; ctx.fillText("SUNGEUM AI RUNNING COACH", 76, 95);
+    ctx.fillStyle = "#fff"; ctx.font = '900 70px "Malgun Gothic", sans-serif'; ctx.fillText("순금이 코치의 러닝폼 리포트", 76, 205);
     ctx.fillStyle = "#61e6d3"; ctx.font = "900 170px Arial"; ctx.fillText(String(result.score), 70, 440);
     ctx.fillStyle = "#fff"; ctx.font = "800 38px Arial"; ctx.fillText("/ 100", 300, 430);
     if (analysisFrame?.width) { drawContain(ctx, analysisFrame, 500, 265, 500, 300); drawFootInset(ctx, analysisFrame, result.footFocus, 820, 385, 160); ctx.fillStyle="rgba(7,17,31,.82)";ctx.fillRect(520,492,268,50);ctx.fillStyle="#61e6d3";ctx.font='700 19px "Malgun Gothic", sans-serif';ctx.fillText(`AI 착지 프레임 · ${result.side}`,535,523); }
     ctx.font = '800 44px "Malgun Gothic", sans-serif'; ctx.fillStyle="#fff"; ctx.fillText(result.runnerType, 76, 625);
     [["착지 유형",result.strikeType,`분석 신뢰도 ${result.strikeConfidence}%`],["무릎 각도",`${result.averageKneeAngle}°`,"권장 범위 105~125°"],["상체 기울기",`${result.averageTrunkLean}°`,"권장 범위 6~14°"]].forEach(([label,value,detail],index)=>{const x=76+index*310;ctx.fillStyle="rgba(255,255,255,.09)";ctx.fillRect(x,690,280,170);ctx.fillStyle="#9fb3c8";ctx.font='600 24px "Malgun Gothic", sans-serif';ctx.fillText(label,x+24,735);ctx.fillStyle="#fff";ctx.font='800 36px "Malgun Gothic", sans-serif';ctx.fillText(value,x+24,790);ctx.fillStyle="#9fb3c8";ctx.font='600 18px "Malgun Gothic", sans-serif';ctx.fillText(detail,x+24,827)});
-    ctx.fillStyle="#fff";ctx.font='800 34px "Malgun Gothic", sans-serif';ctx.fillText("순금이의 한마디",76,950);drawApprovalStamp(ctx,742,900);ctx.fillStyle="#d8e5ee";ctx.font='600 29px "Malgun Gothic", sans-serif';
+    ctx.fillStyle="#fff";ctx.font='800 34px "Malgun Gothic", sans-serif';ctx.fillText("순금이 코치의 한마디",76,950);drawApprovalStamp(ctx,742,900);ctx.fillStyle="#d8e5ee";ctx.font='600 29px "Malgun Gothic", sans-serif';
     const words=(result.improvements[0]||"지금 자세 좋아. 이 리듬을 유지하면서 편안하게 달려봐.").split(" ");let line="",y=1010;words.forEach(word=>{const test=`${line}${word} `;if(ctx.measureText(test).width>900){ctx.fillText(line,76,y);line=`${word} `;y+=42}else line=test});ctx.fillText(line,76,y);
     ctx.fillStyle="rgba(97,230,211,.13)";ctx.beginPath();ctx.roundRect(76,1120,900,54,18);ctx.fill();ctx.fillStyle="#9df3e5";ctx.font='700 21px "Malgun Gothic", sans-serif';ctx.fillText(nextScoreTip(result),100,1155);
     ctx.fillStyle="#d8e5ee";ctx.font='600 22px "Malgun Gothic", sans-serif';ctx.fillText("※ 촬영 각도·속도·조명에 따라 결과가 달라질 수 있으며 의료 진단이 아닙니다.",76,1205);
@@ -103,23 +110,25 @@
 
   form.addEventListener("submit", async event => {
     event.preventDefault(); button.disabled = true;
-    button.textContent = "순금이가 영상을 확인하고 있어요…";
-    status.className = "alert alert-info mt-4";
-    status.textContent = "파일 형식과 촬영 조건을 확인하는 중입니다.";
+    button.textContent = "순금이 코치가 영상을 보고 있어요…";
+    document.dispatchEvent(new CustomEvent("sungeum:state", { detail: { state: "working" } }));
+    showCoachProgress("영상 형식과 촬영 조건을 확인하는 중이에요.", 8);
     try {
       const response = await fetch("/running-form/preflight", { method: "POST", body: new FormData(form) });
       const preflight = await response.json();
       if (!response.ok || !preflight.ok) throw new Error(preflight.error || "영상을 확인하지 못했어요.");
-      status.textContent = "자세 추출 AI를 불러오는 중이에요. 첫 분석은 모델 준비에 잠시 걸릴 수 있어요.";
+      showCoachProgress("AI 코치가 관절 위치를 찾을 준비를 하고 있어요.", 20);
       const { analyzePose } = await import("/static/running-pose-analyzer.js");
       canvas.classList.remove("d-none");
       const result = await analyzePose(preview, canvas, progress => {
-        status.textContent = `순금이가 관절을 추적하고 있어요 · ${progress}%`;
+        const message = progress < 45 ? "머리부터 발끝까지 관절 위치를 찾고 있어요." : progress < 80 ? "착지 순간과 자세 각도를 비교하고 있어요." : "잘한 점과 다음 러닝 미션을 정리하고 있어요.";
+        showCoachProgress(message, progress);
       });
       const strengths = result.strengths.map(item => `<li>${escapeHtml(item)}</li>`).join("");
       const improvements = result.improvements.map(item => `<li>${escapeHtml(item)}</li>`).join("");
       status.className = "mt-4";
-      status.innerHTML = `<div class="alert alert-success"><strong>🐾 순금이 러닝폼 분석 완료</strong><br>실제 영상 프레임을 바탕으로 결과를 정리했어요.</div>
+      document.dispatchEvent(new CustomEvent("sungeum:state", { detail: { state: "approved", duration: 1400 } }));
+      status.innerHTML = `<div class="alert alert-success"><strong>🐾 순금이 AI 러닝코치 분석 완료</strong><br>실제 영상 프레임을 바탕으로 코칭 결과를 정리했어요.</div>
         <div class="row g-2">
           <div class="col-6"><div class="run-check" data-status="pass"><small>러닝폼 종합 점수</small><br><strong>${result.score}점</strong></div></div>
           <div class="col-6"><div class="run-check" data-status="pass"><small>러너 유형</small><br><strong>${escapeHtml(result.runnerType)}</strong></div></div>
@@ -127,12 +136,13 @@
           <div class="col-6"><div class="run-check"><small>평균 무릎 각도</small><br><strong>${result.averageKneeAngle}°</strong></div></div>
           <div class="col-6"><div class="run-check"><small>평균 상체 기울기</small><br><strong>${result.averageTrunkLean}°</strong></div></div>
           <div class="col-6"><div class="run-check"><small>관절 추출 성공률</small><br><strong>${result.detectionRate}%</strong></div></div>
-        </div><div class="run-result-section mt-3"><strong>좋았던 점</strong><ul class="mt-2 mb-0">${strengths}</ul></div><div class="run-result-section mt-3"><strong>개선하면 좋은 점</strong><ul class="mt-2 mb-0">${improvements}</ul></div><div id="runShareArea" class="mt-3"><h3 class="h5 fw-bold">SNS 공유 결과지</h3></div><div class="small text-secondary mt-3">AI 영상 기반 참고 분석이며 의료 진단이 아닙니다. 촬영 각도와 속도에 따라 판정이 달라질 수 있어요.</div>`;
+        </div><div class="run-result-section mt-3"><strong>👏 순금이가 찾은 잘한 점</strong><ul class="mt-2 mb-0">${strengths}</ul></div><div class="run-result-section mt-3"><strong>🎯 다음 러닝에서 바꿀 한 가지</strong><ul class="mt-2 mb-0">${improvements}</ul></div><div id="runShareArea" class="mt-3"><h3 class="h5 fw-bold">순금이 코치의 SNS 공유 결과지</h3></div><div class="small text-secondary mt-3">AI 영상 기반 참고 분석이며 의료 진단이 아닙니다. 촬영 각도·속도·조명에 따라 판정이 달라질 수 있어요.</div>`;
       const card = makeShareCard(result, canvas), shareArea = document.getElementById("runShareArea"); shareArea.appendChild(card);
       const download = document.createElement("button"); download.type="button"; download.className="btn btn-success w-100 fw-bold"; download.textContent="SNS 결과 이미지 저장"; download.onclick=()=>{const link=document.createElement("a");link.download="sungeum-running-form-result.png";link.href=card.toDataURL("image/png");link.click()};shareArea.appendChild(download);
       const saveState=document.createElement("div");saveState.className="small text-secondary mt-2";saveState.textContent="생성 기록에 저장하는 중…";shareArea.appendChild(saveState);
       try{const saved=await saveRunningHistory(result,card);saveState.innerHTML=`✓ 생성 기록에 저장했어요 · <a href="/history">기록 보기</a>`;saveState.dataset.historyId=saved.history_id}catch(saveError){saveState.textContent=`결과는 완성됐지만 생성 기록 저장에 실패했어요: ${friendlyError(saveError)}`}
     } catch (error) {
+      document.dispatchEvent(new CustomEvent("sungeum:state", { detail: { state: "failed", duration: 1800 } }));
       status.className = "alert alert-danger mt-4"; status.textContent = friendlyError(error);
     } finally {
       button.textContent = "순금이에게 분석 맡기기 · 3크레딧"; sync();

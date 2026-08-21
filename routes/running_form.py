@@ -113,7 +113,7 @@ def save_running_history():
         f"순금이의 한마디\n{str(payload.get('coachMessage', ''))[:600]}"
     )
     history_id = save_history(
-        "AI 러닝폼 분석", "AI 러닝 코치 순금", runner_type, result,
+        "순금이 코치의 러닝폼 리포트", "순금이 AI 러닝코치", runner_type, result,
         image_url=image_url, content_type="running_form", user_id=session["user_id"],
     )
     record_ai_credit_usage(session["user_id"], "RUNNING_FORM", RUNNING_FORM_CREDITS)

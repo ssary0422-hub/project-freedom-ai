@@ -53,8 +53,8 @@
   <section class="history-grid" aria-label="생성 기록">
     {% for item in history_list %}
       {% set content_type = item[6] or 'ads' %}
-      {% set type_label = {'ads':'광고', 'sns':'SNS', 'blog':'블로그', 'poster':'포스터', 'running_form':'러닝 분석'}.get(content_type, '콘텐츠') %}
-      {% set item_name = '나의 러닝폼 분석' if content_type == 'running_form' else (item[2] or '이름 없는 콘텐츠') %}
+      {% set type_label = {'ads':'광고', 'sns':'SNS', 'blog':'블로그', 'poster':'포스터', 'running_form':'순금이 러닝코치'}.get(content_type, '콘텐츠') %}
+      {% set item_name = '순금이 코치의 러닝폼 리포트' if content_type == 'running_form' else (item[2] or '이름 없는 콘텐츠') %}
       <article class="history-card">
         <div class="history-card-top">
           <div>
@@ -99,7 +99,7 @@
     <p class="mb-4">새 콘텐츠나 러닝 분석을 만들면 이곳에 자동으로 모아드릴게요.</p>
     <div class="d-flex flex-wrap justify-content-center gap-2">
       <a href="/ads-generator" class="history-cta history-cta-primary">홍보 콘텐츠 만들기</a>
-      <a href="/running-form" class="history-cta history-cta-secondary">내 러닝폼 분석하기</a>
+      <a href="/running-form" class="history-cta history-cta-secondary">순금이 코치에게 다시 분석받기</a>
     </div>
   </section>
   {% endif %}

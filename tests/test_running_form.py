@@ -16,10 +16,11 @@ class RunningFormTests(unittest.TestCase):
     def test_page_contains_upload_and_sungeum_flow(self):
         response = self.client.get("/running-form")
         self.assertEqual(response.status_code, 200)
-        self.assertIn("순금이가 당신의 러닝폼".encode(), response.data)
+        self.assertIn("순금이 AI 러닝코치".encode(), response.data)
+        self.assertIn("달리는 영상만 올려봐".encode(), response.data)
         self.assertIn(b'id="videoInput"', response.data)
         self.assertIn(b'id="poseCanvas"', response.data)
-        self.assertIn("순금 AI 총괄실장".encode(), response.data)
+        self.assertIn("분석·코칭·결과지 검수".encode(), response.data)
 
     def test_pose_analyzer_uses_real_mediapipe_video_landmarks(self):
         response = self.client.get("/static/running-pose-analyzer.js")
@@ -52,6 +53,9 @@ class RunningFormTests(unittest.TestCase):
         self.assertIn("그러면 자세가 더 편안하고 안정적으로".encode(), self.client.get("/static/running-pose-analyzer.js").data)
         self.assertIn("촬영 각도·속도·조명에 따라".encode(), response.data)
         self.assertIn(b"saveRunningHistory", response.data)
+        self.assertIn(b"showCoachProgress", response.data)
+        self.assertIn("순금이 코치가 분석하고 있어요".encode(), response.data)
+        self.assertIn("다음 러닝에서 바꿀 한 가지".encode(), response.data)
 
     @patch("routes.running_form.record_ai_credit_usage")
     @patch("routes.running_form.get_plan_status", side_effect=[{"can_generate":True,"remaining":4}, {"used":3,"remaining":1,"percent":75}])
@@ -70,7 +74,7 @@ class RunningFormTests(unittest.TestCase):
         response = self.client.get("/")
         self.assertIn("오늘 순금이에게 무엇을 맡길까요?".encode(), response.data)
         self.assertIn("사업 홍보 맡기기".encode(), response.data)
-        self.assertIn("내 러닝폼 봐주기".encode(), response.data)
+        self.assertIn("순금이 AI 러닝코치".encode(), response.data)
         self.assertIn(b"hero-task-card", response.data)
         self.assertIn(b'data-kind="running"', response.data)
         self.assertIn("AI 총괄실장 순금이".encode(), response.data)
