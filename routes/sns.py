@@ -1,12 +1,14 @@
+import json
 from pathlib import Path
 from uuid import uuid4
 
 from PIL import Image, ImageDraw, ImageFont
-from flask import Blueprint, render_template, request, session, send_file
+from flask import Blueprint, jsonify, render_template, request, session, send_file
 
 from ai.sns import make_sns
 from ai.image import make_image
 from ai.image_prompts import build_marketing_image_prompt
+from ai.providers import analyze_image_json, generate_text
 from database.db import get_history_item, save_history, update_history_image
 from database.profiles import get_profiles, get_profile
 from database.users import (
@@ -18,9 +20,17 @@ from documents.pdf import create_sns_pdf, SNS_PDF_PATH
 from documents.word import create_sns_word, SNS_WORD_PATH
 from routes.auth import login_required
 from services.finished_promo_card import create_finished_promo_card
+from services.campaign_art_direction import (
+    create_art_directions,
+    direction_from_payload,
+    serialize_directions,
+)
+from services.campaign_renderer import render_campaign_concept
+from services.campaign_quality import evaluate_campaign_image
 from services.uploaded_materials import first_valid_uploaded_image, save_uploaded_image
 
 sns_bp = Blueprint("sns", __name__)
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def _find_brand_font(size: int):
@@ -542,6 +552,37 @@ def _generate_sns_image(business, company, style, platform, image_style, custom_
     return make_image(prompt)
 
 
+@sns_bp.post("/sns/art-directions")
+@login_required
+def sns_art_directions():
+    """Return three cheap planning choices before generating an image."""
+    if not get_ai_enabled():
+        return jsonify(error="현재 AI 생성 기능을 사용할 수 없습니다."), 503
+    status = get_plan_status(session["user_id"], required_credits=3)
+    if not status["can_generate"]:
+        return jsonify(error="이미지 생성에 필요한 AI 크레딧이 부족합니다."), 402
+    data = request.get_json(silent=True) or {}
+    business = str(data.get("business", "")).strip()
+    company = str(data.get("company", "")).strip()
+    campaign_request = str(data.get("request", "")).strip()
+    if not all((business, company, campaign_request)):
+        return jsonify(error="업종, 업체명, 홍보 내용을 먼저 입력해 주세요."), 400
+    try:
+        directions = create_art_directions(
+            business=business,
+            company=company,
+            request=campaign_request,
+            media="sns",
+            photo_count=max(0, min(10, int(data.get("photo_count", 0) or 0))),
+            generator=generate_text,
+            remember=False,
+        )
+        return jsonify(directions=serialize_directions(directions))
+    except Exception as exc:
+        print("SNS art direction failed:", exc)
+        return jsonify(error="서로 다른 디자인 방향을 만드는 데 실패했습니다. 다시 시도해 주세요."), 502
+
+
 @sns_bp.route("/sns", methods=["GET"])
 @login_required
 def sns():
@@ -613,6 +654,7 @@ def _sns_page():
         effective_image_style = custom_image_style or image_style
         with_image = request.form.get("with_image") == "on"
         image_output_mode = request.form.get("image_output_mode", "ai_photo").strip()
+        selected_art_direction = request.form.get("selected_art_direction", "").strip()
 
         required_credits = 3 if with_image else 1
         credit_status = get_plan_status(
@@ -655,18 +697,57 @@ def _sns_page():
                         if image_output_mode == "finished_card":
                             subject_path = first_valid_uploaded_image(request.files.getlist("real_photos"), "sns-photo")
                             logo_path = save_uploaded_image(request.files.get("real_logo"), "sns-logo")
-                            image_path = create_finished_promo_card(
-                                business=business,
-                                company=company,
-                                campaign_request=style,
-                                result=result,
-                                output_name=f"finished-sns-{uuid4().hex[:10]}.png",
-                                subject_path=subject_path,
-                                logo_path=logo_path,
-                                website_url=request.form.get("website_url", "").strip(),
-                                map_url=request.form.get("map_url", "").strip(),
-                                language=session.get("language", "ko"),
-                            )
+                            if selected_art_direction:
+                                directions = [direction_from_payload(json.loads(selected_art_direction))]
+                            else:
+                                directions = create_art_directions(
+                                    business=business,
+                                    company=company,
+                                    request=style,
+                                    media="sns",
+                                    photo_count=1 if subject_path else 0,
+                                    generator=generate_text,
+                                    remember=True,
+                                )
+
+                            approved_result = None
+                            review_failures = []
+                            for direction in directions:
+                                background_path = subject_path or _generate_sns_image(
+                                    business, company,
+                                    f"{style}. Art direction: {direction.campaign_angle}. "
+                                    f"Mood: {direction.mood}. Reserve clean text space at {direction.headline_position}. "
+                                    "The scene must clearly fit the exact business. No readable text, letters, logos, or watermark.",
+                                    platform, image_style, custom_image_style,
+                                )
+                                output_path = BASE_DIR / "static" / "generated" / f"finished-sns-{uuid4().hex[:10]}.png"
+                                render_campaign_concept(
+                                    background_path=background_path,
+                                    direction=direction,
+                                    company=company,
+                                    output_path=output_path,
+                                    logo_path=logo_path,
+                                    footer_detail=(request.form.get("website_url", "").strip() or request.form.get("map_url", "").strip()),
+                                )
+                                review = evaluate_campaign_image(
+                                    image_path=output_path,
+                                    business=business,
+                                    company=company,
+                                    campaign_request=style,
+                                    analyzer=analyze_image_json,
+                                )
+                                if review["approved"]:
+                                    approved_result = (output_path, review)
+                                    break
+                                review_failures.append(review)
+
+                            if not approved_result:
+                                best = max(review_failures, key=lambda item: item["score"], default={"score": 0})
+                                raise ValueError(
+                                    f"90점 출고 기준을 통과하지 못했습니다. 최고 점수: {best['score']}점"
+                                )
+                            output_path, visual_review = approved_result
+                            image_path = output_path.relative_to(BASE_DIR).as_posix()
                         else:
                             image_path = _generate_sns_image(
                                 business, company, style, platform,

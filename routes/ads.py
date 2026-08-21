@@ -9,6 +9,7 @@ from flask import Blueprint, render_template, request, session, send_file
 from ai.ads import make_ads
 from ai.image import make_image
 from ai.image_prompts import build_marketing_image_prompt
+from ai.providers import analyze_image_json, generate_text
 from documents.pdf import create_pdf, PDF_PATH
 from database.db import save_history, get_history_item, update_history_image
 from database.profiles import get_profiles, get_profile
@@ -21,8 +22,12 @@ from documents.word import create_word, WORD_PATH
 from routes.auth import login_required
 from services.finished_promo_card import create_finished_promo_card
 from services.uploaded_materials import first_valid_uploaded_image, save_uploaded_image
+from services.campaign_art_direction import create_art_directions
+from services.campaign_renderer import render_campaign_concept
+from services.campaign_quality import evaluate_campaign_image
 
 ads_bp = Blueprint("ads", __name__)
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def _generate_ad_image(business, company, style, image_style, custom_image_style=""):
@@ -697,18 +702,38 @@ def _home_page():
                     if image_output_mode == "finished_card":
                         subject_path = first_valid_uploaded_image(request.files.getlist("real_photos"), "ad-photo")
                         logo_path = save_uploaded_image(request.files.get("real_logo"), "ad-logo")
-                        image_path = create_finished_promo_card(
-                            business=business,
-                            company=company,
-                            campaign_request=style,
-                            result=result,
-                            output_name=f"finished-ad-{uuid4().hex[:10]}.png",
-                            subject_path=subject_path,
-                            logo_path=logo_path,
-                            website_url=request.form.get("website_url", "").strip(),
-                            map_url=request.form.get("map_url", "").strip(),
-                            language=session.get("language", "ko"),
+                        directions = create_art_directions(
+                            business=business, company=company, request=style,
+                            media="ads", photo_count=1 if subject_path else 0,
+                            generator=generate_text, remember=True,
                         )
+                        approved_result, review_failures = None, []
+                        for direction in directions:
+                            background_path = subject_path or _generate_ad_image(
+                                business, company,
+                                f"{style}. Art direction: {direction.campaign_angle}. Mood: {direction.mood}. "
+                                f"Reserve clean text space at {direction.headline_position}. The scene must fit the exact business.",
+                                effective_image_style, custom_image_style,
+                            )
+                            output_path = BASE_DIR / "static" / "generated" / f"finished-ad-{uuid4().hex[:10]}.png"
+                            render_campaign_concept(
+                                background_path=background_path, direction=direction,
+                                company=company, output_path=output_path,
+                                logo_path=logo_path,
+                                footer_detail=(request.form.get("website_url", "").strip() or request.form.get("map_url", "").strip()),
+                            )
+                            review = evaluate_campaign_image(
+                                image_path=output_path, business=business, company=company,
+                                campaign_request=style, analyzer=analyze_image_json,
+                            )
+                            if review["approved"]:
+                                approved_result = output_path
+                                break
+                            review_failures.append(review)
+                        if not approved_result:
+                            best = max(review_failures, key=lambda item: item["score"], default={"score": 0})
+                            raise ValueError(f"90점 출고 기준을 통과하지 못했습니다. 최고 점수: {best['score']}점")
+                        image_path = approved_result.relative_to(BASE_DIR).as_posix()
                     else:
                         image_path = _generate_ad_image(
                             business, company, style, effective_image_style, custom_image_style

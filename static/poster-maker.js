@@ -229,6 +229,38 @@
     return saved;
   }
 
+  async function verifyPosterQuality(canvas) {
+    const response = await fetch("/poster/quality", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        company: val("posterCompany"),
+        purpose: val("posterPurpose"),
+        image: canvas.toDataURL("image/png")
+      })
+    });
+    const review = await response.json();
+    if (!response.ok) throw new Error(review.error || "포스터 품질 검수에 실패했어요.");
+    return review;
+  }
+
+  async function findApprovedPoster() {
+    let best = {score: 0, issues: []};
+    for (let index = 0; index < themes.length; index += 1) {
+      const canvas = document.createElement("canvas");
+      const localResult = draw(canvas, themes[index]);
+      if (!localResult.approved) continue;
+      const review = await verifyPosterQuality(canvas);
+      if (review.score > best.score) best = review;
+      if (review.approved && review.score >= 90) {
+        currentThemeIndex = index;
+        render();
+        return review;
+      }
+    }
+    throw new Error(`90점 출고 기준을 통과하지 못했어요. 최고 점수 ${best.score}점 · ${(best.issues || [])[0] || "다른 사진이나 더 구체적인 혜택이 필요해요."}`);
+  }
+
   async function makeOneClick() {
     const button = $("makeOneClickPoster"), status = $("posterMainStatus");
     if (!val("posterCompany") || !val("posterPurpose")) { status.className = "poster-main-status text-danger mb-3"; status.textContent = "업체명과 홍보 내용을 먼저 입력해주세요."; return; }
@@ -245,6 +277,11 @@
       if (!await suggest({ autoApply: true })) throw new Error("문구를 만들지 못했습니다. 다시 눌러주세요.");
       button.textContent = "🎨 AI 배경을 만들고 있어요…"; currentStep = "2/2 포스터 배경과 최종 배치를 만들고 있습니다."; showProgress();
       const backgroundReady = await createBackground();
+      if (backgroundReady) {
+        currentStep = "3/3 순금이가 완성 포스터를 검수하고 있어요."; showProgress();
+        const review = await findApprovedPoster();
+        status.dataset.qualityScore = String(review.score);
+      }
       status.className = `poster-main-status ${backgroundReady ? "text-success" : "text-warning"} mb-3`;
       status.textContent = backgroundReady ? "포스터 완성! 생성 기록에 저장하고 있어요…" : "문구 포스터는 완성했지만 AI 배경은 실패했어요. 아래에서 배경만 다시 만들 수 있어요.";
       if (backgroundReady) {

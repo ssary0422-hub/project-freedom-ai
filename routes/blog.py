@@ -1,4 +1,5 @@
 from pathlib import Path
+from uuid import uuid4
 
 from PIL import Image, ImageDraw, ImageFont
 from flask import Blueprint, render_template, request, session, send_file
@@ -6,6 +7,7 @@ from flask import Blueprint, render_template, request, session, send_file
 from ai.blog import make_blog
 from ai.image import make_image
 from ai.image_prompts import build_marketing_image_prompt
+from ai.providers import analyze_image_json, generate_text
 from database.db import save_history, get_history_item
 from database.profiles import get_profiles, get_profile
 from database.users import (
@@ -17,8 +19,12 @@ from documents.pdf import create_blog_pdf, BLOG_PDF_PATH
 from documents.word import create_blog_word, BLOG_WORD_PATH
 from routes.auth import login_required
 from routes.brand_library import save_files
+from services.campaign_art_direction import create_art_directions
+from services.campaign_renderer import render_blog_cover
+from services.campaign_quality import evaluate_campaign_image
 
 blog_bp = Blueprint("blog", __name__)
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def _find_brand_font(size: int):
@@ -694,15 +700,40 @@ def _blog_page():
 이미지 안에는 글자를 넣지 말 것.
 """
                 try:
-                    image_prompt = build_marketing_image_prompt(
-                        business=business,
-                        context=topic,
-                        mood=tone,
-                        image_style=effective_image_style,
-                        placement="a clean landscape blog cover photograph",
-                        custom_concept=custom_image_style,
+                    directions = create_art_directions(
+                        business=business, company=company, request=topic,
+                        media="blog", photo_count=0, generator=generate_text, remember=True,
                     )
-                    image_path = make_image(image_prompt)
+                    approved_result, review_failures = None, []
+                    for direction in directions:
+                        image_prompt = build_marketing_image_prompt(
+                            business=business,
+                            context=f"{topic}. Art direction: {direction.campaign_angle}. "
+                                    f"Reserve clean copy space at {direction.headline_position}.",
+                            mood=f"{tone}; {direction.mood}",
+                            image_style=effective_image_style,
+                            placement="a clean landscape blog cover photograph with no text",
+                            custom_concept=custom_image_style,
+                        )
+                        background_path = make_image(image_prompt)
+                        output_path = BASE_DIR / "static" / "generated" / f"finished-blog-{uuid4().hex[:10]}.png"
+                        render_blog_cover(
+                            background_path=background_path, direction=direction,
+                            company=company, output_path=output_path,
+                        )
+                        review = evaluate_campaign_image(
+                            image_path=output_path, business=business, company=company,
+                            campaign_request=topic, media="blog cover",
+                            expected_size=(1200, 630), analyzer=analyze_image_json,
+                        )
+                        if review["approved"]:
+                            approved_result = output_path
+                            break
+                        review_failures.append(review)
+                    if not approved_result:
+                        best = max(review_failures, key=lambda item: item["score"], default={"score": 0})
+                        raise ValueError(f"90점 출고 기준을 통과하지 못했습니다. 최고 점수: {best['score']}점")
+                    image_path = approved_result.relative_to(BASE_DIR).as_posix()
                     image_url = "/" + Path(image_path).as_posix()
                 except Exception as image_error:
                     print("블로그 이미지 생성 실패:", image_error)

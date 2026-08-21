@@ -1,19 +1,22 @@
 import base64
 import binascii
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from uuid import uuid4
 
 from flask import Blueprint, jsonify, render_template, request, session
 from ai.image import make_image
 from ai.providers import generate_text
 from ai.image_prompts import build_poster_background_prompt
+from ai.providers import analyze_image_json
 from database.users import get_plan_status, record_ai_credit_usage
 from database.db import save_history
 from routes.auth import login_required
+from services.campaign_quality import evaluate_campaign_image
 
 poster_bp = Blueprint("poster", __name__)
 
-def _save_poster_result_image(data_url, user_id):
+def _poster_png_bytes(data_url):
     prefix = "data:image/png;base64,"
     if not isinstance(data_url, str) or not data_url.startswith(prefix):
         raise ValueError("PNG 포스터 결과만 저장할 수 있어요.")
@@ -23,11 +26,50 @@ def _save_poster_result_image(data_url, user_id):
         raise ValueError("포스터 이미지 형식을 확인하지 못했어요.") from exc
     if not image_bytes or len(image_bytes) > 8 * 1024 * 1024 or not image_bytes.startswith(b"\x89PNG\r\n\x1a\n"):
         raise ValueError("포스터 이미지가 비어 있거나 저장 가능한 크기를 넘었어요.")
+    return image_bytes
+
+
+def _save_poster_result_image(data_url, user_id):
+    image_bytes = _poster_png_bytes(data_url)
     relative = Path("generated") / "poster" / str(user_id) / f"{uuid4().hex}.png"
     target = Path("static") / relative
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_bytes(image_bytes)
     return f"/static/{relative.as_posix()}"
+
+
+@poster_bp.post("/poster/quality")
+@login_required
+def poster_quality():
+    data = request.get_json(silent=True) or {}
+    company = str(data.get("company", "")).strip()[:120]
+    purpose = str(data.get("purpose", "")).strip()[:1000]
+    if not company or not purpose or not data.get("image"):
+        return jsonify(error="업체명, 홍보 내용, 포스터 이미지가 필요합니다."), 400
+    try:
+        image_bytes = _poster_png_bytes(data["image"])
+        with TemporaryDirectory() as tmp:
+            image_path = Path(tmp) / "poster.png"
+            image_path.write_bytes(image_bytes)
+            review = evaluate_campaign_image(
+                image_path=image_path, business="poster campaign", company=company,
+                campaign_request=purpose, media="print poster",
+                expected_size=(1080, 1350), analyzer=analyze_image_json,
+            )
+        session["poster_quality_attempts"] = int(session.get("poster_quality_attempts", 0)) + 1
+        if review["approved"]:
+            if session.pop("poster_image_charge_pending", False):
+                record_ai_credit_usage(session["user_id"], "POSTER_IMAGE", 3)
+            session["poster_quality_approved"] = True
+        elif session["poster_quality_attempts"] >= 3:
+            session.pop("poster_image_charge_pending", None)
+            session.pop("poster_quality_approved", None)
+        return jsonify(review)
+    except (TypeError, ValueError) as exc:
+        return jsonify(error=str(exc)), 400
+    except Exception as exc:
+        print("Poster visual quality failed:", exc)
+        return jsonify(error="포스터 품질 검수에 실패했습니다."), 502
 
 def _compact_copy(value, limit, fallback=""):
     text = " ".join(str(value or "").split()).strip(" -•")
@@ -99,7 +141,10 @@ def background():
         path=make_image(build_poster_background_prompt(full_prompt or "업종에 맞는 광고 배경"))
     except Exception as error:
         return jsonify(error=f"이미지 생성 실패: {error}"), 502
-    record_ai_credit_usage(session["user_id"],"POSTER_IMAGE",3); return jsonify(image_url="/"+path.replace("\\","/"))
+    session["poster_image_charge_pending"] = True
+    session["poster_quality_attempts"] = 0
+    session.pop("poster_quality_approved", None)
+    return jsonify(image_url="/"+path.replace("\\","/"))
 
 @poster_bp.post("/poster/history")
 @login_required
@@ -110,6 +155,8 @@ def save_poster_history():
     benefit = str(data.get("benefit", "")).strip()[:500]
     if not company or not headline or not data.get("image"):
         return jsonify(ok=False, error="완성된 포스터 정보가 부족해요."), 400
+    if not session.pop("poster_quality_approved", False):
+        return jsonify(ok=False, error="90점 품질 검수를 먼저 통과해 주세요."), 409
     try:
         image_url = _save_poster_result_image(data["image"], session["user_id"])
     except (TypeError, ValueError) as exc:

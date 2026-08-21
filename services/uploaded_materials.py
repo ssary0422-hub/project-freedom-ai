@@ -1,7 +1,7 @@
 from pathlib import Path
 from uuid import uuid4
 
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +23,10 @@ def save_uploaded_image(file_storage, prefix="material"):
         with Image.open(BytesIO(raw)) as source:
             source.verify()
         with Image.open(BytesIO(raw)) as source:
-            image = source.convert("RGBA")
+            # Phone cameras commonly store portrait orientation in EXIF instead
+            # of rotating the pixel data. Apply it before converting to PNG,
+            # because conversion discards that metadata.
+            image = ImageOps.exif_transpose(source).convert("RGBA")
             image.thumbnail((1800, 1800), Image.Resampling.LANCZOS)
             path = MATERIAL_DIR / f"{prefix}-{uuid4().hex[:12]}.png"
             image.save(path, "PNG", optimize=True)

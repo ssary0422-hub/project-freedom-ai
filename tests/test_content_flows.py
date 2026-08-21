@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from app import app
+from services.campaign_art_direction import ArtDirection
 
 
 READY = {
@@ -15,6 +16,14 @@ READY = {
     "remaining": 100,
     "percent": 0,
 }
+
+TEST_DIRECTION = ArtDirection(
+    concept_name="photo", campaign_angle="clear benefit", layout_family="full_bleed_photo",
+    message_angle="customer_outcome", photo_strategy="generated_scene",
+    subject_position="right", headline_position="left", mood="clear",
+    headline="Start today", supporting_copy="Ready to publish", cta="Start free",
+    palette=("#071827", "#59e1cb", "#f7fbff"), avoid=(),
+)
 
 
 class ContentFlowTests(unittest.TestCase):
@@ -76,7 +85,10 @@ class ContentFlowTests(unittest.TestCase):
 
     def test_ads_finished_card_uses_fact_based_renderer(self):
         patches = self._common_patches("ads", "make_ads", "제목 | 확인된 혜택 | 문의하기") + [
-            patch("routes.ads.create_finished_promo_card", return_value="static/generated/ad-card.png"),
+            patch("routes.ads.create_art_directions", return_value=[TEST_DIRECTION] * 3),
+            patch("routes.ads._generate_ad_image", return_value="static/generated/background.png"),
+            patch("routes.ads.render_campaign_concept"),
+            patch("routes.ads.evaluate_campaign_image", return_value={"score": 93, "approved": True, "issues": [], "strengths": ["clear"], "retry_instruction": ""}),
             patch("routes.ads.create_word"),
             patch("routes.ads.create_pdf"),
         ]
@@ -88,7 +100,7 @@ class ContentFlowTests(unittest.TestCase):
             },
         ))
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"/static/generated/ad-card.png", response.data)
+        self.assertIn(b"/static/generated/finished-ad-", response.data)
 
     @patch("routes.ads.make_image", side_effect=[
         RuntimeError("moderation_blocked safety_violations sexual"),
@@ -171,7 +183,9 @@ class ContentFlowTests(unittest.TestCase):
 
     def test_sns_finished_card_uses_fact_based_renderer(self):
         patches = self._common_patches("sns", "make_sns", "오늘 소식 | 확인된 내용 | 문의하기") + [
-            patch("routes.sns.create_finished_promo_card", return_value="static/generated/sns-card.png"),
+            patch("routes.sns._generate_sns_image", return_value="static/generated/background.png"),
+            patch("routes.sns.render_campaign_concept"),
+            patch("routes.sns.evaluate_campaign_image", return_value={"score": 93, "approved": True, "issues": [], "strengths": ["clear"], "retry_instruction": ""}),
             patch("routes.sns.create_sns_word"),
             patch("routes.sns.create_sns_pdf"),
         ]
@@ -181,10 +195,11 @@ class ContentFlowTests(unittest.TestCase):
                 "business": "카페", "company": "오늘의커피", "style": "오늘 예약 가능",
                 "platform": "인스타그램", "with_image": "on",
                 "image_output_mode": "finished_card",
+                "selected_art_direction": '{"concept_name":"photo","campaign_angle":"clear benefit","layout_family":"full_bleed_photo","message_angle":"customer_outcome","photo_strategy":"generated_scene","subject_position":"right","headline_position":"left","mood":"clear","headline":"Start today","supporting_copy":"Ready to publish","cta":"Start free","palette":["#071827","#59e1cb","#f7fbff"],"avoid":[]}',
             },
         ))
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"/static/generated/sns-card.png", response.data)
+        self.assertIn(b"/static/generated/finished-sns-", response.data)
 
     @patch("routes.sns.get_profiles", return_value=[])
     @patch("routes.sns.record_ai_credit_usage")
