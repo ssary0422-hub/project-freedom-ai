@@ -99,6 +99,33 @@ class CampaignRendererTests(unittest.TestCase):
                     pixels = image.getdata()
                     self.assertTrue(any(r > 240 and b > 150 and g < 30 for r, g, b in pixels))
 
+    def test_uniform_logo_margins_are_removed_and_brand_color_drives_palette(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            background = root / "warm-scene.png"
+            logo = root / "wide-logo.jpg"
+            Image.new("RGB", (1200, 900), "#62401f").save(background)
+            wide = Image.new("RGB", (1200, 700), "#5d3205")
+            for x in range(430, 770):
+                for y in range(285, 415):
+                    wide.putpixel((x, y), (225, 199, 137))
+            wide.save(logo, quality=95)
+            direction = ArtDirection(
+                concept_name="brand", campaign_angle="clear", layout_family="full_bleed_photo",
+                message_angle="customer_outcome", photo_strategy="scene", subject_position="right",
+                headline_position="left", mood="warm", headline="Warm brand headline",
+                supporting_copy="Warm brand proof", cta="Book now",
+                palette=("#071827", "#59e1cb", "#ffffff"), avoid=(),
+            )
+            output = render_campaign_concept(
+                background_path=background, direction=direction, company="Seven Days",
+                output_path=root / "campaign.png", logo_path=logo,
+            )
+            with Image.open(output).convert("RGB") as image:
+                colors = image.resize((80, 100)).getcolors(8000)
+                self.assertTrue(any(red > 170 and green > 140 and blue < 140
+                                    for _, (red, green, blue) in colors))
+
 
 if __name__ == "__main__":
     unittest.main()

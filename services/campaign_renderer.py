@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import colorsys
+from dataclasses import replace
 from pathlib import Path
 
 from PIL import Image, ImageColor, ImageDraw, ImageFilter, ImageStat
@@ -55,14 +57,73 @@ def _background(path: str | Path) -> Image.Image:
         return _cover(source.convert("RGBA"), (WIDTH, HEIGHT))
 
 
+def _normalized_logo(logo_path: str | Path) -> Image.Image:
+    """Remove oversized uniform margins while preserving the exact visible mark."""
+    with Image.open(logo_path) as source:
+        logo = source.convert("RGBA")
+    logo.thumbnail((1600, 1600), Image.Resampling.LANCZOS)
+    pixels = logo.load()
+    corners = (pixels[0, 0], pixels[logo.width - 1, 0], pixels[0, logo.height - 1],
+               pixels[logo.width - 1, logo.height - 1])
+    background = tuple(round(sum(color[channel] for color in corners) / 4) for channel in range(3))
+    mask = Image.new("L", logo.size, 0)
+    mask_pixels = mask.load()
+    for y in range(logo.height):
+        for x in range(logo.width):
+            red, green, blue, alpha = pixels[x, y]
+            distance = max(abs(red - background[0]), abs(green - background[1]), abs(blue - background[2]))
+            if alpha > 20 and distance > 18:
+                mask_pixels[x, y] = min(alpha, max(0, round((distance - 18) * 255 / 18)))
+    content_box = mask.getbbox()
+    if content_box and content_box != (0, 0, logo.width, logo.height):
+        logo.putalpha(mask)
+        left, top, right, bottom = content_box
+        pad = max(4, round(max(right - left, bottom - top) * .04))
+        logo = logo.crop((max(0, left - pad), max(0, top - pad),
+                          min(logo.width, right + pad), min(logo.height, bottom + pad)))
+    return logo
+
+
+def _average_color(image: Image.Image, *, ignore_transparent: bool = False) -> tuple[int, int, int]:
+    sample = image.convert("RGBA")
+    sample.thumbnail((96, 96), Image.Resampling.LANCZOS)
+    colors = []
+    for red, green, blue, alpha in sample.getdata():
+        if ignore_transparent and alpha < 80:
+            continue
+        spread = max(red, green, blue) - min(red, green, blue)
+        colors.extend([(red, green, blue)] * (1 + spread // 24))
+    if not colors:
+        return (216, 185, 120)
+    return tuple(round(sum(color[channel] for color in colors) / len(colors)) for channel in range(3))
+
+
+def _brand_aware_direction(direction: ArtDirection, background_path: str | Path,
+                           logo_path: str | Path | None) -> ArtDirection:
+    """Harmonize model art direction with the real uploaded brand and scene."""
+    with Image.open(background_path) as source:
+        scene_rgb = _average_color(source)
+    brand_rgb = ImageColor.getrgb(direction.palette[1])
+    if logo_path and Path(logo_path).exists():
+        brand_rgb = _average_color(_normalized_logo(logo_path), ignore_transparent=True)
+    scene_h, scene_l, scene_s = colorsys.rgb_to_hls(*(value / 255 for value in scene_rgb))
+    brand_h, brand_l, brand_s = colorsys.rgb_to_hls(*(value / 255 for value in brand_rgb))
+    if brand_s < .16:
+        brand_h, brand_s = scene_h, .46
+    accent = colorsys.hls_to_rgb(brand_h, min(.82, max(.68, brand_l)), min(.68, max(.38, brand_s)))
+    base = colorsys.hls_to_rgb(scene_h, .10, min(.44, max(.22, scene_s)))
+    ivory = colorsys.hls_to_rgb(brand_h, .94, .28)
+    to_hex = lambda color: "#" + "".join(f"{round(value * 255):02x}" for value in color)
+    return replace(direction, palette=(to_hex(base), to_hex(accent), to_hex(ivory)))
+
+
 def _place_brand_logo(image: Image.Image, logo_path: str | Path | None, *,
                       max_size: tuple[int, int], margin: int,
                       candidates: tuple[tuple[int, int], ...]) -> bool:
     """Place the exact uploaded logo on the calmest available brand-safe area."""
     if not logo_path or not Path(logo_path).exists():
         return False
-    with Image.open(logo_path) as source:
-        logo = source.convert("RGBA")
+    logo = _normalized_logo(logo_path)
     alpha_box = logo.getchannel("A").getbbox()
     if not alpha_box:
         return False
@@ -182,6 +243,7 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
                             logo_path: str | Path | None = None,
                             footer_detail: str = "") -> Path:
     """Render one of the core layouts without asking the image model to draw text."""
+    direction = _brand_aware_direction(direction, background_path, logo_path)
     image = _background(background_path)
     accent = ImageColor.getrgb(direction.palette[1]) + (255,)
 
@@ -192,11 +254,11 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
         image = panel
         draw = ImageDraw.Draw(image, "RGBA")
         _draw_text(draw, (58, 62), company, _font(25, True, "ko"), accent, "ko", True)
-        _text_block(draw, direction=direction, x=58, y=245, width=326, title_size=58, title_lines=4, light=False)
-        _proof_chips(draw, proof_items, x=58, y=976, max_width=326, light=False)
+        _text_block(draw, direction=direction, x=58, y=245, width=326, title_size=58, title_lines=4)
+        _proof_chips(draw, proof_items, x=58, y=976, max_width=326)
         _rounded(draw, (58, 1082, 382, 1176), 16, accent)
         _draw_text(draw, (86, 1110), direction.cta, _font(27, True, "ko"), _contrast_text(accent), "ko", True)
-        _footer(draw, company=company, direction=direction, light=False)
+        _footer(draw, company=company, direction=direction)
 
     elif direction.layout_family == "editorial_type":
         photo = image.crop((360, 360, 1030, 1160)).rotate(-3, expand=True, resample=Image.Resampling.BICUBIC)
@@ -304,6 +366,7 @@ def render_blog_cover(*, background_path: str | Path, direction: ArtDirection,
                       company: str, output_path: str | Path,
                       logo_path: str | Path | None = None) -> Path:
     """Render a readable 1200x630 blog hero without AI-generated lettering."""
+    direction = _brand_aware_direction(direction, background_path, logo_path)
     with Image.open(background_path) as source:
         image = _cover(source.convert("RGBA"), (1200, 630))
     shade = Image.new("RGBA", image.size, (0, 0, 0, 0))
