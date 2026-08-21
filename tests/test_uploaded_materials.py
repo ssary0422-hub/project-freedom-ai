@@ -7,7 +7,7 @@ from unittest.mock import patch
 from PIL import Image
 from werkzeug.datastructures import FileStorage
 
-from services.uploaded_materials import save_uploaded_image
+from services.uploaded_materials import MAX_BYTES, MAX_PIXELS, save_uploaded_image
 
 
 def image_upload(name="sample.png", mime="image/png"):
@@ -32,6 +32,10 @@ def rotated_jpeg_upload():
 
 
 class UploadedMaterialsTests(unittest.TestCase):
+    def test_phone_sized_upload_limits_are_explicit(self):
+        self.assertEqual(MAX_BYTES, 16 * 1024 * 1024)
+        self.assertEqual(MAX_PIXELS, 40_000_000)
+
     def test_saves_valid_image_as_safe_png(self):
         with tempfile.TemporaryDirectory() as tmp, patch(
             "services.uploaded_materials.MATERIAL_DIR", Path(tmp)

@@ -244,6 +244,11 @@ class ContentFlowTests(unittest.TestCase):
         self.assertIn("보통 1~3분 걸려요", source)
         self.assertIn('dataset.submitting === "true"', source)
         self.assertIn('get("preview_loading") === "1"', source)
+        self.assertIn("mobile-upload.js", source)
+        mobile_upload = Path("static/mobile-upload.js").read_text(encoding="utf-8")
+        self.assertIn("16 * 1024 * 1024", mobile_upload)
+        self.assertIn("HEIC", mobile_upload)
+        self.assertIn("new DataTransfer()", mobile_upload)
 
     def test_sungeum_motion_supports_generation_states(self):
         script = Path("static/sungeum-assistant.js").read_text(encoding="utf-8")

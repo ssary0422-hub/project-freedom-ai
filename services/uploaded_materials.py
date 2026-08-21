@@ -8,7 +8,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 MATERIAL_DIR = BASE_DIR / "static" / "generated" / "materials"
 MATERIAL_DIR.mkdir(parents=True, exist_ok=True)
 ALLOWED_MIME = {"image/jpeg", "image/png", "image/webp"}
-MAX_BYTES = 6 * 1024 * 1024
+# Current phone cameras regularly produce 7–15 MB originals. The browser
+# normally downsizes them first, but this larger server-side ceiling prevents a
+# valid mobile upload from being silently discarded when that step is skipped.
+MAX_BYTES = 16 * 1024 * 1024
+MAX_PIXELS = 40_000_000
 
 
 def save_uploaded_image(file_storage, prefix="material"):
@@ -23,6 +27,8 @@ def save_uploaded_image(file_storage, prefix="material"):
         with Image.open(BytesIO(raw)) as source:
             source.verify()
         with Image.open(BytesIO(raw)) as source:
+            if source.width * source.height > MAX_PIXELS:
+                return ""
             # Phone cameras commonly store portrait orientation in EXIF instead
             # of rotating the pixel data. Apply it before converting to PNG,
             # because conversion discards that metadata.
