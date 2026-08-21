@@ -293,6 +293,12 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    // Credit-free visual QA route for checking the loading experience after deploys.
+    if (form && new URLSearchParams(window.location.search).get("preview_loading") === "1") {
+        form.addEventListener("submit", function (event) { event.preventDefault(); }, { once: true, capture: true });
+        form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    }
+
     if (document.querySelector(".alert-warning")) {
         document.dispatchEvent(new CustomEvent("sungeum:state", { detail: { state: "failed", duration: 1800 } }));
     } else if (document.getElementById("result")) {

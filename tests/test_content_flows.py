@@ -228,6 +228,7 @@ class ContentFlowTests(unittest.TestCase):
         self.assertIn("순금이 검수·저장", source)
         self.assertIn("보통 1~3분 걸려요", source)
         self.assertIn('dataset.submitting === "true"', source)
+        self.assertIn('get("preview_loading") === "1"', source)
 
     def test_sungeum_motion_supports_generation_states(self):
         script = Path("static/sungeum-assistant.js").read_text(encoding="utf-8")
