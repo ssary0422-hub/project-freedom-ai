@@ -19,10 +19,42 @@
   }
 
   const themes = [
-    { name: "순금 추천 · 브랜드 에디토리얼형", layout: "editorial", accent: "#ffc85c", ink: "#fff", muted: "#d9ddea" },
-    { name: "사진 중심 · 정보 패널형", layout: "left", accent: "#63dcff", ink: "#fff", muted: "#d5e2ed" },
-    { name: "하단 집중 · 프로모션형", layout: "bottom", accent: "#ffca62", ink: "#fff", muted: "#f0e2d5" },
+    { name: "순금 추천 · 브랜드 에디토리얼형", layout: "editorial" },
+    { name: "사진 중심 · 브랜드 패널형", layout: "left" },
+    { name: "하단 집중 · 브랜드 프로모션형", layout: "bottom" },
   ];
+
+  function hslToHex(h, s, l) {
+    const f = n => { const k=(n+h/30)%12, a=s*Math.min(l,1-l); return l-a*Math.max(-1,Math.min(k-3,9-k,1)); };
+    return `#${[f(0),f(8),f(4)].map(v=>Math.round(255*v).toString(16).padStart(2,"0")).join("")}`;
+  }
+
+  function rgbToHsl(r,g,b) {
+    r/=255;g/=255;b/=255;const max=Math.max(r,g,b),min=Math.min(r,g,b),d=max-min;let h=0;
+    if(d){if(max===r)h=60*(((g-b)/d)%6);else if(max===g)h=60*((b-r)/d+2);else h=60*((r-g)/d+4);} if(h<0)h+=360;
+    return [h,d===0?0:d/(1-Math.abs(2*((max+min)/2)-1)),(max+min)/2];
+  }
+
+  function averageVisibleColor(image) {
+    if(!image)return null;const canvas=document.createElement("canvas");canvas.width=80;canvas.height=80;
+    const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.drawImage(image,0,0,80,80);const px=ctx.getImageData(0,0,80,80).data;
+    let r=0,g=0,b=0,weight=0;for(let i=0;i<px.length;i+=4){if(px[i+3]<80)continue;const vivid=1+Math.max(px[i],px[i+1],px[i+2])-Math.min(px[i],px[i+1],px[i+2]);r+=px[i]*vivid;g+=px[i+1]*vivid;b+=px[i+2]*vivid;weight+=vivid;}
+    return weight?[r/weight,g/weight,b/weight]:null;
+  }
+
+  function applyBrandPalettes() {
+    const brand=averageVisibleColor(logoImage)||[216,185,120], scene=averageVisibleColor(subjectImage||backgroundImage)||[92,57,34];
+    let [brandH,brandS,brandL]=rgbToHsl(...brand),[sceneH,sceneS]=rgbToHsl(...scene);
+    if(brandS<.16){brandH=sceneH;brandS=.48;} brandS=Math.max(.38,Math.min(.68,brandS));brandL=Math.max(.68,Math.min(.82,brandL));
+    const accent=hslToHex(brandH,brandS,brandL), ink=hslToHex(brandH,.34,.94), muted=hslToHex(brandH,.22,.82);
+    themes.forEach((theme,index)=>Object.assign(theme,{accent,ink,muted,
+      panel:hslToHex(sceneH,Math.min(.42,Math.max(.22,sceneS)),index===2?.13:.10),
+      base:hslToHex(sceneH,Math.min(.46,Math.max(.20,sceneS)),.09),
+      base2:hslToHex((sceneH+8)%360,Math.min(.50,Math.max(.22,sceneS)),.20),
+      veil:`hsla(${Math.round(sceneH)},35%,7%,.48)`
+    }));
+  }
+  applyBrandPalettes();
 
   function rounded(ctx, x, y, w, h, radius, color) {
     ctx.fillStyle = color; ctx.beginPath(); ctx.roundRect(x, y, w, h, radius); ctx.fill();
@@ -107,11 +139,11 @@
 
   function drawEditorial(ctx, theme, approved) {
     const bg = ctx.createLinearGradient(0, 0, W, H);
-    bg.addColorStop(0, "#090d1d"); bg.addColorStop(.55, "#17132a"); bg.addColorStop(1, "#34213d");
+    bg.addColorStop(0, theme.base); bg.addColorStop(.55, theme.panel); bg.addColorStop(1, theme.base2);
     ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = "rgba(255,200,92,.13)"; ctx.beginPath(); ctx.arc(910, 280, 330, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "rgba(103,220,255,.08)"; ctx.beginPath(); ctx.arc(160, 1120, 370, 0, Math.PI * 2); ctx.fill();
-    if (backgroundImage) { ctx.save(); ctx.globalAlpha = .38; cover(ctx, backgroundImage); ctx.restore(); ctx.fillStyle = "rgba(5,8,20,.6)"; ctx.fillRect(0, 0, W, H); }
+    if (backgroundImage) { ctx.save(); ctx.globalAlpha = .42; cover(ctx, backgroundImage); ctx.restore(); ctx.fillStyle = theme.veil; ctx.fillRect(0, 0, W, H); }
 
     ctx.textBaseline = "top";
     ctx.fillStyle = theme.accent; ctx.font = '800 25px "Malgun Gothic", sans-serif';
@@ -135,7 +167,7 @@
       ctx.fillText("제품·업체 사진을 넣으면", 825, 620); ctx.fillText("이 영역에 크게 배치됩니다", 825, 660); ctx.textAlign = "left";
     }
 
-    rounded(ctx, 64, 610, 525, 350, 32, "rgba(10,15,31,.9)");
+    rounded(ctx, 64, 610, 525, 350, 32, theme.panel);
     ctx.fillStyle = theme.accent; ctx.font = '900 22px "Malgun Gothic", sans-serif'; ctx.fillText("WHY THIS BRAND", 102, 652);
     ctx.fillStyle = theme.muted; ctx.font = '600 29px "Malgun Gothic", sans-serif';
     drawLines(ctx, val("posterBenefit") || "핵심 혜택을 입력하면 고객이 읽기 쉽게 정리됩니다", 102, 708, 450, 48, 4);
@@ -148,12 +180,12 @@
   }
 
   function drawClassic(ctx, theme, approved) {
-    const gradient = ctx.createLinearGradient(0, 0, W, H); gradient.addColorStop(0, "#19243d"); gradient.addColorStop(1, "#684873");
+    const gradient = ctx.createLinearGradient(0, 0, W, H); gradient.addColorStop(0, theme.base); gradient.addColorStop(1, theme.base2);
     ctx.fillStyle = gradient; ctx.fillRect(0, 0, W, H);
     if (subjectImage) cover(ctx, subjectImage); else if (backgroundImage) cover(ctx, backgroundImage);
-    ctx.fillStyle = "rgba(0,0,0,.42)"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = theme.veil; ctx.fillRect(0, 0, W, H);
     const bottom = theme.layout === "bottom"; const x = 48, y = bottom ? 720 : 52, w = bottom ? 984 : 610, h = bottom ? 578 : 700;
-    rounded(ctx, x, y, w, h, 36, "rgba(6,15,28,.91)");
+    rounded(ctx, x, y, w, h, 36, theme.panel);
     const tx = x + 42, tw = w - 84; let ty = y + 44; ctx.textBaseline = "top";
     ctx.fillStyle = theme.accent; ctx.font = '800 25px "Malgun Gothic", sans-serif'; ctx.fillText(val("posterCompany") || "업체명", tx, ty); ty += 62;
     const title = val("posterHeadline") || "광고 제목을 입력하세요"; const size = fitFont(ctx, title, tw, 3, bottom ? 58 : 62, 38);
@@ -214,7 +246,7 @@
     outCtx.putImageData(outData,0,0); return out;
   }
 
-  function loadFile(file, setter, {logo=false} = {}) { if (!file) return; const image = new Image(); image.onload = () => { setter(logo ? normalizeLogo(image) : image); serverApproved = false; render(); URL.revokeObjectURL(image.src); }; image.src = URL.createObjectURL(file); }
+  function loadFile(file, setter, {logo=false} = {}) { if (!file) return; const image = new Image(); image.onload = () => { setter(logo ? normalizeLogo(image) : image); applyBrandPalettes(); serverApproved = false; render(); URL.revokeObjectURL(image.src); }; image.src = URL.createObjectURL(file); }
   function usePhoto() {
     hasUserResult = true; serverApproved = false; loadFile($("posterPhoto").files[0], image => { subjectImage = image; }); loadFile($("posterLogo").files[0], image => { logoImage = image; }, {logo:true}); render();
   }
@@ -243,7 +275,7 @@
     try {
       const response = await fetch("/poster/background", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ business: val("posterCompany"), purpose: val("posterPurpose"), style: val("posterImageStyle"), prompt: val("aiBackgroundPrompt") }) });
       const data = await response.json(); if (!response.ok) throw new Error(data.error || "배경 생성 실패");
-      await new Promise((resolve, reject) => { const image = new Image(); image.onload = () => { backgroundImage = image; hasUserResult = true; render(); resolve(); }; image.onerror = () => reject(new Error("생성된 배경 이미지를 불러오지 못했습니다.")); image.src = `${data.image_url}?v=${Date.now()}`; });
+      await new Promise((resolve, reject) => { const image = new Image(); image.onload = () => { backgroundImage = image; applyBrandPalettes(); serverApproved = false; hasUserResult = true; render(); resolve(); }; image.onerror = () => reject(new Error("생성된 배경 이미지를 불러오지 못했습니다.")); image.src = `${data.image_url}?v=${Date.now()}`; });
       status.textContent = data.fallback ? "안전한 프리미엄 대체 배경이 자동 적용됐습니다." : "글자 없는 AI 배경이 적용됐습니다.";
       return true;
     } catch (error) { status.textContent = error.message; return false; }
