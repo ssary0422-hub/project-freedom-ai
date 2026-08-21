@@ -237,6 +237,9 @@ class ContentFlowTests(unittest.TestCase):
         self.assertIn("sungeum:state", script)
         self.assertIn("is-failed", script)
         self.assertIn("@keyframes sungeum-failed", styles)
+        self.assertIn("scheduleHello", script)
+        self.assertIn("순금 검수 완료", script)
+        self.assertIn("sungeum-review-stamp", styles)
         self.assertIn("prefers-reduced-motion:reduce", styles)
 
     def test_sungeum_assistant_has_visible_click_guidance(self):

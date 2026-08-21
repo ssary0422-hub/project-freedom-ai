@@ -2,9 +2,12 @@
   const trigger=document.getElementById('sungeumAssistantTrigger'),panel=document.getElementById('sungeumAssistantPanel'),close=document.getElementById('sungeumAssistantClose'),backdrop=document.getElementById('sungeumAssistantBackdrop'),chat=document.getElementById('sungeumChatLine'),request=document.getElementById('sungeumRequest'),send=document.getElementById('sungeumRequestSend'),next=document.getElementById('sungeumNextStep'),summary=document.getElementById('sungeumPlanSummary'),create=document.getElementById('sungeumCreateAd');
   if(!trigger||!panel)return;
   const callout=trigger.querySelector('.sungeum-click-callout');
+  const liveStatus=trigger.querySelector('.sungeum-live-status');
+  const defaultCallout=callout?.textContent||'순금이에게 물어보기',defaultStatus=liveStatus?.dataset.default||'';
   const mascots=()=>document.querySelectorAll('.sungeum-assistant-trigger .sungeum-alive,.sungeum-assistant-head .sungeum-alive');
   let moodTimer;
-  const setMood=(mood,duration=0)=>{clearTimeout(moodTimer);mascots().forEach(m=>{m.classList.remove('is-listening','is-working','is-approved','is-failed');if(mood)m.classList.add(`is-${mood}`)});if(duration)moodTimer=setTimeout(()=>setMood(panel.classList.contains('is-open')?'listening':''),duration)};
+  const moodCopy={working:['순금이가 처리 중이에요','꼼꼼히 작업 중'],approved:['완성했어요! 🐾','순금 검수 완료'],failed:['잠깐만요, 다시 볼게요','재시도 준비'],listening:['말씀해 주세요 👂','듣고 있어요']};
+  const setMood=(mood,duration=0)=>{clearTimeout(moodTimer);mascots().forEach(m=>{m.classList.remove('is-listening','is-working','is-approved','is-failed');if(mood)m.classList.add(`is-${mood}`)});if(callout)callout.textContent=moodCopy[mood]?.[0]||(localStorage.getItem('sungeum_assistant_opened')==='1'?'순금이':defaultCallout);if(liveStatus)liveStatus.textContent=moodCopy[mood]?.[1]||defaultStatus;if(duration)moodTimer=setTimeout(()=>setMood(panel.classList.contains('is-open')?'listening':''),duration)};
   window.SungeumMotion={setState:setMood};
   document.addEventListener('sungeum:state',event=>{const detail=event.detail||{};setMood(detail.state||'',Number(detail.duration)||0)});
   const open=value=>{panel.classList.toggle('is-open',value);backdrop?.classList.toggle('is-open',value);panel.setAttribute('aria-hidden',String(!value));trigger.setAttribute('aria-expanded',String(value));if(value&&callout){callout.textContent='순금이';localStorage.setItem('sungeum_assistant_opened','1')}setMood(value?'listening':'')};
@@ -16,4 +19,5 @@
   const prepare=()=>{const value=request.value.trim();if(value.length<3){setMood('listening');chat.innerHTML='<span>🐾</span><p><strong>순금이</strong><br>홍보할 상품이나 상황을 조금만 더 알려주세요.</p>';return}setMood('working');const stock=/재고|남았|소진/.test(value),weather=/비|눈|날씨|배달/.test(value),quiet=/손님|한가|타임세일/.test(value);const style=stock?'오늘 한정 재고 소진, 긴급성과 혜택이 분명한 분위기':weather?'날씨 맞춤 방문 또는 배달 혜택, 따뜻하고 친근한 분위기':quiet?'한가한 시간대 타임세일, 즉시 행동을 유도하는 분위기':'대표 상품의 장점과 혜택이 분명한 친근한 분위기';summary.textContent=`순금이가 요청을 정리했어요: ${value}`;create.href=`/ads-generator?assistant_brief=${encodeURIComponent(value)}&style=${encodeURIComponent(style)}`;next.hidden=false;chat.innerHTML='<span>🐾</span><p><strong>순금이</strong><br>첫 광고 초안을 준비했어요. 업체명과 업종만 확인하면 바로 만들 수 있어요.</p>';localStorage.setItem('sungeum_last_brief',value);setTimeout(()=>setMood('approved',900),650)};
   send.onclick=prepare;request.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();prepare()}});
   const query=new URLSearchParams(location.search);if(query.get('sungeum')==='open')open(true);if(query.get('brief')){request.value=query.get('brief');prepare()}
+  const scheduleHello=()=>setTimeout(()=>{if(!panel.classList.contains('is-open')&&!document.body.classList.contains('is-generating'))setMood('listening',950);scheduleHello()},9000+Math.random()*6000);scheduleHello();
 })();

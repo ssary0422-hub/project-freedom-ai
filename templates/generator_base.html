@@ -44,6 +44,7 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
         <div class="sungeum-loading-hero">
             <img class="sungeum-loading-mascot sungeum-alive is-working" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="작업 중인 3D 순금">
             <span class="sungeum-working-dot" aria-hidden="true"></span>
+            <span class="sungeum-review-stamp" id="sungeum-review-stamp" aria-hidden="true">🐾<b>검수 중</b></span>
         </div>
         <p class="sungeum-loading-kicker">Sungeum AI is working</p>
         <h3 id="ai-loading-title">순금이가 만들고 있어요</h3>
@@ -188,6 +189,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const loadingProgress = document.getElementById("ai-loading-progress");
     const loadingElapsed = document.getElementById("ai-loading-elapsed");
     const loadingTime = document.getElementById("ai-loading-time");
+    const reviewStamp = document.getElementById("sungeum-review-stamp");
     const loadingSteps = Array.from(document.querySelectorAll("[data-loading-step]"));
 
     const currentCredit = Number(
@@ -274,6 +276,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     step.classList.toggle("is-done", index < activeStage[0] || (!createsImage && index === 2));
                 });
                 if (loadingMessage) loadingMessage.textContent = activeStage[2];
+                if (reviewStamp) reviewStamp.classList.toggle("is-visible", activeStage[0] === 3);
                 if (loadingElapsed) loadingElapsed.textContent = elapsed + "초 경과";
                 if (loadingProgress) {
                     const ceiling = createsImage ? 94 : 92;
