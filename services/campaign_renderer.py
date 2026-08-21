@@ -13,6 +13,29 @@ from services.finished_promo_card import _cover, _draw_text, _font, _rounded, _w
 WIDTH, HEIGHT = 1080, 1350
 
 
+def create_safe_typographic_background(*, direction: ArtDirection,
+                                       output_path: str | Path,
+                                       size: tuple[int, int] = (WIDTH, HEIGHT)) -> Path:
+    """Create a deterministic photo-free background without a model call."""
+    width, height = size
+    base = ImageColor.getrgb(direction.palette[0]) + (255,)
+    accent = ImageColor.getrgb(direction.palette[1]) + (255,)
+    secondary = ImageColor.getrgb(direction.palette[2]) + (255,)
+    image = Image.new("RGBA", size, base)
+    draw = ImageDraw.Draw(image, "RGBA")
+    draw.polygon(((int(width * .55), 0), (width, 0), (width, int(height * .7)),
+                  (int(width * .72), int(height * .53))), fill=accent)
+    draw.ellipse((int(width * .7), int(height * .08), int(width * 1.08),
+                  int(height * .38)), outline=secondary, width=max(8, width // 70))
+    for offset in range(-height, width, max(48, width // 14)):
+        draw.line((offset, height, offset + height, 0), fill=secondary[:3] + (36,),
+                  width=max(2, width // 360))
+    target = Path(output_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    image.convert("RGB").save(target, "PNG", optimize=True)
+    return target
+
+
 def _compact_copy(text: str, limit: int) -> str:
     cleaned = " ".join((text or "").split())
     if len(cleaned) <= limit:

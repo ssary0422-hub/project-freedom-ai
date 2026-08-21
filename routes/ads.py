@@ -23,8 +23,9 @@ from routes.auth import login_required
 from services.finished_promo_card import create_finished_promo_card
 from services.uploaded_materials import first_valid_uploaded_image, save_uploaded_image
 from services.campaign_art_direction import create_art_directions
-from services.campaign_renderer import render_campaign_concept
+from services.campaign_renderer import create_safe_typographic_background, render_campaign_concept
 from services.campaign_quality import evaluate_campaign_image
+from services.campaign_budget import generate_with_bounded_backgrounds
 
 ads_bp = Blueprint("ads", __name__)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -707,14 +708,14 @@ def _home_page():
                             media="ads", photo_count=1 if subject_path else 0,
                             generator=generate_text, remember=True,
                         )
-                        approved_result, review_failures = None, []
-                        for direction in directions:
-                            background_path = subject_path or _generate_ad_image(
+                        def generate_background(feedback):
+                            return _generate_ad_image(
                                 business, company,
-                                f"{style}. Art direction: {direction.campaign_angle}. Mood: {direction.mood}. "
-                                f"Reserve clean text space at {direction.headline_position}. The scene must fit the exact business.",
+                                f"{style}. {feedback}. Reserve clean text space. The scene must fit the exact business.",
                                 effective_image_style, custom_image_style,
                             )
+
+                        def render_candidate(background_path, direction, round_index, direction_index):
                             output_path = BASE_DIR / "static" / "generated" / f"finished-ad-{uuid4().hex[:10]}.png"
                             render_campaign_concept(
                                 background_path=background_path, direction=direction,
@@ -722,18 +723,23 @@ def _home_page():
                                 logo_path=logo_path,
                                 footer_detail=(request.form.get("website_url", "").strip() or request.form.get("map_url", "").strip()),
                             )
-                            review = evaluate_campaign_image(
-                                image_path=output_path, business=business, company=company,
+                            return output_path
+
+                        budgeted = generate_with_bounded_backgrounds(
+                            directions=directions,
+                            uploaded_background=subject_path,
+                            generate_background=generate_background,
+                            render_candidate=render_candidate,
+                            create_safe_background=lambda direction: create_safe_typographic_background(
+                                direction=direction,
+                                output_path=BASE_DIR / "static" / "generated" / f"safe-ad-{uuid4().hex[:10]}.png",
+                            ),
+                            evaluate_candidate=lambda candidate: evaluate_campaign_image(
+                                image_path=candidate, business=business, company=company,
                                 campaign_request=style, analyzer=analyze_image_json,
-                            )
-                            if review["approved"]:
-                                approved_result = output_path
-                                break
-                            review_failures.append(review)
-                        if not approved_result:
-                            best = max(review_failures, key=lambda item: item["score"], default={"score": 0})
-                            raise ValueError(f"90점 출고 기준을 통과하지 못했습니다. 최고 점수: {best['score']}점")
-                        image_path = approved_result.relative_to(BASE_DIR).as_posix()
+                            ),
+                        )
+                        image_path = budgeted.output_path.relative_to(BASE_DIR).as_posix()
                     else:
                         image_path = _generate_ad_image(
                             business, company, style, effective_image_style, custom_image_style

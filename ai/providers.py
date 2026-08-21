@@ -31,23 +31,29 @@ def generate_text(prompt: str) -> str:
     return text
 
 
-def analyze_image_json(prompt: str, image_path: str | Path) -> dict:
-    """Inspect a finished visual and return a machine-readable QA decision."""
+def analyze_images_json(prompt: str, image_paths: list[str | Path]) -> dict:
+    """Inspect one or more finished visuals in a single metered QA request."""
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY environment variable is required.")
-    path = Path(image_path)
-    mime = mimetypes.guess_type(path.name)[0] or "image/png"
-    encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+    paths = [Path(value) for value in image_paths]
+    if not paths:
+        raise ValueError("At least one image is required for visual QA.")
     model = os.getenv("OPENAI_TEXT_MODEL", DEFAULT_OPENAI_TEXT_MODEL).strip()
     try:
         response = OpenAI(api_key=api_key).responses.create(
             model=model or DEFAULT_OPENAI_TEXT_MODEL,
             input=[{
                 "role": "user",
-                "content": [
-                    {"type": "input_text", "text": prompt},
-                    {"type": "input_image", "image_url": f"data:{mime};base64,{encoded}"},
+                "content": [{"type": "input_text", "text": prompt}] + [
+                    {
+                        "type": "input_image",
+                        "image_url": "data:{mime};base64,{encoded}".format(
+                            mime=mimetypes.guess_type(path.name)[0] or "image/png",
+                            encoded=base64.b64encode(path.read_bytes()).decode("ascii"),
+                        ),
+                    }
+                    for path in paths
                 ],
             }],
             text={
@@ -78,6 +84,11 @@ def analyze_image_json(prompt: str, image_path: str | Path) -> dict:
         return json.loads(response.output_text)
     except (TypeError, json.JSONDecodeError) as exc:
         raise RuntimeError("OpenAI returned invalid visual QA JSON.") from exc
+
+
+def analyze_image_json(prompt: str, image_path: str | Path) -> dict:
+    """Backward-compatible single-image visual QA helper."""
+    return analyze_images_json(prompt, [image_path])
 
 
 def provider_status() -> dict[str, bool | str]:

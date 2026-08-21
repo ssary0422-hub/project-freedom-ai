@@ -5,10 +5,25 @@ from pathlib import Path
 from PIL import Image
 
 from services.campaign_art_direction import ArtDirection
-from services.campaign_renderer import render_blog_cover, render_campaign_concept
+from services.campaign_renderer import create_safe_typographic_background, render_blog_cover, render_campaign_concept
 
 
 class CampaignRendererTests(unittest.TestCase):
+    def test_safe_typographic_background_has_requested_size(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            direction = ArtDirection(
+                concept_name="safe", campaign_angle="clear", layout_family="bold_offer",
+                message_angle="customer_outcome", photo_strategy="none", subject_position="right",
+                headline_position="left", mood="bold", headline="Headline",
+                supporting_copy="Proof", cta="Start",
+                palette=("#071827", "#59e1cb", "#ffffff"), avoid=(),
+            )
+            output = create_safe_typographic_background(
+                direction=direction, output_path=Path(tmp) / "safe.png", size=(1200, 630)
+            )
+            with Image.open(output) as image:
+                self.assertEqual(image.size, (1200, 630))
+
     def test_core_layouts_render_to_instagram_portrait(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
