@@ -6,6 +6,7 @@
   let subjectImage = null, backgroundImage = null, logoImage = null, currentThemeIndex = 0;
   let hasUserResult = false;
   let serverApproved = false;
+  let suggestedCopySets = [];
 
   const assistantBrief = new URLSearchParams(window.location.search).get("assistant_brief");
   if (assistantBrief && $("posterPurpose")) $("posterPurpose").value = assistantBrief;
@@ -230,6 +231,7 @@
     try {
       const response = await fetch("/poster/suggest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ business: val("posterCompany"), purpose: val("posterPurpose") }) });
       const data = await response.json(); if (!response.ok) throw new Error(data.error || "문구 추천 실패"); root.innerHTML = "";
+      suggestedCopySets = data.sets || [];
       data.sets.forEach((set, index) => { const button = document.createElement("button"); button.type = "button"; button.className = "btn btn-outline-primary text-start"; button.textContent = `${index + 1}. ${set[0]} · ${set[2]}`; button.onclick = () => applyCopySet(set); root.append(button); });
       if (autoApply && data.sets[0]) applyCopySet(data.sets[0]);
       return true;
@@ -271,17 +273,21 @@
 
   async function findApprovedPoster() {
     let best = {score: 0, issues: []};
-    for (let index = 0; index < themes.length; index += 1) {
-      const canvas = document.createElement("canvas");
-      const localResult = draw(canvas, themes[index]);
-      if (!localResult.locallyReady) continue;
-      const review = await verifyPosterQuality(canvas);
-      if (review.score > best.score) best = review;
-      if (review.approved && review.score >= 90) {
-        currentThemeIndex = index;
-        serverApproved = true;
-        render();
-        return review;
+    const candidates = suggestedCopySets.length ? suggestedCopySets : [[val("posterHeadline"), val("posterBenefit"), val("posterOffer"), val("posterContact")]];
+    for (const copySet of candidates) {
+      applyCopySet(copySet);
+      for (let index = 0; index < themes.length; index += 1) {
+        const canvas = document.createElement("canvas");
+        const localResult = draw(canvas, themes[index]);
+        if (!localResult.locallyReady) continue;
+        const review = await verifyPosterQuality(canvas);
+        if (review.score > best.score) best = review;
+        if (review.approved && review.score >= 90) {
+          currentThemeIndex = index;
+          serverApproved = true;
+          render();
+          return review;
+        }
       }
     }
     throw new Error(`90점 출고 기준을 통과하지 못했어요. 최고 점수 ${best.score}점 · ${(best.issues || [])[0] || "다른 사진이나 더 구체적인 혜택이 필요해요."}`);
