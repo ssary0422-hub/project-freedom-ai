@@ -13,6 +13,9 @@ class LandingShowcaseTests(unittest.TestCase):
         ):
             self.assertIn(f"showcase/{name}", template)
         self.assertEqual(template.count("순금 검수 90점"), 4)
+        self.assertIn(".work-visual img", template)
+        self.assertIn("object-fit:contain", template)
+        self.assertNotIn("background:#13243c center/cover no-repeat", template)
 
 
 if __name__ == "__main__":
