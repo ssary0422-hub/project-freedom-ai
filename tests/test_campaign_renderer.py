@@ -72,6 +72,33 @@ class CampaignRendererTests(unittest.TestCase):
             with Image.open(output) as image:
                 self.assertEqual(image.size, (1200, 630))
 
+    def test_uploaded_logo_is_preserved_on_campaign_and_blog_outputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            background = root / "background.png"
+            logo = root / "logo.png"
+            Image.new("RGB", (1200, 900), "#25445b").save(background)
+            Image.new("RGBA", (240, 100), (255, 0, 180, 255)).save(logo)
+            direction = ArtDirection(
+                concept_name="brand", campaign_angle="clear", layout_family="full_bleed_photo",
+                message_angle="customer_outcome", photo_strategy="scene", subject_position="right",
+                headline_position="left", mood="clear", headline="Brand headline",
+                supporting_copy="Brand proof", cta="Book now",
+                palette=("#071827", "#59e1cb", "#ffffff"), avoid=(),
+            )
+            campaign = render_campaign_concept(
+                background_path=background, direction=direction, company="Seven Days",
+                output_path=root / "campaign.png", logo_path=logo,
+            )
+            blog = render_blog_cover(
+                background_path=background, direction=direction, company="Seven Days",
+                output_path=root / "blog-logo.png", logo_path=logo,
+            )
+            for output in (campaign, blog):
+                with Image.open(output).convert("RGB") as image:
+                    pixels = image.getdata()
+                    self.assertTrue(any(r > 240 and b > 150 and g < 30 for r, g, b in pixels))
+
 
 if __name__ == "__main__":
     unittest.main()

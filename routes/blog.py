@@ -18,7 +18,7 @@ from database.users import (
 from documents.pdf import create_blog_pdf, BLOG_PDF_PATH
 from documents.word import create_blog_word, BLOG_WORD_PATH
 from routes.auth import login_required
-from routes.brand_library import save_files
+from routes.brand_library import resolve_brand_logo, resolve_brand_photo, save_files
 from services.campaign_art_direction import create_art_directions
 from services.campaign_renderer import create_safe_typographic_background, render_blog_cover
 from services.campaign_quality import evaluate_campaign_image
@@ -682,6 +682,8 @@ def _blog_page():
             image_path = ""
 
             if with_image:
+                logo_path = resolve_brand_logo(session["user_id"], request.files.get("real_logo"), "blog-logo")
+                subject_path = resolve_brand_photo(session["user_id"], request.files.getlist("blog_photos"), "blog-photo")
                 image_style_instruction = _image_style_instruction(effective_image_style)
                 image_prompt = f"""
 블로그 대표 이미지.
@@ -703,7 +705,7 @@ def _blog_page():
                 try:
                     directions = create_art_directions(
                         business=business, company=company, request=topic,
-                        media="blog", photo_count=0, generator=generate_text, remember=True,
+                        media="blog", photo_count=1 if subject_path else 0, generator=generate_text, remember=True,
                     )
                     def generate_background(feedback):
                         image_prompt = build_marketing_image_prompt(
@@ -720,12 +722,13 @@ def _blog_page():
                         output_path = BASE_DIR / "static" / "generated" / f"finished-blog-{uuid4().hex[:10]}.png"
                         render_blog_cover(
                             background_path=background_path, direction=direction,
-                            company=company, output_path=output_path,
+                            company=company, output_path=output_path, logo_path=logo_path,
                         )
                         return output_path
 
                     budgeted = generate_with_bounded_backgrounds(
                         directions=directions,
+                        uploaded_background=subject_path,
                         generate_background=generate_background,
                         render_candidate=render_candidate,
                         create_safe_background=lambda direction: create_safe_typographic_background(

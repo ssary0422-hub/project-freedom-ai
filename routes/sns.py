@@ -19,6 +19,7 @@ from database.users import (
 from documents.pdf import create_sns_pdf, SNS_PDF_PATH
 from documents.word import create_sns_word, SNS_WORD_PATH
 from routes.auth import login_required
+from routes.brand_library import resolve_brand_logo, resolve_brand_photo
 from services.finished_promo_card import create_finished_promo_card
 from services.campaign_art_direction import (
     create_art_directions,
@@ -702,8 +703,8 @@ def _sns_page():
                 if with_image:
                     try:
                         if image_output_mode == "finished_card":
-                            subject_path = first_valid_uploaded_image(request.files.getlist("real_photos"), "sns-photo")
-                            logo_path = save_uploaded_image(request.files.get("real_logo"), "sns-logo")
+                            subject_path = resolve_brand_photo(session["user_id"], request.files.getlist("real_photos"), "sns-photo")
+                            logo_path = resolve_brand_logo(session["user_id"], request.files.get("real_logo"), "sns-logo")
                             if selected_art_direction:
                                 directions = [direction_from_payload(json.loads(selected_art_direction))]
                             else:

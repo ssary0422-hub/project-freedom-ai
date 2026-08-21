@@ -1,7 +1,9 @@
 import base64
+from pathlib import Path
 from flask import Blueprint, abort, redirect, render_template, request, session, url_for, Response
 from database.profiles import _connect, USE_POSTGRES
 from routes.auth import login_required
+from services.uploaded_materials import save_uploaded_image
 
 brand_library_bp = Blueprint("brand_library", __name__)
 ALLOWED = {"image/jpeg", "image/png", "image/webp"}
@@ -26,6 +28,57 @@ def save_files(user_id, files, kind="photo"):
             saved.append((cur.fetchone()[0] if USE_POSTGRES else cur.lastrowid,file.filename[:180]))
         conn.commit(); return saved
     finally: conn.close()
+
+def resolve_brand_logo(user_id, uploaded_file=None, prefix="brand-logo"):
+    """Save a newly uploaded logo, or reuse the user's latest saved logo."""
+    if uploaded_file and uploaded_file.filename:
+        path = save_uploaded_image(uploaded_file, prefix)
+        if path:
+            raw = Path(path).read_bytes()
+            _init(); conn=_connect(); cur=conn.cursor()
+            try:
+                sql="INSERT INTO brand_media(user_id,name,mime,data,kind) VALUES(?,?,?,?,?)"
+                if USE_POSTGRES: sql += " RETURNING id"
+                cur.execute(sql,(user_id,uploaded_file.filename[:180],"image/png",base64.b64encode(raw).decode("ascii"),"logo"))
+                conn.commit()
+            finally: conn.close()
+            return path
+    _init(); conn=_connect(); cur=conn.cursor()
+    cur.execute("SELECT data FROM brand_media WHERE user_id=? AND kind='logo' ORDER BY id DESC LIMIT 1",(user_id,))
+    row=cur.fetchone(); conn.close()
+    if not row: return ""
+    target = Path(__file__).resolve().parent.parent / "static" / "generated" / "materials" / f"{prefix}-saved-{user_id}.png"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(base64.b64decode(row[0]))
+    return str(target)
+
+def resolve_brand_photo(user_id, uploaded_files=(), prefix="brand-photo"):
+    """Use a newly uploaded real photo first, otherwise reuse the latest saved one."""
+    first_path = ""
+    for uploaded_file in list(uploaded_files)[:10]:
+        path = save_uploaded_image(uploaded_file, prefix)
+        if not path:
+            continue
+        if not first_path:
+            first_path = path
+        raw = Path(path).read_bytes()
+        _init(); conn=_connect(); cur=conn.cursor()
+        try:
+            sql="INSERT INTO brand_media(user_id,name,mime,data,kind) VALUES(?,?,?,?,?)"
+            if USE_POSTGRES: sql += " RETURNING id"
+            cur.execute(sql,(user_id,uploaded_file.filename[:180],"image/png",base64.b64encode(raw).decode("ascii"),"photo"))
+            conn.commit()
+        finally: conn.close()
+    if first_path:
+        return first_path
+    _init(); conn=_connect(); cur=conn.cursor()
+    cur.execute("SELECT data FROM brand_media WHERE user_id=? AND kind='photo' ORDER BY id DESC LIMIT 1",(user_id,))
+    row=cur.fetchone(); conn.close()
+    if not row: return ""
+    target = Path(__file__).resolve().parent.parent / "static" / "generated" / "materials" / f"{prefix}-saved-{user_id}.png"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(base64.b64decode(row[0]))
+    return str(target)
 
 @brand_library_bp.route("/brand-library", methods=["GET","POST"])
 @login_required

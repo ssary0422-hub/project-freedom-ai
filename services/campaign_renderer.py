@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PIL import Image, ImageColor, ImageDraw
+from PIL import Image, ImageColor, ImageDraw, ImageFilter, ImageStat
 
 from services.campaign_art_direction import ArtDirection
 from services.finished_promo_card import _cover, _draw_text, _font, _rounded, _wrap
@@ -53,6 +53,52 @@ def _contrast_text(fill: tuple[int, int, int, int]) -> tuple[int, int, int, int]
 def _background(path: str | Path) -> Image.Image:
     with Image.open(path) as source:
         return _cover(source.convert("RGBA"), (WIDTH, HEIGHT))
+
+
+def _place_brand_logo(image: Image.Image, logo_path: str | Path | None, *,
+                      max_size: tuple[int, int], margin: int,
+                      candidates: tuple[tuple[int, int], ...]) -> bool:
+    """Place the exact uploaded logo on the calmest available brand-safe area."""
+    if not logo_path or not Path(logo_path).exists():
+        return False
+    with Image.open(logo_path) as source:
+        logo = source.convert("RGBA")
+    alpha_box = logo.getchannel("A").getbbox()
+    if not alpha_box:
+        return False
+    logo = logo.crop(alpha_box)
+    logo.thumbnail(max_size, Image.Resampling.LANCZOS)
+
+    pad_x, pad_y = max(14, logo.width // 12), max(10, logo.height // 8)
+    plate_size = (logo.width + pad_x * 2, logo.height + pad_y * 2)
+    width, height = image.size
+    valid = []
+    for x, y in candidates:
+        x = min(max(margin, x if x >= 0 else width - plate_size[0] + x), width - plate_size[0] - margin)
+        y = min(max(margin, y if y >= 0 else height - plate_size[1] + y), height - plate_size[1] - margin)
+        crop = image.crop((x, y, x + plate_size[0], y + plate_size[1])).convert("L")
+        stat = ImageStat.Stat(crop)
+        # Low variation is preferable; a slight top/right bias keeps brand placement familiar.
+        score = stat.var[0] + (y / height) * 18 + (x < width / 2) * 8
+        valid.append((score, x, y))
+    if not valid:
+        return False
+    _, x, y = min(valid)
+
+    shadow = Image.new("RGBA", (plate_size[0] + 18, plate_size[1] + 18), (0, 0, 0, 0))
+    ImageDraw.Draw(shadow).rounded_rectangle(
+        (9, 9, plate_size[0] + 9, plate_size[1] + 9), radius=18, fill=(0, 0, 0, 115)
+    )
+    shadow = shadow.filter(ImageFilter.GaussianBlur(8))
+    image.alpha_composite(shadow, (x - 9, y - 5))
+    plate = Image.new("RGBA", plate_size, (0, 0, 0, 0))
+    ImageDraw.Draw(plate).rounded_rectangle(
+        (0, 0, plate_size[0] - 1, plate_size[1] - 1), radius=16,
+        fill=(255, 255, 255, 238), outline=(255, 255, 255, 180), width=2,
+    )
+    plate.alpha_composite(logo, (pad_x, pad_y))
+    image.alpha_composite(plate, (x, y))
+    return True
 
 
 def _text_block(draw, *, direction: ArtDirection, x: int, y: int, width: int,
@@ -243,13 +289,10 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
         _rounded(draw, (left - 12, 1271, WIDTH - 48, 1323), 12, (5, 15, 27, 205))
         _draw_text(draw, (left, 1283), detail, font,
                    (245, 249, 252, 255), "ko", True)
-    if logo_path and Path(logo_path).exists():
-        with Image.open(logo_path) as source:
-            logo = source.convert("RGBA")
-            logo.thumbnail((150, 72), Image.Resampling.LANCZOS)
-        plate = Image.new("RGBA", (logo.width + 20, logo.height + 14), (255, 255, 255, 225))
-        plate.alpha_composite(logo, (10, 7))
-        image.alpha_composite(plate, (WIDTH - plate.width - 48, 1190))
+    _place_brand_logo(
+        image, logo_path, max_size=(190, 105), margin=42,
+        candidates=((-42, 42), (-42, 180), (-42, -150), (42, -150)),
+    )
 
     target = Path(output_path)
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -258,7 +301,8 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
 
 
 def render_blog_cover(*, background_path: str | Path, direction: ArtDirection,
-                      company: str, output_path: str | Path) -> Path:
+                      company: str, output_path: str | Path,
+                      logo_path: str | Path | None = None) -> Path:
     """Render a readable 1200x630 blog hero without AI-generated lettering."""
     with Image.open(background_path) as source:
         image = _cover(source.convert("RGBA"), (1200, 630))
@@ -281,6 +325,10 @@ def render_blog_cover(*, background_path: str | Path, direction: ArtDirection,
     for line in _wrap(draw, body, _font(25, False, "ko"), 650, 2, "ko"):
         _draw_text(draw, (58, y), line, _font(25, False, "ko"), (218, 228, 239, 255), "ko")
         y += 38
+    _place_brand_logo(
+        image, logo_path, max_size=(190, 90), margin=34,
+        candidates=((-34, 34), (-34, -124)),
+    )
     target = Path(output_path)
     target.parent.mkdir(parents=True, exist_ok=True)
     image.convert("RGB").save(target, "PNG", optimize=True)

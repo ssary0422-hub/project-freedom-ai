@@ -20,6 +20,7 @@ from database.users import (
 )
 from documents.word import create_word, WORD_PATH
 from routes.auth import login_required
+from routes.brand_library import resolve_brand_logo, resolve_brand_photo
 from services.finished_promo_card import create_finished_promo_card
 from services.uploaded_materials import first_valid_uploaded_image, save_uploaded_image
 from services.campaign_art_direction import create_art_directions
@@ -701,8 +702,8 @@ def _home_page():
 """
                 try:
                     if image_output_mode == "finished_card":
-                        subject_path = first_valid_uploaded_image(request.files.getlist("real_photos"), "ad-photo")
-                        logo_path = save_uploaded_image(request.files.get("real_logo"), "ad-logo")
+                        subject_path = resolve_brand_photo(session["user_id"], request.files.getlist("real_photos"), "ad-photo")
+                        logo_path = resolve_brand_logo(session["user_id"], request.files.get("real_logo"), "ad-logo")
                         directions = create_art_directions(
                             business=business, company=company, request=style,
                             media="ads", photo_count=1 if subject_path else 0,
