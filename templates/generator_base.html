@@ -81,6 +81,13 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
     </div>
     {% endif %}
 
+    {% if image_error %}
+    <div class="alert alert-danger shadow-sm mb-4" role="alert">
+        <strong>이미지 생성에 실패했어요.</strong><br>
+        {{ image_error }}
+    </div>
+    {% endif %}
+
     <div class="card shadow main-card">
         <div class="card-body p-4">
 

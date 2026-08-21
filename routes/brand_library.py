@@ -33,16 +33,17 @@ def resolve_brand_logo(user_id, uploaded_file=None, prefix="brand-logo"):
     """Save a newly uploaded logo, or reuse the user's latest saved logo."""
     if uploaded_file and uploaded_file.filename:
         path = save_uploaded_image(uploaded_file, prefix)
-        if path:
-            raw = Path(path).read_bytes()
-            _init(); conn=_connect(); cur=conn.cursor()
-            try:
-                sql="INSERT INTO brand_media(user_id,name,mime,data,kind) VALUES(?,?,?,?,?)"
-                if USE_POSTGRES: sql += " RETURNING id"
-                cur.execute(sql,(user_id,uploaded_file.filename[:180],"image/png",base64.b64encode(raw).decode("ascii"),"logo"))
-                conn.commit()
-            finally: conn.close()
-            return path
+        if not path:
+            raise ValueError("올린 업체 로고를 읽지 못했어요. JPG·PNG·WebP 이미지로 다시 올려주세요.")
+        raw = Path(path).read_bytes()
+        _init(); conn=_connect(); cur=conn.cursor()
+        try:
+            sql="INSERT INTO brand_media(user_id,name,mime,data,kind) VALUES(?,?,?,?,?)"
+            if USE_POSTGRES: sql += " RETURNING id"
+            cur.execute(sql,(user_id,uploaded_file.filename[:180],"image/png",base64.b64encode(raw).decode("ascii"),"logo"))
+            conn.commit()
+        finally: conn.close()
+        return path
     _init(); conn=_connect(); cur=conn.cursor()
     cur.execute("SELECT data FROM brand_media WHERE user_id=? AND kind='logo' ORDER BY id DESC LIMIT 1",(user_id,))
     row=cur.fetchone(); conn.close()

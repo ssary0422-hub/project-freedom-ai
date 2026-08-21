@@ -16,7 +16,10 @@ MAX_PIXELS = 40_000_000
 
 
 def save_uploaded_image(file_storage, prefix="material"):
-    if not file_storage or file_storage.mimetype not in ALLOWED_MIME:
+    # Mobile browsers and in-app webviews sometimes label valid camera/gallery
+    # images as image/jpg or application/octet-stream. Trust verified image
+    # bytes, not the client-provided MIME label.
+    if not file_storage:
         return ""
     raw = file_storage.read(MAX_BYTES + 1)
     if not raw or len(raw) > MAX_BYTES:

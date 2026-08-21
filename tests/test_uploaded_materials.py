@@ -49,6 +49,14 @@ class UploadedMaterialsTests(unittest.TestCase):
         upload = FileStorage(stream=BytesIO(b"not an image"), filename="x.txt", content_type="text/plain")
         self.assertEqual(save_uploaded_image(upload), "")
 
+    def test_accepts_verified_mobile_image_with_generic_mime(self):
+        upload = image_upload("phone-logo.png", "application/octet-stream")
+        with tempfile.TemporaryDirectory() as tmp, patch(
+            "services.uploaded_materials.MATERIAL_DIR", Path(tmp)
+        ):
+            saved = save_uploaded_image(upload, "logo")
+            self.assertTrue(saved.endswith(".png"))
+
     def test_applies_phone_exif_orientation_before_saving(self):
         with tempfile.TemporaryDirectory() as tmp, patch(
             "services.uploaded_materials.MATERIAL_DIR", Path(tmp)
