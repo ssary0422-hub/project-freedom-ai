@@ -13,8 +13,32 @@ from database.users import get_plan_status, record_ai_credit_usage
 from database.db import save_history
 from routes.auth import login_required
 from services.campaign_quality import evaluate_campaign_image
+from PIL import Image, ImageDraw
 
 poster_bp = Blueprint("poster", __name__)
+
+
+def _safe_poster_background(user_id):
+    """Create a polished, photo-free fallback when the image provider refuses a prompt."""
+    relative = Path("generated") / "poster" / str(user_id) / f"fallback-{uuid4().hex}.png"
+    target = Path("static") / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    width, height = 1080, 1350
+    image = Image.new("RGB", (width, height))
+    pixels = image.load()
+    for y in range(height):
+        ratio = y / max(1, height - 1)
+        start, end = (34, 20, 13), (105, 58, 24)
+        color = tuple(round(a + (b - a) * ratio) for a, b in zip(start, end))
+        for x in range(width):
+            pixels[x, y] = color
+    overlay = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+    draw.ellipse((650, -100, 1230, 480), fill=(235, 198, 125, 28))
+    draw.ellipse((-260, 880, 480, 1620), fill=(255, 232, 185, 18))
+    image = Image.alpha_composite(image.convert("RGBA"), overlay).convert("RGB")
+    image.save(target, "PNG", optimize=True)
+    return f"/static/{relative.as_posix()}"
 
 def _poster_png_bytes(data_url):
     prefix = "data:image/png;base64,"
@@ -140,7 +164,11 @@ def background():
     try:
         path=make_image(build_poster_background_prompt(full_prompt or "업종에 맞는 광고 배경"))
     except Exception as error:
-        return jsonify(error=f"이미지 생성 실패: {error}"), 502
+        print("Poster background provider failed; using safe fallback:", error)
+        session["poster_quality_attempts"] = 0
+        session.pop("poster_quality_approved", None)
+        session.pop("poster_image_charge_pending", None)
+        return jsonify(image_url=_safe_poster_background(session["user_id"]), fallback=True)
     session["poster_image_charge_pending"] = True
     session["poster_quality_attempts"] = 0
     session.pop("poster_quality_approved", None)

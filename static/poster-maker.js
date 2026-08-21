@@ -5,6 +5,7 @@
   const val = id => ($(id)?.value || "").trim();
   let subjectImage = null, backgroundImage = null, logoImage = null, currentThemeIndex = 0;
   let hasUserResult = false;
+  let serverApproved = false;
 
   const assistantBrief = new URLSearchParams(window.location.search).get("assistant_brief");
   if (assistantBrief && $("posterPurpose")) $("posterPurpose").value = assistantBrief;
@@ -67,7 +68,7 @@
 
   function drawLogo(ctx, image) {
     if (!image) return;
-    const scale = Math.min(180 / image.width, 70 / image.height, 1);
+    const scale = Math.min(300 / image.width, 112 / image.height, 1);
     const w = image.width * scale, h = image.height * scale;
     rounded(ctx, W - w - 76, 54, w + 28, h + 22, 14, "rgba(255,255,255,.94)");
     ctx.drawImage(image, W - w - 62, 65, w, h);
@@ -142,7 +143,6 @@
     ctx.fillStyle = "#fff"; ctx.font = '900 27px "Malgun Gothic", sans-serif'; ctx.fillText("지금 바로 확인하세요", 104, 1046);
     ctx.fillStyle = theme.muted; ctx.font = '700 28px "Malgun Gothic", sans-serif';
     drawLines(ctx, val("posterContact") || "연락처·예약 방법", 104, 1094, 650, 42, 2);
-    if (approved) drawQualitySeal(ctx, theme.accent);
     drawLogo(ctx, logoImage);
   }
 
@@ -161,20 +161,20 @@
     ctx.fillStyle = theme.muted; ctx.font = '600 27px "Malgun Gothic", sans-serif'; ty = drawLines(ctx, val("posterBenefit"), tx, ty, tw, 42, 4) + 24;
     if (val("posterOffer")) { rounded(ctx, tx, ty, Math.min(tw, 450), 62, 16, theme.accent); ctx.fillStyle = "#101923"; ctx.font = '800 23px "Malgun Gothic", sans-serif'; ctx.fillText(val("posterOffer"), tx + 24, ty + 17); ty += 82; }
     ctx.fillStyle = theme.ink; ctx.font = '700 24px "Malgun Gothic", sans-serif'; drawLines(ctx, val("posterContact"), tx, Math.min(ty, y + h - 70), tw, 38, 2);
-    if (approved) drawQualitySeal(ctx, theme.accent); drawLogo(ctx, logoImage);
+    drawLogo(ctx, logoImage);
   }
 
   function draw(canvas, theme) {
     canvas.width = W; canvas.height = H; const ctx = canvas.getContext("2d");
-    const issues = qualityCheck(ctx, theme); const approved = hasUserResult && issues.length === 0;
-    if (theme.layout === "editorial") drawEditorial(ctx, theme, approved); else drawClassic(ctx, theme, approved);
+    const issues = qualityCheck(ctx, theme); const locallyReady = hasUserResult && issues.length === 0;
+    if (theme.layout === "editorial") drawEditorial(ctx, theme, false); else drawClassic(ctx, theme, false);
     if ($("posterWatermark")?.checked) { ctx.fillStyle = theme.muted; ctx.font = '500 18px Arial'; ctx.fillText("PROJECT FREEDOM AI", 64, H - 54); }
-    return { approved, issues };
+    return { approved: locallyReady && serverApproved, locallyReady, issues };
   }
 
   function makeQualityStatus(result) {
     const stamp = document.createElement("div"); stamp.className = `sungeum-quality-stamp mb-3${result.approved ? "" : " is-pending"}`; stamp.setAttribute("role", "status");
-    stamp.innerHTML = `<svg class="sungeum-paw" viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="39" rx="17" ry="15"/><ellipse cx="14" cy="25" rx="7" ry="9"/><ellipse cx="27" cy="16" rx="7" ry="9"/><ellipse cx="40" cy="16" rx="7" ry="9"/><ellipse cx="52" cy="26" rx="7" ry="9"/></svg><span><strong>${result.approved ? "순금 검수 완료" : "순금 확인 필요"}</strong><small>${result.approved ? "글자 넘침과 필수 정보를 확인했어요" : (result.issues[0] || "내용을 입력하면 자동 검수해요")}</small></span>`;
+    stamp.innerHTML = `<svg class="sungeum-paw" viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="39" rx="17" ry="15"/><ellipse cx="14" cy="25" rx="7" ry="9"/><ellipse cx="27" cy="16" rx="7" ry="9"/><ellipse cx="40" cy="16" rx="7" ry="9"/><ellipse cx="52" cy="26" rx="7" ry="9"/></svg><span><strong>${result.approved ? "순금 검수 완료" : "최종 검수 전"}</strong><small>${result.approved ? "서버 90점 출고 기준을 통과했어요" : (result.issues[0] || "완성 후 서버 검수를 진행합니다")}</small></span>`;
     return stamp;
   }
 
@@ -192,14 +192,36 @@
     controls.append(download, alternate); card.append(makeQualityStatus(result), label, canvas, controls); root.append(card);
   }
 
-  function loadFile(file, setter) { if (!file) return; const image = new Image(); image.onload = () => { setter(image); render(); }; image.src = URL.createObjectURL(file); }
+  function normalizeLogo(image) {
+    const sample = document.createElement("canvas"), maxSide = 1200;
+    const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+    sample.width = Math.max(1, Math.round(image.width * scale)); sample.height = Math.max(1, Math.round(image.height * scale));
+    const ctx = sample.getContext("2d", {willReadFrequently: true}); ctx.drawImage(image, 0, 0, sample.width, sample.height);
+    const data = ctx.getImageData(0, 0, sample.width, sample.height), px = data.data;
+    const corners = [[0,0],[sample.width-1,0],[0,sample.height-1],[sample.width-1,sample.height-1]];
+    const bg = [0,1,2].map(channel => Math.round(corners.reduce((sum,[x,y]) => sum + px[(y*sample.width+x)*4+channel], 0) / corners.length));
+    let minX=sample.width,minY=sample.height,maxX=-1,maxY=-1, changed=0;
+    for (let y=0;y<sample.height;y+=1) for(let x=0;x<sample.width;x+=1) {
+      const i=(y*sample.width+x)*4, distance=Math.max(Math.abs(px[i]-bg[0]),Math.abs(px[i+1]-bg[1]),Math.abs(px[i+2]-bg[2]));
+      if (distance > 24 && px[i+3] > 20) { minX=Math.min(minX,x); minY=Math.min(minY,y); maxX=Math.max(maxX,x); maxY=Math.max(maxY,y); changed+=1; }
+    }
+    if (maxX < 0 || changed < sample.width*sample.height*.001) return image;
+    const pad=Math.max(4,Math.round(Math.max(maxX-minX,maxY-minY)*.04)); minX=Math.max(0,minX-pad);minY=Math.max(0,minY-pad);maxX=Math.min(sample.width-1,maxX+pad);maxY=Math.min(sample.height-1,maxY+pad);
+    const out=document.createElement("canvas");out.width=maxX-minX+1;out.height=maxY-minY+1;const outCtx=out.getContext("2d");outCtx.drawImage(sample,minX,minY,out.width,out.height,0,0,out.width,out.height);
+    const outData=outCtx.getImageData(0,0,out.width,out.height), outPx=outData.data;
+    for(let i=0;i<outPx.length;i+=4){const d=Math.max(Math.abs(outPx[i]-bg[0]),Math.abs(outPx[i+1]-bg[1]),Math.abs(outPx[i+2]-bg[2]));if(d<18)outPx[i+3]=0;else if(d<34)outPx[i+3]=Math.round(outPx[i+3]*(d-18)/16);}
+    outCtx.putImageData(outData,0,0); return out;
+  }
+
+  function loadFile(file, setter, {logo=false} = {}) { if (!file) return; const image = new Image(); image.onload = () => { setter(logo ? normalizeLogo(image) : image); serverApproved = false; render(); URL.revokeObjectURL(image.src); }; image.src = URL.createObjectURL(file); }
   function usePhoto() {
-    hasUserResult = true; loadFile($("posterPhoto").files[0], image => { subjectImage = image; }); loadFile($("posterLogo").files[0], image => { logoImage = image; }); render();
+    hasUserResult = true; serverApproved = false; loadFile($("posterPhoto").files[0], image => { subjectImage = image; }); loadFile($("posterLogo").files[0], image => { logoImage = image; }, {logo:true}); render();
   }
 
   function applyCopySet(set) {
     ["posterHeadline", "posterBenefit", "posterOffer", "posterContact"].forEach((id, i) => $(id).value = set[i]);
     hasUserResult = true;
+    serverApproved = false;
     render();
   }
 
@@ -220,7 +242,7 @@
       const response = await fetch("/poster/background", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ business: val("posterCompany"), purpose: val("posterPurpose"), style: val("posterImageStyle"), prompt: val("aiBackgroundPrompt") }) });
       const data = await response.json(); if (!response.ok) throw new Error(data.error || "배경 생성 실패");
       await new Promise((resolve, reject) => { const image = new Image(); image.onload = () => { backgroundImage = image; hasUserResult = true; render(); resolve(); }; image.onerror = () => reject(new Error("생성된 배경 이미지를 불러오지 못했습니다.")); image.src = `${data.image_url}?v=${Date.now()}`; });
-      status.textContent = "글자 없는 AI 배경이 적용됐습니다.";
+      status.textContent = data.fallback ? "안전한 프리미엄 대체 배경이 자동 적용됐습니다." : "글자 없는 AI 배경이 적용됐습니다.";
       return true;
     } catch (error) { status.textContent = error.message; return false; }
   }
@@ -252,11 +274,12 @@
     for (let index = 0; index < themes.length; index += 1) {
       const canvas = document.createElement("canvas");
       const localResult = draw(canvas, themes[index]);
-      if (!localResult.approved) continue;
+      if (!localResult.locallyReady) continue;
       const review = await verifyPosterQuality(canvas);
       if (review.score > best.score) best = review;
       if (review.approved && review.score >= 90) {
         currentThemeIndex = index;
+        serverApproved = true;
         render();
         return review;
       }
@@ -279,18 +302,12 @@
     try {
       if (!await suggest({ autoApply: true })) throw new Error("문구를 만들지 못했습니다. 다시 눌러주세요.");
       button.textContent = "🎨 AI 배경을 만들고 있어요…"; currentStep = "2/2 포스터 배경과 최종 배치를 만들고 있습니다."; showProgress();
-      const backgroundReady = await createBackground();
-      if (backgroundReady) {
-        currentStep = "3/3 순금이가 완성 포스터를 검수하고 있어요."; showProgress();
-        const review = await findApprovedPoster();
-        status.dataset.qualityScore = String(review.score);
-      }
-      status.className = `poster-main-status ${backgroundReady ? "text-success" : "text-warning"} mb-3`;
-      status.textContent = backgroundReady ? "포스터 완성! 생성 기록에 저장하고 있어요…" : "문구 포스터는 완성했지만 AI 배경은 실패했어요. 아래에서 배경만 다시 만들 수 있어요.";
-      if (backgroundReady) {
-        try { const saved=await savePosterHistory($("posterResults")?.querySelector("canvas")); status.innerHTML=`완성! 생성 기록에도 저장했어요. <a href="/history">기록 보기</a>`; status.dataset.historyId=saved.history_id; }
-        catch (saveError) { status.className="poster-main-status text-warning mb-3"; status.textContent=`포스터는 완성됐지만 기록 저장에 실패했어요: ${saveError.message}`; }
-      }
+      await createBackground();
+      currentStep = "3/3 순금이가 완성 포스터를 검수하고 있어요."; showProgress();
+      const review = await findApprovedPoster(); status.dataset.qualityScore = String(review.score);
+      status.className = "poster-main-status text-success mb-3"; status.textContent = "포스터 완성! 생성 기록에 저장하고 있어요…";
+      try { const saved=await savePosterHistory($("posterResults")?.querySelector("canvas")); status.innerHTML=`${review.score}점으로 완성! 생성 기록에도 저장했어요. <a href="/history">기록 보기</a>`; status.dataset.historyId=saved.history_id; }
+      catch (saveError) { status.className="poster-main-status text-warning mb-3"; status.textContent=`90점 검수는 통과했지만 기록 저장에 실패했어요: ${saveError.message}`; }
       $("posterResults")?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) { status.className = "poster-main-status text-danger mb-3"; status.textContent = error.message; }
     finally { clearInterval(progressTimer); setButtonBusy(button, false); }
@@ -302,7 +319,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     $("makePosters").onclick = usePhoto; $("suggestPoster").onclick = () => suggest(); $("makeAiBackground").onclick = createBackground; $("makeOneClickPoster").onclick = makeOneClick;
     $("posterPhoto").addEventListener("change", usePhoto); $("posterLogo").addEventListener("change", usePhoto); $("posterWatermark").addEventListener("change", render);
-    ["posterCompany", "posterHeadline", "posterBenefit", "posterOffer", "posterContact"].forEach(id => $(id).addEventListener("input", () => { hasUserResult = true; render(); }));
+    ["posterCompany", "posterHeadline", "posterBenefit", "posterOffer", "posterContact"].forEach(id => $(id).addEventListener("input", () => { hasUserResult = true; serverApproved = false; render(); }));
     rotateExamples(); setInterval(rotateExamples, 4000); render();
   });
 })();
