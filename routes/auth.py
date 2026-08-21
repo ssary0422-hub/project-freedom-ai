@@ -124,7 +124,7 @@ def _trial_decision():
 def register():
     if session.get("user_id"):
         return redirect(
-            url_for("home")
+            url_for("ads.home")
         )
 
     error = ""
@@ -225,7 +225,7 @@ def register():
 def login():
     if session.get("user_id"):
         return redirect(
-            url_for("home")
+            url_for("ads.home")
         )
 
     error = ""
@@ -275,7 +275,7 @@ def login():
             session["plan_percent"] = plan_status["percent"]
 
             return redirect(
-                url_for("home")
+                url_for("ads.home")
             )
 
     return render_template(
