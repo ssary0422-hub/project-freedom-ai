@@ -290,7 +290,7 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
         _draw_text(draw, (left, 1283), detail, font,
                    (245, 249, 252, 255), "ko", True)
     _place_brand_logo(
-        image, logo_path, max_size=(190, 105), margin=42,
+        image, logo_path, max_size=(310, 170), margin=42,
         candidates=((-42, 42), (-42, 180), (-42, -150), (42, -150)),
     )
 
@@ -326,7 +326,7 @@ def render_blog_cover(*, background_path: str | Path, direction: ArtDirection,
         _draw_text(draw, (58, y), line, _font(25, False, "ko"), (218, 228, 239, 255), "ko")
         y += 38
     _place_brand_logo(
-        image, logo_path, max_size=(190, 90), margin=34,
+        image, logo_path, max_size=(280, 130), margin=34,
         candidates=((-34, 34), (-34, -124)),
     )
     target = Path(output_path)
