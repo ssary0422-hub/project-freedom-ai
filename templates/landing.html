@@ -34,7 +34,7 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 <body>
 <nav class="navbar navbar-dark fixed-top navx"><div class="container py-2">
 <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/"><img class="pf-brand-mascot" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="3D 순금 마스코트"> Project Freedom AI</a><div class="d-flex gap-2">
-{% if session.get("user_id") %}<a class="btn btn-outline-light" href="/ads-generator">콘텐츠 만들기</a>
+{% if session.get("user_id") %}<a class="btn btn-outline-light" href="/ads-generator">{{ t("landing.cta.create") }}</a>
 {% else %}<a class="btn btn-outline-light" href="/login">{{ t("nav.login") }}</a><a class="btn btn-primary" href="/register">{{ t("landing.cta.start_free") }}</a>{% endif %}
 </div></div></nav>
 
@@ -42,24 +42,24 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 <div class="col-lg-7"><span class="badge rounded-pill border p-2 mb-4">{{ t("landing.hero.badge") }}</span>
 <h1>{{ t("landing.hero.title") }}</h1>
 <p class="leadx mt-4">{{ t("landing.hero.desc") }}</p>
-<div class="hero-task-label">오늘 순금이에게 무엇을 맡길까요?</div>
+<div class="hero-task-label">{{ t("landing.task.label") }}</div>
 <div class="hero-task-grid">
-<a class="hero-task-card marketing" href="{% if session.get('user_id') %}/ads-generator{% else %}/register{% endif %}"><span class="hero-task-icon">📣</span><span class="hero-task-copy"><strong>사업 홍보 맡기기</strong><small>광고·SNS·블로그·포스터를 한곳에서</small></span><span class="hero-task-arrow">→</span></a>
-<a class="hero-task-card running" href="{% if session.get('user_id') %}/running-form{% else %}/login{% endif %}"><span class="hero-task-new">AI COACH</span><span class="hero-task-icon">🏃</span><span class="hero-task-copy"><strong>순금이 AI 러닝코치</strong><small>영상만 올려봐 · 착지 분석부터 다음 러닝 미션까지</small></span><span class="hero-task-arrow">→</span></a>
+<a class="hero-task-card marketing" href="{% if session.get('user_id') %}/ads-generator{% else %}/register{% endif %}"><span class="hero-task-icon">📣</span><span class="hero-task-copy"><strong>{{ t("landing.task.marketing") }}</strong><small>{{ t("landing.task.marketing_desc") }}</small></span><span class="hero-task-arrow">→</span></a>
+<a class="hero-task-card running" data-kind="running" href="{% if session.get('user_id') %}/running-form{% else %}/login{% endif %}"><span class="hero-task-new">AI COACH</span><span class="hero-task-icon">🏃</span><span class="hero-task-copy"><strong>{{ t("landing.task.running") }}</strong><small>{{ t("landing.task.running_desc") }}</small></span><span class="hero-task-arrow">→</span></a>
 </div><div class="d-flex flex-wrap gap-2 mt-4">
 <a class="pill text-decoration-none" href="/language/ko">🇰🇷 한국어</a><a class="pill text-decoration-none" href="/language/en">🇺🇸 English</a><a class="pill text-decoration-none" href="/language/ja">🇯🇵 日本語</a><a class="pill text-decoration-none" href="/language/th">🇹🇭 ไทย</a><a class="pill text-decoration-none" href="/language/zh">🇨🇳 中文</a><a class="pill text-decoration-none" href="/language/es">🇪🇸 Español</a>
 </div></div>
 <div class="col-lg-5"><div class="glass hero-mascot">
-<div class="hero-mascot-bubble">홍보를 만들어볼까? 러닝폼을 같이 볼까? 🐾</div>
+<div class="hero-mascot-bubble">{{ t("landing.task.bubble") }}</div>
 <img class="sungeum-alive sungeum-alive-hero" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="Project Freedom AI를 안내하는 3D 순금 마스코트">
 </div></div></div></div></header>
 
 <section class="section"><div class="container"><div class="text-center mb-5"><h2 class="display-6 fw-bold">{{ t("landing.workspace.title") }}</h2><p class="muted">{{ t("landing.workspace.desc") }}</p></div>
 <div class="row g-4">
-<div class="col-md-6 col-lg-3"><a href="/ads-generator" class="glass feature d-block text-white text-decoration-none"><div class="icon">📢</div><h3 class="h5 mt-3">광고</h3><p class="muted mb-0">{{ t("landing.feature.ads_desc") }}</p></a></div>
+<div class="col-md-6 col-lg-3"><a href="/ads-generator" class="glass feature d-block text-white text-decoration-none"><div class="icon">📢</div><h3 class="h5 mt-3">{{ t("landing.feature.ads") }}</h3><p class="muted mb-0">{{ t("landing.feature.ads_desc") }}</p></a></div>
 <div class="col-md-6 col-lg-3"><a href="/sns" class="glass feature d-block text-white text-decoration-none"><div class="icon">📱</div><h3 class="h5 mt-3">SNS</h3><p class="muted mb-0">{{ t("landing.feature.social_desc") }}</p></a></div>
-<div class="col-md-6 col-lg-3"><a href="/blog" class="glass feature d-block text-white text-decoration-none"><div class="icon">📝</div><h3 class="h5 mt-3">블로그</h3><p class="muted mb-0">{{ t("landing.feature.blog_desc") }}</p></a></div>
-<div class="col-md-6 col-lg-3"><a href="/poster" class="glass feature d-block text-white text-decoration-none"><div class="icon">🖼️</div><h3 class="h5 mt-3">포스터</h3><p class="muted mb-0">문구와 사진을 조합해 광고 포스터를 만들고 PNG로 저장하세요.</p></a></div>
+<div class="col-md-6 col-lg-3"><a href="/blog" class="glass feature d-block text-white text-decoration-none"><div class="icon">📝</div><h3 class="h5 mt-3">{{ t("landing.feature.blog") }}</h3><p class="muted mb-0">{{ t("landing.feature.blog_desc") }}</p></a></div>
+<div class="col-md-6 col-lg-3"><a href="/poster" class="glass feature d-block text-white text-decoration-none"><div class="icon">🖼️</div><h3 class="h5 mt-3">{{ t("landing.feature.package") }}</h3><p class="muted mb-0">{{ t("landing.feature.package_desc") }}</p></a></div>
 </div></div></section>
 
 <section class="section pt-2"><div class="container"><div class="glass p-5 text-center"><div class="icon">🌍</div><h2 class="fw-bold mt-3">{{ t("landing.global.title") }}</h2>
@@ -68,24 +68,23 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 
 <section class="section pt-2"><div class="container">
 <div class="text-center mb-5"><span class="badge rounded-pill border p-2 mb-3">{{ t("landing.product.badge") }}</span><h2 class="display-6 fw-bold">{{ t("landing.product.title") }}</h2><p class="muted">{{ t("landing.product.desc") }}</p></div>
-<div class="preview-tabs mb-4" id="productPreviewTabs"><button class="preview-tab active" data-kind="ads">광고</button><button class="preview-tab" data-kind="sns">SNS</button><button class="preview-tab" data-kind="blog">블로그</button><button class="preview-tab" data-kind="poster">포스터</button><button class="preview-tab" data-kind="running">러닝 AI</button></div>
 <div class="row g-4">
-<div class="col-lg-5"><div class="glass sample-box"><div class="small muted mb-3">예시 입력</div><div class="mb-3"><small class="muted">업종</small><div class="fw-bold" id="previewIndustry">독립서점</div></div><div class="mb-3"><small class="muted">업체명</small><div class="fw-bold" id="previewBusiness">달빛책방</div></div><div><small class="muted">목표·분위기</small><div class="fw-bold" id="previewMood">차분함 · 북토크 모집</div></div></div></div>
-<div class="col-lg-7"><div class="glass sample-box"><div class="small muted mb-3" id="previewOutputLabel">AI 광고 출력</div><div class="sample-output" id="productPreviewOutput"><div class="fw-bold mb-2" id="previewTitle">📚 금요일 밤, 작가와 책 사이</div><p class="mb-2" id="previewText">달빛책방에서 만나는 소규모 북토크. 선착순 12명의 자리를 지금 예약하세요.</p><small class="text-secondary" id="previewMeta">대표 문구 · 혜택 · 행동 유도</small></div></div></div>
+<div class="col-lg-5"><div class="glass sample-box"><div class="small muted mb-3">{{ t("landing.product.input") }}</div><div class="mb-3"><small class="muted">{{ t("landing.product.industry") }}</small><div class="fw-bold">{{ t("landing.product.sample_industry") }}</div></div><div class="mb-3"><small class="muted">{{ t("landing.product.business") }}</small><div class="fw-bold">{{ t("landing.product.sample_business") }}</div></div><div><small class="muted">{{ t("landing.product.mood") }}</small><div class="fw-bold">{{ t("landing.product.sample_mood") }}</div></div></div></div>
+<div class="col-lg-7"><div class="glass sample-box"><div class="small muted mb-3">{{ t("landing.product.output") }}</div><div class="sample-output"><div class="fw-bold mb-2">{{ t("landing.product.output_title") }}</div><p class="mb-2">{{ t("landing.product.output_text") }}</p><small class="text-secondary">{{ t("landing.preview.label") }}</small></div></div></div>
 </div></div></section>
 
-<section class="section pt-2" id="approved-output"><div class="container"><div class="text-center mb-5"><span class="badge rounded-pill border p-2 mb-3">9+ APPROVED OUTPUT</span><h2 class="display-6 fw-bold">실제로 만들고, 9점 이상만 골랐습니다</h2><p class="muted approved-note">Project Freedom AI에서 직접 생성하고 화면·문구·다운로드까지 검수한 결과입니다. 9점 미만 결과는 이곳에 올리지 않습니다.</p></div><div class="row g-4 approved-grid">
-<div class="col-md-6"><a href="/sns" class="glass work-card d-block text-white text-decoration-none"><span class="work-score">9.0 / 10</span><div class="work-visual"><img src="{{ url_for('static', filename='showcase/project-freedom-editorial-sns-v3.png') }}" alt="SNS 에디토리얼 결과물 전체 보기" loading="lazy"></div><div class="work-copy"><div class="work-type">SNS · 에디토리얼 콜라주</div><b>AI로 만드는 네 가지 홍보물</b></div><div class="work-body muted">목적부터 다른 SNS 전용 아트디렉션<div class="work-approved">🐾 순금 검수 90점</div></div></a></div>
-<div class="col-md-6"><a href="/ads-generator" class="glass work-card d-block text-white text-decoration-none"><span class="work-score">9.0 / 10</span><div class="work-visual"><img src="{{ url_for('static', filename='showcase/project-freedom-conversion-ad-v1.png') }}" alt="전환형 광고 결과물 전체 보기" loading="lazy"></div><div class="work-copy"><div class="work-type">광고 · 전환형 크리에이티브</div><b>입력은 한 번, 홍보는 네 방향</b></div><div class="work-body muted">강한 대비와 행동 유도 중심 광고<div class="work-approved">🐾 순금 검수 90점</div></div></a></div>
-<div class="col-md-6"><a href="/blog" class="glass work-card d-block text-white text-decoration-none"><span class="work-score">9.0 / 10</span><div class="work-visual"><img src="{{ url_for('static', filename='showcase/project-freedom-blog-v1.png') }}" alt="블로그 매거진 커버 결과물 전체 보기" loading="lazy"></div><div class="work-copy"><div class="work-type">블로그 · 매거진 커버</div><b>AI 홍보물이 다 비슷해지는 이유</b></div><div class="work-body muted">검색 주제와 읽기 의도가 선명한 커버<div class="work-approved">🐾 순금 검수 90점</div></div></a></div>
-<div class="col-md-6"><a href="/poster" class="glass work-card d-block text-white text-decoration-none"><span class="work-score">9.0 / 10</span><div class="work-visual"><img src="{{ url_for('static', filename='showcase/project-freedom-poster-v4.png') }}" alt="인쇄 포스터 결과물 전체 보기" loading="lazy"></div><div class="work-copy"><div class="work-type">포스터 · 스위스 인쇄 스타일</div><b>홍보물 제작, 이제 한곳에서</b></div><div class="work-body muted">멀리서도 읽히는 인쇄용 정보 구조<div class="work-approved">🐾 순금 검수 90점</div></div></a></div>
+<section class="section pt-2" id="approved-output"><div class="container"><div class="text-center mb-5"><span class="badge rounded-pill border p-2 mb-3">9+ APPROVED OUTPUT</span><h2 class="display-6 fw-bold">{{ t("landing.approved.title") }}</h2><p class="muted approved-note">{{ t("landing.approved.desc") }}</p></div><div class="row g-4 approved-grid">
+<div class="col-md-6"><a href="/sns" class="glass work-card d-block text-white text-decoration-none"><span class="work-score">9.0 / 10</span><div class="work-visual"><img src="{{ url_for('static', filename='showcase/project-freedom-editorial-sns-v3.png') }}" alt="{{ t('landing.approved.sns_alt') }}" loading="lazy"></div><div class="work-copy"><div class="work-type">{{ t("landing.approved.sns_type") }}</div><b>{{ t("landing.approved.sns_title") }}</b></div><div class="work-body muted">{{ t("landing.approved.sns_desc") }}<div class="work-approved">{{ t("landing.approved.score") }}</div></div></a></div>
+<div class="col-md-6"><a href="/ads-generator" class="glass work-card d-block text-white text-decoration-none"><span class="work-score">9.0 / 10</span><div class="work-visual"><img src="{{ url_for('static', filename='showcase/project-freedom-conversion-ad-v1.png') }}" alt="{{ t('landing.approved.ad_alt') }}" loading="lazy"></div><div class="work-copy"><div class="work-type">{{ t("landing.approved.ad_type") }}</div><b>{{ t("landing.approved.ad_title") }}</b></div><div class="work-body muted">{{ t("landing.approved.ad_desc") }}<div class="work-approved">{{ t("landing.approved.score") }}</div></div></a></div>
+<div class="col-md-6"><a href="/blog" class="glass work-card d-block text-white text-decoration-none"><span class="work-score">9.0 / 10</span><div class="work-visual"><img src="{{ url_for('static', filename='showcase/project-freedom-blog-v1.png') }}" alt="{{ t('landing.approved.blog_alt') }}" loading="lazy"></div><div class="work-copy"><div class="work-type">{{ t("landing.approved.blog_type") }}</div><b>{{ t("landing.approved.blog_title") }}</b></div><div class="work-body muted">{{ t("landing.approved.blog_desc") }}<div class="work-approved">{{ t("landing.approved.score") }}</div></div></a></div>
+<div class="col-md-6"><a href="/poster" class="glass work-card d-block text-white text-decoration-none"><span class="work-score">9.0 / 10</span><div class="work-visual"><img src="{{ url_for('static', filename='showcase/project-freedom-poster-v4.png') }}" alt="{{ t('landing.approved.poster_alt') }}" loading="lazy"></div><div class="work-copy"><div class="work-type">{{ t("landing.approved.poster_type") }}</div><b>{{ t("landing.approved.poster_title") }}</b></div><div class="work-body muted">{{ t("landing.approved.poster_desc") }}<div class="work-approved">{{ t("landing.approved.score") }}</div></div></a></div>
 </div></div></section>
 
 <section class="section pt-2"><div class="container">
 <div class="text-center mb-5"><span class="badge rounded-pill border p-2 mb-3">{{ t("landing.pricing.badge") }}</span><h2 class="display-6 fw-bold">{{ t("landing.pricing.title") }}</h2><p class="muted">{{ t("landing.pricing.desc") }}</p></div>
 <div class="row g-4 justify-content-center">
 <div class="col-md-6 col-lg-4"><div class="glass price-card"><h3 class="h4">{{ t("landing.pricing.free") }}</h3><div class="price mt-3">₩0</div><p class="muted">{{ t("landing.pricing.free_desc") }}</p><hr class="border-secondary"><p>✓ {{ t("landing.pricing.ai") }}</p><p>✓ {{ t("landing.pricing.brand") }}</p><p>✓ {{ t("landing.pricing.history") }}</p><p class="muted">{{ t("landing.pricing.testing") }}</p><a href="/register" class="btn btn-outline-light w-100 mt-2">{{ t("landing.cta.start_free") }}</a></div></div>
-<div class="col-md-6 col-lg-4"><div class="glass price-card popular"><span class="badge bg-primary position-absolute top-0 start-50 translate-middle">POPULAR</span><h3 class="h4">PRO</h3><div class="price mt-3">100 {{ t("landing.pricing.credits") }}</div><p class="muted">{{ t("landing.pricing.pro_desc") }}</p><hr class="border-secondary"><p>✓ {{ t("landing.pricing.more_credits") }}</p><p>✓ 광고 · 블로그 · SNS</p><p>✓ 고품질 포스터와 무료 글자 배치 변경</p><p>✓ {{ t("landing.pricing.exports") }}</p><a href="{% if session.get('user_id') %}/credits{% else %}/register{% endif %}" class="btn btn-primary w-100 mt-2">{% if session.get("user_id") %}{{ t("landing.pricing.view_credits") }}{% else %}{{ t("landing.pricing.create_account") }}{% endif %}</a></div></div>
+<div class="col-md-6 col-lg-4"><div class="glass price-card popular"><span class="badge bg-primary position-absolute top-0 start-50 translate-middle">{{ t("landing.pricing.popular") }}</span><h3 class="h4">PRO</h3><div class="price mt-3">100 {{ t("landing.pricing.credits") }}</div><p class="muted">{{ t("landing.pricing.pro_desc") }}</p><hr class="border-secondary"><p>✓ {{ t("landing.pricing.more_credits") }}</p><p>✓ {{ t("landing.pricing.abs") }}</p><p>✓ {{ t("landing.pricing.poster") }}</p><p>✓ {{ t("landing.pricing.exports") }}</p><a href="{% if session.get('user_id') %}/credits{% else %}/register{% endif %}" class="btn btn-primary w-100 mt-2">{% if session.get("user_id") %}{{ t("landing.pricing.view_credits") }}{% else %}{{ t("landing.pricing.create_account") }}{% endif %}</a></div></div>
 </div><p class="text-center muted small mt-4">{{ t("landing.pricing.notice") }}</p></div></section>
 
 <section class="section pt-2"><div class="container"><div class="text-center mb-5"><h2 class="display-6 fw-bold">{{ t("landing.why.title") }}</h2></div>
@@ -105,25 +104,9 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 </div></div></section>
 
 <section class="section text-center"><div class="container"><h2 class="display-6 fw-bold">{{ t("landing.final.title") }}</h2><p class="muted">{{ t("landing.final.desc") }}</p>
-{% if session.get("user_id") %}<a href="/ads-generator" class="btn btn-primary btn-lg">광고 만들기 →</a>{% else %}<a href="/register" class="btn btn-primary btn-lg">{{ t("landing.cta.start_free_arrow") }}</a>{% endif %}
+{% if session.get("user_id") %}<a href="/ads-generator" class="btn btn-primary btn-lg">{{ t("landing.cta.create_arrow") }}</a>{% else %}<a href="/register" class="btn btn-primary btn-lg">{{ t("landing.cta.start_free_arrow") }}</a>{% endif %}
 </div></section>
 <footer class="py-4"><div class="container d-flex justify-content-between flex-wrap gap-3"><span>© Project Freedom AI</span><span><a class="footer-link" href="/terms">{{ t("landing.footer.terms") }}</a> · <a class="footer-link" href="/privacy">{{ t("landing.footer.privacy") }}</a> · <a class="footer-link" href="/refund-policy">{{ t("landing.footer.refund") }}</a> · <a class="footer-link" href="mailto:support@projectfreedom.ai">{{ t("landing.footer.contact") }}</a></span></div></footer>
 {% include "_sungeum_assistant.html" %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-(() => {
-const items={
- ads:{industry:'독립서점',business:'달빛책방',mood:'차분함 · 북토크 모집',label:'AI 광고 출력',title:'📚 금요일 밤, 작가와 책 사이',text:'달빛책방에서 만나는 소규모 북토크. 선착순 12명의 자리를 지금 예약하세요.',meta:'대표 문구 · 혜택 · 행동 유도'},
- sns:{industry:'반려식물 공방',business:'모모식물상점',mood:'싱그러움 · 클래스 모집',label:'SNS 게시글 출력',title:'🌿 우리 집 식물에게 새 화분을',text:'흙과 화분이 모두 준비된 일요일 분갈이 클래스. 초보 식집사도 편하게 참여하세요.',meta:'#반려식물 #분갈이클래스 #식집사'},
- blog:{industry:'도자기 작업실',business:'윤슬도자기',mood:'편안함 · 원데이클래스 안내',label:'블로그 미리보기',title:'처음 만드는 나만의 머그컵',text:'준비물부터 제작 과정, 완성품 수령 방법까지 한눈에 읽히는 글로 정리합니다.',meta:'도입 → 제작 과정 → 신청 안내'},
- poster:{industry:'베이커리',business:'소담 베이커리',mood:'감성적 · 오픈 이벤트',label:'포스터 미리보기',title:'매일 아침, 갓 구운 행복',text:'OPEN EVENT · 식빵 2개 구매 시 아메리카노 증정',meta:'세 가지 디자인 · 개별 PNG 저장'},
- running:{industry:'러닝 영상 분석',business:'순금이 AI 러닝코치',mood:'측면 영상 · 편안한 조깅',label:'순금이 코치의 러닝폼 리포트',title:'🏃 78점 · 포어풋형 전방 추진형',text:'상체 기울기와 무릎 각도를 확인하고, 다음 러닝에서 바로 실천할 한 가지 미션을 순금이가 알려드려요.',meta:'착지 확대 · 친구 같은 코칭 · SNS 결과지 · 성장 기록'}
-};
-const order=['ads','sns','blog','poster','running'];let index=0,timer;
-const output=document.getElementById('productPreviewOutput');
-function show(kind){const x=items[kind];output.classList.add('switching');setTimeout(()=>{previewIndustry.textContent=x.industry;previewBusiness.textContent=x.business;previewMood.textContent=x.mood;previewOutputLabel.textContent=x.label;previewTitle.textContent=x.title;previewText.textContent=x.text;previewMeta.textContent=x.meta;document.querySelectorAll('.preview-tab').forEach(b=>b.classList.toggle('active',b.dataset.kind===kind));output.classList.remove('switching')},180);index=order.indexOf(kind)}
-function autoplay(){clearInterval(timer);timer=setInterval(()=>show(order[index=(index+1)%order.length]),5000)}
-document.querySelectorAll('.preview-tab').forEach(b=>b.addEventListener('click',()=>{show(b.dataset.kind);autoplay()}));autoplay();
-})();
-</script>
 </body></html>

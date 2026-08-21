@@ -12,7 +12,7 @@ class LandingShowcaseTests(unittest.TestCase):
             "project-freedom-poster-v4.png",
         ):
             self.assertIn(f"showcase/{name}", template)
-        self.assertEqual(template.count("순금 검수 90점"), 4)
+        self.assertEqual(template.count('t("landing.approved.score")'), 4)
         self.assertIn(".work-visual img", template)
         self.assertIn("object-fit:contain", template)
         self.assertNotIn("background:#13243c center/cover no-repeat", template)
