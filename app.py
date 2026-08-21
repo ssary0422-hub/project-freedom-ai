@@ -70,7 +70,19 @@ def protect_same_origin_writes():
     if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
         return None
     origin = request.headers.get("Origin", "").rstrip("/")
-    if origin and origin != request.host_url.rstrip("/"):
+    trusted_origins = {
+        request.host_url.rstrip("/"),
+        "https://projectfreedom-ai.com",
+        "https://www.projectfreedom-ai.com",
+        "https://project-freedom-ai.onrender.com",
+    }
+    configured_origins = os.environ.get("TRUSTED_ORIGINS", "")
+    trusted_origins.update(
+        item.strip().rstrip("/")
+        for item in configured_origins.split(",")
+        if item.strip()
+    )
+    if origin and origin not in trusted_origins:
         abort(403)
     return None
 
