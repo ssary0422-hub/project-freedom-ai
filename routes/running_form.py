@@ -79,7 +79,7 @@ def preflight():
             {"key": "view", "label": "측면 촬영", "status": "pass"},
             {"key": "visual_quality", "label": "전신·발·조명 자동 검사", "status": "pending"},
         ],
-        message="기본 검사를 통과했어요. 다음 단계에서 AI가 촬영 품질을 확인합니다.",
+        message="기본 검사를 통과했어요. 다음 단계에서 AI가 촬영 품질과 자세를 확인합니다.",
     )
 
 
@@ -101,6 +101,7 @@ def save_running_history():
         image_url = _save_result_image(payload["image"], session["user_id"])
     except (TypeError, ValueError) as exc:
         return jsonify(ok=False, error=str(exc)), 400
+
     runner_type = str(payload["runnerType"])[:80]
     strike_type = str(payload["strikeType"])[:40]
     side = str(payload["side"])[:40]

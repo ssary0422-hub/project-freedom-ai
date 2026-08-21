@@ -25,12 +25,14 @@ from database.users import (
 
 from flask import (
     Flask,
+    abort,
     render_template,
     request,
     send_file,
     redirect,
     session
 )
+from werkzeug.middleware.proxy_fix import ProxyFix
 from docx import Document
 from docx.shared import Inches
 from documents.pdf import (
@@ -44,6 +46,7 @@ from ai.blog import make_blog
 from ai.sns import make_sns
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 app.config["SECRET_KEY"] = os.environ.get(
     "SECRET_KEY",
@@ -52,6 +55,35 @@ app.config["SECRET_KEY"] = os.environ.get(
 
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("FLASK_ENV") == "production" or bool(os.environ.get("RENDER"))
+app.config["PERMANENT_SESSION_LIFETIME"] = 60 * 60 * 24 * 14
+
+
+@app.before_request
+def protect_same_origin_writes():
+    """Reject browser write requests sent from a different site.
+
+    This protects every existing POST endpoint without requiring each form and
+    fetch call to maintain a separate token. Non-browser clients without an
+    Origin header remain compatible; browser-provided cross-site origins do not.
+    """
+    if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
+        return None
+    origin = request.headers.get("Origin", "").rstrip("/")
+    if origin and origin != request.host_url.rstrip("/"):
+        abort(403)
+    return None
+
+
+@app.after_request
+def add_security_headers(response):
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    if request.is_secure:
+        response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    return response
 
 init_db()
 init_users_table()
@@ -132,6 +164,21 @@ SNS_WORD_PATH = "downloads/sns.docx"
 @app.route("/")
 def landing():
     return render_template("landing.html")
+
+
+@app.route("/terms")
+def terms():
+    return render_template("policy.html", policy="terms")
+
+
+@app.route("/privacy")
+def privacy():
+    return render_template("policy.html", policy="privacy")
+
+
+@app.route("/refund-policy")
+def refund_policy():
+    return render_template("policy.html", policy="refund")
 
 
 @app.route("/dashboard")

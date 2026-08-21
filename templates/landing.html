@@ -106,7 +106,7 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 <section class="section text-center"><div class="container"><h2 class="display-6 fw-bold">{{ t("landing.final.title") }}</h2><p class="muted">{{ t("landing.final.desc") }}</p>
 {% if session.get("user_id") %}<a href="/ads-generator" class="btn btn-primary btn-lg">광고 만들기 →</a>{% else %}<a href="/register" class="btn btn-primary btn-lg">{{ t("landing.cta.start_free_arrow") }}</a>{% endif %}
 </div></section>
-<footer class="py-4"><div class="container d-flex justify-content-between flex-wrap gap-3"><span>© Project Freedom AI</span><span><a class="footer-link" href="#">{{ t("landing.footer.terms") }}</a> · <a class="footer-link" href="#">{{ t("landing.footer.privacy") }}</a> · <a class="footer-link" href="#">{{ t("landing.footer.refund") }}</a> · <a class="footer-link" href="mailto:support@projectfreedom.ai">{{ t("landing.footer.contact") }}</a></span></div></footer>
+<footer class="py-4"><div class="container d-flex justify-content-between flex-wrap gap-3"><span>© Project Freedom AI</span><span><a class="footer-link" href="/terms">{{ t("landing.footer.terms") }}</a> · <a class="footer-link" href="/privacy">{{ t("landing.footer.privacy") }}</a> · <a class="footer-link" href="/refund-policy">{{ t("landing.footer.refund") }}</a> · <a class="footer-link" href="mailto:support@projectfreedom.ai">{{ t("landing.footer.contact") }}</a></span></div></footer>
 {% include "_sungeum_assistant.html" %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>

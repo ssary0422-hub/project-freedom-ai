@@ -29,7 +29,7 @@ def history():
     )
 
 
-@history_bp.route("/delete/<int:id>")
+@history_bp.post("/delete/<int:id>")
 @login_required
 def delete_history(id):
     delete_history_by_id(

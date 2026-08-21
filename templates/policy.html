@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% set policies = {
+  'terms': {
+    'eyebrow': 'TERMS OF SERVICE', 'title': '이용약관',
+    'summary': 'Project Freedom AI를 안전하고 투명하게 이용하기 위한 기본 기준입니다.',
+    'sections': [
+      ('서비스 이용', '광고·SNS·블로그·포스터·러닝폼 분석 등 AI 기반 기능을 제공합니다. 기능과 크레딧 정책은 서비스 개선 과정에서 변경될 수 있으며 중요한 변경은 서비스 화면으로 안내합니다.'),
+      ('AI 결과물', 'AI 결과에는 오류가 포함될 수 있으므로 게시·광고·사업상 사용 전 사용자가 사실관계와 권리 침해 여부를 최종 확인해야 합니다. 러닝폼 분석은 참고용이며 의료 진단이 아닙니다.'),
+      ('사용자 자료', '사용자는 업로드한 사진·영상·로고를 사용할 권한을 보유해야 하며 타인의 개인정보·저작권·초상권을 침해하는 자료를 올려서는 안 됩니다.'),
+      ('금지 행위', '불법 콘텐츠 제작, 타인 사칭, 서비스 공격·자동화 남용, 다른 사용자의 정보 접근을 금지합니다.'),
+      ('계정과 책임', '계정 정보는 본인이 안전하게 관리해야 합니다. 약관 위반이나 서비스 안전을 위협하는 사용은 제한될 수 있습니다.')
+    ]},
+  'privacy': {
+    'eyebrow': 'PRIVACY POLICY', 'title': '개인정보처리방침',
+    'summary': '필요한 정보만 수집하고 서비스 제공 목적에 맞게 처리합니다.',
+    'sections': [
+      ('수집 정보', '회원가입 시 이메일·이름과 암호화된 비밀번호를 처리합니다. 서비스 이용 중 생성 기록, 업로드 자료, 접속 정보와 크레딧 사용 내역이 처리될 수 있습니다.'),
+      ('이용 목적', '로그인, 콘텐츠 생성, 결과 저장, 크레딧 관리, 오류 대응과 서비스 보안 및 품질 개선을 위해 사용합니다.'),
+      ('사진·영상 처리', '업로드한 사진과 영상은 요청한 콘텐츠 또는 러닝폼 분석을 처리하는 데 사용됩니다. 러닝 영상의 원본은 분석 완료 후 영구 보관하지 않는 것을 원칙으로 하며, 사용자가 저장한 결과 이미지는 생성 기록에 보관될 수 있습니다.'),
+      ('보관과 삭제', '관련 법령이나 분쟁 대응에 필요한 경우를 제외하고 목적 달성 후 삭제합니다. 사용자는 생성 기록 삭제 또는 계정 관련 문의를 요청할 수 있습니다.'),
+      ('문의', '개인정보 관련 요청은 support@projectfreedom.ai로 보내주세요.')
+    ]},
+  'refund': {
+    'eyebrow': 'REFUND POLICY', 'title': '환불정책',
+    'summary': '크레딧 사용 여부와 서비스 장애 여부를 기준으로 명확하게 처리합니다.',
+    'sections': [
+      ('미사용 크레딧', '구매 후 사용하지 않은 유료 크레딧은 결제일로부터 7일 이내 환불을 요청할 수 있습니다. 결제 수단의 처리 기간에 따라 실제 환불 완료 시점은 달라질 수 있습니다.'),
+      ('사용한 크레딧', '이미 정상적으로 콘텐츠 생성에 사용된 크레딧은 원칙적으로 환불되지 않습니다.'),
+      ('생성 실패', '서버 오류나 이미지 생성 실패로 결과가 완성되지 않은 경우 크레딧을 차감하지 않거나 확인 후 복구합니다. 단순한 취향 차이는 생성 실패로 보지 않습니다.'),
+      ('중복 결제', '중복 결제가 확인되면 사용되지 않은 중복 결제분을 환불합니다.'),
+      ('요청 방법', '계정 이메일, 결제일, 결제 금액과 사유를 support@projectfreedom.ai로 보내주세요.')
+    ]}
+} %}
+{% set page = policies[policy] %}
+{% block title %}{{ page.title }} - Project Freedom AI{% endblock %}
+{% block extra_style %}
+.policy-shell{max-width:900px}.policy-hero{padding:38px;border:1px solid rgba(121,143,190,.22);border-radius:26px;background:linear-gradient(145deg,rgba(19,29,52,.96),rgba(11,18,34,.98))}.policy-eyebrow{color:#61e6d4;font-size:.8rem;font-weight:900;letter-spacing:.14em}.policy-section{padding:24px 0;border-bottom:1px solid rgba(142,160,200,.16)}.policy-section:last-child{border-bottom:0}.policy-section h2{font-size:1.08rem;font-weight:850;color:#fff}.policy-section p{margin:0;color:#aeb9d1;line-height:1.8}.policy-date{color:#8491ad;font-size:.86rem}
+{% endblock %}
+{% block content %}
+<main class="container policy-shell pb-5">
+  <section class="policy-hero">
+    <div class="policy-eyebrow mb-2">{{ page.eyebrow }}</div>
+    <h1 class="fw-bold mb-3">{{ page.title }}</h1>
+    <p class="text-secondary mb-2">{{ page.summary }}</p>
+    <div class="policy-date">시행일: 2026년 8월 21일 · 최종 업데이트: 2026년 8월 21일</div>
+    {% for heading, body in page.sections %}<section class="policy-section"><h2>{{ heading }}</h2><p>{{ body }}</p></section>{% endfor %}
+  </section>
+</main>
+{% endblock %}

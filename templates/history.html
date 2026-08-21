@@ -71,7 +71,7 @@
               <a href="/history/download/{{ item[0] }}/word" class="history-action">Word</a>
             {% endif %}
             {% if item[5] %}<a href="{{ url_for('history.history_image', history_id=item[0], download=1) if item[7] else '/history/download/' ~ item[0] ~ '/image' }}" class="history-action">이미지 저장</a>{% endif %}
-            <form method="GET" action="/delete/{{ item[0] }}" onsubmit="return confirm('이 기록을 삭제할까요?');">
+            <form method="POST" action="/delete/{{ item[0] }}" onsubmit="return confirm('이 기록을 삭제할까요?');">
               <button type="submit" class="history-action history-action-danger">삭제</button>
             </form>
           </div>
