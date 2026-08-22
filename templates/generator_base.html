@@ -183,6 +183,12 @@ document.addEventListener("DOMContentLoaded", function () {
         poster: {{ t("v21.tab.poster") | tojson }},
         running: {{ running_i18n.get("title", "Sungeum AI Running Coach") | tojson }}
     };
+    const loadingTitle = {{ t("v21.gen.loading") | tojson }};
+    const loadingDesc = {{ t("v21.gen.loading_desc") | tojson }};
+    const loadingHeading = document.getElementById("ai-loading-title");
+    const loadingMessage = document.getElementById("ai-loading-message");
+    if (loadingHeading) loadingHeading.textContent = loadingTitle;
+    if (loadingMessage) loadingMessage.textContent = loadingDesc;
     const promoButton = nav.querySelector(".dropdown-toggle");
     if (promoButton) promoButton.lastChild.textContent = " " + labels.ads;
     const links = nav.querySelectorAll(".dropdown-menu .dropdown-item");
