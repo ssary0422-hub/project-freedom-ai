@@ -54,7 +54,20 @@ def _contrast_text(fill: tuple[int, int, int, int]) -> tuple[int, int, int, int]
 
 def _background(path: str | Path) -> Image.Image:
     with Image.open(path) as source:
-        return _cover(source.convert("RGBA"), (WIDTH, HEIGHT))
+        return _safe_cover(source.convert("RGBA"), (WIDTH, HEIGHT), focal_y=.42)
+
+
+def _safe_cover(source: Image.Image, size: tuple[int, int], *, focal_y: float = .42) -> Image.Image:
+    """Cover a panel while keeping the visually important upper-middle area in frame."""
+    source = source.convert("RGBA")
+    target_w, target_h = size
+    scale = max(target_w / source.width, target_h / source.height)
+    resized = source.resize((round(source.width * scale), round(source.height * scale)),
+                            Image.Resampling.LANCZOS)
+    left = max(0, (resized.width - target_w) // 2)
+    available_y = max(0, resized.height - target_h)
+    top = round(available_y * max(0.0, min(1.0, focal_y)))
+    return resized.crop((left, top, left + target_w, top + target_h))
 
 
 def _normalized_logo(logo_path: str | Path) -> Image.Image:
@@ -251,7 +264,7 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
     accent = ImageColor.getrgb(direction.palette[1]) + (255,)
 
     if direction.layout_family == "split_scene":
-        photo = image.crop((430, 0, WIDTH, HEIGHT))
+        photo = _safe_cover(image, (WIDTH - 430, HEIGHT), focal_y=.40)
         panel = Image.new("RGBA", (WIDTH, HEIGHT), ImageColor.getrgb(direction.palette[0]) + (255,))
         panel.paste(photo, (430, 0))
         image = panel
@@ -264,7 +277,7 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
         _footer(draw, company=company, direction=direction)
 
     elif direction.layout_family == "editorial_type":
-        photo = image.crop((360, 360, 1030, 1160)).rotate(-3, expand=True, resample=Image.Resampling.BICUBIC)
+        photo = _safe_cover(image, (670, 800), focal_y=.43).rotate(-3, expand=True, resample=Image.Resampling.BICUBIC)
         image = Image.new("RGBA", (WIDTH, HEIGHT), (247, 242, 232, 255))
         draw = ImageDraw.Draw(image, "RGBA")
         draw.rectangle((0, 0, 24, HEIGHT), fill=accent)
@@ -281,9 +294,9 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
         image = Image.new("RGBA", (WIDTH, HEIGHT), ImageColor.getrgb(direction.palette[0]) + (255,))
         draw = ImageDraw.Draw(image, "RGBA")
         crops = (
-            (_cover(source.crop((0, 0, 700, 850)), (430, 520)), (58, 520), -4),
-            (_cover(source.crop((360, 180, 1080, 1050)), (430, 520)), (570, 460), 4),
-            (_cover(source.crop((120, 520, 950, 1350)), (390, 300)), (340, 930), -1),
+            (_safe_cover(source.crop((0, 0, 700, 850)), (430, 520), focal_y=.38), (58, 520), -4),
+            (_safe_cover(source.crop((360, 180, 1080, 1050)), (430, 520), focal_y=.40), (570, 460), 4),
+            (_safe_cover(source.crop((120, 520, 950, 1350)), (390, 300), focal_y=.50), (340, 930), -1),
         )
         for panel, position, angle in crops:
             framed = Image.new("RGBA", (panel.width + 18, panel.height + 18), (250, 248, 241, 255))
