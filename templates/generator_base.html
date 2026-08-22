@@ -68,7 +68,7 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
 
     <div class="text-center pf-page-header">
         <div class="pf-eyebrow mb-2">PROJECT FREEDOM AI</div>
-        <h1 class="fw-bold mb-2 d-flex justify-content-center align-items-center gap-3"><img class="pf-title-mascot" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="3D 순금 마스코트"><span>AI 콘텐츠 생성기</span></h1>
+        <h1 class="fw-bold mb-2 d-flex justify-content-center align-items-center gap-3"><img class="pf-title-mascot" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="3D Sungeum mascot"><span>{{ t("v21.gen.title") }}</span></h1>
         <p class="text-muted mb-0">
             {{ t("v21.gen.subtitle") }}
         </p>
@@ -92,12 +92,12 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
         <div class="card-body p-4">
 
             <div class="generator-tabs mb-4" aria-label="콘텐츠 종류 선택">
-                <a href="/ads-generator" class="generator-tab{% if active_tab == 'ads' %} active{% endif %}"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 11v2a2 2 0 0 0 2 2h2l2 5h3l-2-5 9-4V7L7 11H5a2 2 0 0 0-2 2Z"/></svg></span><span class="generator-tab-copy"><strong>광고</strong><small>핵심 문구와 홍보 이미지</small></span></a>
-                <a href="/sns" class="generator-tab{% if active_tab == 'sns' %} active{% endif %}"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 5h4M11 18h2"/></svg></span><span class="generator-tab-copy"><strong>SNS</strong><small>게시글·해시태그·이미지</small></span></a>
-                <a href="/blog" class="generator-tab{% if active_tab == 'blog' %} active{% endif %}"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5zM15 3v5h5M8 12h8M8 16h8"/></svg></span><span class="generator-tab-copy"><strong>블로그</strong><small>검색형 장문 콘텐츠</small></span></a>
-                <a href="/poster" class="generator-tab{% if active_tab == 'poster' %} active{% endif %}"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m4 18 5-5 3 3 3-4 5 6"/></svg></span><span class="generator-tab-copy"><strong>포스터</strong><small>바로 저장하는 1080×1350</small></span></a>
-                <a href="/profiles" class="generator-tab"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M4 21V8l8-5 8 5v13M8 21v-6h8v6M8 10h.01M12 10h.01M16 10h.01"/></svg></span><span class="generator-tab-copy"><strong>브랜드</strong><small>로고와 사진을 한곳에 보관</small></span></a>
-                <a href="/history" class="generator-tab"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></svg></span><span class="generator-tab-copy"><strong>기록</strong><small>완성한 결과 다시 확인</small></span></a>
+                <a href="/ads-generator" class="generator-tab{% if active_tab == 'ads' %} active{% endif %}"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 11v2a2 2 0 0 0 2 2h2l2 5h3l-2-5 9-4V7L7 11H5a2 2 0 0 0-2 2Z"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.ads") }}</strong><small>{{ t("v21.tab.ads_desc") }}</small></span></a>
+                <a href="/sns" class="generator-tab{% if active_tab == 'sns' %} active{% endif %}"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 5h4M11 18h2"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.sns") }}</strong><small>{{ t("v21.tab.sns_desc") }}</small></span></a>
+                <a href="/blog" class="generator-tab{% if active_tab == 'blog' %} active{% endif %}"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5zM15 3v5h5M8 12h8M8 16h8"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.blog") }}</strong><small>{{ t("v21.tab.blog_desc") }}</small></span></a>
+                <a href="/poster" class="generator-tab{% if active_tab == 'poster' %} active{% endif %}"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m4 18 5-5 3 3 3-4 5 6"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.poster") }}</strong><small>{{ t("v21.tab.poster_desc") }}</small></span></a>
+                <a href="/profiles" class="generator-tab"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M4 21V8l8-5 8 5v13M8 21v-6h8v6M8 10h.01M12 10h.01M16 10h.01"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.brand") }}</strong><small>{{ t("v21.tab.brand_desc") }}</small></span></a>
+                <a href="/history" class="generator-tab"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.history") }}</strong><small>{{ t("v21.tab.history_desc") }}</small></span></a>
             </div>
 
             <div class="mb-4">
