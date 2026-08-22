@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "static/showcase/sungeum-marketing-workspace-carousel"
 OUT.mkdir(parents=True, exist_ok=True)
 W, H = 1080, 1350
-BG = (7, 17, 31)
+BG = (28, 24, 38)
 TEAL = (97, 230, 211)
 WHITE = (248, 251, 255)
 MUTED = (171, 188, 211)
@@ -20,13 +20,13 @@ PROOF = [ROOT / "static/showcase/approved-ads-9-0.png", ROOT / "static/showcase/
 def base(slide):
     im = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(im)
-    d.ellipse((690, -180, 1260, 390), fill=(15, 74, 91))
-    d.ellipse((-240, 1030, 420, 1570), fill=(21, 43, 83))
+    d.ellipse((650, -190, 1270, 440), fill=(103, 48, 70))
+    d.ellipse((-240, 1030, 420, 1570), fill=(55, 45, 91))
     d.text((70, 58), "순금이의 마케팅 작업실", font=BOLD(34), fill=TEAL)
     d.text((W - 170, 70), f"{slide}/5", font=BOLD(25), fill=MUTED)
     mascot = Image.open(MASCOT).convert("RGBA")
-    mascot.thumbnail((190, 230))
-    im.paste(mascot, (W - mascot.width - 65, 105), mascot)
+    mascot.thumbnail((280, 350))
+    im.paste(mascot, (W - mascot.width - 55, 110), mascot)
     return im, d
 
 
@@ -57,7 +57,7 @@ def main():
         ("내 로고와 실제 사진까지\n반영해서", "우리 가게와 브랜드에 어울리는 콘텐츠로 완성해.", PROOF[2]),
     ], 2):
         im, d = base(n)
-        d.text((70, 300), headline, font=BOLD(58), fill=WHITE, spacing=10)
+        d.text((70, 300), headline, font=BOLD(48), fill=WHITE, spacing=10)
         d.text((72, 465), body, font=REG(31), fill=MUTED)
         fit_card(im, path, (70, 610, 940, 540))
         d = ImageDraw.Draw(im)
