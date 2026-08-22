@@ -1778,3 +1778,33 @@ _RUNNING_I18N_EXTRA = {
 }
 for _language, _values in _RUNNING_I18N_EXTRA.items():
     _RUNNING_I18N[_language].update(_values)
+
+# Static helper copy used by the running-coach shell.  Keeping these labels in
+# the same payload prevents the page from mixing translated controls with
+# Korean-only helper cards after a language switch.
+_RUNNING_STATIC_I18N = {
+    "ko": {
+        "flow_upload": "러닝 영상 올리기", "flow_analyze": "순금이 AI 분석", "flow_share": "코칭 결과 공유",
+        "coach_prompt": "순금이 코치에게 영상 보여주기", "upload_heading": "달리는 옆모습을 올려줘",
+        "upload_copy": "머리부터 발끝까지 보이는 5~10초 영상이면 좋아. 발과 지면이 잘 보이면 더 정확하게 볼 수 있어!",
+        "capture_tip": "고정된 측면 카메라와 밝은 환경에서 분석 신뢰도가 높아집니다. 촬영 각도·속도·조명에 따라 결과가 달라질 수 있어요.",
+        "credit_note": "분석 성공 시에만 차감됩니다.", "credits": "3크레딧", "how_to": "잘 찍는 방법",
+        "step1_title": "카메라를 고정해요", "step1_copy": "흔들림 없이 정확한 측면으로 촬영",
+        "step2_title": "전신과 발을 보여줘요", "step2_copy": "머리부터 발끝과 지면이 모두 보이게",
+        "step3_title": "5~10초면 충분해요", "step3_copy": "밝은 장소에서 60fps 이상 권장",
+        "coach_subtitle": "분석·코칭·결과지 검수"
+    },
+    "en": {
+        "flow_upload": "Upload running video", "flow_analyze": "Sungeum AI analysis", "flow_share": "Share coaching result",
+        "coach_prompt": "Show your video to Sungeum", "upload_heading": "Upload your side-view run",
+        "upload_copy": "A 5–10 second clip showing your head to toes works best. Keep your feet and the ground visible for a clearer review.",
+        "capture_tip": "A steady side camera and bright lighting improve analysis quality. Results can vary with camera angle, speed and lighting.",
+        "credit_note": "Credits are deducted only when analysis succeeds.", "credits": "3 credits", "how_to": "How to record a good clip",
+        "step1_title": "Keep the camera steady", "step1_copy": "Use a clear side view without shaking",
+        "step2_title": "Show your full body and feet", "step2_copy": "Keep your head, toes and ground in frame",
+        "step3_title": "5–10 seconds is enough", "step3_copy": "Bright light and 60fps or higher are recommended",
+        "coach_subtitle": "Analysis · coaching · report review"
+    }
+}
+for _language in _RUNNING_I18N:
+    _RUNNING_I18N[_language].update(_RUNNING_STATIC_I18N.get(_language, _RUNNING_STATIC_I18N["en"]))

@@ -2,6 +2,7 @@
   const I = Object.assign({
     title: "Sungeum AI Running Coach", working: "Sungeum is analyzing your run", done_stamp: "Sungeum checked it", landing_frame: "AI foot-strike frame", foot_zoom: "Foot-strike close-up", coach: "Sungeum's coaching note", next_goal: "One thing to change next run", save_image: "Save SNS result image", save_done: "Your running result was saved", generic_error: "Something went wrong while analyzing the video. Please try again.", mediapipe_error: "AI pose tracking is getting ready again. Press analyze once more in a moment.", range_knee: "Recommended range 105–125°", range_trunk: "Recommended range 6–14°", steps: ["Check video", "Find joints", "Analyze strike", "Prepare coaching"]
   }, window.RUNNING_I18N || {});
+  Object.assign(I, { flow_upload: "Upload running video", flow_analyze: "Sungeum AI analysis", flow_share: "Share coaching result", coach_prompt: "Show your video to Sungeum", upload_heading: "Upload your side-view run", upload_copy: "A 5–10 second clip showing your head to toes works best. Keep your feet and the ground visible for a clearer review.", capture_tip: "A steady side camera and bright lighting improve analysis quality. Results can vary with camera angle, speed and lighting.", credit_note: "Credits are deducted only when analysis succeeds.", credits: "3 credits", how_to: "How to record a good clip", step1_title: "Keep the camera steady", step1_copy: "Use a clear side view without shaking", step2_title: "Show your full body and feet", step2_copy: "Keep your head, toes and ground in frame", step3_title: "5–10 seconds is enough", step3_copy: "Bright light and 60fps or higher are recommended", coach_subtitle: "Analysis · coaching · report review" }, window.RUNNING_I18N || {});
   const form = document.getElementById("runningForm");
   if (!form) return;
   const input = document.getElementById("videoInput");
@@ -32,10 +33,29 @@
     setText(".run-kicker", I.title);
     setText(".run-hero h1", I.hero_title);
     setText(".run-hero-copy > p", I.hero_desc);
+    setText(".run-coach-flow div:nth-child(1) span", I.flow_upload);
+    setText(".run-coach-flow div:nth-child(2) span", I.flow_analyze);
+    setText(".run-coach-flow div:nth-child(3) span", I.flow_share);
+    setText(".col-lg-8 .pf-card .pf-eyebrow", I.coach_prompt);
+    setText(".col-lg-8 .pf-card h2", I.upload_heading);
+    setText(".col-lg-8 .pf-card > p", I.upload_copy);
+    setText(".col-lg-8 .pf-card .alert", I.capture_tip);
     setText("#uploadZone strong", I.upload_title);
     setText("#uploadZone span", I.upload_hint);
     setText("#analyzeButton", I.analyze);
     setText("#consentCheck + label", I.consent);
+    setText("#runningForm .d-flex.justify-content-between span", I.credit_note);
+    setText("#runningForm .d-flex.justify-content-between strong", I.credits);
+    const helper = document.querySelectorAll(".col-lg-4 .pf-card")[0];
+    if (helper) {
+      setText(".col-lg-4 .pf-card .pf-eyebrow", I.how_to);
+      const helperTitles = helper.querySelectorAll(".run-step strong");
+      const helperCopies = helper.querySelectorAll(".run-step .small");
+      [I.step1_title, I.step2_title, I.step3_title].forEach((value, index) => { if (helperTitles[index]) helperTitles[index].textContent = value; });
+      [I.step1_copy, I.step2_copy, I.step3_copy].forEach((value, index) => { if (helperCopies[index]) helperCopies[index].textContent = value; });
+    }
+    const coachCard = document.querySelectorAll(".col-lg-4 .pf-card")[1];
+    if (coachCard) { setText(".col-lg-4 .pf-card strong", I.coach); setText(".col-lg-4 .pf-card .small.text-secondary", I.coach_subtitle); }
     const paceLabel = document.querySelector("label[for='paceSelect']"); if (paceLabel && I.pace_label) paceLabel.textContent = I.pace_label;
     const viewLabel = document.querySelector("label[for='viewSelect']"); if (viewLabel && I.view_label) viewLabel.textContent = I.view_label;
     const sideOption = document.querySelector("#viewSelect option[value='side']"); if (sideOption && I.side) sideOption.textContent = I.side;
