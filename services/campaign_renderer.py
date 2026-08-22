@@ -152,15 +152,14 @@ def _place_brand_logo(image: Image.Image, logo_path: str | Path | None, *,
 
     shadow = Image.new("RGBA", (plate_size[0] + 18, plate_size[1] + 18), (0, 0, 0, 0))
     ImageDraw.Draw(shadow).rounded_rectangle(
-        (9, 9, plate_size[0] + 9, plate_size[1] + 9), radius=18, fill=(0, 0, 0, 115)
+        (9, 9, plate_size[0] + 9, plate_size[1] + 9), radius=18, fill=(0, 0, 0, 58)
     )
     shadow = shadow.filter(ImageFilter.GaussianBlur(8))
     image.alpha_composite(shadow, (x - 9, y - 5))
+    # Do not add a white card around the uploaded mark. The source logo's own
+    # colors and transparent silhouette are the brand asset; a forced plate
+    # makes every business look like it has a sticker border.
     plate = Image.new("RGBA", plate_size, (0, 0, 0, 0))
-    ImageDraw.Draw(plate).rounded_rectangle(
-        (0, 0, plate_size[0] - 1, plate_size[1] - 1), radius=16,
-        fill=(255, 255, 255, 238), outline=(255, 255, 255, 180), width=2,
-    )
     plate.alpha_composite(logo, (pad_x, pad_y))
     image.alpha_composite(plate, (x, y))
     return True

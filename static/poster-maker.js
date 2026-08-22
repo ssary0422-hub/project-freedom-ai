@@ -116,8 +116,10 @@
         const variance=Math.abs(mean/count-105); const score=variance+edge/Math.max(1,count)*5+(x<W/2?3:0); if(score<bestScore){bestScore=score;best=[x,y];}
       }
     }
-    rounded(ctx, best[0], best[1], w + 28, h + 22, 14, "rgba(255,255,255,.94)");
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,.28)"; ctx.shadowBlur = 10; ctx.shadowOffsetY = 4;
     ctx.drawImage(image, best[0] + 14, best[1] + 11, w, h);
+    ctx.restore();
   }
 
   function drawQualitySeal(ctx, accent) {
