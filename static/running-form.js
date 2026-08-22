@@ -86,7 +86,7 @@
     const mascot = await loadCoachMascot();
     if (mascot) {
       ctx.save();
-      ctx.drawImage(mascot, 884, 38, 122, 150); ctx.restore();
+      ctx.drawImage(mascot, 830, 18, 176, 218); ctx.restore();
     }
     ctx.fillStyle = "#61e6d3"; ctx.font = "800 30px Arial"; ctx.fillText("SUNGEUM AI RUNNING COACH", 76, 95);
     ctx.fillStyle = "#fff"; ctx.font = '900 70px "Malgun Gothic", sans-serif'; ctx.fillText("순금이 코치의 러닝폼 리포트", 76, 205);
