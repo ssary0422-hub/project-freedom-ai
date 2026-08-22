@@ -86,10 +86,6 @@
     const mascot = await loadCoachMascot();
     if (mascot) {
       ctx.save();
-      ctx.fillStyle = "rgba(255,255,255,.96)"; ctx.beginPath(); ctx.roundRect(650, 76, 282, 92, 18); ctx.fill();
-      ctx.fillStyle = "#12344c"; ctx.font = '800 22px "Malgun Gothic", sans-serif'; ctx.fillText("\uc21c\uae08\uc774 \uc0c1\ub2f4", 674, 111);
-      ctx.fillStyle = "#486377"; ctx.font = '600 17px "Malgun Gothic", sans-serif'; ctx.fillText("\uc774\ubc88 \ub7ec\ub2dd\uc5d0\uc11c \ud558\ub098\ub9cc \ubc14\uafd4\ubd10", 674, 140);
-      ctx.beginPath(); ctx.moveTo(786, 168); ctx.lineTo(806, 168); ctx.lineTo(795, 187); ctx.closePath(); ctx.fill();
       ctx.drawImage(mascot, 884, 38, 122, 150); ctx.restore();
     }
     ctx.fillStyle = "#61e6d3"; ctx.font = "800 30px Arial"; ctx.fillText("SUNGEUM AI RUNNING COACH", 76, 95);
