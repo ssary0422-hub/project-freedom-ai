@@ -225,7 +225,7 @@ def register():
 def login():
     if session.get("user_id"):
         return redirect(
-            url_for("dashboard")
+            url_for("landing")
         )
 
     error = ""
