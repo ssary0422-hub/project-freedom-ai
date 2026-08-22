@@ -111,6 +111,11 @@ def generate_image_bytes(prompt: str) -> bytes:
         raise RuntimeError("OPENAI_API_KEY environment variable is required.")
 
     model = os.getenv("OPENAI_IMAGE_MODEL", DEFAULT_OPENAI_IMAGE_MODEL).strip()
+    # Older deployments may still have the invalid ``gpt-image-2`` value in
+    # their environment. Normalize it in code so a stale setting cannot break
+    # every paid image request after deployment.
+    if model == "gpt-image-2":
+        model = DEFAULT_OPENAI_IMAGE_MODEL
     quality = os.getenv(
         "OPENAI_IMAGE_QUALITY", DEFAULT_OPENAI_IMAGE_QUALITY
     ).strip().lower()
