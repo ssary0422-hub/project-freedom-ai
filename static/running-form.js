@@ -55,7 +55,9 @@
       [I.step1_copy, I.step2_copy, I.step3_copy].forEach((value, index) => { if (helperCopies[index]) helperCopies[index].textContent = value; });
     }
     const coachCard = document.querySelectorAll(".col-lg-4 .pf-card")[1];
-    if (coachCard) { setText(".col-lg-4 .pf-card strong", I.coach); setText(".col-lg-4 .pf-card .small.text-secondary", I.coach_subtitle); }
+    if (coachCard) { setText(".col-lg-4 .pf-card strong", I.coach); setText(".col-lg-4 .pf-card .small.text-secondary", I.coach_subtitle); setText(".col-lg-4 .pf-card p.small", I.coach_quote); }
+    const metricLabels = [I.metric_score, I.metric_runner, I.metric_strike, I.metric_knee, I.metric_trunk, I.metric_detection];
+    document.querySelectorAll("#statusPanel .run-check").forEach((check, index) => { const labels = check.querySelectorAll("small"); if (metricLabels[index] && labels[0]) labels[0].textContent = metricLabels[index]; if (index === 2 && labels[1]) labels[1].textContent = `${I.metric_confidence} ${String(labels[1].textContent).split(" ").pop()}`; });
     const paceLabel = document.querySelector("label[for='paceSelect']"); if (paceLabel && I.pace_label) paceLabel.textContent = I.pace_label;
     const viewLabel = document.querySelector("label[for='viewSelect']"); if (viewLabel && I.view_label) viewLabel.textContent = I.view_label;
     [["easy", I.pace_easy], ["marathon", I.pace_marathon], ["10k", I.pace_10k], ["fast", I.pace_fast]].forEach(([value, label]) => { const option = document.querySelector(`#paceSelect option[value='${value}']`); if (option && label) option.textContent = label; });
@@ -81,6 +83,16 @@
       const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
       nodes.forEach(node => replacements.forEach(([from, to]) => { if (to && node.nodeValue.includes(from)) node.nodeValue = node.nodeValue.replace(from, to); }));
     }
+  }
+  const RESULT_TEXT = {
+    "측면 자세가 선명해 관절 움직임을 안정적으로 추적했어요.": "strength_clear", "상체 기울기가 자연스러운 추진 범위에 있어요.": "strength_trunk", "무릎 굴곡이 충격 흡수와 추진을 함께 만들 수 있는 범위예요.": "strength_knee", "발바닥 중앙에 가까운 착지 패턴이 감지됐어요.": "strength_midfoot",
+    "지금 상체가 조금 앞으로 숙여져 있어. 허리만 굽히지 말고 발목부터 몸 전체를 살짝 기울여서 달려봐. 그러면 자세가 더 편안하고 안정적으로 좋아질 거야.": "improve_trunk_forward", "지금 상체가 조금 곧게 서 있어. 발목부터 몸 전체를 앞쪽으로 살짝 기울여서 달려봐. 그러면 앞으로 나가는 힘을 더 편하게 받을 수 있을 거야.": "improve_trunk_upright", "보폭을 지금보다 조금만 줄여봐. 발이 몸 바로 아래에 닿는 느낌으로 달리면 충격을 줄이고 리듬도 더 편해질 거야.": "improve_stride", "뒤꿈치가 몸보다 너무 앞에서 닿지 않는지 한번 확인해봐. 케이던스를 3~5%만 높이면 착지가 몸 아래로 들어오는 데 도움이 될 거야.": "improve_rear", "앞꿈치로 잘 달리고 있어. 다만 종아리에 힘이 몰리지 않게 뒤꿈치가 지면으로 자연스럽게 내려오도록 해봐. 그러면 오래 달릴 때 더 편해질 거야.": "improve_fore"
+  };
+  function localizeResult(result) {
+    const strikeKey = result.strikeType === "포어풋형" ? "strike_forefoot" : result.strikeType === "리어풋형" ? "strike_rearfoot" : "strike_midfoot";
+    const runnerParts = String(result.runnerType || "").split(" · ");
+    const runnerKey = runnerParts[1] === "전방 추진형" ? "runner_forward" : runnerParts[1] === "안정 중심형" ? "runner_stable" : "runner_balanced";
+    return { ...result, strikeType: I[strikeKey] || result.strikeType, runnerType: `${I[strikeKey] || runnerParts[0]} · ${I[runnerKey] || runnerParts[1] || ""}`.trim(), strengths: (result.strengths || []).map(item => I[RESULT_TEXT[item]] || item), improvements: (result.improvements || []).map(item => I[RESULT_TEXT[item]] || item) };
   }
   applyLocalizedRunningUi();
   let localizing = false;
@@ -205,10 +217,11 @@
       showCoachProgress("AI 코치가 관절 위치를 찾을 준비를 하고 있어요.", 20);
       const { analyzePose } = await import("/static/running-pose-analyzer.js");
       canvas.classList.remove("d-none");
-      const result = await analyzePose(preview, canvas, progress => {
+      const rawResult = await analyzePose(preview, canvas, progress => {
         const message = progressCopy(progress);
         showCoachProgress(message, progress);
       });
+      const result = localizeResult(rawResult);
       const strengths = result.strengths.map(item => `<li>${escapeHtml(item)}</li>`).join("");
       const improvements = result.improvements.map(item => `<li>${escapeHtml(item)}</li>`).join("");
       status.className = "mt-4";
