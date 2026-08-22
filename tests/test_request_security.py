@@ -27,14 +27,14 @@ class RequestSecurityTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 403)
 
-    def test_authenticated_login_redirects_to_dashboard(self):
+    def test_authenticated_login_redirects_to_main_screen(self):
         with self.client.session_transaction() as session:
             session["user_id"] = 1
 
         response = self.client.get("/login")
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.headers["Location"], "/dashboard")
+        self.assertEqual(response.headers["Location"], "/")
 
 
 if __name__ == "__main__":

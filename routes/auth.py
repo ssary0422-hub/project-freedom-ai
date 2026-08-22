@@ -124,7 +124,7 @@ def _trial_decision():
 def register():
     if session.get("user_id"):
         return redirect(
-            url_for("dashboard")
+            url_for("landing")
         )
 
     error = ""
@@ -275,7 +275,7 @@ def login():
             session["plan_percent"] = plan_status["percent"]
 
             return redirect(
-                url_for("dashboard")
+                url_for("landing")
             )
 
     return render_template(
