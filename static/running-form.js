@@ -1,4 +1,7 @@
 (() => {
+  const I = Object.assign({
+    title: "Sungeum AI Running Coach", working: "Sungeum is analyzing your run", done_stamp: "Sungeum checked it", landing_frame: "AI foot-strike frame", foot_zoom: "Foot-strike close-up", coach: "Sungeum's coaching note", next_goal: "One thing to change next run", save_image: "Save SNS result image", save_done: "Your running result was saved", generic_error: "Something went wrong while analyzing the video. Please try again.", mediapipe_error: "AI pose tracking is getting ready again. Press analyze once more in a moment.", range_knee: "Recommended range 105–125°", range_trunk: "Recommended range 6–14°", steps: ["Check video", "Find joints", "Analyze strike", "Prepare coaching"]
+  }, window.RUNNING_I18N || {});
   const form = document.getElementById("runningForm");
   if (!form) return;
   const input = document.getElementById("videoInput");
@@ -22,10 +25,54 @@
   };
   const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"})[char]);
 
-  const progressStages = ["영상 확인", "관절 찾기", "착지 분석", "코칭 정리"];
+  // Presentation-only localization. Pose extraction, scoring and credit flow
+  // remain unchanged so the existing running feature keeps the same behavior.
+  function applyLocalizedRunningUi() {
+    const setText = (selector, value) => { const node = document.querySelector(selector); if (node && value && node.textContent !== value) node.textContent = value; };
+    setText(".run-kicker", I.title);
+    setText(".run-hero h1", I.hero_title);
+    setText(".run-hero-copy > p", I.hero_desc);
+    setText("#uploadZone strong", I.upload_title);
+    setText("#uploadZone span", I.upload_hint);
+    setText("#analyzeButton", I.analyze);
+    setText("#consentCheck + label", I.consent);
+    const paceLabel = document.querySelector("label[for='paceSelect']"); if (paceLabel && I.pace_label) paceLabel.textContent = I.pace_label;
+    const viewLabel = document.querySelector("label[for='viewSelect']"); if (viewLabel && I.view_label) viewLabel.textContent = I.view_label;
+    const sideOption = document.querySelector("#viewSelect option[value='side']"); if (sideOption && I.side) sideOption.textContent = I.side;
+    document.querySelectorAll(".run-progress-steps span").forEach((node, index) => { if (I.steps?.[index]) node.textContent = I.steps[index]; });
+    setText(".run-progress-head strong", I.working);
+    setText("#runShareArea h3", I.share_title);
+    const resultSections = document.querySelectorAll("#statusPanel .run-result-section strong");
+    if (resultSections[0]) resultSections[0].textContent = I.strengths;
+    if (resultSections[1]) resultSections[1].textContent = I.improvement;
+    document.querySelectorAll("#statusPanel button").forEach(button => {
+      if (/SNS 결과 이미지 저장|Save SNS result image|SNS結果画像|บันทึกภาพผลลัพธ์|保存 SNS|Guardar imagen/.test(button.textContent)) button.textContent = I.save_image;
+    });
+    document.querySelectorAll("#statusPanel .small").forEach(node => {
+      if (/생성 기록에 저장하는 중|Saving to history|履歴に保存中|กำลังบันทึกประวัติ|正在保存到记录|Guardando en el historial/.test(node.textContent)) node.textContent = I.saving;
+    });
+    if (status) {
+      const replacements = [["순금이가 찾은 잘한 점", I.strengths], ["다음 러닝에서 바꿀 한 가지", I.improvement], ["순금이 코치의 SNS 공유 결과지", I.share_title], ["AI 영상 기반 참고 분석이며 의료 진단이 아닙니다. 촬영 각도·속도·조명에 따라 판정이 달라질 수 있어요.", I.disclaimer]];
+      const walker = document.createTreeWalker(status, NodeFilter.SHOW_TEXT);
+      const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach(node => replacements.forEach(([from, to]) => { if (to && node.nodeValue.includes(from)) node.nodeValue = node.nodeValue.replace(from, to); }));
+    }
+  }
+  applyLocalizedRunningUi();
+  let localizing = false;
+  const localizedUiObserver = new MutationObserver(() => {
+    if (localizing) return;
+    localizing = true;
+    requestAnimationFrame(() => { applyLocalizedRunningUi(); localizing = false; });
+  });
+  localizedUiObserver.observe(status, { childList: true, subtree: true });
+
+  const progressStages = I.steps || ["영상 확인", "관절 찾기", "착지 분석", "코칭 정리"];
+  const progressCopy = progress => progress < 45 ? (I.finding || I.working) : progress < 80 ? (I.comparing || I.working) : (I.summarizing || I.working);
   function showCoachProgress(message, percent = 5) {
     const activeIndex = Math.min(3, Math.floor(Math.max(0, percent - 1) / 25));
     status.className = "run-progress-card mt-4";
+    applyLocalizedRunningUi();
     status.innerHTML = `<div class="run-progress-head"><img class="sungeum-alive is-working" src="/static/brand/sungeum-3d-official.png" alt=""><div><strong>순금이 코치가 분석하고 있어요</strong><div class="small text-secondary mt-1">${escapeHtml(message)}</div></div></div><div class="run-progress-track"><div class="run-progress-bar" style="width:${Math.max(5, percent)}%"></div></div><div class="run-progress-steps">${progressStages.map((stage,index)=>`<span class="${index <= activeIndex ? "is-active" : ""}">${stage}</span>`).join("")}</div>`;
   }
 
@@ -135,7 +182,7 @@
       const { analyzePose } = await import("/static/running-pose-analyzer.js");
       canvas.classList.remove("d-none");
       const result = await analyzePose(preview, canvas, progress => {
-        const message = progress < 45 ? "머리부터 발끝까지 관절 위치를 찾고 있어요." : progress < 80 ? "착지 순간과 자세 각도를 비교하고 있어요." : "잘한 점과 다음 러닝 미션을 정리하고 있어요.";
+        const message = progressCopy(progress);
         showCoachProgress(message, progress);
       });
       const strengths = result.strengths.map(item => `<li>${escapeHtml(item)}</li>`).join("");

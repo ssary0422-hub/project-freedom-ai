@@ -24,6 +24,15 @@ class RunningFormTests(unittest.TestCase):
         self.assertIn(b'id="poseCanvas"', response.data)
         self.assertIn("분석·코칭·결과지 검수".encode(), response.data)
 
+    def test_running_page_injects_selected_language_without_changing_analysis_contract(self):
+        with self.client.session_transaction() as session:
+            session["language"] = "en"
+        response = self.client.get("/running-form")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"window.RUNNING_I18N", response.data)
+        self.assertIn(b"Choose a running video", response.data)
+        self.assertIn(b"/running-form/history", self.client.get("/static/running-form.js").data)
+
     def test_pose_analyzer_uses_real_mediapipe_video_landmarks(self):
         response = self.client.get("/static/running-pose-analyzer.js")
         self.assertEqual(response.status_code, 200)

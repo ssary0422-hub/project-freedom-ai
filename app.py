@@ -15,7 +15,7 @@ from routes.ai_office import ai_office_bp
 from routes.running_form import running_form_bp
 from routes.social_publish import social_publish_bp
 
-from i18n.translations import SUPPORTED_LANGUAGES, translate
+from i18n.translations import SUPPORTED_LANGUAGES, running_i18n, translate
 from routes.admin import admin_bp
 from routes.credits import credits_bp
 from database.users import (
@@ -136,6 +136,7 @@ def inject_i18n():
         "current_language": language,
         "supported_languages": SUPPORTED_LANGUAGES,
         "t": lambda key: translate(key, language),
+        "running_i18n": running_i18n(language),
     }
 
 
