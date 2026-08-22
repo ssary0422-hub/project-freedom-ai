@@ -101,6 +101,11 @@
   setTimeout(applyLocalizedRunningUi, 250);
   const localizationTimer = setInterval(applyLocalizedRunningUi, 500);
   setTimeout(() => clearInterval(localizationTimer), 5000);
+  // The shared assistant widget periodically updates its status (for example
+  // when it enters a listening state). Keep the running page's selected
+  // language authoritative so that late widget updates cannot reintroduce
+  // Korean text into an otherwise translated page.
+  setInterval(applyLocalizedRunningUi, 1000);
   let localizing = false;
   const localizedUiObserver = new MutationObserver(() => {
     if (localizing) return;
