@@ -1792,7 +1792,7 @@ _RUNNING_STATIC_I18N = {
         "step1_title": "카메라를 고정해요", "step1_copy": "흔들림 없이 정확한 측면으로 촬영",
         "step2_title": "전신과 발을 보여줘요", "step2_copy": "머리부터 발끝과 지면이 모두 보이게",
         "step3_title": "5~10초면 충분해요", "step3_copy": "밝은 장소에서 60fps 이상 권장",
-        "coach_subtitle": "분석·코칭·결과지 검수"
+        "coach_subtitle": "분석·코칭·결과지 검수", "pace_easy": "편안한 조깅", "pace_marathon": "마라톤 페이스", "pace_10k": "10km 페이스", "pace_fast": "빠른 질주", "rear_view": "후면 · 2차 지원", "terms": "이용약관", "privacy": "개인정보처리방침", "refund": "환불정책", "contact": "문의"
     },
     "en": {
         "flow_upload": "Upload running video", "flow_analyze": "Sungeum AI analysis", "flow_share": "Share coaching result",
@@ -1803,7 +1803,7 @@ _RUNNING_STATIC_I18N = {
         "step1_title": "Keep the camera steady", "step1_copy": "Use a clear side view without shaking",
         "step2_title": "Show your full body and feet", "step2_copy": "Keep your head, toes and ground in frame",
         "step3_title": "5–10 seconds is enough", "step3_copy": "Bright light and 60fps or higher are recommended",
-        "coach_subtitle": "Analysis · coaching · report review"
+        "coach_subtitle": "Analysis · coaching · report review", "pace_easy": "Easy jog", "pace_marathon": "Marathon pace", "pace_10k": "10K pace", "pace_fast": "Fast run", "rear_view": "Rear view · coming soon", "terms": "Terms", "privacy": "Privacy", "refund": "Refund policy", "contact": "Contact"
     }
 }
 for _language in _RUNNING_I18N:
