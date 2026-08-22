@@ -99,6 +99,8 @@
   applyLocalizedRunningUi();
   setTimeout(applyLocalizedRunningUi, 0);
   setTimeout(applyLocalizedRunningUi, 250);
+  const localizationTimer = setInterval(applyLocalizedRunningUi, 500);
+  setTimeout(() => clearInterval(localizationTimer), 5000);
   let localizing = false;
   const localizedUiObserver = new MutationObserver(() => {
     if (localizing) return;
