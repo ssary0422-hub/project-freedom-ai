@@ -70,10 +70,28 @@
     ctx.fillStyle = "rgba(7,17,31,.84)"; ctx.fillRect(x + 10, y + size - 39, size - 20, 30); ctx.fillStyle = "#61e6d3"; ctx.font = '700 18px "Malgun Gothic", sans-serif'; ctx.fillText("착지 확대", x + 24, y + size - 17);
   }
 
-  function makeShareCard(result, analysisFrame) {
+  function loadCoachMascot() {
+    return new Promise(resolve => {
+      const mascot = new Image();
+      mascot.onload = () => resolve(mascot);
+      mascot.onerror = () => resolve(null);
+      mascot.src = "/static/brand/sungeum-3d-official.png";
+    });
+  }
+
+  async function makeShareCard(result, analysisFrame) {
     const card = document.createElement("canvas"); card.width = 1080; card.height = 1350; card.className = "run-share-card";
     const ctx = card.getContext("2d"), gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
     gradient.addColorStop(0, "#07111f"); gradient.addColorStop(.55, "#12344c"); gradient.addColorStop(1, "#0d766f"); ctx.fillStyle = gradient; ctx.fillRect(0, 0, 1080, 1350);
+    const mascot = await loadCoachMascot();
+    if (mascot) {
+      ctx.save();
+      ctx.fillStyle = "rgba(255,255,255,.96)"; ctx.beginPath(); ctx.roundRect(650, 76, 282, 92, 18); ctx.fill();
+      ctx.fillStyle = "#12344c"; ctx.font = '800 22px "Malgun Gothic", sans-serif'; ctx.fillText("\uc21c\uae08\uc774 \uc0c1\ub2f4", 674, 111);
+      ctx.fillStyle = "#486377"; ctx.font = '600 17px "Malgun Gothic", sans-serif'; ctx.fillText("\uc774\ubc88 \ub7ec\ub2dd\uc5d0\uc11c \ud558\ub098\ub9cc \ubc14\uafd4\ubd10", 674, 140);
+      ctx.beginPath(); ctx.moveTo(786, 168); ctx.lineTo(806, 168); ctx.lineTo(795, 187); ctx.closePath(); ctx.fill();
+      ctx.drawImage(mascot, 884, 38, 122, 150); ctx.restore();
+    }
     ctx.fillStyle = "#61e6d3"; ctx.font = "800 30px Arial"; ctx.fillText("SUNGEUM AI RUNNING COACH", 76, 95);
     ctx.fillStyle = "#fff"; ctx.font = '900 70px "Malgun Gothic", sans-serif'; ctx.fillText("순금이 코치의 러닝폼 리포트", 76, 205);
     ctx.fillStyle = "#61e6d3"; ctx.font = "900 170px Arial"; ctx.fillText(String(result.score), 70, 440);
@@ -137,7 +155,7 @@
           <div class="col-6"><div class="run-check"><small>평균 상체 기울기</small><br><strong>${result.averageTrunkLean}°</strong></div></div>
           <div class="col-6"><div class="run-check"><small>관절 추출 성공률</small><br><strong>${result.detectionRate}%</strong></div></div>
         </div><div class="run-result-section mt-3"><strong>👏 순금이가 찾은 잘한 점</strong><ul class="mt-2 mb-0">${strengths}</ul></div><div class="run-result-section mt-3"><strong>🎯 다음 러닝에서 바꿀 한 가지</strong><ul class="mt-2 mb-0">${improvements}</ul></div><div id="runShareArea" class="mt-3"><h3 class="h5 fw-bold">순금이 코치의 SNS 공유 결과지</h3></div><div class="small text-secondary mt-3">AI 영상 기반 참고 분석이며 의료 진단이 아닙니다. 촬영 각도·속도·조명에 따라 판정이 달라질 수 있어요.</div>`;
-      const card = makeShareCard(result, canvas), shareArea = document.getElementById("runShareArea"); shareArea.appendChild(card);
+      const card = await makeShareCard(result, canvas), shareArea = document.getElementById("runShareArea"); shareArea.appendChild(card);
       const download = document.createElement("button"); download.type="button"; download.className="btn btn-success w-100 fw-bold"; download.textContent="SNS 결과 이미지 저장"; download.onclick=()=>{const link=document.createElement("a");link.download="sungeum-running-form-result.png";link.href=card.toDataURL("image/png");link.click()};shareArea.appendChild(download);
       const saveState=document.createElement("div");saveState.className="small text-secondary mt-2";saveState.textContent="생성 기록에 저장하는 중…";shareArea.appendChild(saveState);
       try{const saved=await saveRunningHistory(result,card);saveState.innerHTML=`✓ 생성 기록에 저장했어요 · <a href="/history">기록 보기</a>`;saveState.dataset.historyId=saved.history_id}catch(saveError){saveState.textContent=`결과는 완성됐지만 생성 기록 저장에 실패했어요: ${friendlyError(saveError)}`}
