@@ -29,7 +29,7 @@ Create a social media post that satisfies all requirements:
 3. Naturally include the company / brand name exactly as entered.
 4. Use short paragraphs and generous line breaks for mobile reading.
 5. Explain one clear customer benefit before the promotional message.
-6. Include one natural call to action. If no link or contact was supplied, invite the reader to contact the business without inventing a channel. Never output placeholders.
+6. Include one natural call to action. If no link or contact was supplied, invite the reader to contact the business without inventing a channel. Prefer conversational Korean such as "예약 문의는 매장으로 부탁드립니다." Never use instruction-like wording such as "예약은 매장 문의로 안내해주세요" and never output placeholders.
 7. End with 6 to 10 highly relevant hashtags instead of generic hashtag stuffing.
 8. Adapt length, rhythm and emoji use to the selected platform; use no more than three emojis total.
 9. Return only the publish-ready post, with no analysis or prefacing explanation.
@@ -38,6 +38,11 @@ OUTPUT LANGUAGE RULE:
 {language_instruction}
 """
 
-    return generate_with_quality_check(
+    result = generate_with_quality_check(
         generate_text, prompt, company=company, min_chars=100
     )
+    # Keep common model phrasing from leaking the user's production instruction
+    # into publish-ready copy.
+    return (result
+            .replace("예약은 매장 문의로 안내해주세요", "예약 문의는 매장으로 부탁드립니다.")
+            .replace("예약은 매장 문의로 안내해 주세요", "예약 문의는 매장으로 부탁드립니다."))
