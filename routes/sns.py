@@ -598,6 +598,15 @@ def generate_sns():
 
 
 def _sns_page():
+    # Keep the credit pill and the server-side generation check on the same
+    # source of truth. A long-lived login session can otherwise show stale
+    # credits after usage or a plan change.
+    current_status = get_plan_status(session["user_id"])
+    session["plan"] = current_status["plan"]
+    session["plan_used"] = current_status["used"]
+    session["plan_limit"] = current_status["limit"]
+    session["plan_remaining"] = current_status["remaining"]
+    session["plan_percent"] = current_status["percent"]
     result = ""
     image_url = ""
     error = ""
