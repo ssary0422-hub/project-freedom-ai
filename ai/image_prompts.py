@@ -17,7 +17,7 @@ def _subject_for(business: str, context: str) -> str:
         return "a clean modern car in a professional dealership showroom, realistic commercial photography"
     if any(key in source for key in ("음식", "식당", "restaurant", "food")):
         return "an appetizing hero shot of the signature dish in a welcoming restaurant"
-    if any(key in source for key in ("massage", "spa", "\\ub9c8\\uc0ac\\uc9c0")):
+    if any(key in source for key in ("massage", "spa", "\uB9C8\uC0AC\uC9C0")):
         return (
             "a premium professional Thai massage studio interior with a neatly prepared massage table, "
             "folded towels, clean oil and cream bottles, warm ambient lighting and elegant wood details; "
