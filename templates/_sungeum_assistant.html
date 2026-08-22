@@ -1,4 +1,5 @@
 {% set sungeum_home = request.path == '/' %}
+<!-- 오늘 무엇을 맡길까요? -->
 <button class="sungeum-assistant-trigger" id="sungeumAssistantTrigger" type="button" aria-controls="sungeumAssistantPanel" aria-expanded="false">
   <i class="sungeum-click-callout" aria-hidden="true">안녕, 난 순금이야</i><img class="sungeum-alive" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt=""><span><strong>{% if sungeum_home %}AI 총괄실장 순금이{% else %}순금이{% endif %}</strong><small class="sungeum-live-status" data-default="{% if sungeum_home %}홍보·러닝 함께 보기{% else %}오늘 홍보 맡기기{% endif %}">{% if sungeum_home %}홍보·러닝 함께 보기{% else %}오늘 홍보 맡기기{% endif %}</small></span><b class="sungeum-online-dot"></b>
 </button>
