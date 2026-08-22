@@ -66,7 +66,7 @@
     const sideOption = document.querySelector("#viewSelect option[value='side']"); if (sideOption && I.side) sideOption.textContent = I.side;
     const rearOption = document.querySelector("#viewSelect option[value='rear']"); if (rearOption && I.rear_view) rearOption.textContent = I.rear_view;
     const footerLabels = [I.terms, I.privacy, I.refund, I.contact];
-    document.querySelectorAll("footer a").forEach((link, index) => { if (footerLabels[index]) link.textContent = footerLabels[index]; });
+    document.querySelectorAll("footer a, .pf-footer a").forEach((link, index) => { if (footerLabels[index]) link.textContent = footerLabels[index]; });
     document.querySelectorAll(".run-progress-steps span").forEach((node, index) => { if (I.steps?.[index]) node.textContent = I.steps[index]; });
     setText(".run-progress-head strong", I.working);
     setText("#runShareArea h3", I.share_title);
@@ -97,6 +97,8 @@
     return { ...result, strikeType: I[strikeKey] || result.strikeType, runnerType: `${I[strikeKey] || runnerParts[0]} · ${I[runnerKey] || runnerParts[1] || ""}`.trim(), strengths: (result.strengths || []).map(item => I[RESULT_TEXT[item]] || item), improvements: (result.improvements || []).map(item => I[RESULT_TEXT[item]] || item) };
   }
   applyLocalizedRunningUi();
+  setTimeout(applyLocalizedRunningUi, 0);
+  setTimeout(applyLocalizedRunningUi, 250);
   let localizing = false;
   const localizedUiObserver = new MutationObserver(() => {
     if (localizing) return;
