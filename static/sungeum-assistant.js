@@ -2,12 +2,15 @@
   const trigger=document.getElementById('sungeumAssistantTrigger'),panel=document.getElementById('sungeumAssistantPanel'),close=document.getElementById('sungeumAssistantClose'),backdrop=document.getElementById('sungeumAssistantBackdrop'),chat=document.getElementById('sungeumChatLine'),request=document.getElementById('sungeumRequest'),send=document.getElementById('sungeumRequestSend'),next=document.getElementById('sungeumNextStep'),summary=document.getElementById('sungeumPlanSummary'),create=document.getElementById('sungeumCreateAd'),createSns=document.getElementById('sungeumCreateSns'),createPoster=document.getElementById('sungeumCreatePoster');
   if(!trigger||!panel)return;
   const callout=trigger.querySelector('.sungeum-click-callout');
-  const helloCopy=['\uc548\ub155 \ub09c \uc21c\uae08\uc774\uc57c \ud83d\udc36','\ub098\ub97c \ud074\ub9ad\ud574\uc918 \ud83d\udc3e','\ub0b4\uac00 \ub3c4\uc640\uc904\uac8c \ud83d\udc15'];
+  const localizedCopy=[trigger.dataset.assistantClick1,trigger.dataset.assistantClick2,trigger.dataset.assistantClick3].filter(Boolean);
+  const helloCopy=localizedCopy.length ? localizedCopy : ['안녕 난 순금이야 🐶','나를 클릭해줘 🐾','내가 도와줄게 🐕'];
   let helloIndex=0;
   const rotateHello=()=>{if(callout&&!panel.classList.contains('is-open')){callout.textContent=helloCopy[helloIndex%helloCopy.length];helloIndex+=1;}};
   rotateHello();
   setInterval(rotateHello,4200);
   const liveStatus=trigger.querySelector('.sungeum-live-status');
+  const localizedStatus=location.pathname==='/' ? trigger.dataset.assistantHomeStatus : trigger.dataset.assistantStatus;
+  if(liveStatus&&localizedStatus) liveStatus.textContent=localizedStatus;
   const defaultStatus=liveStatus?.dataset.default||'';
   const mascots=()=>document.querySelectorAll('.sungeum-assistant-trigger .sungeum-alive,.sungeum-assistant-head .sungeum-alive');
   let moodTimer;
