@@ -1810,3 +1810,8 @@ for _language in _RUNNING_I18N:
     _RUNNING_I18N[_language].update(_RUNNING_STATIC_I18N.get(_language, _RUNNING_STATIC_I18N["en"]))
 _RUNNING_I18N["ko"]["coach_quote"] = "잘한 점은 확실히 칭찬하고, 다음 러닝에서 바꿀 한 가지만 쉽게 알려줄게. 판정이 어려우면 억지로 점수를 만들지 않을 거야."
 _RUNNING_I18N["en"]["coach_quote"] = "I’ll celebrate what you did well and give you one simple change for your next run. If the footage is unclear, I won’t invent a score."
+_RUNNING_I18N["ja"].update({
+    "flow_upload": "ランニング動画をアップロード", "flow_analyze": "スングムAI分析", "flow_share": "コーチング結果を共有", "coach_prompt": "スングムに動画を見せる", "upload_heading": "横から走る動画をアップロード", "upload_copy": "頭からつま先まで映る5〜10秒の動画がおすすめです。足と地面が見えると、より正確に確認できます。", "capture_tip": "固定した横向きカメラと明るい環境で分析精度が上がります。撮影角度・速度・照明により結果が変わる場合があります。", "credit_note": "分析が成功した場合のみクレジットを消費します。", "credits": "3クレジット", "how_to": "よい動画の撮り方", "step1_title": "カメラを固定する", "step1_copy": "揺れのない横向きで撮影", "step2_title": "全身と足を映す", "step2_copy": "頭からつま先、地面まで画面に入れる", "step3_title": "5〜10秒で十分", "step3_copy": "明るい場所で60fps以上がおすすめ", "coach_subtitle": "分析・コーチング・結果確認", "pace_easy": "楽なジョギング", "pace_marathon": "マラソンペース", "pace_10k": "10Kペース", "pace_fast": "速いラン", "rear_view": "後ろ向き・準備中", "terms": "利用規約", "privacy": "プライバシー", "refund": "返金ポリシー", "contact": "お問い合わせ", "coach_quote": "できたことはしっかり褒めて、次のランで変えることを一つだけ簡単に伝えます。判定が難しいときは無理に点数を作りません。", "assistant_greeting": "こんにちは、スングムだよ 🐶", "assistant_status": "今日の広報を任せて", "assistant_running_status": "広報・ランニングを一緒に見る"
+})
+_RUNNING_I18N["ko"].update({"assistant_greeting": "안녕 난 순금이야 🐶", "assistant_status": "오늘 홍보 맡기기", "assistant_running_status": "홍보·러닝 함께 보기"})
+_RUNNING_I18N["en"].update({"assistant_greeting": "Hi, I’m Sungeum 🐶", "assistant_status": "Let me handle today’s promo", "assistant_running_status": "View promo and running together"})
