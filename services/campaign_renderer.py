@@ -52,6 +52,21 @@ def _contrast_text(fill: tuple[int, int, int, int]) -> tuple[int, int, int, int]
     return (8, 22, 28, 255) if luminance > 0.58 else (255, 255, 255, 255)
 
 
+def _draw_fitted_cta(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int],
+                      text: str, max_size: int, fill: tuple[int, int, int, int]) -> None:
+    """Center a CTA and shrink it until it stays inside its button."""
+    left, top, right, bottom = box
+    font = _font(max_size, True, "ko")
+    while draw.textlength(text or "", font=font) > (right - left - 44) and font.size > 16:
+        font = _font(font.size - 2, True, "ko")
+    width = draw.textlength(text or "", font=font)
+    bbox = draw.textbbox((0, 0), text or "", font=font)
+    height = bbox[3] - bbox[1]
+    x = left + ((right - left) - width) / 2
+    y = top + ((bottom - top) - height) / 2 - bbox[1]
+    _draw_text(draw, (x, y), text or "", font, fill, "ko", True)
+
+
 def _background(path: str | Path) -> Image.Image:
     with Image.open(path) as source:
         return _safe_cover(source.convert("RGBA"), (WIDTH, HEIGHT), focal_y=.42)
@@ -273,7 +288,7 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
         _text_block(draw, direction=direction, x=58, y=245, width=326, title_size=58, title_lines=4)
         _proof_chips(draw, proof_items, x=58, y=976, max_width=326)
         _rounded(draw, (58, 1082, 382, 1176), 16, accent)
-        _draw_text(draw, (86, 1110), direction.cta, _font(27, True, "ko"), _contrast_text(accent), "ko", True)
+        _draw_fitted_cta(draw, (58, 1082, 382, 1176), direction.cta, 27, _contrast_text(accent))
         _footer(draw, company=company, direction=direction)
 
     elif direction.layout_family == "editorial_type":
@@ -286,7 +301,7 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
         image.alpha_composite(photo, (390, 600))
         draw = ImageDraw.Draw(image, "RGBA")
         _rounded(draw, (58, 1120, 520, 1210), 8, accent)
-        _draw_text(draw, (90, 1146), direction.cta, _font(29, True, "ko"), _contrast_text(accent), "ko", True)
+        _draw_fitted_cta(draw, (58, 1120, 520, 1210), direction.cta, 29, _contrast_text(accent))
         _footer(draw, company=direction.concept_name, direction=direction, light=False)
 
     elif direction.layout_family == "photo_collage":
@@ -307,7 +322,7 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
         _draw_text(draw, (58, 55), company, _font(25, True, "ko"), accent, "ko", True)
         _text_block(draw, direction=direction, x=58, y=145, width=900, title_size=65, title_lines=2)
         _rounded(draw, (650, 1160, 1020, 1240), 40, accent)
-        _draw_text(draw, (684, 1183), direction.cta, _font(26, True, "ko"), _contrast_text(accent), "ko", True)
+        _draw_fitted_cta(draw, (650, 1160, 1020, 1240), direction.cta, 26, _contrast_text(accent))
         _footer(draw, company=direction.concept_name, direction=direction)
 
     elif direction.layout_family == "problem_solution":
@@ -325,7 +340,7 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
         _rounded(draw, (50, 760, 1030, 1110), 16, (4, 13, 24, 224))
         _text_block(draw, direction=direction, x=86, y=805, width=900, title_size=68, title_lines=2)
         _rounded(draw, (645, 1150, 1022, 1235), 42, accent)
-        _draw_text(draw, (678, 1175), direction.cta, _font(27, True, "ko"), _contrast_text(accent), "ko", True)
+        _draw_fitted_cta(draw, (645, 1150, 1022, 1235), direction.cta, 27, _contrast_text(accent))
         _footer(draw, company=direction.concept_name, direction=direction)
 
     elif direction.layout_family == "bold_offer":
@@ -338,7 +353,7 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
         _text_block(draw, direction=direction, x=88, y=520, width=900, title_size=82, title_lines=3)
         _proof_chips(draw, proof_items, x=88, y=930, max_width=900)
         _rounded(draw, (616, 1130, 1022, 1224), 47, accent)
-        _draw_text(draw, (656, 1158), direction.cta, _font(29, True, "ko"), _contrast_text(accent), "ko", True)
+        _draw_fitted_cta(draw, (616, 1130, 1022, 1224), direction.cta, 29, _contrast_text(accent))
         _footer(draw, company=company, direction=direction)
 
     else:
@@ -354,7 +369,7 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
         _text_block(draw, direction=direction, x=62, y=210, width=610, title_size=72)
         _proof_previews(draw, proof_items, x=62, y=930, max_width=610)
         _rounded(draw, (58, 1110, 660, 1204), 47, accent)
-        _draw_text(draw, (94, 1138), direction.cta, _font(30, True, "ko"), _contrast_text(accent), "ko", True)
+        _draw_fitted_cta(draw, (58, 1110, 660, 1204), direction.cta, 30, _contrast_text(accent))
         _footer(draw, company=company, direction=direction)
 
     draw = ImageDraw.Draw(image, "RGBA")
