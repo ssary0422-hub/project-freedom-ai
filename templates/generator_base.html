@@ -171,6 +171,27 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
 
 {% block scripts %}
 <script>
+// The shared navbar predates the generator i18n keys and still contains a few
+// Korean literals. Normalize its visible labels when a generator page loads.
+document.addEventListener("DOMContentLoaded", function () {
+    const nav = document.querySelector(".pf-navbar");
+    if (!nav) return;
+    const labels = {
+        ads: {{ t("v21.tab.ads") | tojson }},
+        sns: {{ t("v21.tab.sns") | tojson }},
+        blog: {{ t("v21.tab.blog") | tojson }},
+        poster: {{ t("v21.tab.poster") | tojson }},
+        running: {{ running_i18n.get("title", "Sungeum AI Running Coach") | tojson }}
+    };
+    const promoButton = nav.querySelector(".dropdown-toggle");
+    if (promoButton) promoButton.lastChild.textContent = " " + labels.ads;
+    const links = nav.querySelectorAll(".dropdown-menu .dropdown-item");
+    const menuLabels = [labels.ads, labels.sns, labels.blog, labels.poster];
+    links.forEach((link, index) => { const strong = link.querySelector("strong"); if (strong && menuLabels[index]) strong.textContent = menuLabels[index]; });
+    const runningLink = Array.from(nav.querySelectorAll("a.btn")).find(link => link.href.includes("/running-form"));
+    if (runningLink) runningLink.lastChild.textContent = " " + labels.running;
+});
+
 async function copyResult() {
     const resultElement = document.getElementById("result");
 
