@@ -7,7 +7,9 @@ from openai import OpenAI
 
 
 DEFAULT_OPENAI_TEXT_MODEL = "gpt-5.4"
-DEFAULT_OPENAI_IMAGE_MODEL = "gpt-image-2"
+# GPT Image 1 is the stable Images API model.  ``gpt-image-2`` is not a
+# supported Images API model and causes every paid image request to fail.
+DEFAULT_OPENAI_IMAGE_MODEL = "gpt-image-1"
 DEFAULT_OPENAI_IMAGE_QUALITY = "medium"
 
 

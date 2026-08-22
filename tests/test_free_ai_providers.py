@@ -30,7 +30,7 @@ class AIProviderTests(unittest.TestCase):
 
         self.assertEqual(generate_image_bytes("러닝 광고 이미지"), expected)
         openai_cls.return_value.images.generate.assert_called_once_with(
-            model="gpt-image-2",
+            model="gpt-image-1",
             prompt="러닝 광고 이미지",
             size="1024x1024",
             quality="medium",
