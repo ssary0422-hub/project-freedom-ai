@@ -103,8 +103,21 @@
     if (!image) return;
     const scale = Math.min(300 / image.width, 112 / image.height, 1);
     const w = image.width * scale, h = image.height * scale;
-    rounded(ctx, W - w - 76, 54, w + 28, h + 22, 14, "rgba(255,255,255,.94)");
-    ctx.drawImage(image, W - w - 62, 65, w, h);
+    const candidates = [[W - w - 76, 54], [W - w - 76, 900], [W - w - 76, 1040], [W / 2 - w / 2, 1015]];
+    const scene = backgroundImage || subjectImage;
+    let best = candidates[0], bestScore = Number.POSITIVE_INFINITY;
+    if (scene) {
+      const sample = document.createElement("canvas"); sample.width = W; sample.height = H;
+      const sampleCtx = sample.getContext("2d", {willReadFrequently:true}); cover(sampleCtx, scene);
+      for (const [x, y] of candidates) {
+        const sx=Math.max(0,Math.round(x)), sy=Math.max(0,Math.round(y)), sw=Math.min(W-sx,Math.round(w+28)), sh=Math.min(H-sy,Math.round(h+22));
+        if(sw<4||sh<4)continue; const pixels=sampleCtx.getImageData(sx,sy,sw,sh).data; let mean=0,edge=0,count=0,prev=0;
+        for(let i=0;i<pixels.length;i+=4){const gray=.2126*pixels[i]+.7152*pixels[i+1]+.0722*pixels[i+2];mean+=gray; if(count%sw)edge+=Math.abs(gray-prev);prev=gray;count+=1;}
+        const variance=Math.abs(mean/count-105); const score=variance+edge/Math.max(1,count)*5+(x<W/2?3:0); if(score<bestScore){bestScore=score;best=[x,y];}
+      }
+    }
+    rounded(ctx, best[0], best[1], w + 28, h + 22, 14, "rgba(255,255,255,.94)");
+    ctx.drawImage(image, best[0] + 14, best[1] + 11, w, h);
   }
 
   function drawQualitySeal(ctx, accent) {

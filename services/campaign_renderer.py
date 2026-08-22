@@ -139,8 +139,12 @@ def _place_brand_logo(image: Image.Image, logo_path: str | Path | None, *,
         y = min(max(margin, y if y >= 0 else height - plate_size[1] + y), height - plate_size[1] - margin)
         crop = image.crop((x, y, x + plate_size[0], y + plate_size[1])).convert("L")
         stat = ImageStat.Stat(crop)
-        # Low variation is preferable; a slight top/right bias keeps brand placement familiar.
-        score = stat.var[0] + (y / height) * 18 + (x < width / 2) * 8
+        # Low variation and low edge energy indicate genuine negative space. Edge energy
+        # keeps a logo off faces, hands, furniture and other high-detail subjects that
+        # can look deceptively calm when averaged into a dark crop.
+        edge = crop.filter(ImageFilter.FIND_EDGES)
+        edge_mean = ImageStat.Stat(edge).mean[0]
+        score = stat.var[0] + edge_mean * 6 + (x < width / 2) * 3
         valid.append((score, x, y))
     if not valid:
         return False
@@ -353,7 +357,8 @@ def render_campaign_concept(*, background_path: str | Path, direction: ArtDirect
                    (245, 249, 252, 255), "ko", True)
     _place_brand_logo(
         image, logo_path, max_size=(310, 170), margin=42,
-        candidates=((-42, 42), (-42, 180), (-42, -150), (42, -150)),
+        candidates=((42, -360), (-42, -360), (42, -220), (-42, -220),
+                    (-42, 42), (-42, 180), (-42, -150), (42, -150)),
     )
 
     target = Path(output_path)
@@ -390,7 +395,7 @@ def render_blog_cover(*, background_path: str | Path, direction: ArtDirection,
         y += 38
     _place_brand_logo(
         image, logo_path, max_size=(280, 130), margin=34,
-        candidates=((-34, 34), (-34, -124)),
+        candidates=((34, -260), (-34, -260), (34, 34), (-34, 34), (-34, -124)),
     )
     target = Path(output_path)
     target.parent.mkdir(parents=True, exist_ok=True)
