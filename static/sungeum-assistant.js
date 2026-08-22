@@ -2,6 +2,11 @@
   const trigger=document.getElementById('sungeumAssistantTrigger'),panel=document.getElementById('sungeumAssistantPanel'),close=document.getElementById('sungeumAssistantClose'),backdrop=document.getElementById('sungeumAssistantBackdrop'),chat=document.getElementById('sungeumChatLine'),request=document.getElementById('sungeumRequest'),send=document.getElementById('sungeumRequestSend'),next=document.getElementById('sungeumNextStep'),summary=document.getElementById('sungeumPlanSummary'),create=document.getElementById('sungeumCreateAd'),createSns=document.getElementById('sungeumCreateSns'),createPoster=document.getElementById('sungeumCreatePoster');
   if(!trigger||!panel)return;
   const callout=trigger.querySelector('.sungeum-click-callout');
+  const helloCopy=['\uc548\ub155, \ub09c \uc21c\uae08\uc774\uc57c','\ub098\ub97c \ud074\ub9ad\ud574\ubd10','\ub0b4\uac00 \ub3c4\uc640\uc904\uac8c'];
+  let helloIndex=0;
+  const rotateHello=()=>{if(callout&&!panel.classList.contains('is-open')){callout.textContent=helloCopy[helloIndex%helloCopy.length];helloIndex+=1;}};
+  rotateHello();
+  setInterval(rotateHello,4200);
   const liveStatus=trigger.querySelector('.sungeum-live-status');
   const defaultCallout=callout?.textContent||'순금이에게 물어보기',defaultStatus=liveStatus?.dataset.default||'';
   const mascots=()=>document.querySelectorAll('.sungeum-assistant-trigger .sungeum-alive,.sungeum-assistant-head .sungeum-alive');
