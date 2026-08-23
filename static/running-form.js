@@ -218,14 +218,14 @@
 
   form.addEventListener("submit", async event => {
     event.preventDefault(); button.disabled = true;
-    button.textContent = "순금이 코치가 영상을 보고 있어요…";
+    button.textContent = I.working || "Sungeum is analyzing your run";
     document.dispatchEvent(new CustomEvent("sungeum:state", { detail: { state: "working" } }));
-    showCoachProgress("영상 형식과 촬영 조건을 확인하는 중이에요.", 8);
+    showCoachProgress(I.finding || I.working, 8);
     try {
       const response = await fetch("/running-form/preflight", { method: "POST", body: new FormData(form) });
       const preflight = await response.json();
       if (!response.ok || !preflight.ok) throw new Error(preflight.error || "영상을 확인하지 못했어요.");
-      showCoachProgress("AI 코치가 관절 위치를 찾을 준비를 하고 있어요.", 20);
+      showCoachProgress(I.comparing || I.working, 20);
       const { analyzePose } = await import("/static/running-pose-analyzer.js");
       canvas.classList.remove("d-none");
       const rawResult = await analyzePose(preview, canvas, progress => {
@@ -237,24 +237,24 @@
       const improvements = result.improvements.map(item => `<li>${escapeHtml(item)}</li>`).join("");
       status.className = "mt-4";
       document.dispatchEvent(new CustomEvent("sungeum:state", { detail: { state: "approved", duration: 1400 } }));
-      status.innerHTML = `<div class="alert alert-success"><strong>🐾 순금이 AI 러닝코치 분석 완료</strong><br>실제 영상 프레임을 바탕으로 코칭 결과를 정리했어요.</div>
+      status.innerHTML = `<div class="alert alert-success"><strong>${escapeHtml(I.complete || "Sungeum AI running analysis complete")}</strong><br>${escapeHtml(I.complete_desc || "Your coaching result is based on real video frames.")}</div>
         <div class="row g-2">
-          <div class="col-6"><div class="run-check" data-status="pass"><small>러닝폼 종합 점수</small><br><strong>${result.score}점</strong></div></div>
-          <div class="col-6"><div class="run-check" data-status="pass"><small>러너 유형</small><br><strong>${escapeHtml(result.runnerType)}</strong></div></div>
-          <div class="col-6"><div class="run-check"><small>착지 유형</small><br><strong>${result.strikeType}</strong><br><small>신뢰도 ${result.strikeConfidence}%</small></div></div>
-          <div class="col-6"><div class="run-check"><small>평균 무릎 각도</small><br><strong>${result.averageKneeAngle}°</strong></div></div>
-          <div class="col-6"><div class="run-check"><small>평균 상체 기울기</small><br><strong>${result.averageTrunkLean}°</strong></div></div>
-          <div class="col-6"><div class="run-check"><small>관절 추출 성공률</small><br><strong>${result.detectionRate}%</strong></div></div>
-        </div><div class="run-result-section mt-3"><strong>👏 순금이가 찾은 잘한 점</strong><ul class="mt-2 mb-0">${strengths}</ul></div><div class="run-result-section mt-3"><strong>🎯 다음 러닝에서 바꿀 한 가지</strong><ul class="mt-2 mb-0">${improvements}</ul></div><div id="runShareArea" class="mt-3"><h3 class="h5 fw-bold">순금이 코치의 SNS 공유 결과지</h3></div><div class="small text-secondary mt-3">AI 영상 기반 참고 분석이며 의료 진단이 아닙니다. 촬영 각도·속도·조명에 따라 판정이 달라질 수 있어요.</div>`;
+          <div class="col-6"><div class="run-check" data-status="pass"><small>${escapeHtml(I.metric_score || "Overall running-form score")}</small><br><strong>${result.score}</strong></div></div>
+          <div class="col-6"><div class="run-check" data-status="pass"><small>${escapeHtml(I.metric_runner || "Runner type")}</small><br><strong>${escapeHtml(result.runnerType)}</strong></div></div>
+          <div class="col-6"><div class="run-check"><small>${escapeHtml(I.metric_strike || "Foot-strike type")}</small><br><strong>${result.strikeType}</strong><br><small>${escapeHtml(I.metric_confidence || "Confidence")} ${result.strikeConfidence}%</small></div></div>
+          <div class="col-6"><div class="run-check"><small>${escapeHtml(I.metric_knee || "Average knee angle")}</small><br><strong>${result.averageKneeAngle}°</strong></div></div>
+          <div class="col-6"><div class="run-check"><small>${escapeHtml(I.metric_trunk || "Average trunk lean")}</small><br><strong>${result.averageTrunkLean}°</strong></div></div>
+          <div class="col-6"><div class="run-check"><small>${escapeHtml(I.metric_detection || "Joint detection rate")}</small><br><strong>${result.detectionRate}%</strong></div></div>
+        </div><div class="run-result-section mt-3"><strong>${escapeHtml(I.strengths || "What Sungeum found you did well")}</strong><ul class="mt-2 mb-0">${strengths}</ul></div><div class="run-result-section mt-3"><strong>${escapeHtml(I.improvement || "One thing to change next run")}</strong><ul class="mt-2 mb-0">${improvements}</ul></div><div id="runShareArea" class="mt-3"><h3 class="h5 fw-bold">${escapeHtml(I.share_title || "Sungeum's SNS share result")}</h3></div><div class="small text-secondary mt-3">${escapeHtml(I.disclaimer || "This is an AI video-based reference analysis, not a medical diagnosis.")}</div>`;
       const card = await makeShareCard(result, canvas), shareArea = document.getElementById("runShareArea"); shareArea.appendChild(card);
-      const download = document.createElement("button"); download.type="button"; download.className="btn btn-success w-100 fw-bold"; download.textContent="SNS 결과 이미지 저장"; download.onclick=()=>{const link=document.createElement("a");link.download="sungeum-running-form-result.png";link.href=card.toDataURL("image/png");link.click()};shareArea.appendChild(download);
-      const saveState=document.createElement("div");saveState.className="small text-secondary mt-2";saveState.textContent="생성 기록에 저장하는 중…";shareArea.appendChild(saveState);
-      try{const saved=await saveRunningHistory(result,card);saveState.innerHTML=`✓ 생성 기록에 저장했어요 · <a href="/history">기록 보기</a>`;saveState.dataset.historyId=saved.history_id}catch(saveError){saveState.textContent=`결과는 완성됐지만 생성 기록 저장에 실패했어요: ${friendlyError(saveError)}`}
+      const download = document.createElement("button"); download.type="button"; download.className="btn btn-success w-100 fw-bold"; download.textContent=I.save_image || "Save SNS result image"; download.onclick=()=>{const link=document.createElement("a");link.download="sungeum-running-form-result.png";link.href=card.toDataURL("image/png");link.click()};shareArea.appendChild(download);
+      const saveState=document.createElement("div");saveState.className="small text-secondary mt-2";saveState.textContent=I.saving || "Saving to history…";shareArea.appendChild(saveState);
+      try{const saved=await saveRunningHistory(result,card);saveState.innerHTML=I.saved || "✓ Saved to history · View history";saveState.dataset.historyId=saved.history_id}catch(saveError){saveState.textContent=`${I.generic_error || "Something went wrong"}: ${friendlyError(saveError)}`}
     } catch (error) {
       document.dispatchEvent(new CustomEvent("sungeum:state", { detail: { state: "failed", duration: 1800 } }));
       status.className = "alert alert-danger mt-4"; status.textContent = friendlyError(error);
     } finally {
-      button.textContent = "순금이에게 분석 맡기기 · 3크레딧"; sync();
+      button.textContent = I.analyze || "Ask Sungeum to analyze · 3 credits"; sync();
     }
   });
 })();

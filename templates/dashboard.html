@@ -191,7 +191,7 @@ body {
                 <div class="hero-actions">
                     <div class="hero-actions-title-new d-flex align-items-center gap-2">
                         <img class="pf-card-mascot" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="3D 순금 마스코트">
-                        <span>AI 콘텐츠 생성기</span>
+                        <span>{{ t('dash.generator') }}</span>
                     </div>
                     <div class="hero-actions-title">
                         ✨ {{ t("v21.gen.title") }}
@@ -225,14 +225,14 @@ body {
                         <div class="col-6">
                             <a href="/running-form"
                                class="btn btn-light hero-action-link w-100">
-                                🏃 러닝코치
+                                {{ t('dash.running') }}
                             </a>
                         </div>
 
                         <div class="col-6">
                             <a href="/poster"
                                class="btn hero-action-link hero-action-package w-100">
-                                🖼️ 포스터
+                                {{ t('dash.poster') }}
                             </a>
                         </div>
                     </div>

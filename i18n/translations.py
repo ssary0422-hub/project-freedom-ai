@@ -1857,3 +1857,40 @@ _GENERATOR_TAB_COPY = {
 }
 for _language, _values in _GENERATOR_TAB_COPY.items():
     TRANSLATIONS[_language].update(_values)
+
+# Shared shell copy used by every page.  Keep navigation and footer text in
+# the same translation source as the generators so a language switch never
+# leaves Korean labels behind.
+_COMMON_UI_COPY = {
+    "ko": {"nav.create": "홍보 만들기", "nav.ad": "광고", "nav.ad_desc": "핵심 문구와 홍보 이미지", "nav.sns_desc": "게시글·해시태그·이미지", "nav.blog_desc": "검색형 장문 콘텐츠", "nav.poster_desc": "바로 저장하는 1080×1350", "nav.running": "순금이 러닝코치", "nav.speaking": "순금이 말하기 코치", "nav.language": "언어", "footer.terms": "이용약관", "footer.privacy": "개인정보처리방침", "footer.refund": "환불정책", "footer.contact": "문의", "dash.generator": "AI 콘텐츠 생성기", "dash.running": "🏃 러닝코치", "dash.poster": "🖼️ 포스터"},
+    "en": {"nav.create": "Create promotion", "nav.ad": "Ad", "nav.ad_desc": "Key copy and promo image", "nav.sns_desc": "Posts · hashtags · image", "nav.blog_desc": "Search-friendly long-form content", "nav.poster_desc": "Save instantly at 1080×1350", "nav.running": "Sungeum Running Coach", "nav.speaking": "Sungeum Speaking Coach", "nav.language": "Language", "footer.terms": "Terms", "footer.privacy": "Privacy", "footer.refund": "Refund policy", "footer.contact": "Contact", "dash.generator": "AI Content Generator", "dash.running": "🏃 Running Coach", "dash.poster": "🖼️ Poster"},
+    "ja": {"nav.create": "プロモーションを作成", "nav.ad": "広告", "nav.ad_desc": "主要コピーと販促画像", "nav.sns_desc": "投稿・ハッシュタグ・画像", "nav.blog_desc": "検索向け長文コンテンツ", "nav.poster_desc": "1080×1350で保存", "nav.running": "スングム ランニングコーチ", "nav.speaking": "スングム 話し方コーチ", "nav.language": "言語", "footer.terms": "利用規約", "footer.privacy": "プライバシー", "footer.refund": "返金ポリシー", "footer.contact": "お問い合わせ", "dash.generator": "AIコンテンツ生成", "dash.running": "🏃 ランニングコーチ", "dash.poster": "🖼️ ポスター"},
+    "th": {"nav.create": "สร้างโปรโมชัน", "nav.ad": "โฆษณา", "nav.ad_desc": "ข้อความหลักและภาพโปรโมต", "nav.sns_desc": "โพสต์ · แฮชแท็ก · รูปภาพ", "nav.blog_desc": "คอนเทนต์แบบยาวที่ค้นหาได้", "nav.poster_desc": "บันทึกทันทีขนาด 1080×1350", "nav.running": "โค้ชวิ่งซุนกึม", "nav.speaking": "โค้ชการพูดซุนกึม", "nav.language": "ภาษา", "footer.terms": "ข้อกำหนดการใช้งาน", "footer.privacy": "ความเป็นส่วนตัว", "footer.refund": "นโยบายคืนเงิน", "footer.contact": "ติดต่อเรา", "dash.generator": "เครื่องมือสร้างคอนเทนต์ AI", "dash.running": "🏃 โค้ชวิ่ง", "dash.poster": "🖼️ โปสเตอร์"},
+    "zh": {"nav.create": "创建宣传内容", "nav.ad": "广告", "nav.ad_desc": "核心文案与宣传图片", "nav.sns_desc": "帖子·标签·图片", "nav.blog_desc": "适合搜索的长篇内容", "nav.poster_desc": "立即保存 1080×1350", "nav.running": "顺金跑步教练", "nav.speaking": "顺金表达教练", "nav.language": "语言", "footer.terms": "使用条款", "footer.privacy": "隐私政策", "footer.refund": "退款政策", "footer.contact": "联系我们", "dash.generator": "AI 内容生成器", "dash.running": "🏃 跑步教练", "dash.poster": "🖼️ 海报"},
+    "es": {"nav.create": "Crear promoción", "nav.ad": "Anuncio", "nav.ad_desc": "Texto clave e imagen promocional", "nav.sns_desc": "Publicación · hashtags · imagen", "nav.blog_desc": "Contenido largo optimizado para búsquedas", "nav.poster_desc": "Guarda al instante en 1080×1350", "nav.running": "Entrenador de running Sungeum", "nav.speaking": "Coach de expresión Sungeum", "nav.language": "Idioma", "footer.terms": "Términos", "footer.privacy": "Privacidad", "footer.refund": "Política de reembolso", "footer.contact": "Contacto", "dash.generator": "Generador de contenidos con IA", "dash.running": "🏃 Entrenador de running", "dash.poster": "🖼️ Póster"},
+}
+for _language, _values in _COMMON_UI_COPY.items():
+    TRANSLATIONS[_language].update(_values)
+
+_RUNNING_I18N["zh"].update({
+    "assistant_greeting": "你好，我是顺金 🐶",
+    "assistant_status": "让我负责今天的宣传",
+    "assistant_running_status": "同时查看宣传和跑步",
+    "coach_quote": "我会肯定你做得好的地方，并告诉你下次跑步只需改变的一点。如果视频不清楚，我不会勉强给出分数。",
+    "flow_upload": "上传跑步视频", "flow_analyze": "顺金 AI 分析", "flow_share": "分享指导结果",
+    "coach_prompt": "把视频交给顺金看看", "upload_heading": "上传侧面跑步视频",
+    "upload_copy": "建议上传能看到头到脚的 5–10 秒视频。请让脚和地面保持在画面中，以便更准确地检查。",
+    "capture_tip": "固定的侧面摄像机和明亮环境有助于提高分析准确度。结果可能因拍摄角度、速度和光线而不同。",
+    "credit_note": "只有分析成功时才会扣除积分。", "credits": "3 积分", "how_to": "如何拍摄清晰视频",
+    "step1_title": "固定摄像机", "step1_copy": "保持稳定的清晰侧面画面",
+    "step2_title": "拍到全身和双脚", "step2_copy": "让头部、脚尖和地面都在画面中",
+    "step3_title": "5–10 秒就够了", "step3_copy": "建议在明亮环境下使用 60fps 或更高帧率",
+    "coach_subtitle": "分析 · 指导 · 检查报告", "pace_easy": "轻松慢跑", "pace_marathon": "马拉松配速", "pace_10k": "10K 配速", "pace_fast": "快速跑", "rear_view": "后侧视角 · 即将支持",
+    "terms": "使用条款", "privacy": "隐私政策", "refund": "退款政策", "contact": "联系我们",
+    "complete": "🐾 顺金 AI 跑步分析完成", "complete_desc": "你的指导结果基于视频中的真实画面。",
+    "metric_score": "跑姿综合评分", "metric_runner": "跑者类型", "metric_strike": "落地类型", "metric_confidence": "可信度", "metric_knee": "平均膝盖角度", "metric_trunk": "平均躯干倾角", "metric_detection": "关节检测率",
+    "recommended_knee": "建议范围 105–125°", "recommended_trunk": "建议范围 6–14°", "strike_forefoot": "前脚掌落地", "strike_rearfoot": "后脚跟落地", "strike_midfoot": "中足落地", "runner_forward": "前向推进型", "runner_stable": "稳定型", "runner_balanced": "均衡推进型",
+    "strength_clear": "侧面姿势清晰，关节运动得到了稳定追踪。", "strength_trunk": "躯干倾角处于有助于向前推进的自然范围。", "strength_knee": "膝盖弯曲角度有助于吸收冲击并推进身体。", "strength_midfoot": "检测到接近中足的落地模式。",
+    "improve_trunk_forward": "上身稍微向前倾得太多。请从脚踝开始让全身倾斜，不要只弯腰，这样姿势会更舒适稳定。", "improve_trunk_upright": "上身稍微太直了。请从脚踝开始让全身略微向前倾，更轻松地获得推进力。", "improve_stride": "试着稍微缩短步幅。让脚落在身体下方可以减轻冲击，让节奏更轻松。", "improve_rear": "注意脚跟不要落在身体前方太远的位置。提高 3–5% 的步频可能有帮助。", "improve_fore": "你的前脚掌跑得很好。让脚跟自然下落，减少小腿负担，长距离会更舒服。",
+    "assistant_click_1": "你好，我是顺金 🐶", "assistant_click_2": "点击我吧 🐾", "assistant_click_3": "我可以帮助你 🐕"
+})
