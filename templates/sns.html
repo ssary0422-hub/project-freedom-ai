@@ -54,13 +54,13 @@
     {% endif %}
     {% include "_content_mode_switch.html" %}
     <div class="mb-3">
-        <label class="form-label fw-bold">업종</label>
+        <label class="form-label fw-bold">{{ t('v2.business') }}</label>
         <input type="text" class="form-control" name="business"
                value="{{ business or '' }}" placeholder="{{ t('v21.ph.business') }}" required>
     </div>
 
     <div class="mb-3">
-        <label class="form-label fw-bold">업체명</label>
+        <label class="form-label fw-bold">{{ t('v2.company') }}</label>
         <input type="text" class="form-control" name="company"
                value="{{ company or '' }}" placeholder="{{ t('v21.ph.company') }}" required>
     </div>
