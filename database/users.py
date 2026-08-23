@@ -93,6 +93,7 @@ def init_users_table():
             password_hash TEXT NOT NULL,
             created_at TEXT NOT NULL,
             plan TEXT NOT NULL DEFAULT 'FREE',
+            plan_expires_at TEXT,
             is_admin INTEGER NOT NULL DEFAULT 0,
             trial_eligible INTEGER NOT NULL DEFAULT 0,
             trial_reason TEXT NOT NULL DEFAULT ''
@@ -107,12 +108,16 @@ def init_users_table():
 
         if "plan" not in columns:
             cursor.execute("ALTER TABLE users ADD COLUMN plan TEXT NOT NULL DEFAULT 'FREE'")
+        if "plan_expires_at" not in columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN plan_expires_at TEXT")
         if "is_admin" not in columns:
             cursor.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0")
         if "trial_eligible" not in columns:
             cursor.execute("ALTER TABLE users ADD COLUMN trial_eligible INTEGER NOT NULL DEFAULT 0")
         if "trial_reason" not in columns:
             cursor.execute("ALTER TABLE users ADD COLUMN trial_reason TEXT NOT NULL DEFAULT ''")
+    else:
+        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS plan_expires_at TEXT")
 
     cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS package_usage (
@@ -548,6 +553,14 @@ def get_plan_status(user_id, required_credits=1):
     user = get_user_by_id(user_id)
     plan = (user["plan"] if user and user["plan"] else "FREE").upper()
 
+    expires_at = user["plan_expires_at"] if user and "plan_expires_at" in user.keys() else None
+    if plan == "PRO" and expires_at:
+        try:
+            if datetime.fromisoformat(str(expires_at)) <= datetime.now():
+                plan = "FREE"
+        except ValueError:
+            pass
+
     if plan not in CREDIT_LIMITS:
         plan = "FREE"
 
@@ -691,7 +704,7 @@ def record_package_usage(user_id, credits=7):
     record_ai_credit_usage(user_id, "PACKAGE", int(credits))
 
 
-def set_user_plan(user_id, plan):
+def set_user_plan(user_id, plan, expires_at=None):
     init_users_table()
     plan = (plan or "FREE").upper()
     if plan not in CREDIT_LIMITS:
@@ -700,8 +713,8 @@ def set_user_plan(user_id, plan):
     conn = _connect()
     cursor = conn.cursor()
     cursor.execute(
-        "UPDATE users SET plan = ? WHERE id = ?",
-        (plan, user_id)
+        "UPDATE users SET plan = ?, plan_expires_at = ? WHERE id = ?",
+        (plan, expires_at, user_id)
     )
     conn.commit()
     conn.close()

@@ -19,6 +19,10 @@ def generate_text(prompt: str) -> str:
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY environment variable is required.")
     model = os.getenv("OPENAI_TEXT_MODEL", DEFAULT_OPENAI_TEXT_MODEL).strip()
+    if "long" in prompt:
+        goal = f"{goal}; 사용자가 원하는 말할 문장은 3~4문장으로 조금 더 자세하고 충분하게 작성한다."
+    elif "short" in prompt:
+        goal = f"{goal}; 사용자가 원하는 말할 문장은 한 문장으로 아주 짧게 작성한다."
     try:
         response = OpenAI(api_key=api_key).responses.create(
             model=model or DEFAULT_OPENAI_TEXT_MODEL,
@@ -31,6 +35,67 @@ def generate_text(prompt: str) -> str:
     if not text:
         raise RuntimeError("OpenAI returned an empty text response.")
     return text
+
+
+def generate_speaking_coach_json(
+    *, person: str, situation: str, message: str, goal: str, tone: str,
+    quick: bool = False,
+) -> dict:
+    """Generate practical Korean speaking-coach lines as structured JSON."""
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY environment variable is required.")
+
+    model = os.getenv("OPENAI_TEXT_MODEL", DEFAULT_OPENAI_TEXT_MODEL).strip()
+    mode = "핵심 한 문장만 아주 짧게" if quick else "바로 말할 문장과 변형 2개"
+    prompt = f"""
+너는 '순금이 말하기 코치'다. 사용자가 실제 현장에서 바로 말할 수 있는 자연스러운 한국어를 만든다.
+상대: {person}
+상황: {situation}
+사용자가 적은 내용: {message}
+꼭 전하고 싶은 말: {goal}
+원하는 말투: {tone}
+출력 모드: {mode}
+
+지침:
+- 특정 사용자의 이름을 부르지 않고, 누구에게나 자연스럽고 따뜻한 코치 톤을 유지한다.
+- 훈계하거나 상대를 공격하는 표현은 피한다.
+- 입력에 없는 사실을 만들어내지 않는다.
+- quick 모드에서는 sentence 하나만 1~2문장으로 짧게 만든다.
+""".strip()
+    try:
+        response = OpenAI(api_key=api_key).responses.create(
+            model=model or DEFAULT_OPENAI_TEXT_MODEL,
+            input=prompt,
+            text={
+                "format": {
+                    "type": "json_schema",
+                    "name": "speaking_coach_lines",
+                    "strict": True,
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "sentence": {"type": "string"},
+                            "soft": {"type": "string"},
+                            "firm": {"type": "string"},
+                            "coach_note": {"type": "string"},
+                        },
+                        "required": ["sentence", "soft", "firm", "coach_note"],
+                        "additionalProperties": False,
+                    },
+                }
+            },
+            max_output_tokens=700 if quick else 1100,
+        )
+    except Exception as exc:
+        raise RuntimeError(f"OpenAI speaking coach generation failed: {exc}") from exc
+    try:
+        result = json.loads(response.output_text)
+    except (TypeError, json.JSONDecodeError) as exc:
+        raise RuntimeError("OpenAI returned invalid speaking coach JSON.") from exc
+    if not all(isinstance(result.get(key), str) and result[key].strip() for key in ("sentence", "soft", "firm", "coach_note")):
+        raise RuntimeError("OpenAI returned incomplete speaking coach JSON.")
+    return result
 
 
 def analyze_images_json(prompt: str, image_paths: list[str | Path]) -> dict:
