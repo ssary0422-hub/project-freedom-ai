@@ -47,8 +47,8 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
             <span class="sungeum-review-stamp" id="sungeum-review-stamp" aria-hidden="true">🐾<b>검수 중</b></span>
         </div>
         <p class="sungeum-loading-kicker">Sungeum AI is working</p>
-        <h3 id="ai-loading-title">순금이가 만들고 있어요</h3>
-        <p id="ai-loading-message" class="sungeum-loading-message">요청을 읽고 작업을 준비하고 있어요.</p>
+        <h3 id="ai-loading-title">{{ t('v21.gen.loading') }}</h3>
+        <p id="ai-loading-message" class="sungeum-loading-message">{{ t('v21.gen.loading_desc') }}</p>
         <div class="sungeum-progress" aria-hidden="true"><span id="ai-loading-progress"></span></div>
         <ol class="sungeum-loading-steps" aria-label="생성 진행 단계">
             <li class="is-active" data-loading-step="0"><span>1</span>요청 확인</li>
