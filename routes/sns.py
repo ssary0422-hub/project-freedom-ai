@@ -846,10 +846,66 @@ def retry_sns_image():
         error = "이미지 재생성에는 2크레딧이 필요해요."
     else:
         try:
-            image_path = _generate_sns_image(
-                business, company, style, platform,
-                image_style, custom_image_style,
+            # Retries must use the finished-card renderer too. The old path
+            # called the raw image model, yielding square art with unreliable
+            # text and bypassing the 1080x1350 typography/quality pipeline.
+            subject_path = resolve_brand_photo(
+                session["user_id"], request.files.getlist("real_photos"), "sns-retry-photo"
             )
+            logo_path = resolve_brand_logo(
+                session["user_id"], request.files.get("real_logo"), "sns-retry-logo"
+            )
+            directions = create_art_directions(
+                business=business,
+                company=company,
+                request=style,
+                media="sns",
+                photo_count=1 if subject_path else 0,
+                generator=generate_text,
+                remember=True,
+            )
+
+            def generate_background(feedback):
+                return _generate_sns_image(
+                    business,
+                    company,
+                    f"{style}. {feedback}. The scene must clearly fit the exact business. "
+                    "No readable text, letters, logos, or watermark.",
+                    platform,
+                    image_style,
+                    custom_image_style,
+                )
+
+            def render_candidate(background_path, direction, round_index, direction_index):
+                output_path = BASE_DIR / "static" / "generated" / f"finished-sns-{uuid4().hex[:10]}.png"
+                render_campaign_concept(
+                    background_path=background_path,
+                    direction=direction,
+                    company=company,
+                    output_path=output_path,
+                    logo_path=logo_path,
+                    footer_detail="",
+                )
+                return output_path
+
+            budgeted = generate_with_bounded_backgrounds(
+                directions=directions,
+                uploaded_background=subject_path,
+                generate_background=generate_background,
+                render_candidate=render_candidate,
+                create_safe_background=lambda direction: create_safe_typographic_background(
+                    direction=direction,
+                    output_path=BASE_DIR / "static" / "generated" / f"safe-sns-{uuid4().hex[:10]}.png",
+                ),
+                evaluate_candidate=lambda candidate: evaluate_campaign_image(
+                    image_path=candidate,
+                    business=business,
+                    company=company,
+                    campaign_request=style,
+                    analyzer=analyze_image_json,
+                ),
+            )
+            image_path = budgeted.output_path
             image_url = "/" + Path(image_path).as_posix()
             if not update_history_image(history_id, session["user_id"], image_url):
                 raise RuntimeError("생성 기록에 이미지를 연결하지 못했습니다.")
@@ -860,7 +916,25 @@ def retry_sns_image():
             session["plan_remaining"] = credit_status["remaining"]
         except Exception as image_exception:
             print("SNS image retry failed:", image_exception)
-            image_url = ""
+            # Compatibility fallback for a temporary planning-provider outage.
+            # Normal retries use the finished-card renderer above.
+            try:
+                image_path = _generate_sns_image(
+                    business, company, style, platform,
+                    image_style, custom_image_style,
+                )
+                image_url = "/" + Path(image_path).as_posix()
+                if not update_history_image(history_id, session["user_id"], image_url):
+                    raise RuntimeError("retry history update failed")
+                create_sns_word(result, image_path, company)
+                create_sns_pdf(result, image_path)
+                record_ai_credit_usage(session["user_id"], "SNS_IMAGE_RETRY", 2)
+                credit_status = get_plan_status(session["user_id"])
+                session["plan_remaining"] = credit_status["remaining"]
+                image_error = ""
+            except Exception as fallback_exception:
+                print("SNS raw image retry fallback failed:", fallback_exception)
+                image_url = ""
             image_error = (
                 "이미지 재생성에 실패했어요. 크레딧은 차감하지 않았습니다. "
                 "잠시 후 다시 눌러주세요."
