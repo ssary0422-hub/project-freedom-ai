@@ -4,6 +4,7 @@ from routes.ads import ads_bp
 from routes.blog import blog_bp
 from routes.sns import sns_bp
 from routes.history import history_bp
+from routes.feedback import feedback_bp
 from database.db import init_db, get_dashboard_data
 from routes.package import package_bp
 from routes.profiles import profiles_bp
@@ -13,7 +14,9 @@ from routes.poster import poster_bp
 from routes.brand_library import brand_library_bp
 from routes.ai_office import ai_office_bp
 from routes.running_form import running_form_bp
+from routes.speaking_coach import speaking_coach_bp
 from routes.social_publish import social_publish_bp
+from routes.payment import payment_bp
 
 from i18n.translations import SUPPORTED_LANGUAGES, running_i18n, translate
 from routes.admin import admin_bp
@@ -110,6 +113,7 @@ app.register_blueprint(ads_bp)
 app.register_blueprint(blog_bp)
 app.register_blueprint(sns_bp)
 app.register_blueprint(history_bp)
+app.register_blueprint(feedback_bp)
 app.register_blueprint(package_bp)
 app.register_blueprint(profiles_bp)
 app.register_blueprint(auth_bp)
@@ -118,7 +122,9 @@ app.register_blueprint(poster_bp)
 app.register_blueprint(brand_library_bp)
 app.register_blueprint(ai_office_bp)
 app.register_blueprint(running_form_bp)
+app.register_blueprint(speaking_coach_bp)
 app.register_blueprint(social_publish_bp)
+app.register_blueprint(payment_bp)
 
 
 # -------------------------
@@ -450,4 +456,5 @@ def download_sns_pdf():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Listen on the local network too, so a phone on the same Wi-Fi can preview the app.
+    app.run(host="0.0.0.0", port=5000, debug=True)

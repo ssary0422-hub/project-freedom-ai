@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}사용자 리뷰 · Project Freedom AI{% endblock %}
+{% block extra_style %}
+.feedback-shell{max-width:980px}.feedback-card{background:linear-gradient(145deg,#131d34,#0b1222);border:1px solid rgba(142,160,200,.2);border-radius:22px;padding:24px;color:#eef4ff}.feedback-grid{display:grid;gap:18px}.feedback-select,.feedback-input{width:100%;border:1px solid #34445f;border-radius:12px;background:#0b1427;color:#f3f7ff;padding:12px}.feedback-input{min-height:100px}.feedback-button{border:0;border-radius:12px;padding:11px 16px;background:linear-gradient(135deg,#397dff,#8055ff);color:white;font-weight:800}.feedback-muted{color:#9ba8c4}.feedback-stars{font-size:1.6rem;color:#ffd166;letter-spacing:.15em}
+{% endblock %}
+{% block content %}
+<main class="container feedback-shell pb-5">
+  <header class="mb-4"><div class="feedback-muted">SUNGЕUM LISTENING ROOM</div><h1 class="text-white">써보고, 솔직하게 알려주세요</h1><p class="feedback-muted">좋았던 점과 불편했던 점을 남기면 다음 결과물에 바로 반영할게요.</p></header>
+  <section class="feedback-card feedback-grid">
+    <form method="get"><label class="feedback-muted" for="history_id">어떤 결과물을 검토하셨나요?</label><select class="feedback-select mt-2" id="history_id" name="history_id" onchange="this.form.submit()"><option value="">전체 제품 경험</option>{% for item in history_list %}<option value="{{ item[0] }}" {% if selected_history_id==item[0] %}selected{% endif %}>{{ item[2] or '콘텐츠' }} · {{ item[3] or '' }}</option>{% endfor %}</select></form>
+    <form method="post" class="feedback-grid"><input type="hidden" name="action" value="review"><input type="hidden" name="history_id" value="{{ selected_history_id or '' }}"><label>별점 <span class="feedback-stars">★★★★★</span><select class="feedback-select" name="rating"><option value="5">5점 - 바로 쓸 수 있어요</option><option value="4">4점 - 조금 다듬으면 좋아요</option><option value="3">3점 - 보통이에요</option><option value="2">2점 - 아쉬워요</option><option value="1">1점 - 다시 만들어야 해요</option></select></label><label>좋았던 점<textarea class="feedback-input" name="liked" placeholder="예: 사진 배치, 문구, 번역"></textarea></label><label>불편하거나 고칠 점<textarea class="feedback-input" name="disliked" placeholder="예: 글자가 작아요, 결과가 반복돼요"></textarea></label><label><input type="checkbox" name="would_use"> 돈을 내고 다시 사용할 의향이 있어요</label><button class="feedback-button" type="submit">리뷰 남기기</button></form>
+    <form method="post" class="feedback-grid"><input type="hidden" name="action" value="comment"><input type="hidden" name="history_id" value="{{ selected_history_id or '' }}"><label>순금이에게 한마디<textarea class="feedback-input" name="body" placeholder="궁금한 점이나 원하는 기능을 자유롭게 적어주세요" required></textarea></label><button class="feedback-button" type="submit">댓글 보내기</button></form>
+  </section>
+  {% if feedback_list or comment_list %}<section class="feedback-card mt-4"><h2 class="h5 text-white">내가 남긴 기록</h2>{% for row in feedback_list %}<p class="feedback-muted">{{ '★' * row[2] }} · {{ row[6] }}</p><p>{{ row[3] or '' }}</p><p>{{ row[4] or '' }}</p>{% endfor %}{% for row in comment_list %}<p>{{ row[2] }}</p><small class="feedback-muted">{{ row[3] }}</small>{% endfor %}</section>{% endif %}
+</main>
+{% endblock %}

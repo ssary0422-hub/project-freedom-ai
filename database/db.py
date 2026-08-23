@@ -198,6 +198,32 @@ def init_db():
         ON payments (status)
     """)
 
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS product_feedback (
+            id {id_column},
+            user_id INTEGER NOT NULL,
+            history_id INTEGER,
+            rating INTEGER NOT NULL,
+            liked TEXT,
+            disliked TEXT,
+            would_use INTEGER DEFAULT 0,
+            created_at TEXT NOT NULL
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_feedback_user ON product_feedback (user_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_feedback_history ON product_feedback (history_id)")
+
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS product_comments (
+            id {id_column},
+            user_id INTEGER NOT NULL,
+            history_id INTEGER,
+            body TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_comments_history ON product_comments (history_id)")
+
     # 기존 DB를 깨뜨리지 않고 필요한 컬럼만 자동 추가
     columns = _table_columns(cursor, "history")
 
@@ -834,6 +860,56 @@ def get_history_image(history_id, user_id):
     return data, (row[1] or "application/octet-stream")
 
 
+def save_product_feedback(user_id, history_id, rating, liked, disliked, would_use):
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO product_feedback (user_id, history_id, rating, liked, disliked, would_use, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (user_id, history_id, int(rating), liked, disliked, int(bool(would_use)), datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+    )
+    conn.commit()
+    conn.close()
+
+
+def save_product_comment(user_id, history_id, body):
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO product_comments (user_id, history_id, body, created_at) VALUES (?, ?, ?, ?)",
+        (user_id, history_id, body, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_product_feedback(user_id, history_id=None):
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    if history_id is None:
+        cursor.execute("SELECT id, history_id, rating, liked, disliked, would_use, created_at FROM product_feedback WHERE user_id = ? ORDER BY id DESC", (user_id,))
+    else:
+        cursor.execute("SELECT id, history_id, rating, liked, disliked, would_use, created_at FROM product_feedback WHERE user_id = ? AND history_id = ? ORDER BY id DESC", (user_id, history_id))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+
+def get_product_comments(user_id, history_id=None):
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    if history_id is None:
+        cursor.execute("SELECT id, history_id, body, created_at FROM product_comments WHERE user_id = ? ORDER BY id DESC", (user_id,))
+    else:
+        cursor.execute("SELECT id, history_id, body, created_at FROM product_comments WHERE user_id = ? AND history_id = ? ORDER BY id ASC", (user_id, history_id))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+
 
 def create_test_payment(
     user_id,
@@ -904,6 +980,70 @@ def create_test_payment(
             "reason": "duplicate_order",
         }
 
+    finally:
+        conn.close()
+
+
+def create_pending_payment(user_id, order_id, product_code, amount, credits=0, provider="TOSS"):
+    """Create an idempotent pending order before opening a PG checkout."""
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            INSERT INTO payments
+                (user_id, order_id, payment_key, product_code, amount, credits,
+                 status, provider, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (user_id, order_id, "", product_code, int(amount), int(credits),
+             "PENDING", provider, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+        )
+        conn.commit()
+        return {"ok": True}
+    except Exception:
+        conn.rollback()
+        return {"ok": False}
+    finally:
+        conn.close()
+
+
+def complete_payment(order_id, payment_key, provider="TOSS"):
+    """Mark a pending payment paid; safe to call repeatedly for the same order."""
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            UPDATE payments
+            SET payment_key = ?, status = ?, provider = ?, paid_at = ?
+            WHERE order_id = ? AND status = ?
+            """,
+            (payment_key, "PAID", provider,
+             datetime.now().strftime("%Y-%m-%d %H:%M:%S"), order_id, "PENDING"),
+        )
+        changed = cursor.rowcount
+        conn.commit()
+        return {"ok": changed == 1, "already_paid": changed == 0}
+    except Exception:
+        conn.rollback()
+        return {"ok": False, "already_paid": False}
+    finally:
+        conn.close()
+
+
+def get_payment_by_order(order_id, user_id=None):
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    try:
+        if user_id is None:
+            cursor.execute("SELECT * FROM payments WHERE order_id = ?", (order_id,))
+        else:
+            cursor.execute("SELECT * FROM payments WHERE order_id = ? AND user_id = ?", (order_id, user_id))
+        return cursor.fetchone()
     finally:
         conn.close()
 
