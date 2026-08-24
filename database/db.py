@@ -254,6 +254,20 @@ def init_db():
     if "image_mime" not in history_columns:
         cursor.execute("ALTER TABLE history ADD COLUMN image_mime TEXT")
 
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS service_leads (
+            id {id_column},
+            name TEXT NOT NULL,
+            business_name TEXT NOT NULL,
+            contact TEXT NOT NULL,
+            interest TEXT NOT NULL,
+            message TEXT,
+            status TEXT NOT NULL DEFAULT 'NEW',
+            created_at TEXT NOT NULL
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_service_leads_status ON service_leads (status)")
+
     # 기존 데이터 중 생성일이 비어 있으면 현재 시각으로 채움
     cursor.execute("""
         UPDATE history
@@ -980,6 +994,29 @@ def create_test_payment(
             "reason": "duplicate_order",
         }
 
+    finally:
+        conn.close()
+
+
+def save_service_lead(name, business_name, contact, interest, message=""):
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            INSERT INTO service_leads
+                (name, business_name, contact, interest, message, status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (name, business_name, contact, interest, message, "NEW",
+             datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+        )
+        conn.commit()
+        return {"ok": True}
+    except Exception:
+        conn.rollback()
+        return {"ok": False}
     finally:
         conn.close()
 

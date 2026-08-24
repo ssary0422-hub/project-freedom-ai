@@ -17,6 +17,7 @@ from routes.running_form import running_form_bp
 from routes.speaking_coach import speaking_coach_bp
 from routes.social_publish import social_publish_bp
 from routes.payment import payment_bp
+from routes.services import services_bp
 
 from i18n.translations import SUPPORTED_LANGUAGES, running_i18n, translate
 from routes.admin import admin_bp
@@ -125,6 +126,7 @@ app.register_blueprint(running_form_bp)
 app.register_blueprint(speaking_coach_bp)
 app.register_blueprint(social_publish_bp)
 app.register_blueprint(payment_bp)
+app.register_blueprint(services_bp)
 
 
 # -------------------------
