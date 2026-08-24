@@ -36,7 +36,7 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 <nav class="navbar navbar-dark fixed-top navx"><div class="container py-2">
 <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/"><img class="pf-brand-mascot" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="3D 순금 마스코트"> Project Freedom AI</a><button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#landingMenu" aria-controls="landingMenu" aria-expanded="false" aria-label="메뉴 열기"><span class="navbar-toggler-icon"></span></button>
 <div class="collapse navbar-collapse" id="landingMenu"><div class="d-flex justify-content-end gap-2 pt-3 pt-lg-0">
-{% if session.get("user_id") %}<a class="btn btn-outline-light" href="/dashboard">대시보드</a>
+{% if session.get("user_id") %}<a class="btn btn-outline-light" href="/dashboard">대시보드</a><a class="btn btn-outline-light" href="/content">콘텐츠</a><a class="btn btn-outline-light" href="/running-form">러닝 코치</a><a class="btn btn-outline-light" href="/speaking-coach">말하기 코치</a><a class="btn btn-outline-light" href="/history">기록</a><a class="btn btn-info" href="/credits">크레딧</a>
 {% else %}<a class="btn btn-outline-light" href="/login">{{ t("nav.login") }}</a><a class="btn btn-primary" href="/register">{{ t("landing.cta.start_free") }}</a>{% endif %}
 </div></div></div></nav>
 
