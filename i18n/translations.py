@@ -1709,6 +1709,21 @@ _LANDING_EXTRA_KEYS = ["landing.cta.create", "landing.cta.create_arrow", "landin
 for _language, _texts in _LANDING_EXTRAS.items():
     TRANSLATIONS[_language].update(dict(zip(_LANDING_EXTRA_KEYS, _texts)))
 
+_LANDING_COACH_KEYS = {
+    "landing.task.speaking": {
+        "ko": "순금이 말하기 코치", "en": "Sungeum speaking coach", "ja": "スングム会話コーチ",
+        "th": "ซุนกึมโค้ชการพูด", "zh": "顺金表达教练", "es": "Coach de conversación Sungeum",
+    },
+    "landing.task.speaking_desc": {
+        "ko": "어려운 말을 순금이와 함께 자연스럽게 정리해요", "en": "Shape difficult words into a natural sentence",
+        "ja": "言いにくいことを自然な一言に整えます", "th": "ช่วยเรียบเรียงเรื่องยากให้พูดได้เป็นธรรมชาติ",
+        "zh": "把难说的话整理成自然的一句话", "es": "Convierte lo difícil de decir en una frase natural",
+    },
+}
+for _key, _values in _LANDING_COACH_KEYS.items():
+    for _language, _value in _values.items():
+        TRANSLATIONS[_language][_key] = _value
+
 # Package product was retired in favor of the standalone poster workflow.
 _POSTER_LANDING = {
     "ko": {
