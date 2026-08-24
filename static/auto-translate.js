@@ -12,6 +12,12 @@
   // open a second language menu after choosing English in the app.
   const targetLanguage = currentLanguage;
   document.cookie = `googtrans=/ko/${targetLanguage}; path=/`;
+  const reloadMarker = `pf-auto-translate-${targetLanguage}`;
+  if (sessionStorage.getItem(reloadMarker) !== "ready") {
+    sessionStorage.setItem(reloadMarker, "ready");
+    window.location.reload();
+    return;
+  }
 
   // Keep the mascot's proper name as a name, rather than translating it as
   // the literal phrase “pure gold”.
