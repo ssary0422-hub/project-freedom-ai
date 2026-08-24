@@ -7,10 +7,31 @@ from database.db import (
     get_product_feedback,
     save_product_comment,
     save_product_feedback,
+    get_public_reviews,
+    save_public_review,
+    save_public_review_reply,
 )
 from routes.auth import login_required
 
 feedback_bp = Blueprint("feedback", __name__)
+
+
+@feedback_bp.route("/reviews", methods=["GET", "POST"])
+def public_reviews():
+    if request.method == "POST":
+        if not session.get("user_id"):
+            return redirect(url_for("auth.login", next=url_for("feedback.public_reviews")))
+        action = request.form.get("action", "review")
+        body = request.form.get("body", "").strip()
+        if body:
+            name = request.form.get("author_name", "").strip()[:40] or "익명 사용자"
+            if action == "reply":
+                save_public_review_reply(request.form.get("review_id", type=int), session["user_id"], name, body)
+            else:
+                save_public_review(session["user_id"], name, request.form.get("rating", type=int) or 5, body)
+        return redirect(url_for("feedback.public_reviews"))
+    reviews, reply_map = get_public_reviews()
+    return render_template("public_reviews.html", reviews=reviews, reply_map=reply_map)
 
 
 def _sungeum_reply(*, rating=0, liked="", disliked="", body=""):

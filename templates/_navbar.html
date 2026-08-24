@@ -27,6 +27,7 @@
                 {% endif %}
                 <a class="btn pf-nav-btn {% if request.path.startswith('/running-form') %}pf-nav-active{% endif %}" href="{% if session.get('user_id') %}/running-form{% else %}/login{% endif %}">{{ nav_icon('run') }} {{ t('nav.running') }}</a>
                 <a class="btn pf-nav-btn {% if request.path.startswith('/speaking-coach') %}pf-nav-active{% endif %}" href="/speaking-coach">💬 {{ t('nav.speaking') }}</a>
+                <a class="btn pf-nav-btn {% if request.path.startswith('/reviews') %}pf-nav-active{% endif %}" href="/reviews">★ 리뷰</a>
                 {% if session.get("user_id") %}
                 <a class="btn pf-nav-btn {% if request.path.startswith('/history') %}pf-nav-active{% endif %}" href="/history">{{ nav_icon('history') }} {{ t("nav.history") }}</a>
                 <a class="btn pf-credit-pill {% if request.path.startswith('/credits') %}pf-credit-active{% endif %}" href="/credits" title="{{ t('nav.credit_title') }}">{{ nav_icon('wallet') }} {{ session.get("plan_remaining", 0) }} {{ t("nav.credits") }}</a>

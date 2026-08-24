@@ -224,6 +224,29 @@ def init_db():
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_comments_history ON product_comments (history_id)")
 
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS public_reviews (
+            id {id_column},
+            user_id INTEGER,
+            author_name TEXT NOT NULL DEFAULT '익명 러너',
+            rating INTEGER NOT NULL,
+            body TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_public_reviews_created ON public_reviews (created_at)")
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS public_review_replies (
+            id {id_column},
+            review_id INTEGER NOT NULL,
+            user_id INTEGER,
+            author_name TEXT NOT NULL DEFAULT '익명 사용자',
+            body TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_public_review_replies_review ON public_review_replies (review_id)")
+
     # 말하기 코치는 로그인 전에도 써볼 수 있는 공개 MVP이므로, 결과 직후
     # 남기는 익명 후기를 별도 테이블에 보관합니다.
     cursor.execute(f"""
@@ -968,6 +991,43 @@ def get_product_comments(user_id, history_id=None):
     rows = cursor.fetchall()
     conn.close()
     return rows
+
+
+def save_public_review(user_id, author_name, rating, body):
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO public_reviews (user_id, author_name, rating, body, created_at) VALUES (?, ?, ?, ?, ?)",
+        (user_id, str(author_name or "익명 러너")[:40], max(1, min(5, int(rating))), str(body)[:2000], datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+    )
+    conn.commit(); conn.close()
+
+
+def save_public_review_reply(review_id, user_id, author_name, body):
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO public_review_replies (review_id, user_id, author_name, body, created_at) VALUES (?, ?, ?, ?, ?)",
+        (int(review_id), user_id, str(author_name or "익명 사용자")[:40], str(body)[:1000], datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+    )
+    conn.commit(); conn.close()
+
+
+def get_public_reviews(limit=100):
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, author_name, rating, body, created_at FROM public_reviews ORDER BY id DESC LIMIT ?", (int(limit),))
+    reviews = cursor.fetchall()
+    cursor.execute("SELECT id, review_id, author_name, body, created_at FROM public_review_replies ORDER BY id ASC")
+    replies = cursor.fetchall()
+    conn.close()
+    reply_map = {}
+    for row in replies:
+        reply_map.setdefault(int(row[1]), []).append(row)
+    return reviews, reply_map
 
 
 
