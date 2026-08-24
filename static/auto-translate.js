@@ -11,6 +11,19 @@
   // open a second language menu after choosing English in the app.
   document.cookie = "googtrans=/ko/en; path=/";
 
+  // Keep the mascot's proper name as a name, rather than translating it as
+  // the literal phrase “pure gold”.
+  const protectSungeumName = () => {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((node) => {
+      if (!node.nodeValue || !node.nodeValue.includes("순금")) return;
+      node.nodeValue = node.nodeValue.replaceAll("순금이", "Sungeum").replaceAll("순금", "Sungeum");
+    });
+  };
+  if (document.body) protectSungeumName();
+
   window.googleTranslateElementInit = function () {
     if (!window.google || !google.translate) return;
     new google.translate.TranslateElement({
