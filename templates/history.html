@@ -45,9 +45,9 @@
 <main class="container history-shell pb-5">
   <header class="mb-5">
     <div class="history-kicker mb-2">MY CREATIONS</div>
-    <h1 class="history-title mb-2">내가 만든 결과</h1>
-    <p class="history-lead mb-2">순금이와 만든 홍보 콘텐츠와 러닝 분석 결과를 다시 확인하세요.</p>
-    <a class="history-cta history-cta-secondary" href="/feedback">사용 후기·댓글 남기기</a>
+    <h1 class="history-title mb-2">{{ t('v3.history.title') }}</h1>
+    <p class="history-lead mb-2">{{ t('v3.history.subtitle') }}</p>
+    <a class="history-cta history-cta-secondary" href="/feedback">{{ t('v3.history.feedback') }}</a>
   </header>
 
   {% if history_list %}
@@ -72,8 +72,8 @@
               <a href="/history/download/{{ item[0] }}/word" class="history-action">Word</a>
             {% endif %}
             {% if item[5] %}<a href="{{ url_for('history.history_image', history_id=item[0], download=1) if item[7] else '/history/download/' ~ item[0] ~ '/image' }}" class="history-action">이미지 저장</a>{% endif %}
-            <form method="POST" action="/delete/{{ item[0] }}" onsubmit="return confirm('이 기록을 삭제할까요?');">
-              <button type="submit" class="history-action history-action-danger">삭제</button>
+            <form method="POST" action="/delete/{{ item[0] }}" onsubmit="return confirm({{ t('v3.history.delete_confirm')|tojson }});">
+              <button type="submit" class="history-action history-action-danger">{{ t('v3.history.delete') }}</button>
             </form>
           </div>
         </div>
@@ -96,11 +96,11 @@
   {% else %}
   <section class="history-empty">
     <div class="history-empty-mark">✓</div>
-    <h2>아직 저장된 결과가 없어요</h2>
-    <p class="mb-4">새 콘텐츠나 러닝 분석을 만들면 이곳에 자동으로 모아드릴게요.</p>
+    <h2>{{ t('v3.history.empty') }}</h2>
+    <p class="mb-4">{{ t('v3.history.empty_desc') }}</p>
     <div class="d-flex flex-wrap justify-content-center gap-2">
-      <a href="/ads-generator" class="history-cta history-cta-primary">홍보 콘텐츠 만들기</a>
-      <a href="/running-form" class="history-cta history-cta-secondary">순금이 코치에게 다시 분석받기</a>
+      <a href="/ads-generator" class="history-cta history-cta-primary">{{ t('v3.history.make_ad') }}</a>
+      <a href="/running-form" class="history-cta history-cta-secondary">{{ t('nav.running') }}</a>
     </div>
   </section>
   {% endif %}

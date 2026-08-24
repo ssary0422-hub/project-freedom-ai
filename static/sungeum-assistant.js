@@ -14,7 +14,7 @@
   const defaultStatus=liveStatus?.dataset.default||'';
   const mascots=()=>document.querySelectorAll('.sungeum-assistant-trigger .sungeum-alive,.sungeum-assistant-head .sungeum-alive');
   let moodTimer;
-  const moodCopy={working:['순금이가 처리 중이에요','꼼꼼히 작업 중'],approved:['완성했어요! 🐾','순금 검수 완료'],failed:['잠깐만요, 다시 볼게요','재시도 준비'],listening:['말씀해 주세요 👂','듣고 있어요']};
+  const moodCopy={working:['',trigger.dataset.assistantWorking||'꼼꼼히 작업 중'],approved:['',trigger.dataset.assistantApproved||'순금 검수 완료'],failed:['',trigger.dataset.assistantFailed||'재시도 준비'],listening:['',trigger.dataset.assistantListening||'듣고 있어요']};
   const setMood=(mood,duration=0)=>{clearTimeout(moodTimer);mascots().forEach(m=>{m.classList.remove('is-listening','is-working','is-approved','is-failed');if(mood)m.classList.add(`is-${mood}`)});if(liveStatus)liveStatus.textContent=moodCopy[mood]?.[1]||defaultStatus;if(duration)moodTimer=setTimeout(()=>setMood(panel.classList.contains('is-open')?'listening':''),duration)};
   window.SungeumMotion={setState:setMood};
   document.addEventListener('sungeum:state',event=>{const detail=event.detail||{};setMood(detail.state||'',Number(detail.duration)||0)});

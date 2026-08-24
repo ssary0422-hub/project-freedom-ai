@@ -1743,12 +1743,12 @@ TRANSLATIONS["ko"].update({
 _RUNNING_I18N = {
     "ko": {
         "title": "순금이 AI 러닝코치", "hero_title": "달리는 영상만 올려봐\n순금이가 러닝폼을 봐줄게", "hero_desc": "착지·관절 각도·자세를 확인하고, 다음 러닝에서 실천할 한 가지를 알려드려요.",
-        "upload_title": "러닝 영상을 올려주세요", "upload_hint": "MP4·MOV·WEBM · 최대 120MB", "choose_video": "러닝 영상 선택", "pace_label": "촬영 당시 페이스", "view_label": "촬영 방향", "side": "측면", "consent": "AI 러닝폼 분석을 위한 영상 처리에 동의합니다.", "analyze": "순금이에게 분석 맡기기 · 3크레딧", "steps": ["영상 확인", "관절 찾기", "착지 분석", "코칭 정리"],
+        "upload_title": "러닝 영상을 올려주세요", "upload_hint": "MP4·MOV·WEBM · 최대 120MB", "choose_video": "러닝 영상 선택", "pace_label": "촬영 당시 페이스", "view_label": "촬영 방향", "side": "측면", "consent": "AI 러닝폼 분석을 위한 영상 처리에 동의합니다.", "analyze": "순금이에게 무료 분석 맡기기", "steps": ["영상 확인", "관절 찾기", "착지 분석", "코칭 정리"],
         "working": "순금이 코치가 분석하고 있어요", "done_stamp": "순금 검수 완료", "landing_frame": "AI 착지 프레임", "foot_zoom": "착지 확대", "coach": "순금이 코치의 한마디", "next_goal": "다음 러닝에서 바꿀 한 가지", "save_image": "SNS 결과 이미지 저장", "save_done": "러닝 결과가 저장됐어요", "generic_error": "영상 분석 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요.", "mediapipe_error": "AI 자세 추적을 다시 준비하고 있어요. 잠시 후 분석 버튼을 다시 눌러주세요.", "range_knee": "권장 범위 105~125°", "range_trunk": "권장 범위 6~14°"
     },
     "en": {
         "title": "Sungeum AI Running Coach", "hero_title": "Upload your running video\nSungeum will check your form", "hero_desc": "We review foot strike, joint angles and posture, then give you one practical change for your next run.",
-        "upload_title": "Choose a running video", "upload_hint": "MP4 · MOV · WEBM · up to 120MB", "choose_video": "Choose running video", "pace_label": "Pace during recording", "view_label": "Camera view", "side": "Side view", "consent": "I agree to process this video for AI running-form analysis.", "analyze": "Ask Sungeum to analyze · 3 credits", "steps": ["Check video", "Find joints", "Analyze strike", "Prepare coaching"],
+        "upload_title": "Choose a running video", "upload_hint": "MP4 · MOV · WEBM · up to 120MB", "choose_video": "Choose running video", "pace_label": "Pace during recording", "view_label": "Camera view", "side": "Side view", "consent": "I agree to process this video for AI running-form analysis.", "analyze": "Ask Sungeum to analyze for free", "steps": ["Check video", "Find joints", "Analyze strike", "Prepare coaching"],
         "working": "Sungeum is analyzing your run", "done_stamp": "Sungeum checked it", "landing_frame": "AI foot-strike frame", "foot_zoom": "Foot-strike close-up", "coach": "Sungeum's coaching note", "next_goal": "One thing to change next run", "save_image": "Save SNS result image", "save_done": "Your running result was saved", "generic_error": "Something went wrong while analyzing the video. Please try again.", "mediapipe_error": "AI pose tracking is getting ready again. Press analyze once more in a moment.", "range_knee": "Recommended range 105–125°", "range_trunk": "Recommended range 6–14°"
     },
     "ja": {
@@ -1788,7 +1788,7 @@ _RUNNING_STATIC_I18N = {
         "coach_prompt": "순금이 코치에게 영상 보여주기", "upload_heading": "달리는 옆모습을 올려줘",
         "upload_copy": "머리부터 발끝까지 보이는 5~10초 영상이면 좋아. 발과 지면이 잘 보이면 더 정확하게 볼 수 있어!",
         "capture_tip": "고정된 측면 카메라와 밝은 환경에서 분석 신뢰도가 높아집니다. 촬영 각도·속도·조명에 따라 결과가 달라질 수 있어요.",
-        "credit_note": "분석 성공 시에만 차감됩니다.", "credits": "3크레딧", "how_to": "잘 찍는 방법",
+        "credit_note": "러닝코치는 무료로 이용할 수 있어요.", "credits": "무료", "how_to": "잘 찍는 방법",
         "step1_title": "카메라를 고정해요", "step1_copy": "흔들림 없이 정확한 측면으로 촬영",
         "step2_title": "전신과 발을 보여줘요", "step2_copy": "머리부터 발끝과 지면이 모두 보이게",
         "step3_title": "5~10초면 충분해요", "step3_copy": "밝은 장소에서 60fps 이상 권장",
@@ -1799,7 +1799,7 @@ _RUNNING_STATIC_I18N = {
         "coach_prompt": "Show your video to Sungeum", "upload_heading": "Upload your side-view run",
         "upload_copy": "A 5–10 second clip showing your head to toes works best. Keep your feet and the ground visible for a clearer review.",
         "capture_tip": "A steady side camera and bright lighting improve analysis quality. Results can vary with camera angle, speed and lighting.",
-        "credit_note": "Credits are deducted only when analysis succeeds.", "credits": "3 credits", "how_to": "How to record a good clip",
+        "credit_note": "Running coaching is free.", "credits": "FREE", "how_to": "How to record a good clip",
         "step1_title": "Keep the camera steady", "step1_copy": "Use a clear side view without shaking",
         "step2_title": "Show your full body and feet", "step2_copy": "Keep your head, toes and ground in frame",
         "step3_title": "5–10 seconds is enough", "step3_copy": "Bright light and 60fps or higher are recommended",
@@ -1894,3 +1894,16 @@ _RUNNING_I18N["zh"].update({
     "improve_trunk_forward": "上身稍微向前倾得太多。请从脚踝开始让全身倾斜，不要只弯腰，这样姿势会更舒适稳定。", "improve_trunk_upright": "上身稍微太直了。请从脚踝开始让全身略微向前倾，更轻松地获得推进力。", "improve_stride": "试着稍微缩短步幅。让脚落在身体下方可以减轻冲击，让节奏更轻松。", "improve_rear": "注意脚跟不要落在身体前方太远的位置。提高 3–5% 的步频可能有帮助。", "improve_fore": "你的前脚掌跑得很好。让脚跟自然下落，减少小腿负担，长距离会更舒服。",
     "assistant_click_1": "你好，我是顺金 🐶", "assistant_click_2": "点击我吧 🐾", "assistant_click_3": "我可以帮助你 🐕"
 })
+
+for _lang, _label in {"ko":"사용 후기·댓글 남기기", "en":"Leave feedback · comments", "ja":"レビュー・コメントを残す", "th":"ฝากรีวิว · ความคิดเห็น", "zh":"留下评价·评论", "es":"Dejar reseña · comentarios"}.items():
+    TRANSLATIONS[_lang]["v3.history.feedback"] = _label
+
+for _lang, _values in {
+    "ko":{"assistant_working":"꼼꼼히 작업 중","assistant_approved":"순금 검수 완료","assistant_failed":"재시도 준비","assistant_listening":"듣고 있어요"},
+    "en":{"assistant_working":"Working carefully","assistant_approved":"Sungeum checked it","assistant_failed":"Ready to retry","assistant_listening":"I’m listening"},
+    "ja":{"assistant_working":"丁寧に作業中","assistant_approved":"スングム確認済み","assistant_failed":"再試行の準備中","assistant_listening":"聞いているよ"},
+    "th":{"assistant_working":"กำลังทำงานอย่างละเอียด","assistant_approved":"ซุนกึมตรวจสอบแล้ว","assistant_failed":"พร้อมลองใหม่","assistant_listening":"กำลังฟังอยู่"},
+    "zh":{"assistant_working":"正在认真处理","assistant_approved":"顺金已检查","assistant_failed":"准备重试","assistant_listening":"我在听"},
+    "es":{"assistant_working":"Trabajando con cuidado","assistant_approved":"Sungeum lo revisó","assistant_failed":"Listo para reintentar","assistant_listening":"Te escucho"},
+}.items():
+    _RUNNING_I18N[_lang].update(_values)
