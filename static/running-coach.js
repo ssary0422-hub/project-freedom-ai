@@ -27,7 +27,7 @@
         <div class="result-item"><h3>워밍업</h3><p>${escapeHtml(r.warmup)}</p></div>
         <div class="result-item"><h3>주의사항</h3><p>${escapeHtml(r.caution)}</p></div>
         <div class="result-item"><h3>마무리</h3><p>${escapeHtml(r.cooldown)}</p></div>
-        <div class="result-cheer">${escapeHtml(r.cheer)}</div>`;
+        <div class="result-cheer"><img class="result-mascot" src="/static/brand/sungeum-running-coach-mascot-v1.png" alt="순금이 러닝코치"><span>${escapeHtml(r.cheer)}</span></div>`;
       resultBox.hidden = false;
       resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
       status.textContent = data.source === "fallback" ? "기본 안전 코칭으로 안내했어." : "순금이가 너에게 맞춰 정리했어.";
