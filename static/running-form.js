@@ -154,6 +154,30 @@
     return saved;
   }
 
+  function mountQuickFeedback(container, historyId) {
+    const copy = window.RUNNING_FEEDBACK_I18N || {};
+    const card = document.createElement("section");
+    card.className = "run-quick-feedback";
+    card.innerHTML = `<strong>${escapeHtml(copy.title || "How was Sungeum’s result? 🐶")}</strong><p>${escapeHtml(copy.prompt || "One tap helps us improve the next result.")}</p><div class="d-flex flex-wrap gap-2"><button type="button" class="feedback-choice" data-rating="5">${escapeHtml(copy.helpful || "👍 It helped")}</button><button type="button" class="feedback-choice" data-rating="3">${escapeHtml(copy.neutral || "😐 It was okay")}</button><button type="button" class="feedback-choice" data-rating="2">${escapeHtml(copy.not_helpful || "👎 Needs work")}</button></div><div class="feedback-extra d-none"><label class="small fw-semibold d-block mt-3">${escapeHtml(copy.comment || "Add a note (optional)")}</label><textarea maxlength="3000" placeholder="${escapeHtml(copy.placeholder || "Tell us one thing you liked or would change")}"></textarea><button type="button" class="feedback-submit">${escapeHtml(copy.send || "Send feedback")}</button></div><div class="feedback-thanks d-none">${escapeHtml(copy.thanks || "Thanks for sharing! 🐶✨")}</div>`;
+    container.appendChild(card);
+    const choices = [...card.querySelectorAll("[data-rating]")];
+    const extra = card.querySelector(".feedback-extra");
+    const textarea = card.querySelector("textarea");
+    const submit = card.querySelector(".feedback-submit");
+    const thanks = card.querySelector(".feedback-thanks");
+    let rating = null;
+    choices.forEach(choice => choice.addEventListener("click", () => { rating = Number(choice.dataset.rating); choices.forEach(item => item.classList.toggle("is-selected", item === choice)); extra.classList.remove("d-none"); textarea.focus(); }));
+    submit.addEventListener("click", async () => {
+      if (!rating) return;
+      submit.disabled = true;
+      try {
+        const response = await fetch("/feedback/quick", {method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded","X-Requested-With":"XMLHttpRequest"},body:new URLSearchParams({history_id:String(historyId),rating:String(rating),comment:textarea.value})});
+        if (!response.ok) throw new Error("feedback failed");
+        extra.classList.add("d-none"); choices.forEach(item => { item.disabled = true; item.classList.remove("is-selected"); }); thanks.classList.remove("d-none");
+      } catch (error) { submit.disabled = false; window.location.href = `/feedback?history_id=${encodeURIComponent(historyId)}`; }
+    });
+  }
+
   function drawFootInset(ctx, image, focus, x, y, size) {
     if (!focus) return;
     const sourceSize = Math.min(image.width, image.height) * .34;
@@ -249,7 +273,7 @@
       const card = await makeShareCard(result, canvas), shareArea = document.getElementById("runShareArea"); shareArea.appendChild(card);
       const download = document.createElement("button"); download.type="button"; download.className="btn btn-success w-100 fw-bold"; download.textContent=I.save_image || "Save SNS result image"; download.onclick=()=>{const link=document.createElement("a");link.download="sungeum-running-form-result.png";link.href=card.toDataURL("image/png");link.click()};shareArea.appendChild(download);
       const saveState=document.createElement("div");saveState.className="small text-secondary mt-2";saveState.textContent=I.saving || "Saving to history…";shareArea.appendChild(saveState);
-      try{const saved=await saveRunningHistory(result,card);saveState.innerHTML=I.saved || "✓ Saved to history · View history";saveState.dataset.historyId=saved.history_id}catch(saveError){saveState.textContent=`${I.generic_error || "Something went wrong"}: ${friendlyError(saveError)}`}
+      try{const saved=await saveRunningHistory(result,card);saveState.innerHTML=I.saved || "✓ Saved to history · View history";saveState.dataset.historyId=saved.history_id;mountQuickFeedback(shareArea,saved.history_id)}catch(saveError){saveState.textContent=`${I.generic_error || "Something went wrong"}: ${friendlyError(saveError)}`}
     } catch (error) {
       document.dispatchEvent(new CustomEvent("sungeum:state", { detail: { state: "failed", duration: 1800 } }));
       status.className = "alert alert-danger mt-4"; status.textContent = friendlyError(error);

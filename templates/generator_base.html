@@ -17,6 +17,7 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
 .generator-tab-icon { display:grid; place-items:center; width:32px; height:32px; color:#61dcff; }
 .generator-tab-icon svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 .generator-tab-copy { min-width:0; line-height:1.15; }
+.quick-feedback-card{margin-top:1.25rem;padding:1rem 1.1rem;border:1px solid rgba(97,230,211,.28);border-radius:16px;background:linear-gradient(135deg,rgba(13,110,112,.1),rgba(37,99,235,.08))}.quick-feedback-card h5{margin:0;color:#17243a;font-weight:800}.quick-feedback-card p{margin:.35rem 0 .8rem;color:#64748b;font-size:.9rem}.quick-feedback-actions{display:flex;gap:.5rem;flex-wrap:wrap}.quick-feedback-choice{border:1px solid #cbd5e1;border-radius:999px;background:#fff;color:#17243a;padding:.45rem .75rem;font-weight:700}.quick-feedback-choice:hover,.quick-feedback-choice.is-selected{border-color:#397dff;background:#eef4ff;color:#1d4ed8}.quick-feedback-comment{display:none;margin-top:.8rem}.quick-feedback-comment.is-visible{display:block}.quick-feedback-comment textarea{width:100%;min-height:72px;border:1px solid #cbd5e1;border-radius:10px;padding:.65rem}.quick-feedback-submit{margin-top:.55rem;border:0;border-radius:10px;padding:.5rem .85rem;background:linear-gradient(135deg,#397dff,#8055ff);color:#fff;font-weight:800}.quick-feedback-thanks{color:#08786d;font-weight:700}
 .generator-tab-copy strong { display:block; font-size:.88rem; }
 .generator-tab-copy small { display:block; margin-top:5px; color:#8492ab; font-size:.66rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
@@ -162,6 +163,24 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
                 </button>
                 {% endblock %}
             </div>
+
+            {% if history_id %}
+            <section class="quick-feedback-card" data-quick-feedback data-history-id="{{ history_id }}">
+                <h5>{{ t('v3.quick_feedback.title') }}</h5>
+                <p>{{ t('v3.quick_feedback.prompt') }}</p>
+                <div class="quick-feedback-actions" role="group" aria-label="{{ t('v3.quick_feedback.title') }}">
+                    <button type="button" class="quick-feedback-choice" data-rating="5">{{ t('v3.quick_feedback.helpful') }}</button>
+                    <button type="button" class="quick-feedback-choice" data-rating="3">{{ t('v3.quick_feedback.neutral') }}</button>
+                    <button type="button" class="quick-feedback-choice" data-rating="2">{{ t('v3.quick_feedback.not_helpful') }}</button>
+                </div>
+                <div class="quick-feedback-comment">
+                    <label class="small fw-semibold" for="quick-feedback-text">{{ t('v3.quick_feedback.comment') }}</label>
+                    <textarea id="quick-feedback-text" maxlength="3000" placeholder="{{ t('v3.quick_feedback.placeholder') }}"></textarea>
+                    <button type="button" class="quick-feedback-submit">{{ t('v3.quick_feedback.send') }}</button>
+                </div>
+                <div class="quick-feedback-thanks d-none" role="status">{{ t('v3.quick_feedback.thanks') }}</div>
+            </section>
+            {% endif %}
         </div>
     </div>
     {% endif %}
@@ -341,6 +360,41 @@ document.addEventListener("DOMContentLoaded", function () {
     } else if (document.getElementById("result")) {
         document.dispatchEvent(new CustomEvent("sungeum:state", { detail: { state: "approved", duration: 1400 } }));
     }
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("[data-quick-feedback]").forEach(function (card) {
+        const choices = Array.from(card.querySelectorAll("[data-rating]"));
+        const commentBox = card.querySelector(".quick-feedback-comment");
+        const textarea = card.querySelector("textarea");
+        const submit = card.querySelector(".quick-feedback-submit");
+        const thanks = card.querySelector(".quick-feedback-thanks");
+        let rating = null;
+        choices.forEach(function (choice) {
+            choice.addEventListener("click", function () {
+                rating = Number(choice.dataset.rating);
+                choices.forEach((item) => item.classList.toggle("is-selected", item === choice));
+                commentBox.classList.add("is-visible");
+                textarea.focus();
+            });
+        });
+        submit.addEventListener("click", async function () {
+            if (!rating) return;
+            submit.disabled = true;
+            const body = new URLSearchParams({ history_id: card.dataset.historyId, rating: String(rating), comment: textarea.value });
+            try {
+                const response = await fetch("/feedback/quick", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", "X-Requested-With": "XMLHttpRequest" }, body });
+                if (!response.ok) throw new Error("feedback failed");
+                commentBox.classList.remove("is-visible");
+                choices.forEach((item) => { item.disabled = true; item.classList.remove("is-selected"); });
+                thanks.classList.remove("d-none");
+            } catch (error) {
+                submit.disabled = false;
+                window.location.href = "/feedback?history_id=" + encodeURIComponent(card.dataset.historyId);
+            }
+        });
+    });
 });
 </script>
 <script src="{{ url_for('static', filename='smart-suggestions.js') }}"></script>

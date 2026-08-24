@@ -1,7 +1,8 @@
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
 
 from database.db import (
     get_history,
+    get_history_item,
     get_product_comments,
     get_product_feedback,
     save_product_comment,
@@ -52,3 +53,23 @@ def feedback():
         feedback_list=get_product_feedback(user_id, history_id),
         comment_list=get_product_comments(user_id, history_id),
     )
+
+
+@feedback_bp.route("/feedback/quick", methods=["POST"])
+@login_required
+def quick_feedback():
+    """Save the lightweight, in-context feedback shown after a result."""
+    rating = max(1, min(5, request.form.get("rating", type=int) or 3))
+    history_id = request.form.get("history_id", type=int)
+    if history_id and not get_history_item(history_id, session["user_id"]):
+        return jsonify({"ok": False, "error": "history_not_found"}), 404
+    liked = request.form.get("liked", "").strip()[:2000]
+    disliked = request.form.get("disliked", "").strip()[:2000]
+    comment = request.form.get("comment", "").strip()[:3000]
+    save_product_feedback(
+        session["user_id"], history_id, rating, liked, disliked,
+        request.form.get("would_use") == "on",
+    )
+    if comment:
+        save_product_comment(session["user_id"], history_id, comment)
+    return jsonify({"ok": True, "reply": _sungeum_reply(rating=rating, liked=liked, disliked=disliked, body=comment)})

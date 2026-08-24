@@ -1907,3 +1907,14 @@ for _lang, _values in {
     "es":{"assistant_working":"Trabajando con cuidado","assistant_approved":"Sungeum lo revisó","assistant_failed":"Listo para reintentar","assistant_listening":"Te escucho"},
 }.items():
     _RUNNING_I18N[_lang].update(_values)
+
+for _lang, _values in {
+    "ko": {"title": "순금이 결과는 어땠나요? 🐶", "prompt": "버튼 하나만 눌러도 다음 결과를 더 좋아지게 만들 수 있어요.", "helpful": "👍 도움이 됐어요", "neutral": "😐 보통이에요", "not_helpful": "👎 아쉬워요", "comment": "한마디 남기기 (선택)", "placeholder": "가장 좋았던 점이나 고칠 점을 짧게 적어주세요", "send": "후기 보내기", "thanks": "소중한 의견 고마워요! 순금이가 다음 결과에 반영할게요 🐶✨"},
+    "en": {"title": "How was Sungeum’s result? 🐶", "prompt": "One tap helps us make the next result better.", "helpful": "👍 It helped", "neutral": "😐 It was okay", "not_helpful": "👎 Needs work", "comment": "Add a note (optional)", "placeholder": "Tell us one thing you liked or would change", "send": "Send feedback", "thanks": "Thanks for sharing! Sungeum will use it to improve the next result 🐶✨"},
+    "ja": {"title": "スングムの結果はいかがでしたか？ 🐶", "prompt": "ワンタップの感想が次の結果の改善に役立ちます。", "helpful": "👍 役に立った", "neutral": "😐 ふつう", "not_helpful": "👎 改善が必要", "comment": "ひとこと（任意）", "placeholder": "よかった点や直したい点を短く教えてください", "send": "感想を送る", "thanks": "感想をありがとう！次の結果に活かします 🐶✨"},
+    "th": {"title": "ผลลัพธ์ของซุนกึมเป็นอย่างไรบ้าง? 🐶", "prompt": "แตะเพียงครั้งเดียวเพื่อช่วยให้ผลลัพธ์ครั้งหน้าดีขึ้น", "helpful": "👍 มีประโยชน์", "neutral": "😐 พอใช้", "not_helpful": "👎 ควรปรับปรุง", "comment": "ฝากข้อความ (ไม่บังคับ)", "placeholder": "บอกสิ่งที่ชอบหรืออยากให้แก้สั้น ๆ", "send": "ส่งความคิดเห็น", "thanks": "ขอบคุณสำหรับความคิดเห็น! ซุนกึมจะนำไปปรับปรุงครั้งหน้า 🐶✨"},
+    "zh": {"title": "你觉得顺金的结果怎么样？ 🐶", "prompt": "点一下就能帮助我们改进下一次结果。", "helpful": "👍 有帮助", "neutral": "😐 一般", "not_helpful": "👎 需要改进", "comment": "留下备注（可选）", "placeholder": "请简短写下喜欢或想改进的地方", "send": "发送反馈", "thanks": "谢谢你的意见！顺金会用来改进下一次结果 🐶✨"},
+    "es": {"title": "¿Qué te pareció el resultado de Sungeum? 🐶", "prompt": "Un toque nos ayuda a mejorar el próximo resultado.", "helpful": "👍 Me ayudó", "neutral": "😐 Normal", "not_helpful": "👎 Hay que mejorarlo", "comment": "Añadir una nota (opcional)", "placeholder": "Cuéntanos algo que te gustó o cambiarías", "send": "Enviar opinión", "thanks": "¡Gracias por compartirlo! Sungeum lo usará para mejorar 🐶✨"},
+}.items():
+    for _key, _value in _values.items():
+        TRANSLATIONS[_lang][f"v3.quick_feedback.{_key}"] = _value
