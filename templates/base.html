@@ -201,6 +201,36 @@
         }
 
         @media (max-width: 767.98px) {
+            /* Keep every mobile screen on the same compact, horizontal menu.
+               The old 100%-width buttons stacked into a very long column. */
+            .pf-navbar .navbar-collapse.show {
+                overflow-x: auto;
+                scrollbar-width: none;
+                padding-bottom: .35rem;
+            }
+            .pf-navbar .navbar-collapse.show::-webkit-scrollbar { display: none; }
+            .pf-navbar .navbar-nav {
+                width: max-content;
+                min-width: 100%;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                align-items: stretch !important;
+                gap: .5rem !important;
+            }
+            .pf-navbar .navbar-nav > .pf-nav-btn,
+            .pf-navbar .navbar-nav > .pf-credit-pill,
+            .pf-navbar .navbar-nav > .dropdown {
+                flex: 0 0 auto;
+                width: auto !important;
+            }
+            .pf-navbar .navbar-nav > .pf-nav-btn,
+            .pf-navbar .navbar-nav > .pf-credit-pill,
+            .pf-navbar .navbar-nav > .dropdown > .pf-user-menu {
+                min-height: 44px;
+                padding-inline: .8rem;
+                white-space: nowrap;
+            }
+
             .pf-page {
                 padding-top: 1.25rem;
             }
