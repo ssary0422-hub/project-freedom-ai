@@ -20,7 +20,7 @@ from routes.social_publish import social_publish_bp
 from routes.payment import payment_bp
 from routes.services import services_bp
 
-from i18n.translations import SUPPORTED_LANGUAGES, running_i18n, translate
+from i18n.translations import SUPPORTED_LANGUAGES, TRANSLATIONS, running_i18n, translate
 from routes.admin import admin_bp
 from routes.credits import credits_bp
 from database.users import (
