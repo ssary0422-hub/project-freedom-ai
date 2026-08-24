@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}콘텐츠 만들기 - Project Freedom AI{% endblock %}
+{% block extra_style %}
+.content-hub{max-width:1080px}.content-hero{border-radius:28px;background:linear-gradient(135deg,#0b2036,#123e5c);color:#fff}.content-card{height:100%;border:1px solid #dbe7f0;border-radius:22px;background:#fff;box-shadow:0 12px 30px rgba(25,55,85,.08);transition:transform .18s ease,box-shadow .18s ease}.content-card:hover{transform:translateY(-4px);box-shadow:0 18px 36px rgba(25,55,85,.14)}.content-card-icon{font-size:2rem}.content-card a{text-decoration:none;color:inherit}.content-card .btn{border-radius:999px;font-weight:800}.content-secondary{border-radius:20px;background:#f3f8fb;border:1px solid #d9e8ef}
+{% endblock %}
+{% block content %}
+<main class="container content-hub py-4 py-lg-5">
+  <section class="content-hero p-4 p-lg-5 mb-4">
+    <div class="row align-items-center g-4"><div class="col-lg-8"><div class="text-info fw-bold small mb-2">PROJECT FREEDOM AI</div><h1 class="display-6 fw-bold mb-3">무엇을 만들어볼까?</h1><p class="lead text-white-50 mb-0">광고 하나만 만드는 곳이 아니야. 필요한 콘텐츠를 골라 순금이와 바로 시작해봐.</p></div><div class="col-lg-4 text-center"><img src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="순금이" style="width:150px;max-width:100%"></div></div>
+  </section>
+  <div class="row g-3 g-lg-4">
+    <div class="col-md-6"><article class="content-card p-4"><a href="/ads-generator"><div class="content-card-icon">📣</div><h2 class="h4 fw-bold mt-3">광고 만들기</h2><p class="text-muted">가게와 상품을 알리는 광고 문구와 이미지를 만들어봐.</p><span class="btn btn-primary px-4">광고 시작하기</span></a></article></div>
+    <div class="col-md-6"><article class="content-card p-4"><a href="/sns"><div class="content-card-icon">📱</div><h2 class="h4 fw-bold mt-3">SNS 콘텐츠</h2><p class="text-muted">인스타그램과 쓰레드에 올릴 게시물 문구와 이미지를 준비해.</p><span class="btn btn-primary px-4">SNS 시작하기</span></a></article></div>
+    <div class="col-md-6"><article class="content-card p-4"><a href="/blog"><div class="content-card-icon">📝</div><h2 class="h4 fw-bold mt-3">블로그 글쓰기</h2><p class="text-muted">검색에 잘 읽히는 블로그 글과 구조를 순금이가 정리해줄게.</p><span class="btn btn-primary px-4">블로그 시작하기</span></a></article></div>
+    <div class="col-md-6"><article class="content-card p-4"><a href="/poster"><div class="content-card-icon">🖼️</div><h2 class="h4 fw-bold mt-3">포스터 만들기</h2><p class="text-muted">매장에 붙이거나 SNS에 공유할 포스터를 만들어봐.</p><span class="btn btn-primary px-4">포스터 시작하기</span></a></article></div>
+  </div>
+  <section class="content-secondary mt-4 p-3 p-lg-4 d-flex flex-wrap align-items-center justify-content-between gap-3"><div><strong>콘텐츠가 아니라 코칭이 필요해?</strong><div class="text-muted small mt-1">러닝 자세 분석과 말하기 코칭도 여기서 바로 갈 수 있어.</div></div><div class="d-flex gap-2"><a class="btn btn-outline-dark rounded-pill" href="/running-form">🏃 러닝 코치</a><a class="btn btn-outline-dark rounded-pill" href="/speaking-coach">🐶 말하기 코치</a></div></section>
+</main>
+{% endblock %}

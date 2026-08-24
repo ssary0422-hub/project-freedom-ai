@@ -210,6 +210,13 @@ def dashboard():
     dashboard_data = get_dashboard_data(session["user_id"])
     return render_template("dashboard.html", dashboard=dashboard_data)
 
+
+@app.route("/content")
+@login_required
+def content_hub():
+    """Give every content format a clear, single-step entry point."""
+    return render_template("content_hub.html")
+
 # -------------------------
 # Word 문서
 # -------------------------

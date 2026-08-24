@@ -20,7 +20,7 @@
         <div class="collapse navbar-collapse mt-3 mt-xl-0" id="pfMainNav">
             <div class="navbar-nav ms-auto gap-2 align-items-xl-center">
                 <div class="dropdown">
-                    <button class="btn pf-nav-btn dropdown-toggle {% if request.path.startswith(('/ads-generator','/sns','/blog','/poster')) %}pf-nav-active{% endif %}" type="button" data-bs-toggle="dropdown" aria-expanded="false">{{ nav_icon('megaphone') }} {{ t('nav.create') }}</button>
+                    <button class="btn pf-nav-btn dropdown-toggle {% if request.path.startswith(('/ads-generator','/sns','/blog','/poster','/content')) %}pf-nav-active{% endif %}" type="button" data-bs-toggle="dropdown" aria-expanded="false" onclick="window.location.href='/content';">{{ nav_icon('megaphone') }} {{ t('nav.create') }}</button>
                     <ul class="dropdown-menu dropdown-menu-end shadow pf-nav-menu">
                         <li><a class="dropdown-item" href="{% if session.get('user_id') %}/ads-generator{% else %}/register{% endif %}">{{ nav_icon('megaphone') }}<span><strong>{{ t('nav.ad') }}</strong><small>{{ t('nav.ad_desc') }}</small></span></a></li>
                         {% if session.get("user_id") %}
