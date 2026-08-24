@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ current_language or 'ko' }}"{% if current_language == 'en' %} translate="yes"{% endif %}>
+<html lang="{{ current_language or 'ko' }}"{% if current_language in ('en', 'th') %} translate="yes"{% endif %}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -222,7 +222,7 @@
     <script>window.PF_MENU_I18N = {{ menu_i18n|tojson }};</script>
     <script src="{{ url_for('static', filename='i18n-runtime.js') }}" defer></script>
     <script src="{{ url_for('static', filename='menu-localize.js') }}" defer></script>
-    {% if current_language == 'en' %}<script src="{{ url_for('static', filename='auto-translate.js') }}" defer></script>{% endif %}
+    {% if current_language in ('en', 'th') %}<script src="{{ url_for('static', filename='auto-translate.js') }}" defer></script>{% endif %}
 </head>
 
 <body {% block body_attrs %}{% endblock %}>

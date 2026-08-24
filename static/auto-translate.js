@@ -5,11 +5,13 @@
   // JavaScript). When English is selected, let Google's page translator cover
   // those legacy strings as a final fallback so the whole screen stays in the
   // selected language.
-  if (document.documentElement.lang !== "en") return;
+  const currentLanguage = document.documentElement.lang;
+  if (!["en", "th"].includes(currentLanguage)) return;
 
   // Tell the widget to apply English immediately; users should not have to
   // open a second language menu after choosing English in the app.
-  document.cookie = "googtrans=/ko/en; path=/";
+  const targetLanguage = currentLanguage;
+  document.cookie = `googtrans=/ko/${targetLanguage}; path=/`;
 
   // Keep the mascot's proper name as a name, rather than translating it as
   // the literal phrase “pure gold”.
@@ -19,7 +21,8 @@
     while (walker.nextNode()) nodes.push(walker.currentNode);
     nodes.forEach((node) => {
       if (!node.nodeValue || !node.nodeValue.includes("순금")) return;
-      node.nodeValue = node.nodeValue.replaceAll("순금이", "Sungeum").replaceAll("순금", "Sungeum");
+      const name = currentLanguage === "th" ? "ซุนกึม" : "Sungeum";
+      node.nodeValue = node.nodeValue.replaceAll("순금이", name).replaceAll("순금", name);
     });
   };
   if (document.body) protectSungeumName();
@@ -46,7 +49,7 @@
     if (!window.google || !google.translate) return;
     new google.translate.TranslateElement({
       pageLanguage: "ko",
-      includedLanguages: "en",
+      includedLanguages: targetLanguage,
       autoDisplay: false,
       multilanguagePage: true,
     }, "google_translate_fallback");
