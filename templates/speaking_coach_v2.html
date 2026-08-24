@@ -31,6 +31,8 @@
 <div id="coachCharacterBubble" class="coach-character-bubble">무슨 일이야? 편하게 말해줘.</div>
 {% endblock %}
 {% block scripts %}
+<script>window.PF_SPEAKING_COPY = {{ speaking_i18n|tojson }};</script>
+<script src="{{ url_for('static', filename='speaking-localize.js') }}" defer></script>
 <script>
 (() => {
   const input = document.getElementById('coachInput');

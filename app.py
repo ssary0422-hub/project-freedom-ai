@@ -21,6 +21,16 @@ from routes.payment import payment_bp
 from routes.services import services_bp
 
 from i18n.translations import SUPPORTED_LANGUAGES, TRANSLATIONS, running_i18n, translate
+from i18n.speaking_copy import SPEAKING_COPY
+
+MENU_COPY = {
+    "ko": {"광고 콘텐츠":"광고 콘텐츠", "SNS":"SNS", "블로그":"블로그", "포스터":"포스터", "러닝 코치":"순금이 러닝코치", "말하기 코치":"순금이 말하기 코치", "리뷰":"리뷰", "기록":"기록", "크레딧":"크레딧"},
+    "en": {"광고 콘텐츠":"Ad content", "SNS":"SNS", "블로그":"Blog", "포스터":"Poster", "러닝 코치":"Sungeum Running Coach", "말하기 코치":"Sungeum Speaking Coach", "리뷰":"Reviews", "기록":"History", "크레딧":"Credits"},
+    "ja": {"광고 콘텐츠":"広告コンテンツ", "SNS":"SNS", "블로그":"ブログ", "포스터":"ポスター", "러닝 코치":"スングム ランニングコーチ", "말하기 코치":"スングム スピーキングコーチ", "리뷰":"レビュー", "기록":"履歴", "크레딧":"クレジット"},
+    "th": {"광고 콘텐츠":"เนื้อหาโฆษณา", "SNS":"SNS", "블로그":"บล็อก", "포스터":"โปสเตอร์", "러닝 코치":"โค้ชวิ่งซุนกึม", "말하기 코치":"โค้ชการพูดซุนกึม", "리뷰":"รีวิว", "기록":"ประวัติ", "크레딧":"เครดิต"},
+    "zh": {"광고 콘텐츠":"广告内容", "SNS":"SNS", "블로그":"博客", "포스터":"海报", "러닝 코치":"顺金跑步教练", "말하기 코치":"顺金表达教练", "리뷰":"评价", "기록":"记录", "크레딧":"积分"},
+    "es": {"광고 콘텐츠":"Contenido publicitario", "SNS":"SNS", "블로그":"Blog", "포스터":"Póster", "러닝 코치":"Entrenador de running Sungeum", "말하기 코치":"Coach de expresión Sungeum", "리뷰":"Reseñas", "기록":"Historial", "크레딧":"Créditos"},
+}
 from routes.admin import admin_bp
 from routes.credits import credits_bp
 from database.users import (
@@ -154,6 +164,18 @@ def inject_i18n():
             for source in values:
                 if source and source != target:
                     translation_pairs.append({"source": source, "target": target})
+    for key, source in SPEAKING_COPY["ko"].items():
+        target = SPEAKING_COPY.get(language, SPEAKING_COPY["ko"]).get(key)
+        if source and target and source != target:
+            translation_pairs.append({"source": source, "target": target})
+    for source in MENU_COPY["ko"]:
+        target = MENU_COPY.get(language, MENU_COPY["ko"]).get(source)
+        if target and source != target:
+            translation_pairs.append({"source": source, "target": target})
+    for source, target_key in (("순금이 러닝코치", "러닝 코치"), ("순금이 말하기 코치", "말하기 코치")):
+        target = MENU_COPY.get(language, MENU_COPY["ko"]).get(target_key)
+        if target and source != target:
+            translation_pairs.append({"source": source, "target": target})
 
     return {
         "current_language": language,
@@ -161,6 +183,7 @@ def inject_i18n():
         "t": lambda key: translate(key, language),
         "running_i18n": running_i18n(language),
         "translation_pairs": translation_pairs,
+        "speaking_i18n": SPEAKING_COPY.get(language, SPEAKING_COPY["ko"]),
     }
 
 
