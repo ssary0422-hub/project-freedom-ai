@@ -98,6 +98,58 @@ def generate_speaking_coach_json(
     return result
 
 
+def generate_running_coach_json(*, condition: str, minutes: int, goal: str) -> dict:
+    """Generate one structured, personalized no-video running plan."""
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY environment variable is required.")
+    model = os.getenv("OPENAI_TEXT_MODEL", DEFAULT_OPENAI_TEXT_MODEL).strip()
+    prompt = f"""
+너는 순금이라는 이름의 순둥순둥한 러닝 코치야.
+사용자 컨디션: {condition}
+오늘 가능한 시간(분): {minutes}
+러닝 목표: {goal}
+
+위 정보를 바탕으로 오늘 바로 실행할 수 있는 안전한 러닝 안내를 한국어로 작성해.
+거리보다 시간과 체감 강도를 우선하고, 통증이 있으면 달리기를 중단하도록 안내해.
+답변은 반드시 아래 JSON 구조만 사용해.
+""".strip()
+    response = OpenAI(api_key=api_key).responses.create(
+        model=model or DEFAULT_OPENAI_TEXT_MODEL,
+        input=prompt,
+        text={
+            "format": {
+                "type": "json_schema",
+                "name": "running_coach_plan",
+                "strict": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "title": {"type": "string"},
+                        "plan": {"type": "string"},
+                        "intensity": {"type": "string"},
+                        "warmup": {"type": "string"},
+                        "caution": {"type": "string"},
+                        "cooldown": {"type": "string"},
+                        "cheer": {"type": "string"},
+                    },
+                    "required": ["title", "plan", "intensity", "warmup", "caution", "cooldown", "cheer"],
+                    "additionalProperties": False,
+                },
+            }
+        },
+        max_output_tokens=900,
+    )
+    try:
+        result = json.loads(response.output_text)
+    except (TypeError, json.JSONDecodeError) as exc:
+        raise RuntimeError("OpenAI returned invalid running coach JSON.") from exc
+    required = ("title", "plan", "intensity", "warmup", "caution", "cooldown", "cheer")
+    if not all(isinstance(result.get(key), str) and result[key].strip() for key in required):
+        raise RuntimeError("OpenAI returned incomplete running coach JSON.")
+    return result
+
+
 def analyze_images_json(prompt: str, image_paths: list[str | Path]) -> dict:
     """Inspect one or more finished visuals in a single metered QA request."""
     api_key = os.getenv("OPENAI_API_KEY", "").strip()

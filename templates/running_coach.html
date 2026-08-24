@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}오늘의 러닝 코치 | 순금이{% endblock %}
+{% block content %}
+<main class="running-coach-page">
+  <section class="coach-hero">
+    <div class="coach-avatar" aria-hidden="true">🐕</div>
+    <div><p class="eyebrow">Sungeum Running Coach</p><h1>오늘 러닝, 순금이랑 정해볼까?</h1><p>영상 없이도 지금 컨디션에 맞는 러닝 계획을 무료로 만들어줄게.</p></div>
+  </section>
+  <section class="coach-card" id="coach-form-card">
+    <div class="coach-question"><span>순금이</span><strong>오늘 몸 상태는 어때?</strong></div>
+    <div class="choice-grid" data-field="condition">
+      <button type="button" data-value="good">좋아, 가볍게 달리고 싶어</button>
+      <button type="button" data-value="normal">보통이야</button>
+      <button type="button" data-value="tired">조금 피곤해</button>
+      <button type="button" data-value="pain">통증이 있어</button>
+    </div>
+    <div class="coach-question"><span>순금이</span><strong>오늘 몇 분 정도 뛸 수 있어?</strong></div>
+    <div class="choice-grid" data-field="minutes">
+      <button type="button" data-value="20">20분</button><button type="button" data-value="30">30분</button><button type="button" data-value="45">45분</button><button type="button" data-value="60">60분 이상</button>
+    </div>
+    <div class="coach-question"><span>순금이</span><strong>오늘 러닝의 목적은 뭐야?</strong></div>
+    <div class="choice-grid" data-field="goal">
+      <button type="button" data-value="easy">가볍게 뛰기</button><button type="button" data-value="fitness">체력 키우기</button><button type="button" data-value="weight">체중 관리</button><button type="button" data-value="race">대회 준비</button>
+    </div>
+    <button class="primary-action" id="coach-submit" type="button" disabled>순금이에게 무료 코칭 받기</button>
+    <p class="coach-status" id="coach-status" role="status"></p>
+  </section>
+  <section class="coach-result" id="coach-result" hidden></section>
+</main>
+<style>
+.running-coach-page{max-width:760px;margin:0 auto;padding:28px 16px 70px}.coach-hero{display:flex;gap:18px;align-items:center;padding:24px;border-radius:24px;background:linear-gradient(135deg,#effbf8,#eef1ff);margin-bottom:18px}.coach-avatar{font-size:48px}.eyebrow{color:#087f78;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12px}.coach-hero h1{margin:4px 0 8px;font-size:clamp(24px,5vw,38px)}.coach-hero p{margin:0;color:#52657d}.coach-card,.coach-result{background:#fff;border:1px solid #dce7ef;border-radius:24px;padding:24px;box-shadow:0 12px 35px #1b35520d}.coach-question{display:flex;flex-direction:column;gap:5px;margin:18px 0 12px}.coach-question span{font-size:12px;color:#0a948b;font-weight:700}.coach-question strong{font-size:18px}.choice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.choice-grid button{border:1px solid #cbd9e8;background:#f8fbfd;border-radius:14px;padding:13px 10px;color:#29405a;cursor:pointer;font-size:14px}.choice-grid button.selected{background:#dff8f2;border-color:#0b9e91;color:#08756f;font-weight:700}.primary-action{width:100%;margin-top:24px;border:0;border-radius:14px;padding:15px;background:#5664f6;color:#fff;font-size:16px;font-weight:700;cursor:pointer}.primary-action:disabled{opacity:.45;cursor:not-allowed}.coach-status{min-height:20px;color:#6c7d91;font-size:13px}.result-title{font-size:24px;margin:0 0 18px}.result-item{padding:14px 0;border-top:1px solid #e5edf3}.result-item h3{font-size:14px;color:#087f78;margin:0 0 6px}.result-item p{margin:0;line-height:1.65;color:#30445b}.result-cheer{background:#effbf8;border-radius:14px;padding:15px;margin-top:14px;color:#08756f;font-weight:600}
+@media(max-width:520px){.coach-hero{padding:18px}.coach-avatar{font-size:38px}.coach-card,.coach-result{padding:18px}.choice-grid{grid-template-columns:1fr 1fr}}
+</style>
+<script src="{{ url_for('static', filename='running-coach.js') }}?v=20260824-mvp"></script>
+{% endblock %}
