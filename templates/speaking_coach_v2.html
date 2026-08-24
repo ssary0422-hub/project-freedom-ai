@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}순금이 말하기 코치 | Project Freedom AI{% endblock %}
+{% block extra_style %}
+.coach-v2{max-width:920px;margin:0 auto}.coach-hero{background:linear-gradient(135deg,#082337,#0b6f73);color:#fff;border-radius:28px;padding:2.4rem}.coach-kicker{color:#9df6e8;font-size:.75rem;font-weight:800;letter-spacing:.16em}.coach-card{border:1px solid #dce9ef;border-radius:24px;background:#fff;box-shadow:0 18px 50px rgba(16,34,60,.08)}.coach-input{min-height:150px;resize:vertical;border:2px solid #dce9ef;border-radius:18px;font-size:1.05rem;padding:1rem}.coach-input:focus{border-color:#0d8b83;box-shadow:0 0 0 4px rgba(13,139,131,.12)}.coach-result{background:#f2fffc;border:1px solid #a9e4d8;border-radius:20px;padding:1.2rem}.coach-quote{background:#fff;border-left:4px solid #0d8b83;border-radius:12px;padding:1rem 1.1rem;font-size:1.12rem;line-height:1.65;color:#1d3853}.coach-actions{display:flex;flex-wrap:wrap;gap:.55rem}.coach-actions button{border:1px solid #b8d4e9;background:#fff;border-radius:999px;padding:.55rem .8rem;color:#24415f;font-weight:700}.coach-actions button.primary{background:#123b59;color:#fff;border-color:#123b59}.coach-mascot{width:120px;height:145px;object-fit:contain}.coach-hint{color:#6b7c90;font-size:.88rem}.coach-loading{color:#0d706b;font-weight:700}@media(max-width:767px){.coach-hero{padding:1.8rem 1.25rem}.coach-mascot{width:88px;height:110px}}
+{% endblock %}
+{% block content %}
+<main class="container coach-v2">
+  <section class="coach-hero mb-4"><div class="row align-items-center"><div class="col"><div class="coach-kicker mb-3">SUNGEUM SPEAKING COACH</div><h1 class="display-6 fw-bold mb-3">무슨 일이야?<br>순금이에게 편하게 말해줘.</h1><p class="lead text-white-50 mb-0">상황을 설명하면, 실제로 말할 수 있는 문장으로 바로 정리해줄게.</p></div><div class="col-auto"><img class="coach-mascot sungeum-alive" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="순금이"></div></div></section>
+  <section class="coach-card p-3 p-lg-4">
+    <label class="form-label fw-bold" for="coachInput">어떤 일이 있었어?</label>
+    <textarea id="coachInput" class="form-control coach-input" placeholder="예: 몸이 안 좋아서 오늘 조퇴하고 싶은데 상사에게 어떻게 말하지?"></textarea>
+    <div class="d-flex justify-content-between align-items-center mt-3 gap-3"><span class="coach-hint">정리되지 않은 말이어도 괜찮아. 순금이가 알아서 정리할게.</span><button id="coachSubmit" class="btn btn-primary btn-lg fw-bold px-4" type="button">순금아, 어떻게 말해?</button></div>
+    <div id="coachStatus" class="mt-3" aria-live="polite"></div>
+    <div id="coachResult" class="coach-result mt-4 d-none" aria-live="polite"><div class="small text-secondary mb-2">순금이가 이해한 상황</div><p id="coachUnderstanding" class="fw-semibold mb-3"></p><div class="small text-secondary mb-2">바로 말할 문장</div><div id="coachQuote" class="coach-quote"></div><div class="small text-secondary mt-3 mb-2">다른 느낌으로 말하면</div><div class="coach-actions"><button type="button" data-variant="soft">더 부드럽게</button><button type="button" data-variant="firm">더 단호하게</button><button type="button" data-quick class="primary">급해! 한 문장만</button></div><button id="coachAgain" type="button" class="btn btn-link px-0 mt-3">다른 상황 말해보기</button></div>
+  </section>
+  <p class="coach-hint text-center mt-3">처음에는 누구에게나 자연스럽고 무난한 말투로 도와줘. 원하는 경우에만 말투를 바꿀 수 있어.</p>
+  <div class="text-center mt-3 d-flex justify-content-center gap-2 flex-wrap"><a class="btn btn-outline-primary rounded-pill px-4" href="/payment">순금이 프로 기능 보기</a><a class="btn btn-outline-secondary rounded-pill px-4" href="/services">사업장 파일럿 보기</a></div>
+</main>
+<style>
+.coach-mascot{animation:coach-float 3.2s ease-in-out infinite}
+.coach-character-bubble{position:fixed;right:28px;bottom:28px;z-index:20;max-width:210px;padding:.7rem .85rem;border-radius:16px 16px 4px 16px;background:#fff;color:#24415f;box-shadow:0 10px 28px rgba(0,0,0,.16);font-size:.86rem;line-height:1.4}
+.coach-character-anchor{position:relative}.coach-character-bubble{position:absolute;right:-18px;top:-12px}.coach-character-bubble.is-thinking{background:#e5fffa}.coach-character-bubble.is-helping{background:#fff6d8}.coach-character-anchor.is-thinking .coach-mascot{animation:coach-think 1.1s ease-in-out infinite}.coach-character-anchor.is-helping .coach-mascot{animation:coach-help 1.3s ease-in-out 1}
+@keyframes coach-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes coach-think{0%,100%{transform:rotate(0) translateY(0)}50%{transform:rotate(-4deg) translateY(-4px)}}
+@keyframes coach-help{0%,100%{transform:translateY(0)}45%{transform:translateY(-9px) rotate(3deg)}}
+@media(max-width:767px){.coach-character-bubble{right:14px;bottom:14px;max-width:175px;font-size:.78rem}}
+</style>
+<style>
+.sungeum-assistant-trigger{display:none!important}.coach-hero .col-auto{min-width:210px}.coach-character-anchor{padding-top:72px}.coach-character-anchor .coach-mascot{display:block;margin:0 auto;position:relative;z-index:1}.coach-character-anchor .coach-character-bubble{top:-4px;right:-8px;z-index:3;min-width:175px;width:175px;height:60px!important;min-height:0!important;max-height:60px;overflow:hidden;white-space:normal}.coach-mascot-hand{display:none!important}.coach-character-anchor.is-helping .coach-mascot:not(.coach-mascot-hand){display:none}.coach-character-anchor.is-helping .coach-mascot-hand{display:block!important}.coach-question-mark{position:absolute;left:12px;top:8px;display:none;width:34px;height:34px;border-radius:50%;background:#ffe9a6;color:#7d5700;font-weight:900;font-size:1.4rem;line-height:34px;text-align:center;box-shadow:0 6px 12px rgba(60,44,0,.18);z-index:4}.coach-character-anchor.is-thinking .coach-question-mark{display:block;animation:coach-question .9s ease-in-out infinite}@keyframes coach-question{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-6px) rotate(8deg)}}.coach-card label.form-label{color:#203953!important}.coach-input{background:#f7fbff!important;color:#203953!important}.coach-input::placeholder{color:#70839a!important;opacity:1}.coach-hint{color:#61758c!important}.coach-hero .lead{color:#d0e1e8!important}
+@media(max-width:767px){.coach-hero .col-auto{min-width:145px}.coach-character-anchor{padding-top:62px}.coach-character-anchor .coach-character-bubble{right:-18px;min-width:150px}}
+</style>
+<div id="coachCharacterBubble" class="coach-character-bubble">무슨 일이야? 편하게 말해줘.</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(() => {
+  const input = document.getElementById('coachInput');
+  const submit = document.getElementById('coachSubmit');
+  const status = document.getElementById('coachStatus');
+  const characterBubble = document.getElementById('coachCharacterBubble');
+  const characterAnchor = document.querySelector('.coach-mascot')?.parentElement;
+  if (characterAnchor) {
+    characterAnchor.classList.add('coach-character-anchor');
+    characterAnchor.appendChild(characterBubble);
+    characterBubble.style.setProperty('height', 'auto', 'important');
+    characterBubble.style.setProperty('min-height', '0', 'important');
+    characterBubble.style.setProperty('max-height', 'none', 'important');
+    characterBubble.style.setProperty('width', 'max-content', 'important');
+    characterBubble.style.setProperty('max-width', '190px', 'important');
+    const handImage = document.createElement('img');
+    handImage.className = 'coach-mascot coach-mascot-hand';
+    handImage.src = "{{ url_for('static', filename='brand/sungeum-3d-hand-up.png') }}";
+    handImage.alt = '순금이';
+    characterAnchor.appendChild(handImage);
+    const questionMark = document.createElement('span');
+    questionMark.className = 'coach-question-mark';
+    questionMark.textContent = '?';
+    characterAnchor.appendChild(questionMark);
+  }
+  const setCoachState = (state) => {
+    const messages = { idle:'무슨 일이야? 편하게 말해줘.', listening:'응, 잘 듣고 있어.', thinking:'음… 상황을 천천히 정리해볼게.', helping:'이렇게 말하면 조금 더 편할 것 같아.' };
+    characterBubble.textContent = messages[state] || messages.idle;
+    characterBubble.classList.toggle('is-thinking', state === 'thinking');
+    characterBubble.classList.toggle('is-helping', state === 'helping');
+    characterAnchor?.classList.toggle('is-thinking', state === 'thinking');
+    characterAnchor?.classList.toggle('is-listening', state === 'listening');
+    characterAnchor?.classList.toggle('is-helping', state === 'helping');
+  };
+  const result = document.getElementById('coachResult');
+  const understanding = document.getElementById('coachUnderstanding');
+  const quote = document.getElementById('coachQuote');
+  const tonePicker = document.createElement('div');
+  tonePicker.className = 'coach-tone-picker mt-3';
+  tonePicker.innerHTML = '<span class="coach-tone-label">말투를 골라볼까?</span><div class="coach-tone-options" role="group" aria-label="말투 선택"><button type="button" class="is-selected" data-tone="natural">무난하게</button><button type="button" data-tone="polite">더 공손하게</button><button type="button" data-tone="friendly">친구처럼</button><button type="button" data-tone="firm">단호하게</button></div>';
+  input.insertAdjacentElement('afterend', tonePicker);
+  const categoryPicker = document.createElement('div');
+  categoryPicker.className = 'coach-category-picker mt-3';
+  const examples = ['친구에게 약속 시간에 늦었다고 어떻게 말하지?', '오늘 일찍 퇴근하고 싶은데 뭐라고 하지?', '부탁을 거절하고 싶은데 미안하지 않게 말하고 싶어.', '상대방에게 서운했던 점을 어떻게 말하지?', '처음 만난 사람에게 자연스럽게 부탁하려면 뭐라고 하지?'];
+  categoryPicker.innerHTML = '<span class="coach-tone-label">이런 상황도 도와줄게</span><div class="coach-example-row"><button type="button" class="coach-example" data-example></button><button type="button" class="coach-example-next">다른 예시 보기</button></div>';
+  input.insertAdjacentElement('beforebegin', categoryPicker);
+  const lengthPicker = document.createElement('div');
+  lengthPicker.className = 'coach-length-picker mt-3';
+  lengthPicker.innerHTML = '<span class="coach-tone-label">문장 길이는?</span><div class="coach-length-options"><button type="button" class="is-selected" data-length="normal">자연스럽게</button><button type="button" data-length="short">한 문장</button><button type="button" data-length="detail">자세하게</button><button type="button" data-length="long">더 길게</button></div>';
+  tonePicker.insertAdjacentElement('afterend', lengthPicker);
+  const confirm = document.createElement('div');
+  confirm.className = 'coach-confirm mt-3';
+  confirm.innerHTML = '<span class="coach-confirm-text">내가 이해한 상황이 맞아?</span><div class="coach-confirm-actions"><button type="button" data-confirm="yes">응, 맞아</button><button type="button" data-confirm="no">다시 설명할게</button></div>';
+  const coachNote = document.createElement('div');
+  coachNote.className = 'coach-note mt-3';
+  const copyButton = document.createElement('button');
+  copyButton.type = 'button'; copyButton.className = 'coach-copy mt-2'; copyButton.textContent = '문장 복사';
+  result.querySelector('.coach-quote').insertAdjacentElement('afterend', copyButton);
+  copyButton.insertAdjacentElement('afterend', coachNote);
+  coachNote.insertAdjacentElement('afterend', confirm);
+  let selectedTone = 'natural';
+  let selectedLength = 'normal';
+  let selectedCategory = '';
+  let current = null;
+  const originalFetch = window.fetch.bind(window);
+  window.fetch = (url, options) => {
+    if (String(url).includes('/api/speaking-coach') && options?.body) {
+      const body = JSON.parse(options.body); body.tone = selectedTone; body.goal = `${body.goal} (문장 길이: ${selectedLength})`; options.body = JSON.stringify(body);
+    }
+    return originalFetch(url, options);
+  };
+  const resultObserver = new MutationObserver(() => {
+    if (!result.classList.contains('d-none')) {
+      coachNote.textContent = current?.coach_note || '이 문장을 그대로 말해도 괜찮아.';
+    }
+  });
+  resultObserver.observe(result, {attributes:true, attributeFilter:['class']});
+  const fallback = (text) => {
+    const context = text.toLowerCase();
+    if (context.includes('조퇴') || context.includes('일찍 퇴근') || context.includes('아파') || context.includes('몸이 안')) return {understanding:'몸이 좋지 않아서 조퇴 허락을 구해야 하는 상황이구나.', sentence:'오늘 몸이 좋지 않아 조퇴해야 할 것 같습니다. 업무는 정리해두고 가겠습니다. 괜찮을까요?', soft:'오늘 몸이 좋지 않아 조퇴해도 괜찮을까요? 업무는 정리해두겠습니다.', firm:'오늘은 몸 상태 때문에 조퇴하겠습니다. 필요한 업무는 먼저 정리해두겠습니다.'};
+    if (context.includes('사과') || context.includes('미안') || context.includes('죄송')) return {understanding:'상대방에게 잘못한 일을 사과하고 싶은 상황이구나.', sentence:'불편하게 해드려서 죄송합니다. 다음부터는 더 신경 쓰겠습니다.', soft:'정말 죄송해요. 제 마음이 제대로 전달되지 않은 것 같아요.', firm:'이번 일은 제가 잘못했습니다. 같은 일이 반복되지 않도록 바로 고치겠습니다.'};
+    return {understanding:'상황과 마음을 상대방에게 자연스럽게 전달하고 싶은 상황이구나.', sentence:`제가 말씀드리고 싶은 건 ${text}입니다. 어떻게 하면 좋을지 같이 이야기해보고 싶어요.`, soft:`제가 조금 조심스러워서 그런데, ${text} 괜찮을지 여쭤봐도 될까요?`, firm:`${text} 이 부분은 꼭 전달드리고 싶습니다.`};
+  };
+  const show = (data) => { current=data; result.classList.remove('d-none'); understanding.textContent=data.understanding || '상황을 정리해봤어.'; quote.textContent=data.sentence; status.textContent=''; result.scrollIntoView({behavior:'smooth',block:'nearest'}); };
+  const generate = async () => {
+    const text=input.value.trim(); if(text.length<2){status.textContent='상황을 한두 문장만 적어줘.';return;}
+    submit.disabled=true; setCoachState('thinking'); status.className='coach-loading mt-3'; status.textContent='순금이가 상황을 정리하는 중…';
+    try { const response=await fetch('/api/speaking-coach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({person:'상대방',situation:text,message:text,goal:text,tone:'자연스럽고 무난하게',quick:false})}); const payload=await response.json(); if(!response.ok) throw new Error(payload.error||'fallback'); show({understanding:'상황을 정리해서 바로 말할 수 있게 다듬었어.',...payload.result}); }
+    catch(error){ show(fallback(text)); }
+    finally{ submit.disabled=false; setCoachState('helping'); status.className='mt-3'; }
+  };
+  submit.onclick=generate; input.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key==='Enter')generate();});
+  tonePicker.querySelectorAll('[data-tone]').forEach(button=>button.onclick=()=>{selectedTone=button.dataset.tone;tonePicker.querySelectorAll('[data-tone]').forEach(item=>item.classList.toggle('is-selected',item===button));setCoachState('listening');});
+  const exampleButton = categoryPicker.querySelector('[data-example]');
+  let exampleIndex = Math.floor(Math.random() * examples.length);
+  const renderExample = () => { exampleButton.textContent = examples[exampleIndex]; exampleButton.dataset.example = examples[exampleIndex]; };
+  renderExample();
+  exampleButton.onclick=()=>{selectedCategory='random-example';input.value=exampleButton.dataset.example;input.focus();setCoachState('listening');};
+  categoryPicker.querySelector('.coach-example-next').onclick=()=>{exampleIndex=(exampleIndex+1)%examples.length;renderExample();};
+  lengthPicker.querySelectorAll('[data-length]').forEach(button=>button.onclick=()=>{selectedLength=button.dataset.length;lengthPicker.querySelectorAll('[data-length]').forEach(item=>item.classList.toggle('is-selected',item===button));});
+  confirm.querySelector('[data-confirm="yes"]').onclick=()=>{confirm.querySelector('.coach-confirm-text').textContent='좋아, 이 상황에 맞춰 정리했어.';setCoachState('helping');};
+  confirm.querySelector('[data-confirm="no"]').onclick=()=>{result.classList.add('d-none');input.focus();setCoachState('listening');};
+  copyButton.onclick=async()=>{try{await navigator.clipboard.writeText(quote.textContent);copyButton.textContent='복사했어';setTimeout(()=>copyButton.textContent='문장 복사',1400);}catch(error){copyButton.textContent='문장을 길게 눌러 복사해줘';}};
+  document.querySelectorAll('[data-variant]').forEach(button=>button.onclick=()=>{if(current)quote.textContent=current[button.dataset.variant];});
+  document.querySelector('[data-quick]').onclick=()=>{if(current)quote.textContent=current.sentence;};
+  document.getElementById('coachAgain').onclick=()=>{input.value='';result.classList.add('d-none');setCoachState('idle');input.focus();};
+  input.addEventListener('focus',()=>setCoachState('listening'));
+  setCoachState('idle');
+})();
+</script>
+<style>
+/* Final override wins over the legacy fixed-height bubble rule. */
+.coach-hero .coach-character-anchor .coach-character-bubble{height:auto!important;min-height:0!important;max-height:none!important;width:max-content!important;max-width:190px!important;display:block!important;bottom:auto!important}
+@media(max-width:767px){.coach-hero .coach-character-anchor .coach-character-bubble{max-width:160px!important}}
+</style>
+<style>
+/* Softer mascot speech bubble: content-sized, rounded, with a small tail. */
+.coach-character-anchor .coach-character-bubble{width:auto!important;min-width:0!important;max-width:190px;height:auto!important;min-height:0!important;max-height:none!important;padding:.62rem .78rem;border:1px solid #cfe1e9;border-radius:18px 18px 5px 18px;box-shadow:0 9px 22px rgba(24,55,76,.16);font-size:.82rem;line-height:1.38;overflow:visible;white-space:normal}
+.coach-character-anchor .coach-character-bubble::after{content:"";position:absolute;left:20px;bottom:-8px;width:15px;height:15px;background:#fff;border-right:1px solid #cfe1e9;border-bottom:1px solid #cfe1e9;transform:rotate(45deg)}
+.coach-character-anchor .coach-character-bubble.is-thinking{background:#edfffb;border-color:#a9e4d8}.coach-character-anchor .coach-character-bubble.is-thinking::after{background:#edfffb;border-color:#a9e4d8}.coach-character-anchor .coach-character-bubble.is-helping{background:#fff7dc;border-color:#efd994}.coach-character-anchor .coach-character-bubble.is-helping::after{background:#fff7dc;border-color:#efd994}
+@media(max-width:767px){.coach-character-anchor .coach-character-bubble{max-width:160px;font-size:.75rem;padding:.55rem .65rem}}
+</style>
+<style>
+.coach-example-row{display:flex;align-items:center;gap:.55rem}.coach-example{flex:1;text-align:left;border:0;background:#f1f8fc;color:#315b73;border-radius:12px;padding:.65rem .8rem;font-size:.9rem}.coach-example-next{flex:0 0 auto;border:1px solid #c7dbea;background:#fff;color:#315b73;border-radius:999px;padding:.42rem .7rem;font-weight:700;font-size:.82rem}@media(max-width:767px){.coach-example-row{align-items:stretch}.coach-example{min-width:0}.coach-example-next{white-space:nowrap}}
+</style>
+<style>
+@media(max-width:767px){
+  .coach-v2{padding-left:.65rem;padding-right:.65rem}
+  .coach-hero{border-radius:22px;padding:1.35rem 1rem 1.15rem!important}
+  .coach-hero .row{align-items:flex-end}
+  .coach-hero h1{font-size:clamp(1.75rem,8vw,2.35rem);line-height:1.16}
+  .coach-hero .lead{font-size:.95rem;line-height:1.5}
+  .coach-hero .col-auto{min-width:112px!important}
+  .coach-character-anchor{padding-top:54px}
+  .coach-character-anchor .coach-character-bubble{right:-7px!important;top:-2px!important;width:auto!important;min-width:0!important;height:auto!important;min-height:0!important;max-height:none!important;font-size:.75rem}
+  .coach-card{border-radius:20px;padding:1rem!important}
+  .coach-input{min-height:128px;font-size:1rem}
+  .coach-category-options,.coach-tone-options,.coach-length-options{overflow-x:auto;flex-wrap:nowrap;padding-bottom:.25rem;scrollbar-width:none}
+  .coach-category-options::-webkit-scrollbar,.coach-tone-options::-webkit-scrollbar,.coach-length-options::-webkit-scrollbar{display:none}
+  .coach-category-options button,.coach-tone-options button,.coach-length-options button{flex:0 0 auto;white-space:nowrap}
+  .coach-card .d-flex.justify-content-between{display:block!important}
+  #coachSubmit{width:100%;margin-top:.8rem}
+  .coach-result{padding:1rem}
+  .coach-confirm{font-size:.86rem}
+  .coach-confirm-actions button{min-height:40px}
+  .coach-copy{min-height:38px;padding:.45rem .8rem}
+  .coach-quote{font-size:1rem}
+}
+</style>
+<style>
+.coach-question-mark{background:transparent!important;box-shadow:none!important;width:auto!important;height:auto!important;line-height:1!important;color:#ffe28a!important;font-size:2rem!important;font-weight:900;text-shadow:0 3px 8px rgba(61,35,0,.35)}
+@media(max-width:767px){.coach-question-mark{font-size:1.7rem!important}}
+</style>
+<style>
+.coach-category-options,.coach-length-options{display:flex;flex-wrap:wrap;gap:.45rem}.coach-category-options button,.coach-length-options button,.coach-copy{border:1px solid #c7dbea;background:#fff;color:#24415f;border-radius:999px;padding:.4rem .7rem;font-weight:700}.coach-length-options button.is-selected{background:#315b73;color:#fff;border-color:#315b73}.coach-copy{font-size:.82rem;padding:.35rem .65rem}.coach-copy:hover{background:#eaf8ff}
+</style>
+<style>
+/* Gentle character motion: readable and calm rather than distracting. */
+@keyframes coach-listen-nod{0%,100%{transform:translateY(0) rotate(0)}35%{transform:translateY(2px) rotate(-3deg)}70%{transform:translateY(0) rotate(2deg)}}
+@keyframes coach-help-bounce{0%{transform:translateY(0)}35%{transform:translateY(-10px) rotate(3deg)}65%{transform:translateY(0) rotate(-2deg)}100%{transform:translateY(0)}}
+.coach-character-anchor.is-listening .coach-mascot{animation:coach-listen-nod 1.8s ease-in-out infinite}
+.coach-character-anchor.is-helping .coach-mascot-hand{animation:coach-help-bounce 1.25s ease-out 1}
+@media(prefers-reduced-motion:reduce){.coach-character-anchor .coach-mascot,.coach-question-mark{animation:none!important}}
+</style>
+<style>
+/* Keep every mascot pose in the same visual frame and anchor the question mark to the dog. */
+.coach-character-anchor .coach-mascot{width:120px;height:145px;object-fit:contain}
+.coach-character-anchor .coach-mascot-hand{width:120px;height:120px;margin-top:12px}
+.coach-question-mark{left:calc(50% + 54px);top:64px}
+@media(max-width:767px){.coach-character-anchor .coach-mascot{width:88px;height:110px}.coach-character-anchor .coach-mascot-hand{width:88px;height:88px;margin-top:11px}.coach-question-mark{left:calc(50% + 38px);top:50px;width:30px;height:30px;line-height:30px;font-size:1.2rem}}
+</style>
+<style>
+.coach-tone-picker{padding:.75rem 0 .25rem}.coach-tone-label{display:block;color:#61758c;font-size:.88rem;font-weight:700;margin-bottom:.45rem}.coach-tone-options,.coach-confirm-actions{display:flex;flex-wrap:wrap;gap:.45rem}.coach-tone-options button,.coach-confirm-actions button{border:1px solid #c7dbea;background:#fff;color:#24415f;border-radius:999px;padding:.42rem .7rem;font-weight:700}.coach-tone-options button.is-selected{background:#0d8b83;color:#fff;border-color:#0d8b83}.coach-confirm{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.7rem .85rem;background:#fff9e8;border:1px solid #f1df9c;border-radius:14px;color:#6b5420;font-size:.92rem}.coach-confirm-actions button{padding:.35rem .65rem;color:#6b5420;border-color:#e2ce87}.coach-note{padding:.7rem .85rem;border-radius:12px;background:#eaf8ff;color:#315b73;font-size:.92rem;line-height:1.5}@media(max-width:767px){.coach-confirm{display:block}.coach-confirm-actions{margin-top:.55rem}.coach-tone-options button{flex:1 1 auto}}
+</style>
+{% endblock %}
