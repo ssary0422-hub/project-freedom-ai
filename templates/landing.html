@@ -36,6 +36,7 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 @media(max-width:991.98px){.hero-mascot{min-height:440px}.hero-mascot img{max-height:390px}.hero-mascot-bubble{right:8%}}
 @media(max-width:1199.98px){.navx .navbar-collapse.show{padding:0 0 .6rem}.navx .navbar-collapse.show>div{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:.35rem!important}.navx .navbar-collapse.show .btn{width:100%;min-height:42px;text-align:center;white-space:nowrap;border-radius:12px}}
 @media(max-width:980px){.hero-task-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-task-card{min-height:108px}}
+.hero-task-card{grid-template-columns:auto minmax(0,1fr)!important;padding-right:2.6rem!important}.hero-task-arrow{position:absolute;right:1rem;top:50%;transform:translateY(-50%)}
 @media(max-width:767.98px){.hero-task-grid{grid-template-columns:1fr}.hero-task-card{min-height:92px}.hero{padding-top:6rem}.hero-mascot{min-height:400px}}
 </style>
 <link href="{{ url_for('static', filename='freedom-neon.css') }}" rel="stylesheet">
