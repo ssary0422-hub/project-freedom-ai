@@ -23,6 +23,14 @@ from routes.services import services_bp
 from i18n.translations import SUPPORTED_LANGUAGES, TRANSLATIONS, running_i18n, translate
 from i18n.speaking_copy import SPEAKING_COPY
 
+# Repair legacy mojibake that was shipped in the English speaking-coach copy.
+SPEAKING_COPY.setdefault("en", {}).update({
+    "hero_desc": "Describe the situation and I'll turn it into words you can actually say.",
+    "input_hint": "Unstructured thoughts are okay. Sungeum will sort them out.",
+    "feedback_title": "How was Teacher Sungeum's coaching? 🐶",
+    "yes": "Yes, that's right",
+})
+
 SPEAKING_EXTRAS = {
     "ko": {"helpful":"👍 도움이 됐어", "neutral":"🙂 보통이야", "not_helpful":"🤔 아쉬워", "feedback_placeholder":"짧은 후기를 남겨줘 (선택)", "thanks":"고마워! 다음 말도 더 잘 도와줄게 🐶✨"},
     "en": {"helpful":"👍 Helpful", "neutral":"🙂 It was okay", "not_helpful":"🤔 Needs work", "feedback_placeholder":"Leave a short note (optional)", "thanks":"Thanks! I’ll help even better next time 🐶✨"},
