@@ -19,6 +19,10 @@ def generate_text(prompt: str) -> str:
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY environment variable is required.")
     model = os.getenv("OPENAI_TEXT_MODEL", DEFAULT_OPENAI_TEXT_MODEL).strip()
+    # ``generate_text`` receives the complete prompt; there is no separate
+    # ``goal`` argument here.  Keep this local fallback defined because older
+    # prompt-length compatibility branches below still reference it.
+    goal = ""
     if "long" in prompt:
         goal = f"{goal}; 사용자가 원하는 말할 문장은 3~4문장으로 조금 더 자세하고 충분하게 작성한다."
     elif "short" in prompt:
