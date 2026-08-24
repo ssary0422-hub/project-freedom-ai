@@ -3,6 +3,7 @@
 from flask import Blueprint, jsonify, render_template, request
 
 from ai.providers import generate_running_coach_json
+from database.db import save_running_coach_feedback
 
 
 running_coach_bp = Blueprint("running_coach", __name__)
@@ -60,3 +61,17 @@ def analyze_running_coach():
         result = fallback
         source = "fallback"
     return jsonify(ok=True, result=result, source=source, credits_used=0, free_feature=True)
+
+
+@running_coach_bp.post("/api/running-coach/feedback")
+def running_coach_feedback():
+    data = request.get_json(silent=True) or {}
+    try:
+        rating = max(1, min(5, int(data.get("rating", 0))))
+    except (TypeError, ValueError):
+        return jsonify(ok=False, error="rating must be between 1 and 5."), 400
+    comment = str(data.get("comment", "")).strip()[:3000]
+    if not comment and rating <= 2:
+        return jsonify(ok=False, error="짧은 개선 의견을 남겨주세요."), 400
+    save_running_coach_feedback(rating, comment)
+    return jsonify(ok=True)

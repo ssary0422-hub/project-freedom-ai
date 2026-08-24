@@ -236,6 +236,15 @@ def init_db():
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_speaking_feedback_created ON speaking_coach_feedback (created_at)")
 
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS running_coach_feedback (
+            id {id_column},
+            rating INTEGER NOT NULL,
+            comment TEXT,
+            created_at TEXT NOT NULL
+        )
+    """)
+
     # 기존 DB를 깨뜨리지 않고 필요한 컬럼만 자동 추가
     columns = _table_columns(cursor, "history")
 
@@ -893,6 +902,18 @@ def save_speaking_coach_feedback(rating, comment=""):
     cursor = conn.cursor()
     cursor.execute(
         "INSERT INTO speaking_coach_feedback (rating, comment, created_at) VALUES (?, ?, ?)",
+        (int(rating), str(comment or "")[:3000], datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+    )
+    conn.commit()
+    conn.close()
+
+
+def save_running_coach_feedback(rating, comment=""):
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO running_coach_feedback (rating, comment, created_at) VALUES (?, ?, ?)",
         (int(rating), str(comment or "")[:3000], datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
     )
     conn.commit()

@@ -273,7 +273,7 @@
       const card = await makeShareCard(result, canvas), shareArea = document.getElementById("runShareArea"); shareArea.appendChild(card);
       const download = document.createElement("button"); download.type="button"; download.className="btn btn-success w-100 fw-bold"; download.textContent=I.save_image || "Save SNS result image"; download.onclick=()=>{const link=document.createElement("a");link.download="sungeum-running-form-result.png";link.href=card.toDataURL("image/png");link.click()};shareArea.appendChild(download);
       const saveState=document.createElement("div");saveState.className="small text-secondary mt-2";saveState.textContent=I.saving || "Saving to history…";shareArea.appendChild(saveState);
-      try{const saved=await saveRunningHistory(result,card);saveState.innerHTML=I.saved || "✓ Saved to history · View history";saveState.dataset.historyId=saved.history_id;mountQuickFeedback(shareArea,saved.history_id)}catch(saveError){saveState.textContent=`${I.generic_error || "Something went wrong"}: ${friendlyError(saveError)}`}
+      try{const saved=await saveRunningHistory(result,card);saveState.innerHTML=I.saved || "✓ Saved to history · View history";saveState.dataset.historyId=saved.history_id;mountQuickFeedback(shareArea,saved.history_id)}catch(saveError){saveState.textContent=`${I.generic_error || "Something went wrong"}: ${friendlyError(saveError)}`;mountQuickFeedback(shareArea,null)}
     } catch (error) {
       document.dispatchEvent(new CustomEvent("sungeum:state", { detail: { state: "failed", duration: 1800 } }));
       status.className = "alert alert-danger mt-4"; status.textContent = friendlyError(error);
