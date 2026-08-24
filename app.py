@@ -22,6 +22,7 @@ from routes.services import services_bp
 
 from i18n.translations import SUPPORTED_LANGUAGES, TRANSLATIONS, running_i18n, translate
 from i18n.speaking_copy import SPEAKING_COPY
+from i18n.running_coach_copy import RUNNING_COACH_COPY
 
 # Repair legacy mojibake that was shipped in the English speaking-coach copy.
 SPEAKING_COPY.setdefault("en", {}).update({
@@ -219,6 +220,7 @@ def inject_i18n():
         "translation_pairs": translation_pairs,
         "speaking_i18n": {**SPEAKING_COPY.get(language, SPEAKING_COPY["ko"]), **SPEAKING_EXTRAS.get(language, SPEAKING_EXTRAS["ko"])},
         "menu_i18n": MENU_LABELS.get(language, MENU_LABELS["ko"]),
+        "running_coach_i18n": RUNNING_COACH_COPY.get(language, RUNNING_COACH_COPY["ko"]),
     }
 
 
