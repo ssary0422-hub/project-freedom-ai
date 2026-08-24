@@ -18,7 +18,7 @@ def ko():
     bg=(255,244,224); ink=(30,47,58); coral=(240,108,83); mint=(206,241,220)
     im=Image.new('RGB',(W,H),bg); d=ImageDraw.Draw(im)
     d.ellipse((-220,-280,620,560),fill=(255,218,157)); d.polygon([(0,790),(1080,530),(1080,1100),(0,1370)],fill=(255,231,190))
-    d.text((72,72),'RUNNING RECOVERY',font=ft(KRB,30),fill=coral)
+    d.text((72,72),'RUNNING FORM',font=ft(KRB,30),fill=coral)
     d.text((72,145),'영상 하나 올리면,',font=ft(KRB,70),fill=ink)
     d.text((72,235),'러닝 자세를 봐드려요.',font=ft(KRB,70),fill=ink)
     box(d,(72,420,610,520),30,coral); d.text((110,444),'순금이 러닝코치 · 1분 분석',font=ft(KR,30),fill='white')
