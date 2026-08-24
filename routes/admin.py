@@ -99,6 +99,67 @@ def _get_admin_payment_data(limit=100):
     }
 
 
+def _get_admin_feedback_data(limit=200):
+    """Return product, speaking-coach, and running-coach feedback for admins."""
+    init_db()
+    conn = _connect()
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT pf.id, pf.rating, pf.liked, pf.disliked, pf.would_use, pf.created_at,
+               pf.history_id, u.username, u.email, h.business, h.company
+        FROM product_feedback pf
+        LEFT JOIN users u ON u.id = pf.user_id
+        LEFT JOIN history h ON h.id = pf.history_id
+        ORDER BY pf.id DESC LIMIT ?
+    """, (int(limit),))
+    reviews = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT pc.id, pc.body, pc.created_at, pc.history_id, u.username, u.email,
+               h.business, h.company
+        FROM product_comments pc
+        LEFT JOIN users u ON u.id = pc.user_id
+        LEFT JOIN history h ON h.id = pc.history_id
+        ORDER BY pc.id DESC LIMIT ?
+    """, (int(limit),))
+    comments = cursor.fetchall()
+
+    cursor.execute("SELECT id, rating, comment, created_at FROM speaking_coach_feedback ORDER BY id DESC LIMIT ?", (int(limit),))
+    speaking = cursor.fetchall()
+    cursor.execute("SELECT id, rating, comment, created_at FROM running_coach_feedback ORDER BY id DESC LIMIT ?", (int(limit),))
+    running = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT COUNT(*) AS count, COALESCE(AVG(rating), 0) AS average,
+               COALESCE(SUM(CASE WHEN would_use = 1 THEN 1 ELSE 0 END), 0) AS would_use
+        FROM product_feedback
+    """)
+    product_summary = cursor.fetchone()
+    cursor.execute("SELECT COUNT(*) AS count, COALESCE(AVG(rating), 0) AS average FROM speaking_coach_feedback")
+    speaking_summary = cursor.fetchone()
+    cursor.execute("SELECT COUNT(*) AS count, COALESCE(AVG(rating), 0) AS average FROM running_coach_feedback")
+    running_summary = cursor.fetchone()
+    conn.close()
+
+    return {
+        "reviews": reviews,
+        "comments": comments,
+        "speaking": speaking,
+        "running": running,
+        "summary": {
+            "product_count": int(product_summary["count"] or 0),
+            "product_average": round(float(product_summary["average"] or 0), 1),
+            "would_use": int(product_summary["would_use"] or 0),
+            "speaking_count": int(speaking_summary["count"] or 0),
+            "speaking_average": round(float(speaking_summary["average"] or 0), 1),
+            "running_count": int(running_summary["count"] or 0),
+            "running_average": round(float(running_summary["average"] or 0), 1),
+        },
+    }
+
+
 
 
 def admin_required(view_function):
@@ -145,6 +206,12 @@ def admin():
         payment_summary=payment_data["summary"],
         payments=payment_data["payments"]
     )
+
+
+@admin_bp.route("/admin/feedback")
+@admin_required
+def admin_feedback():
+    return render_template("admin_feedback.html", feedback=_get_admin_feedback_data())
 
 
 @admin_bp.route(

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}댓글·리뷰 관리 - Project Freedom AI{% endblock %}
+{% block extra_style %}
+body{background:#f5f7fb}.feedback-admin{max-width:1180px}.feedback-hero{background:linear-gradient(135deg,#102a43,#245b67);color:#fff;border-radius:24px}.feedback-stat{border:0;border-radius:18px}.feedback-stat .value{font-size:1.8rem;font-weight:800;color:#102a43}.feedback-card{border:0;border-radius:18px}.feedback-item{border-bottom:1px solid #e8edf3;padding:16px 0}.feedback-item:last-child{border-bottom:0}.feedback-meta{color:#748298;font-size:.82rem}.feedback-empty{color:#8995a5;padding:24px 0}
+{% endblock %}
+{% block content %}
+<main class="container feedback-admin py-4 pb-5">
+  <section class="feedback-hero p-4 p-md-5 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+      <div><div class="small text-uppercase opacity-75">Sungeum Listening Room</div><h1 class="h2 mt-2 mb-2">댓글과 리뷰를 한눈에</h1><p class="mb-0 opacity-75">사용자가 남긴 의견을 확인하고 다음 결과물 개선에 반영하세요.</p></div>
+      <a class="btn btn-light" href="{{ url_for('admin.admin') }}">관리자 홈</a>
+    </div>
+  </section>
+  <div class="row g-3 mb-4">
+    {% for label,value in [('제품 리뷰',feedback.summary.product_count),('말정리 코치',feedback.summary.speaking_count),('러닝코치',feedback.summary.running_count),('재사용 의향',feedback.summary.would_use)] %}
+    <div class="col-6 col-lg-3"><div class="card feedback-stat shadow-sm h-100"><div class="card-body"><div class="text-secondary small">{{ label }}</div><div class="value">{{ value }}{% if label != '재사용 의향' %}건{% else %}명{% endif %}</div></div></div></div>
+    {% endfor %}
+  </div>
+  <div class="row g-4">
+    <div class="col-lg-6"><section class="card feedback-card shadow-sm"><div class="card-body"><h2 class="h5">제품 리뷰 <span class="text-warning">★ {{ feedback.summary.product_average }}</span></h2>{% for row in feedback.reviews %}<article class="feedback-item"><div class="feedback-meta">{{ '★' * row.rating }} · {{ row.username or row.email or '사용자' }} · {{ row.created_at }}</div><div class="mt-2"><strong>좋았던 점</strong><p class="mb-1">{{ row.liked or '—' }}</p><strong>고칠 점</strong><p class="mb-1">{{ row.disliked or '—' }}</p></div></article>{% else %}<div class="feedback-empty">아직 제품 리뷰가 없어요.</div>{% endfor %}</div></section></div>
+    <div class="col-lg-6"><section class="card feedback-card shadow-sm"><div class="card-body"><h2 class="h5">사용자 댓글</h2>{% for row in feedback.comments %}<article class="feedback-item"><div class="feedback-meta">{{ row.username or row.email or '사용자' }} · {{ row.created_at }}</div><p class="mb-0 mt-2">{{ row.body }}</p></article>{% else %}<div class="feedback-empty">아직 댓글이 없어요.</div>{% endfor %}</div></section></div>
+    <div class="col-lg-6"><section class="card feedback-card shadow-sm"><div class="card-body"><h2 class="h5">말정리 코치 리뷰 <span class="text-warning">★ {{ feedback.summary.speaking_average }}</span></h2>{% for row in feedback.speaking %}<article class="feedback-item"><div class="feedback-meta">{{ '★' * row.rating }} · {{ row.created_at }}</div><p class="mb-0 mt-2">{{ row.comment or '코멘트 없음' }}</p></article>{% else %}<div class="feedback-empty">아직 말정리 코치 리뷰가 없어요.</div>{% endfor %}</div></section></div>
+    <div class="col-lg-6"><section class="card feedback-card shadow-sm"><div class="card-body"><h2 class="h5">러닝코치 리뷰 <span class="text-warning">★ {{ feedback.summary.running_average }}</span></h2>{% for row in feedback.running %}<article class="feedback-item"><div class="feedback-meta">{{ '★' * row.rating }} · {{ row.created_at }}</div><p class="mb-0 mt-2">{{ row.comment or '코멘트 없음' }}</p></article>{% else %}<div class="feedback-empty">아직 러닝코치 리뷰가 없어요.</div>{% endfor %}</div></section></div>
+  </div>
+</main>
+{% endblock %}
