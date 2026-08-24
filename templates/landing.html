@@ -38,6 +38,8 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 @media(max-width:767.98px){.hero-task-grid{grid-template-columns:1fr}.hero-task-card{min-height:92px}.hero{padding-top:6rem}.hero-mascot{min-height:400px}}
 </style>
 <link href="{{ url_for('static', filename='freedom-neon.css') }}" rel="stylesheet">
+<script>window.PF_TRANSLATION_PAIRS = {{ translation_pairs|tojson }};</script>
+<script src="{{ url_for('static', filename='i18n-runtime.js') }}" defer></script>
 </head>
 <body>
 <nav class="navbar navbar-dark fixed-top navx"><div class="container py-2">

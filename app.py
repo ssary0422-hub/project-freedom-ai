@@ -142,11 +142,25 @@ def inject_i18n():
     if language not in SUPPORTED_LANGUAGES:
         language = "ko"
 
+    # Build source-text pairs so legacy hard-coded labels are localized too.
+    # Existing templates already use the canonical translation values in many
+    # places; this closes the remaining static text gaps without touching
+    # generation or analysis logic.
+    translation_pairs = []
+    for key in set().union(*(TRANSLATIONS[lang].keys() for lang in SUPPORTED_LANGUAGES)):
+        values = {TRANSLATIONS[lang].get(key) for lang in SUPPORTED_LANGUAGES}
+        target = TRANSLATIONS[language].get(key)
+        if target:
+            for source in values:
+                if source and source != target:
+                    translation_pairs.append({"source": source, "target": target})
+
     return {
         "current_language": language,
         "supported_languages": SUPPORTED_LANGUAGES,
         "t": lambda key: translate(key, language),
         "running_i18n": running_i18n(language),
+        "translation_pairs": translation_pairs,
     }
 
 

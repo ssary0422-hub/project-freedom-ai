@@ -218,6 +218,8 @@
         {% block extra_style %}{% endblock %}
     </style>
     <link href="{{ url_for('static', filename='freedom-neon.css') }}" rel="stylesheet">
+    <script>window.PF_TRANSLATION_PAIRS = {{ translation_pairs|tojson }};</script>
+    <script src="{{ url_for('static', filename='i18n-runtime.js') }}" defer></script>
 </head>
 
 <body {% block body_attrs %}{% endblock %}>
