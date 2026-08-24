@@ -10,6 +10,12 @@
 <style>
 :root{--bg:#07111f;--card:#0e1b2d;--line:rgba(255,255,255,.1);--muted:#9eb0c6}
 body{background:var(--bg);color:white}.navx{background:rgba(7,17,31,.9);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+@media(max-width:767.98px){
+  /* Match the authenticated mobile menu: centered vertical links with full-width actions. */
+  .navx .navbar-collapse.show{padding:0 0 .6rem}
+  .navx .navbar-collapse.show>div{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:.35rem!important}
+  .navx .navbar-collapse.show .btn{width:100%;min-height:42px;text-align:center;white-space:nowrap;border-radius:12px}
+}
 .hero{min-height:82vh;display:flex;align-items:center;padding:7rem 0 4rem;background:radial-gradient(circle at 75% 25%,rgba(13,110,253,.3),transparent 32%),radial-gradient(circle at 20% 65%,rgba(111,66,193,.18),transparent 30%)}
 h1{font-size:clamp(2.7rem,6vw,5.3rem);line-height:.98;letter-spacing:-.055em;font-weight:850}.leadx{color:var(--muted);font-size:1.15rem;max-width:720px}
 .glass{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.035));border:1px solid var(--line);border-radius:1.25rem}
