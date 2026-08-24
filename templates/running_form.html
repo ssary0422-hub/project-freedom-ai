@@ -7,6 +7,12 @@
 {% endblock %}
 {% block content %}
 <div class="container run-shell">
+  <section class="pf-card p-3 p-lg-4 mb-4" style="border:1px solid #bfe8df;background:linear-gradient(135deg,#effbf8,#f4f6ff)">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+      <div><div class="fw-bold" style="color:#087f78">오늘은 영상 없이 코칭받아볼까요?</div><div class="small text-secondary">컨디션과 목표만 고르면 순금이가 오늘 러닝 계획을 무료로 정리해줘요.</div></div>
+      <a class="btn btn-success fw-bold" href="{{ url_for('running_coach.running_coach') }}">오늘의 러닝 코치 열기</a>
+    </div>
+  </section>
   <section class="run-hero mb-4"><div class="row align-items-center g-0"><div class="col-lg-8 run-hero-copy"><div class="run-kicker mb-3">SUNGEUM AI RUNNING COACH</div><h1 class="display-5 fw-bold mb-3">달리는 영상만 올려봐.<br>순금이가 러닝폼을 봐줄게!</h1><p class="lead text-white-50 mb-0">착지·관절 각도·자세를 확인하고, 다음 러닝에서 실천할 한 가지까지 알려드려요.</p><div class="run-coach-flow"><div><b>STEP 1</b><span>러닝 영상 올리기</span></div><div><b>STEP 2</b><span>순금이 AI 분석</span></div><div><b>STEP 3</b><span>코칭 결과 공유</span></div></div></div><div class="col-lg-4 text-center align-self-end"><img class="run-hero-mascot sungeum-alive sungeum-alive-hero" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="순금이 AI 러닝코치"></div></div></section>
   <div class="row g-4"><div class="col-lg-8"><section class="pf-card p-4 p-lg-5">
     <div class="pf-eyebrow mb-2">순금이 코치에게 영상 보여주기</div><h2 class="h3 fw-bold mb-2">달리는 옆모습을 올려줘</h2><p class="text-secondary mb-2">“머리부터 발끝까지 보이는 5~10초 영상이면 좋아. 발과 지면이 잘 보이면 더 정확하게 볼 수 있어!”</p><div class="alert alert-info py-2 small mb-4">고정된 측면 카메라와 밝은 환경에서 분석 신뢰도가 높아집니다. 촬영 각도·속도·조명에 따라 결과가 달라질 수 있어요.</div>
