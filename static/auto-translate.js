@@ -24,6 +24,24 @@
   };
   if (document.body) protectSungeumName();
 
+  // Google can occasionally produce mixed-script output for this sentence.
+  // Normalize both the original Korean and the malformed translated variant.
+  const normalizeCoachCopy = () => {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((node) => {
+      if (!node.nodeValue) return;
+      node.nodeValue = node.nodeValue
+        .replaceAll("정리되지 않은 말이어도 괜찮아. Sungeum will sort them out.", "Unstructured thoughts are okay. Sungeum will sort them out.")
+        .replaceAll("정리되지 않은 생각이어도 괜찮아. Sungeum will sort them out.", "Unstructured thoughts are okay. Sungeum will sort them out.")
+        .replaceAll("Un整리ed thoughts are okay.", "Unstructured thoughts are okay.")
+        .replaceAll("Un整리ed thoughts are okay", "Unstructured thoughts are okay");
+    });
+  };
+  if (document.body) normalizeCoachCopy();
+  new MutationObserver(() => { protectSungeumName(); normalizeCoachCopy(); }).observe(document.body, { childList: true, subtree: true });
+
   window.googleTranslateElementInit = function () {
     if (!window.google || !google.translate) return;
     new google.translate.TranslateElement({
