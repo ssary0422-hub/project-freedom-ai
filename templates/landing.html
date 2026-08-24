@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ current_language or 'ko' }}">
+<html lang="{{ current_language or 'ko' }}"{% if current_language == 'en' %} translate="yes"{% endif %}>
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{ t("landing.meta.title") }}</title>
@@ -39,7 +39,10 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 </style>
 <link href="{{ url_for('static', filename='freedom-neon.css') }}" rel="stylesheet">
 <script>window.PF_TRANSLATION_PAIRS = {{ translation_pairs|tojson }};</script>
+<script>window.PF_MENU_I18N = {{ menu_i18n|tojson }};</script>
 <script src="{{ url_for('static', filename='i18n-runtime.js') }}" defer></script>
+<script src="{{ url_for('static', filename='menu-localize.js') }}" defer></script>
+{% if current_language == 'en' %}<script src="{{ url_for('static', filename='auto-translate.js') }}" defer></script>{% endif %}
 </head>
 <body>
 <nav class="navbar navbar-dark fixed-top navx"><div class="container py-2">

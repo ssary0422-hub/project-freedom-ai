@@ -23,6 +23,15 @@ from routes.services import services_bp
 from i18n.translations import SUPPORTED_LANGUAGES, TRANSLATIONS, running_i18n, translate
 from i18n.speaking_copy import SPEAKING_COPY
 
+SPEAKING_EXTRAS = {
+    "ko": {"helpful":"👍 도움이 됐어", "neutral":"🙂 보통이야", "not_helpful":"🤔 아쉬워", "feedback_placeholder":"짧은 후기를 남겨줘 (선택)", "thanks":"고마워! 다음 말도 더 잘 도와줄게 🐶✨"},
+    "en": {"helpful":"👍 Helpful", "neutral":"🙂 It was okay", "not_helpful":"🤔 Needs work", "feedback_placeholder":"Leave a short note (optional)", "thanks":"Thanks! I’ll help even better next time 🐶✨"},
+    "ja": {"helpful":"👍 役に立った", "neutral":"🙂 ふつう", "not_helpful":"🤔 改善が必要", "feedback_placeholder":"短い感想をどうぞ（任意）", "thanks":"ありがとう！次はもっと上手に手伝うね 🐶✨"},
+    "th": {"helpful":"👍 มีประโยชน์", "neutral":"🙂 ปานกลาง", "not_helpful":"🤔 ยังไม่ดี", "feedback_placeholder":"ฝากความคิดเห็นสั้น ๆ (ไม่บังคับ)", "thanks":"ขอบคุณนะ! ครั้งหน้าจะช่วยได้ดียิ่งขึ้น 🐶✨"},
+    "zh": {"helpful":"👍 有帮助", "neutral":"🙂 一般", "not_helpful":"🤔 需要改进", "feedback_placeholder":"留下简短评价（可选）", "thanks":"谢谢！下次我会帮得更好 🐶✨"},
+    "es": {"helpful":"👍 Me ayudó", "neutral":"🙂 Normal", "not_helpful":"🤔 Puede mejorar", "feedback_placeholder":"Deja un comentario breve (opcional)", "thanks":"¡Gracias! La próxima vez te ayudaré mejor 🐶✨"},
+}
+
 MENU_COPY = {
     "ko": {"광고 콘텐츠":"광고 콘텐츠", "SNS":"SNS", "블로그":"블로그", "포스터":"포스터", "러닝 코치":"순금이 러닝코치", "말하기 코치":"순금이 말하기 코치", "리뷰":"리뷰", "기록":"기록", "크레딧":"크레딧"},
     "en": {"광고 콘텐츠":"Ad content", "SNS":"SNS", "블로그":"Blog", "포스터":"Poster", "러닝 코치":"Sungeum Running Coach", "말하기 코치":"Sungeum Speaking Coach", "리뷰":"Reviews", "기록":"History", "크레딧":"Credits"},
@@ -31,6 +40,23 @@ MENU_COPY = {
     "zh": {"광고 콘텐츠":"广告内容", "SNS":"SNS", "블로그":"博客", "포스터":"海报", "러닝 코치":"顺金跑步教练", "말하기 코치":"顺金表达教练", "리뷰":"评价", "기록":"记录", "크레딧":"积分"},
     "es": {"광고 콘텐츠":"Contenido publicitario", "SNS":"SNS", "블로그":"Blog", "포스터":"Póster", "러닝 코치":"Entrenador de running Sungeum", "말하기 코치":"Coach de expresión Sungeum", "리뷰":"Reseñas", "기록":"Historial", "크레딧":"Créditos"},
 }
+
+# Stable semantic labels used by the menu-localizer.  Keeping these separate
+# from legacy template strings prevents encoding or wording differences from
+# leaving a menu item untranslated.
+MENU_LABELS = {
+    "ko": {"ads": "광고 콘텐츠", "sns": "SNS", "blog": "블로그", "poster": "포스터", "running": "순금이 러닝코치", "speaking": "순금이 말하기 코치", "reviews": "리뷰", "history": "기록", "credits": "크레딧"},
+    "en": {"ads": "Ad content", "sns": "SNS", "blog": "Blog", "poster": "Poster", "running": "Sungeum Running Coach", "speaking": "Sungeum Speaking Coach", "reviews": "Reviews", "history": "History", "credits": "Credits"},
+    "ja": {"ads": "広告コンテンツ", "sns": "SNS", "blog": "ブログ", "poster": "ポスター", "running": "スングム ランニングコーチ", "speaking": "スングム スピーキングコーチ", "reviews": "レビュー", "history": "履歴", "credits": "クレジット"},
+    "th": {"ads": "เนื้อหาโฆษณา", "sns": "SNS", "blog": "บล็อก", "poster": "โปสเตอร์", "running": "โค้ชวิ่งซุนกึม", "speaking": "โค้ชการพูดซุนกึม", "reviews": "รีวิว", "history": "ประวัติ", "credits": "เครดิต"},
+    "zh": {"ads": "广告内容", "sns": "SNS", "blog": "博客", "poster": "海报", "running": "顺金跑步教练", "speaking": "顺金口语教练", "reviews": "评价", "history": "记录", "credits": "积分"},
+    "es": {"ads": "Contenido publicitario", "sns": "SNS", "blog": "Blog", "poster": "Póster", "running": "Entrenador de running Sungeum", "speaking": "Coach de expresión Sungeum", "reviews": "Reseñas", "history": "Historial", "credits": "Créditos"},
+}
+for _lang, _label in {
+    "ko": "대시보드", "en": "Dashboard", "ja": "ダッシュボード",
+    "th": "แดชบอร์ด", "zh": "仪表板", "es": "Panel"
+}.items():
+    MENU_LABELS[_lang]["dashboard"] = _label
 from routes.admin import admin_bp
 from routes.credits import credits_bp
 from database.users import (
@@ -183,7 +209,8 @@ def inject_i18n():
         "t": lambda key: translate(key, language),
         "running_i18n": running_i18n(language),
         "translation_pairs": translation_pairs,
-        "speaking_i18n": SPEAKING_COPY.get(language, SPEAKING_COPY["ko"]),
+        "speaking_i18n": {**SPEAKING_COPY.get(language, SPEAKING_COPY["ko"]), **SPEAKING_EXTRAS.get(language, SPEAKING_EXTRAS["ko"])},
+        "menu_i18n": MENU_LABELS.get(language, MENU_LABELS["ko"]),
     }
 
 
