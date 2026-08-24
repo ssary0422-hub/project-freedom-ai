@@ -3,7 +3,6 @@
 from flask import Blueprint, jsonify, render_template, request
 
 from ai.providers import generate_running_coach_json
-from routes.auth import login_required
 
 
 running_coach_bp = Blueprint("running_coach", __name__)
@@ -34,13 +33,11 @@ def _fallback_plan(payload: dict) -> dict:
 
 
 @running_coach_bp.get("/running-coach")
-@login_required
 def running_coach():
     return render_template("running_coach.html")
 
 
 @running_coach_bp.post("/running-coach/analyze")
-@login_required
 def analyze_running_coach():
     payload = request.get_json(silent=True) or {}
     try:
