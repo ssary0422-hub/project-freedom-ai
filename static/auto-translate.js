@@ -7,6 +7,10 @@
   // selected language.
   if (document.documentElement.lang !== "en") return;
 
+  // Tell the widget to apply English immediately; users should not have to
+  // open a second language menu after choosing English in the app.
+  document.cookie = "googtrans=/ko/en; path=/";
+
   window.googleTranslateElementInit = function () {
     if (!window.google || !google.translate) return;
     new google.translate.TranslateElement({
