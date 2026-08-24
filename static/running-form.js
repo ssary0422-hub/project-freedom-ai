@@ -282,3 +282,8 @@
     }
   });
 })();
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll('img[src*="sungeum-3d-official.png"]').forEach((image) => {
+    image.src = "/static/brand/sungeum-running-coach-mascot-v1.png";
+  });
+});
