@@ -224,6 +224,18 @@ def init_db():
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_comments_history ON product_comments (history_id)")
 
+    # 말하기 코치는 로그인 전에도 써볼 수 있는 공개 MVP이므로, 결과 직후
+    # 남기는 익명 후기를 별도 테이블에 보관합니다.
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS speaking_coach_feedback (
+            id {id_column},
+            rating INTEGER NOT NULL,
+            comment TEXT,
+            created_at TEXT NOT NULL
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_speaking_feedback_created ON speaking_coach_feedback (created_at)")
+
     # 기존 DB를 깨뜨리지 않고 필요한 컬럼만 자동 추가
     columns = _table_columns(cursor, "history")
 
@@ -872,6 +884,19 @@ def get_history_image(history_id, user_id):
         return None
     data = bytes(row[0])
     return data, (row[1] or "application/octet-stream")
+
+
+def save_speaking_coach_feedback(rating, comment=""):
+    """Save the small public review shown after a speaking-coach result."""
+    init_db()
+    conn = _connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO speaking_coach_feedback (rating, comment, created_at) VALUES (?, ?, ?)",
+        (int(rating), str(comment or "")[:3000], datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+    )
+    conn.commit()
+    conn.close()
 
 
 def save_product_feedback(user_id, history_id, rating, liked, disliked, would_use):

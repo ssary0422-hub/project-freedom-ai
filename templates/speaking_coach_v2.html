@@ -5,16 +5,15 @@
 {% endblock %}
 {% block content %}
 <main class="container coach-v2">
-  <section class="coach-hero mb-4"><div class="row align-items-center"><div class="col"><div class="coach-kicker mb-3">SUNGEUM SPEAKING COACH</div><h1 class="display-6 fw-bold mb-3">무슨 일이야?<br>순금이에게 편하게 말해줘.</h1><p class="lead text-white-50 mb-0">상황을 설명하면, 실제로 말할 수 있는 문장으로 바로 정리해줄게.</p></div><div class="col-auto"><img class="coach-mascot sungeum-alive" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="순금이"></div></div></section>
+  <section class="coach-hero mb-4"><div class="row align-items-center"><div class="col"><div class="coach-kicker mb-3">SUNGEUM SPEAKING TEACHER</div><h1 class="display-6 fw-bold mb-3">무슨 일이야?<br>순금이 선생님에게 편하게 말해줘.</h1><p class="lead text-white-50 mb-0">상황을 설명하면, 실제로 말할 수 있는 문장으로 바로 정리해줄게.</p></div><div class="col-auto"><img class="coach-mascot sungeum-alive" src="{{ url_for('static', filename='brand/sungeum-speaking-teacher-v1.png') }}" alt="순금이 말하기 선생님"></div></div></section>
   <section class="coach-card p-3 p-lg-4">
     <label class="form-label fw-bold" for="coachInput">어떤 일이 있었어?</label>
     <textarea id="coachInput" class="form-control coach-input" placeholder="예: 몸이 안 좋아서 오늘 조퇴하고 싶은데 상사에게 어떻게 말하지?"></textarea>
     <div class="d-flex justify-content-between align-items-center mt-3 gap-3"><span class="coach-hint">정리되지 않은 말이어도 괜찮아. 순금이가 알아서 정리할게.</span><button id="coachSubmit" class="btn btn-primary btn-lg fw-bold px-4" type="button">순금아, 어떻게 말해?</button></div>
     <div id="coachStatus" class="mt-3" aria-live="polite"></div>
-    <div id="coachResult" class="coach-result mt-4 d-none" aria-live="polite"><div class="small text-secondary mb-2">순금이가 이해한 상황</div><p id="coachUnderstanding" class="fw-semibold mb-3"></p><div class="small text-secondary mb-2">바로 말할 문장</div><div id="coachQuote" class="coach-quote"></div><div class="small text-secondary mt-3 mb-2">다른 느낌으로 말하면</div><div class="coach-actions"><button type="button" data-variant="soft">더 부드럽게</button><button type="button" data-variant="firm">더 단호하게</button><button type="button" data-quick class="primary">급해! 한 문장만</button></div><button id="coachAgain" type="button" class="btn btn-link px-0 mt-3">다른 상황 말해보기</button></div>
+    <div id="coachResult" class="coach-result mt-4 d-none" aria-live="polite"><div class="small text-secondary mb-2">순금이가 이해한 상황</div><p id="coachUnderstanding" class="fw-semibold mb-3"></p><div class="small text-secondary mb-2">바로 말할 문장</div><div id="coachQuote" class="coach-quote"></div><div class="small text-secondary mt-3 mb-2">다른 느낌으로 말하면</div><div class="coach-actions"><button type="button" data-variant="soft">더 부드럽게</button><button type="button" data-variant="firm">더 단호하게</button><button type="button" data-quick class="primary">급해! 한 문장만</button></div><section id="speakingFeedback" class="coach-feedback mt-4 d-none" aria-live="polite"><div class="fw-bold">순금이 선생님 코치는 어땠어? 🐶</div><div class="small text-secondary mt-1">한 번만 알려주면 다음 문장을 더 잘 다듬을게.</div><div class="coach-feedback-actions mt-3" role="group" aria-label="코치 후기 평점"><button type="button" data-review-rating="5">👍 도움이 됐어</button><button type="button" data-review-rating="3">🙂 보통이야</button><button type="button" data-review-rating="1">🤔 아쉬워</button></div><textarea id="speakingFeedbackComment" class="form-control mt-3" rows="2" maxlength="3000" placeholder="짧은 후기를 남겨줘 (선택)"></textarea><button id="speakingFeedbackSubmit" type="button" class="btn btn-primary btn-sm mt-2" disabled>후기 보내기</button><div id="speakingFeedbackThanks" class="small text-success fw-semibold mt-2 d-none">고마워! 다음 말도 더 잘 도와줄게 🐶✨</div></section><button id="coachAgain" type="button" class="btn btn-link px-0 mt-3">다른 상황 말해보기</button></div>
   </section>
   <p class="coach-hint text-center mt-3">처음에는 누구에게나 자연스럽고 무난한 말투로 도와줘. 원하는 경우에만 말투를 바꿀 수 있어.</p>
-  <div class="text-center mt-3 d-flex justify-content-center gap-2 flex-wrap"><a class="btn btn-outline-primary rounded-pill px-4" href="/payment">순금이 프로 기능 보기</a><a class="btn btn-outline-secondary rounded-pill px-4" href="/services">사업장 파일럿 보기</a></div>
 </main>
 <style>
 .coach-mascot{animation:coach-float 3.2s ease-in-out infinite}
@@ -69,6 +68,36 @@
   const result = document.getElementById('coachResult');
   const understanding = document.getElementById('coachUnderstanding');
   const quote = document.getElementById('coachQuote');
+  const speakingFeedback = document.getElementById('speakingFeedback');
+  const feedbackComment = document.getElementById('speakingFeedbackComment');
+  const feedbackSubmit = document.getElementById('speakingFeedbackSubmit');
+  const feedbackThanks = document.getElementById('speakingFeedbackThanks');
+  let feedbackRating = 0;
+  const feedbackSeenKey = 'sungeum-speaking-feedback-seen-v1';
+  const feedbackDoneKey = 'sungeum-speaking-feedback-done-v1';
+  const feedbackCanShow = () => {
+    if (localStorage.getItem(feedbackDoneKey) === '1') return false;
+    const seenAt = Number(localStorage.getItem(feedbackSeenKey) || 0);
+    return !seenAt || Date.now() - seenAt > 7 * 24 * 60 * 60 * 1000;
+  };
+  document.querySelectorAll('[data-review-rating]').forEach(button => button.onclick = () => {
+    feedbackRating = Number(button.dataset.reviewRating);
+    document.querySelectorAll('[data-review-rating]').forEach(item => item.classList.toggle('is-selected', item === button));
+    feedbackSubmit.disabled = false;
+  });
+  feedbackSubmit.onclick = async () => {
+    if (!feedbackRating) return;
+    feedbackSubmit.disabled = true;
+    try {
+      const response = await fetch('/api/speaking-coach/feedback', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({rating:feedbackRating, comment:feedbackComment.value.trim()})});
+      if (!response.ok) throw new Error('feedback failed');
+      localStorage.setItem(feedbackDoneKey, '1');
+      speakingFeedback.querySelector('.coach-feedback-actions').classList.add('d-none');
+      feedbackComment.classList.add('d-none');
+      feedbackSubmit.classList.add('d-none');
+      feedbackThanks.classList.remove('d-none');
+    } catch (error) { feedbackSubmit.disabled = false; }
+  };
   const tonePicker = document.createElement('div');
   tonePicker.className = 'coach-tone-picker mt-3';
   tonePicker.innerHTML = '<span class="coach-tone-label">말투를 골라볼까?</span><div class="coach-tone-options" role="group" aria-label="말투 선택"><button type="button" class="is-selected" data-tone="natural">무난하게</button><button type="button" data-tone="polite">더 공손하게</button><button type="button" data-tone="friendly">친구처럼</button><button type="button" data-tone="firm">단호하게</button></div>';
@@ -115,7 +144,7 @@
     if (context.includes('사과') || context.includes('미안') || context.includes('죄송')) return {understanding:'상대방에게 잘못한 일을 사과하고 싶은 상황이구나.', sentence:'불편하게 해드려서 죄송합니다. 다음부터는 더 신경 쓰겠습니다.', soft:'정말 죄송해요. 제 마음이 제대로 전달되지 않은 것 같아요.', firm:'이번 일은 제가 잘못했습니다. 같은 일이 반복되지 않도록 바로 고치겠습니다.'};
     return {understanding:'상황과 마음을 상대방에게 자연스럽게 전달하고 싶은 상황이구나.', sentence:`제가 말씀드리고 싶은 건 ${text}입니다. 어떻게 하면 좋을지 같이 이야기해보고 싶어요.`, soft:`제가 조금 조심스러워서 그런데, ${text} 괜찮을지 여쭤봐도 될까요?`, firm:`${text} 이 부분은 꼭 전달드리고 싶습니다.`};
   };
-  const show = (data) => { current=data; result.classList.remove('d-none'); understanding.textContent=data.understanding || '상황을 정리해봤어.'; quote.textContent=data.sentence; status.textContent=''; result.scrollIntoView({behavior:'smooth',block:'nearest'}); };
+  const show = (data) => { current=data; result.classList.remove('d-none'); understanding.textContent=data.understanding || '상황을 정리해봤어.'; quote.textContent=data.sentence; status.textContent=''; if (feedbackCanShow()) { localStorage.setItem(feedbackSeenKey, String(Date.now())); speakingFeedback.classList.remove('d-none'); } result.scrollIntoView({behavior:'smooth',block:'nearest'}); };
   const generate = async () => {
     const text=input.value.trim(); if(text.length<2){status.textContent='상황을 한두 문장만 적어줘.';return;}
     submit.disabled=true; setCoachState('thinking'); status.className='coach-loading mt-3'; status.textContent='순금이가 상황을 정리하는 중…';
@@ -137,7 +166,7 @@
   copyButton.onclick=async()=>{try{await navigator.clipboard.writeText(quote.textContent);copyButton.textContent='복사했어';setTimeout(()=>copyButton.textContent='문장 복사',1400);}catch(error){copyButton.textContent='문장을 길게 눌러 복사해줘';}};
   document.querySelectorAll('[data-variant]').forEach(button=>button.onclick=()=>{if(current)quote.textContent=current[button.dataset.variant];});
   document.querySelector('[data-quick]').onclick=()=>{if(current)quote.textContent=current.sentence;};
-  document.getElementById('coachAgain').onclick=()=>{input.value='';result.classList.add('d-none');setCoachState('idle');input.focus();};
+  document.getElementById('coachAgain').onclick=()=>{input.value='';result.classList.add('d-none');speakingFeedback.classList.add('d-none');setCoachState('idle');input.focus();};
   input.addEventListener('focus',()=>setCoachState('listening'));
   setCoachState('idle');
 })();
@@ -205,5 +234,6 @@
 </style>
 <style>
 .coach-tone-picker{padding:.75rem 0 .25rem}.coach-tone-label{display:block;color:#61758c;font-size:.88rem;font-weight:700;margin-bottom:.45rem}.coach-tone-options,.coach-confirm-actions{display:flex;flex-wrap:wrap;gap:.45rem}.coach-tone-options button,.coach-confirm-actions button{border:1px solid #c7dbea;background:#fff;color:#24415f;border-radius:999px;padding:.42rem .7rem;font-weight:700}.coach-tone-options button.is-selected{background:#0d8b83;color:#fff;border-color:#0d8b83}.coach-confirm{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.7rem .85rem;background:#fff9e8;border:1px solid #f1df9c;border-radius:14px;color:#6b5420;font-size:.92rem}.coach-confirm-actions button{padding:.35rem .65rem;color:#6b5420;border-color:#e2ce87}.coach-note{padding:.7rem .85rem;border-radius:12px;background:#eaf8ff;color:#315b73;font-size:.92rem;line-height:1.5}@media(max-width:767px){.coach-confirm{display:block}.coach-confirm-actions{margin-top:.55rem}.coach-tone-options button{flex:1 1 auto}}
+.coach-feedback{padding:1rem;background:#fff;border:1px solid #cfe6e0;border-radius:16px}.coach-feedback-actions{display:flex;flex-wrap:wrap;gap:.45rem}.coach-feedback-actions button{border:1px solid #b8d4e9;background:#fff;color:#24415f;border-radius:999px;padding:.45rem .7rem;font-weight:700}.coach-feedback-actions button.is-selected{background:#0d8b83;border-color:#0d8b83;color:#fff}.coach-feedback textarea{font-size:.9rem;resize:vertical}.coach-feedback button:disabled{opacity:.55}
 </style>
 {% endblock %}

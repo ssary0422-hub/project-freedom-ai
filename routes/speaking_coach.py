@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, render_template, request
 
 from ai.providers import generate_speaking_coach_json
+from database.db import save_speaking_coach_feedback
 
 
 speaking_coach_bp = Blueprint("speaking_coach", __name__)
@@ -27,3 +28,18 @@ def speaking_coach_api():
     except RuntimeError as exc:
         return jsonify({"error": str(exc), "fallback": True}), 503
     return jsonify({"result": result, "quick": quick})
+
+
+@speaking_coach_bp.post("/api/speaking-coach/feedback")
+def speaking_coach_feedback_api():
+    """Accept one short, anonymous review after a speaking-coach result."""
+    data = request.get_json(silent=True) or {}
+    try:
+        rating = max(1, min(5, int(data.get("rating", 0))))
+    except (TypeError, ValueError):
+        return jsonify({"error": "rating must be between 1 and 5."}), 400
+    comment = str(data.get("comment", "")).strip()[:3000]
+    if not comment and rating <= 2:
+        return jsonify({"error": "짧은 개선 의견을 남겨주세요."}), 400
+    save_speaking_coach_feedback(rating, comment)
+    return jsonify({"ok": True, "reply": "소중한 후기 고마워! 🐶 다음 말도 더 잘 도와줄게."})
