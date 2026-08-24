@@ -6,7 +6,6 @@ from pathlib import Path
 from flask import Blueprint, jsonify, render_template, request, session
 
 from database.db import save_history
-from database.users import get_plan_status, record_ai_credit_usage
 from routes.auth import login_required
 
 
@@ -14,7 +13,6 @@ running_form_bp = Blueprint("running_form", __name__)
 ALLOWED_VIDEO_EXTENSIONS = {".mp4", ".mov", ".m4v", ".webm"}
 MAX_VIDEO_BYTES = 120 * 1024 * 1024
 MAX_RESULT_IMAGE_BYTES = 5 * 1024 * 1024
-RUNNING_FORM_CREDITS = 3
 
 
 def _save_result_image(data_url, user_id):
@@ -61,15 +59,6 @@ def preflight():
     if str(request.form.get("view", "side")).strip() != "side":
         return jsonify(ok=False, error="첫 버전은 정확한 측면 영상만 지원해요."), 400
 
-    credit_status = get_plan_status(session["user_id"], required_credits=RUNNING_FORM_CREDITS)
-    if not credit_status["can_generate"]:
-        return jsonify(
-            ok=False,
-            error=f"러닝폼 분석에는 {RUNNING_FORM_CREDITS}크레딧이 필요해요. 현재 {credit_status['remaining']}크레딧이 남아 있어요.",
-            required_credits=RUNNING_FORM_CREDITS,
-            remaining_credits=credit_status["remaining"],
-        ), 402
-
     return jsonify(
         ok=True,
         stage="ready",
@@ -90,9 +79,6 @@ def save_running_history():
     required = ("score", "runnerType", "strikeType", "averageKneeAngle", "averageTrunkLean", "strikeConfidence", "side", "image")
     if any(key not in payload for key in required):
         return jsonify(ok=False, error="러닝 분석 결과가 완성되지 않았어요."), 400
-    credit_status = get_plan_status(session["user_id"], required_credits=RUNNING_FORM_CREDITS)
-    if not credit_status["can_generate"]:
-        return jsonify(ok=False, error=f"결과 저장에는 {RUNNING_FORM_CREDITS}크레딧이 필요해요.", required_credits=RUNNING_FORM_CREDITS), 402
     try:
         score = max(0, min(100, int(payload["score"])))
         knee = round(float(payload["averageKneeAngle"]), 1)
@@ -116,9 +102,4 @@ def save_running_history():
         "순금이 코치의 러닝폼 리포트", "순금이 AI 러닝코치", runner_type, result,
         image_url=image_url, content_type="running_form", user_id=session["user_id"],
     )
-    record_ai_credit_usage(session["user_id"], "RUNNING_FORM", RUNNING_FORM_CREDITS)
-    updated_status = get_plan_status(session["user_id"])
-    session["plan_used"] = updated_status["used"]
-    session["plan_remaining"] = updated_status["remaining"]
-    session["plan_percent"] = updated_status["percent"]
-    return jsonify(ok=True, history_id=history_id, image_url=image_url, credits_used=RUNNING_FORM_CREDITS, remaining_credits=updated_status["remaining"])
+    return jsonify(ok=True, history_id=history_id, image_url=image_url, credits_used=0, free_feature=True)

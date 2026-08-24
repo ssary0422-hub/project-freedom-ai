@@ -15,13 +15,13 @@
       <div id="previewPanel" class="d-none mt-4"><video id="videoPreview" class="run-preview" controls muted playsinline></video><canvas id="poseCanvas" class="run-preview d-none mt-3" aria-label="AI 관절 추적 결과"></canvas><div id="fileSummary" class="small text-secondary mt-2"></div></div>
       <div class="row g-3 mt-3"><div class="col-md-7"><label class="form-label fw-semibold" for="paceSelect">촬영 당시 페이스</label><select id="paceSelect" class="form-select" name="pace"><option value="easy">편안한 조깅</option><option value="marathon">마라톤 페이스</option><option value="10k">10km 페이스</option><option value="fast">빠른 질주</option></select></div><div class="col-md-5"><label class="form-label fw-semibold" for="viewSelect">촬영 방향</label><select id="viewSelect" class="form-select" name="view"><option value="side">측면</option><option value="rear" disabled>후면 · 2차 지원</option></select></div></div>
       <div class="form-check mt-4"><input id="consentCheck" class="form-check-input" type="checkbox" required><label class="form-check-label" for="consentCheck">AI 러닝폼 분석을 위한 영상 처리에 동의합니다.</label></div>
-      <div class="d-flex justify-content-between align-items-center mt-4 small"><span class="text-secondary">분석 성공 시에만 차감됩니다.</span><strong class="text-info">3크레딧</strong></div>
-      <button id="analyzeButton" class="btn btn-primary btn-lg w-100 fw-bold mt-2" type="submit" disabled>순금이에게 분석 맡기기 · 3크레딧</button>
+      <div class="d-flex justify-content-between align-items-center mt-4 small"><span class="text-secondary">러닝코치는 무료로 이용할 수 있어요.</span><strong class="text-success">무료</strong></div>
+      <button id="analyzeButton" class="btn btn-primary btn-lg w-100 fw-bold mt-2" type="submit" disabled>순금이에게 무료 분석 맡기기</button>
     </form><div id="statusPanel" class="d-none mt-4" aria-live="polite"></div>
   </section></div>
   <div class="col-lg-4"><aside class="pf-card p-4 mb-4"><div class="pf-eyebrow mb-3">잘 찍는 방법</div><div class="run-step mb-3"><span class="run-step-number">1</span><div><strong>카메라를 고정해요</strong><div class="small text-secondary">흔들림 없이 정확한 측면으로 촬영</div></div></div><div class="run-step mb-3"><span class="run-step-number">2</span><div><strong>전신과 발을 보여줘요</strong><div class="small text-secondary">머리부터 발끝과 지면이 모두 보이게</div></div></div><div class="run-step"><span class="run-step-number">3</span><div><strong>5~10초면 충분해요</strong><div class="small text-secondary">밝은 장소에서 60fps 이상 권장</div></div></div></aside>
   <aside class="pf-card p-4"><div class="d-flex align-items-center gap-3 mb-3"><img class="sungeum-alive" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" width="62" height="72" style="object-fit:contain" alt="순금이"><div><strong>순금이 AI 러닝코치</strong><div class="small text-secondary">분석·코칭·결과지 검수</div></div></div><p class="small text-secondary mb-0">“잘한 점은 확실히 칭찬하고, 다음 러닝에서 바꿀 한 가지만 쉽게 알려줄게. 판정이 어려우면 억지로 점수를 만들지 않을 거야.”</p></aside></div></div>
 </div>
 <script>window.RUNNING_I18N = {{ running_i18n|tojson }};</script>
-<script src="{{ url_for('static', filename='running-form.js') }}"></script>
+<script src="{{ url_for('static', filename='running-form.js') }}?v=20260824-free-running"></script>
 {% endblock %}

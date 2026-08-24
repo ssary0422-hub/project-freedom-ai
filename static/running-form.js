@@ -2,7 +2,7 @@
   const I = Object.assign({
     title: "Sungeum AI Running Coach", working: "Sungeum is analyzing your run", done_stamp: "Sungeum checked it", landing_frame: "AI foot-strike frame", foot_zoom: "Foot-strike close-up", coach: "Sungeum's coaching note", next_goal: "One thing to change next run", save_image: "Save SNS result image", save_done: "Your running result was saved", generic_error: "Something went wrong while analyzing the video. Please try again.", mediapipe_error: "AI pose tracking is getting ready again. Press analyze once more in a moment.", range_knee: "Recommended range 105–125°", range_trunk: "Recommended range 6–14°", steps: ["Check video", "Find joints", "Analyze strike", "Prepare coaching"]
   }, window.RUNNING_I18N || {});
-  Object.assign(I, { flow_upload: "Upload running video", flow_analyze: "Sungeum AI analysis", flow_share: "Share coaching result", coach_prompt: "Show your video to Sungeum", upload_heading: "Upload your side-view run", upload_copy: "A 5–10 second clip showing your head to toes works best. Keep your feet and the ground visible for a clearer review.", capture_tip: "A steady side camera and bright lighting improve analysis quality. Results can vary with camera angle, speed and lighting.", credit_note: "Credits are deducted only when analysis succeeds.", credits: "3 credits", how_to: "How to record a good clip", step1_title: "Keep the camera steady", step1_copy: "Use a clear side view without shaking", step2_title: "Show your full body and feet", step2_copy: "Keep your head, toes and ground in frame", step3_title: "5–10 seconds is enough", step3_copy: "Bright light and 60fps or higher are recommended", coach_subtitle: "Analysis · coaching · report review", pace_easy: "Easy jog", pace_marathon: "Marathon pace", pace_10k: "10K pace", pace_fast: "Fast run", rear_view: "Rear view · coming soon", terms: "Terms", privacy: "Privacy", refund: "Refund policy", contact: "Contact", assistant_greeting: "Hi, I’m Sungeum 🐶", assistant_status: "Let me handle today’s promo", assistant_running_status: "View promo and running together" }, window.RUNNING_I18N || {});
+  Object.assign(I, { flow_upload: "Upload running video", flow_analyze: "Sungeum AI analysis", flow_share: "Share coaching result", coach_prompt: "Show your video to Sungeum", upload_heading: "Upload your side-view run", upload_copy: "A 5–10 second clip showing your head to toes works best. Keep your feet and the ground visible for a clearer review.", capture_tip: "A steady side camera and bright lighting improve analysis quality. Results can vary with camera angle, speed and lighting.", credit_note: "Running coaching is free.", credits: "FREE", how_to: "How to record a good clip", step1_title: "Keep the camera steady", step1_copy: "Use a clear side view without shaking", step2_title: "Show your full body and feet", step2_copy: "Keep your head, toes and ground in frame", step3_title: "5–10 seconds is enough", step3_copy: "Bright light and 60fps or higher are recommended", coach_subtitle: "Analysis · coaching · report review", pace_easy: "Easy jog", pace_marathon: "Marathon pace", pace_10k: "10K pace", pace_fast: "Fast run", rear_view: "Rear view · coming soon", terms: "Terms", privacy: "Privacy", refund: "Refund policy", contact: "Contact", assistant_greeting: "Hi, I’m Sungeum 🐶", assistant_status: "Let me handle today’s promo", assistant_running_status: "View promo and running together" }, window.RUNNING_I18N || {});
   const form = document.getElementById("runningForm");
   if (!form) return;
   const input = document.getElementById("videoInput");
@@ -26,8 +26,8 @@
   };
   const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"})[char]);
 
-  // Presentation-only localization. Pose extraction, scoring and credit flow
-  // remain unchanged so the existing running feature keeps the same behavior.
+  // Presentation-only localization. Pose extraction remains unchanged; the
+  // running coach is intentionally free while marketing generation uses credits.
   function applyLocalizedRunningUi() {
     const setText = (selector, value) => { const node = document.querySelector(selector); if (node && value && node.textContent !== value) node.textContent = value; };
     setText(".run-kicker", I.title);
@@ -254,7 +254,7 @@
       document.dispatchEvent(new CustomEvent("sungeum:state", { detail: { state: "failed", duration: 1800 } }));
       status.className = "alert alert-danger mt-4"; status.textContent = friendlyError(error);
     } finally {
-      button.textContent = I.analyze || "Ask Sungeum to analyze · 3 credits"; sync();
+      button.textContent = I.analyze || "Ask Sungeum to analyze for free"; sync();
     }
   });
 })();
