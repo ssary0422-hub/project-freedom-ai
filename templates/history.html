@@ -79,6 +79,7 @@
               <input type="hidden" name="image_style" value="AI 추천">
               <button type="submit" class="history-action">🎨 이미지 재생성</button>
             </form>
+            <button type="button" class="history-action" onclick="copyHistoryText('history-result-{{ item[0] }}', this)">📝 텍스트 복사</button>
             {% endif %}
             <form method="POST" action="/delete/{{ item[0] }}" onsubmit="return confirm({{ t('v3.history.delete_confirm')|tojson }});">
               <button type="submit" class="history-action history-action-danger">{{ t('v3.history.delete') }}</button>
@@ -92,7 +93,12 @@
             <div class="history-image-error"><div><strong>이미지를 다시 연결해야 해요</strong><span>이전 서버의 파일이 사라졌습니다. 새로 생성한 이미지는 안전하게 보관됩니다.</span></div></div>
           </div>
           {% endif %}
-          <div class="result-list">
+          {% if content_type == 'sns' and not item[5] %}
+          <div class="alert alert-warning mb-3">
+            이미지 없이 텍스트 결과는 저장되어 있어요. 필요하면 위의 <strong>이미지 재생성</strong>을 눌러주세요.
+          </div>
+          {% endif %}
+          <div class="result-list" id="history-result-{{ item[0] }}">
             {% for line in (item[4] or '').splitlines() if line.strip() %}
               <div class="result-line">{{ line }}</div>
             {% endfor %}
@@ -113,4 +119,22 @@
   </section>
   {% endif %}
 </main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function copyHistoryText(id, button) {
+  const target = document.getElementById(id);
+  if (!target) return;
+  const text = target.innerText.trim();
+  try {
+    await navigator.clipboard.writeText(text);
+    const original = button.textContent;
+    button.textContent = '✅ 복사됨';
+    setTimeout(() => { button.textContent = original; }, 1400);
+  } catch (error) {
+    window.prompt('텍스트를 복사하세요', text);
+  }
+}
+</script>
 {% endblock %}
