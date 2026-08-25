@@ -1787,6 +1787,17 @@ _GENERATOR_TITLE_NO_ROBOT = {
 for _language, _value in _GENERATOR_TITLE_NO_ROBOT.items():
     TRANSLATIONS[_language]["v21.gen.title"] = _value
 
+_NO_ROBOT_UI_TEXT = {
+    "ko": {"v21.result.ads": "AI 광고 결과", "v21.result.blog": "AI 블로그 결과", "v21.result.sns": "AI SNS 결과", "v21.gen.loading": "AI 생성 중..."},
+    "en": {"v21.result.ads": "AI Ad Result", "v21.result.blog": "AI Blog Result", "v21.result.sns": "AI Social Result", "v21.gen.loading": "Generating..."},
+    "ja": {"v21.result.ads": "AI広告結果", "v21.result.blog": "AIブログ結果", "v21.result.sns": "AI SNS結果", "v21.gen.loading": "AI生成中..."},
+    "th": {"v21.result.ads": "ผลโฆษณาจาก AI", "v21.result.blog": "ผลบล็อกจาก AI", "v21.result.sns": "ผลโซเชียลจาก AI", "v21.gen.loading": "AI กำลังสร้าง..."},
+    "zh": {"v21.result.ads": "AI 广告结果", "v21.result.blog": "AI 博客结果", "v21.result.sns": "AI 社交结果", "v21.gen.loading": "AI 生成中..."},
+    "es": {"v21.result.ads": "Resultado de anuncio IA", "v21.result.blog": "Resultado de blog IA", "v21.result.sns": "Resultado social IA", "v21.gen.loading": "Generando con IA..."},
+}
+for _language, _values in _NO_ROBOT_UI_TEXT.items():
+    TRANSLATIONS[_language].update(_values)
+
 # Keep public examples fictional and unrelated to personal or past test data.
 TRANSLATIONS["ko"].update({
     "landing.product.sample_industry": "독립서점",
