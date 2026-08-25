@@ -1,4 +1,6 @@
+import base64
 import json
+import mimetypes
 from pathlib import Path
 from uuid import uuid4
 
@@ -40,6 +42,18 @@ def _public_image_url(path: str | Path) -> str:
     candidate = Path(path)
     relative = candidate.relative_to(BASE_DIR) if candidate.is_absolute() else candidate
     return "/" + relative.as_posix().lstrip("/")
+
+
+def _image_data_url(path: str | Path) -> str:
+    """Inline the just-created image so the result survives static-file hiccups."""
+    candidate = Path(path)
+    if not candidate.is_absolute():
+        candidate = BASE_DIR / candidate
+    if not candidate.exists() or not candidate.is_file():
+        return ""
+    mime = mimetypes.guess_type(candidate.name)[0] or "image/png"
+    encoded = base64.b64encode(candidate.read_bytes()).decode("ascii")
+    return f"data:{mime};base64,{encoded}"
 
 
 def _find_brand_font(size: int):
@@ -616,6 +630,8 @@ def _sns_page():
     session["plan_percent"] = current_status["percent"]
     result = ""
     image_url = ""
+    image_data_url = ""
+    image_path = ""
     error = ""
     business = ""
     company = ""
@@ -785,7 +801,7 @@ def _sns_page():
                                 business, company, style, platform,
                                 image_style, custom_image_style,
                             )
-                        image_url = "/" + Path(image_path).as_posix()
+                            image_url = _public_image_url(image_path)
                     except Exception as image_exception:
                         image_error = (
                             "글은 안전하게 완성했지만 이미지 생성에 실패했어요. "
@@ -807,7 +823,7 @@ def _sns_page():
                                 language=session.get("language", "ko"),
                             )
                             image_path = fallback_path
-                            image_url = "/" + Path(fallback_path).as_posix()
+                            image_url = _public_image_url(fallback_path)
                             image_error = ""
                         except Exception as fallback_exception:
                             print("SNS safe card fallback failed:", fallback_exception)
@@ -838,10 +854,14 @@ def _sns_page():
                 error = f"SNS 생성 오류: {e}"
                 print(error)
 
+    if image_path:
+        image_data_url = _image_data_url(image_path)
+
     return render_template(
         "sns.html",
         result=result,
         image_url=image_url,
+        image_data_url=image_data_url,
         error=error,
         saved_profiles=saved_profiles,
         selected_profile_id=selected_profile_id,
@@ -872,6 +892,8 @@ def retry_sns_image():
     custom_image_style = request.form.get("custom_image_style", "").strip()
     credit_status = get_plan_status(session["user_id"], required_credits=2)
     image_url = ""
+    image_data_url = ""
+    image_path = ""
     image_error = ""
     error = ""
 
@@ -980,7 +1002,7 @@ def retry_sns_image():
                         output_name=f"finished-sns-{uuid4().hex[:10]}.png",
                         language=session.get("language", "ko"),
                     )
-                    image_url = "/" + Path(safe_path).as_posix()
+                    image_url = _public_image_url(safe_path)
                     if update_history_image(history_id, session["user_id"], image_url):
                         create_sns_word(result, safe_path, company)
                         create_sns_pdf(result, safe_path)
@@ -996,8 +1018,12 @@ def retry_sns_image():
                 "잠시 후 다시 눌러주세요."
             )
 
+    if image_path:
+        image_data_url = _image_data_url(image_path)
+
     return render_template(
         "sns.html", result=result, image_url=image_url,
+        image_data_url=image_data_url,
         image_error=image_error, image_retry_history_id=history_id,
         error=error, saved_profiles=get_profiles(session["user_id"]),
         selected_profile_id=None, loaded_profile_name="", business=business,

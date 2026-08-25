@@ -114,7 +114,7 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
     </div>
 
     {% if result %}
-    <div class="card shadow main-card mt-4">
+    <div id="result-card" class="card shadow main-card mt-4">
         <div class="card-header bg-white fw-bold py-3">
             <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
                 <span>{% block result_title %}{{ t("v21.gen.title") }}{% endblock %}</span>
@@ -130,11 +130,11 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
             <div class="mb-4 text-center">
                 <h5 class="mb-3">{{ t("v21.gen.image") }}</h5>
                 <img
-                    src="{{ image_url }}"
+                    src="{{ image_data_url or image_url }}"
                     class="img-fluid rounded shadow result-image"
                     alt="{{ t('v21.gen.image') }}">
                 <div class="mt-3">
-                    <a href="{{ image_url }}"
+                    <a href="{{ image_data_url or image_url }}"
                        download="{{ active_tab or 'content' }}-image.png"
                        class="btn btn-outline-primary image-download-btn">
                         🖼️ 이미지 저장
@@ -188,6 +188,12 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
 // The shared navbar predates the generator i18n keys and still contains a few
 // Korean literals. Normalize its visible labels when a generator page loads.
 document.addEventListener("DOMContentLoaded", function () {
+    const resultCard = document.getElementById("result-card");
+    if (resultCard) {
+        window.setTimeout(function () {
+            resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 120);
+    }
     // Remove stale duplicate card labels left by older deployed templates.
     document.querySelectorAll(".generator-tab").forEach(function (tab) {
         const icon = tab.querySelector(":scope > .generator-tab-icon") || tab.querySelector(".generator-tab-icon");
