@@ -10,7 +10,10 @@ from services.campaign_art_direction import ArtDirection
 from services.campaign_quality import evaluate_campaign_image
 
 
-MAX_BACKGROUND_GENERATIONS = 2
+# Generate exactly one AI background per request.  A failed quality review
+# should not trigger extra image charges or make mobile requests wait through
+# multiple image generations.
+MAX_BACKGROUND_GENERATIONS = 1
 
 
 @dataclass(frozen=True)
