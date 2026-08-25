@@ -1,4 +1,5 @@
 import base64
+import io
 import json
 import mimetypes
 from pathlib import Path
@@ -45,15 +46,23 @@ def _public_image_url(path: str | Path) -> str:
 
 
 def _image_data_url(path: str | Path) -> str:
-    """Inline the just-created image so the result survives static-file hiccups."""
+    """Inline a small preview so mobile pages do not carry the full PNG payload."""
     candidate = Path(path)
     if not candidate.is_absolute():
         candidate = BASE_DIR / candidate
     if not candidate.exists() or not candidate.is_file():
         return ""
-    mime = mimetypes.guess_type(candidate.name)[0] or "image/png"
-    encoded = base64.b64encode(candidate.read_bytes()).decode("ascii")
-    return f"data:{mime};base64,{encoded}"
+    try:
+        preview = Image.open(candidate).convert("RGB")
+        preview.thumbnail((720, 900), Image.Resampling.LANCZOS)
+        buffer = io.BytesIO()
+        preview.save(buffer, format="JPEG", quality=78, optimize=True)
+        encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
+        return f"data:image/jpeg;base64,{encoded}"
+    except Exception:
+        mime = mimetypes.guess_type(candidate.name)[0] or "image/png"
+        encoded = base64.b64encode(candidate.read_bytes()).decode("ascii")
+        return f"data:{mime};base64,{encoded}"
 
 
 def _find_brand_font(size: int):

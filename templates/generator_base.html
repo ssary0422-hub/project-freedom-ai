@@ -134,7 +134,7 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
                     class="img-fluid rounded shadow result-image"
                     alt="{{ t('v21.gen.image') }}">
                 <div class="mt-3">
-                    <a href="{{ image_data_url or image_url }}"
+                    <a href="{{ image_url }}"
                        download="{{ active_tab or 'content' }}-image.png"
                        class="btn btn-outline-primary image-download-btn">
                         🖼️ 이미지 저장
