@@ -61,7 +61,7 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 <p class="leadx mt-4">사업 정보만 입력하면 SNS·광고 콘텐츠를 만들고, 순금이 러닝코치와 말하기 코치까지 한곳에서 이용하세요.</p>
 <div class="hero-task-label">{{ t("landing.task.label") }}</div>
 <div class="hero-task-grid">
-<a class="hero-task-card marketing" href="{% if session.get('user_id') %}/ads-generator{% else %}/register{% endif %}"><span class="hero-task-icon">📣</span><span class="hero-task-copy"><strong>{{ t("landing.task.marketing") }}</strong><small>{{ t("landing.task.marketing_desc") }}</small></span><span class="hero-task-arrow">→</span></a>
+<a class="hero-task-card marketing" href="{% if session.get('user_id') %}/ads-generator{% else %}/register{% endif %}"><span class="hero-task-icon">📣</span><span class="hero-task-copy"><strong>사업 홍보 만들기</strong><small>광고·SNS 콘텐츠를 한곳에서</small></span><span class="hero-task-arrow">→</span></a>
 <a class="hero-task-card running" data-kind="running" href="{% if session.get('user_id') %}/running-form{% else %}/login{% endif %}"><span class="hero-task-new">AI COACH</span><span class="hero-task-icon">🏃</span><span class="hero-task-copy"><strong>{{ t("landing.task.running") }}</strong><small>{{ t("landing.task.running_desc") }}</small></span><span class="hero-task-arrow">→</span></a>
 <a class="hero-task-card speaking" data-kind="speaking" href="/speaking-coach"><span class="hero-task-new">AI COACH</span><span class="hero-task-icon">💬</span><span class="hero-task-copy"><strong>{{ t("landing.task.speaking") }}</strong><small>{{ t("landing.task.speaking_desc") }}</small></span><span class="hero-task-arrow">→</span></a>
 </div><div class="d-flex flex-wrap gap-2 mt-4">
