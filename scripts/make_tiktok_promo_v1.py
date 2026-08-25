@@ -4,8 +4,8 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import imageio_ffmpeg
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "static" / "marketing" / "tiktok-project-freedom-promo-v1.mp4"
-PREVIEW = ROOT / "static" / "marketing" / "tiktok-project-freedom-promo-v1-preview.png"
+OUT = ROOT / "static" / "marketing" / "tiktok-project-freedom-promo-v2.mp4"
+PREVIEW = ROOT / "static" / "marketing" / "tiktok-project-freedom-promo-v2-preview.png"
 W, H, FPS, DURATION = 1080, 1920, 30, 15
 FONT = Path("C:/Windows/Fonts/malgun.ttf")
 FONT_B = Path("C:/Windows/Fonts/malgunbd.ttf")
@@ -23,6 +23,36 @@ def fit(img, box):
 def rounded(base, xy, radius, fill, outline=None, width=1):
     ImageDraw.Draw(base).rounded_rectangle(xy, radius=radius, fill=fill, outline=outline, width=width)
 
+def clean_result_card(img):
+    """Normalize embedded demo URLs so every visible CTA uses the live domain."""
+    img = img.copy().convert("RGBA")
+    d = ImageDraw.Draw(img)
+    h = img.height
+    # The source card contains an outdated host near its footer. Replace the
+    # whole footer band so no obsolete URL can leak into the TikTok export.
+    d.rectangle((0, h-250, img.width, h), fill=(8, 20, 38, 255))
+    d.rounded_rectangle((70, h-190, img.width-70, h-105), 24, fill=(102, 239, 214, 255))
+    text_center(d, (img.width//2, h-148), "무료로 직접 만들어봐", font(28, True), (7, 28, 49, 255))
+    text_center(d, (img.width//2, h-52), "projectfreedom-ai.com", font(19, True), (102, 239, 214, 255))
+    return img
+
+def make_sns_mock():
+    """Create a clean social-result mock without retired blog/poster copy."""
+    card = Image.new("RGBA", (1080, 1350), (10, 22, 42, 255))
+    d = ImageDraw.Draw(card)
+    d.text((72, 74), "순금이 실제 결과", font=font(30, True), fill=(102, 239, 214, 255))
+    d.text((72, 170), "사업 정보만 넣었는데", font=font(58, True), fill=(255, 255, 255, 255))
+    d.text((72, 245), "홍보물이 이렇게 나왔어", font=font(58, True), fill=(102, 239, 214, 255))
+    rounded(card, (72, 395, 1008, 840), 28, (21, 42, 69, 255), (71, 112, 163, 255), 2)
+    d.text((110, 445), "오늘의 홍보 문구", font=font(26, True), fill=(255, 221, 130, 255))
+    d.text((110, 525), "고객이 바로 이해하는", font=font(36, True), fill=(255, 255, 255, 255))
+    d.text((110, 580), "친근한 SNS 게시물을 준비했어요.", font=font(32), fill=(220, 233, 247, 255))
+    d.rounded_rectangle((110, 700, 970, 790), 20, fill=(228, 204, 133, 255))
+    text_center(d, (540, 745), "무료로 직접 만들어봐", font(32, True), (9, 26, 47, 255))
+    d.text((72, 1000), "업종·상호·홍보 내용만 입력하면 돼", font=font(30), fill=(151, 190, 214, 255))
+    d.text((72, 1080), "projectfreedom-ai.com", font=font(28, True), fill=(102, 239, 214, 255))
+    return card
+
 def text_center(draw, xy, text, f, fill):
     b = draw.textbbox((0, 0), text, font=f)
     draw.text((xy[0]-(b[2]-b[0])/2, xy[1]-(b[3]-b[1])/2), text, font=f, fill=fill)
@@ -39,8 +69,8 @@ def frame(t):
     d.text((70, 116), "순금이의 마케팅 작업실", font=font(22), fill=(180, 197, 221, 255))
 
     mascot = Image.open(ROOT / "static" / "brand" / "sungeum-3d-official.png")
-    ad = Image.open(ROOT / "static" / "marketing" / "instagram-ai-content-lineup.png")
-    sns = Image.open(ROOT / "static" / "marketing" / "instagram-free-trial-user-post-20260825.png")
+    ad = clean_result_card(Image.open(ROOT / "static" / "marketing" / "instagram-ai-content-lineup.png"))
+    sns = make_sns_mock()
 
     if t < 3.8:
         p = min(1, t / 0.6)
@@ -67,7 +97,10 @@ def frame(t):
     elif t < 12.8:
         text_center(d, (W//2, 330), "광고도", font(62, True), (255, 255, 255, 255))
         text_center(d, (W//2, 410), "SNS도 한 번에", font(62, True), (102, 239, 214, 255))
-        for x, im, label in [(55, ad, "광고"), (565, sns, "SNS")]:
+        phase = min(1, max(0, (t - 8.8) / 0.65))
+        ease = 1 - (1 - phase) ** 3
+        for target_x, im, label, direction in [(55, ad, "광고", -1), (565, sns, "SNS", 1)]:
+            x = int(target_x + direction * (1 - ease) * 360)
             rounded(bg, (x, 560, x+460, 1365), 28, (18, 28, 50, 255), (82, 122, 170, 255), 3)
             d.text((x+28, 600), label, font=font(32, True), fill=(255, 255, 255, 255))
             card = fit(im, (400, 680)); bg.alpha_composite(card, (x+30, 660))
