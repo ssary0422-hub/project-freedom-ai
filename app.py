@@ -139,7 +139,10 @@ def add_security_headers(response):
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
     response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
-    response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    # GPS route recommendations need the browser's location prompt. Keep
+    # camera/microphone blocked by default, but allow geolocation for this
+    # same-origin site so users can explicitly grant permission.
+    response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)")
     if request.is_secure:
         response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
     return response
