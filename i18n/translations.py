@@ -1776,6 +1776,17 @@ _ACTIVE_LINEUP_GENERATOR = {
 for _language, _value in _ACTIVE_LINEUP_GENERATOR.items():
     TRANSLATIONS[_language]["v21.gen.subtitle"] = _value
 
+_GENERATOR_TITLE_NO_ROBOT = {
+    "ko": "AI 콘텐츠 생성기",
+    "en": "AI Content Generator",
+    "ja": "AIコンテンツジェネレーター",
+    "th": "เครื่องมือสร้างคอนเทนต์ AI",
+    "zh": "AI 内容生成器",
+    "es": "Generador de contenido IA",
+}
+for _language, _value in _GENERATOR_TITLE_NO_ROBOT.items():
+    TRANSLATIONS[_language]["v21.gen.title"] = _value
+
 # Keep public examples fictional and unrelated to personal or past test data.
 TRANSLATIONS["ko"].update({
     "landing.product.sample_industry": "독립서점",
