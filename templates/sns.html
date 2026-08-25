@@ -199,10 +199,10 @@
 {% block result_title %}{{ t("v21.result.sns") }}{% endblock %}
 
 {% block result_actions %}
-{% if image_error and image_retry_history_id %}
+{% if image_retry_history_id and not image_url %}
 <div class="alert alert-warning w-100 mb-3">
     <strong>이미지만 아직 준비되지 않았어요.</strong><br>
-    {{ image_error }}
+    {{ image_error or '이미지 파일 생성 또는 저장 과정에서 문제가 발생했습니다.' }}
 </div>
 <form method="POST" action="/sns/retry-image" class="w-100 mb-3">
     <input type="hidden" name="history_id" value="{{ image_retry_history_id }}">
