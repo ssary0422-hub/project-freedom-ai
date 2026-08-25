@@ -22,8 +22,6 @@
                 <a class="btn pf-nav-btn {% if request.path.startswith('/content') %}pf-nav-active{% endif %}" href="{% if session.get('user_id') %}/content{% else %}/login{% endif %}">{{ nav_icon('megaphone') }} 광고 콘텐츠</a>
                 {% if session.get("user_id") %}
                 <a class="btn pf-nav-btn {% if request.path.startswith('/sns') %}pf-nav-active{% endif %}" href="/sns">{{ nav_icon('sns') }} SNS</a>
-                <a class="btn pf-nav-btn {% if request.path.startswith('/blog') %}pf-nav-active{% endif %}" href="/blog">{{ nav_icon('blog') }} 블로그</a>
-                <a class="btn pf-nav-btn {% if request.path.startswith('/poster') %}pf-nav-active{% endif %}" href="/poster">{{ nav_icon('poster') }} 포스터</a>
                 {% endif %}
                 <a class="btn pf-nav-btn {% if request.path.startswith('/running-form') %}pf-nav-active{% endif %}" href="{% if session.get('user_id') %}/running-form{% else %}/login{% endif %}">{{ nav_icon('run') }} {{ t('nav.running') }}</a>
                 <a class="btn pf-nav-btn {% if request.path.startswith('/speaking-coach') %}pf-nav-active{% endif %}" href="/speaking-coach">💬 {{ t('nav.speaking') }}</a>
