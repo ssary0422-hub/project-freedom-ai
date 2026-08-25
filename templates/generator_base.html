@@ -21,6 +21,10 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
 .generator-tab-copy strong { display:block; min-width:0; font-size:.88rem; white-space:nowrap; word-break:normal; overflow-wrap:normal; writing-mode:horizontal-tb; }
 .generator-tab-copy small { display:block; margin-top:5px; color:#8492ab; font-size:.66rem; white-space:normal; word-break:keep-all; overflow-wrap:normal; }
 .generator-heading { display:none !important; }
+/* Keep each generator card to one title and one description. This also
+   protects against older cached markup that appended a repeated title. */
+.generator-tab > :not(.generator-tab-icon):not(.generator-tab-copy) { display:none !important; }
+.generator-tab-copy > :nth-child(n+3) { display:none !important; }
 
 .result-image {
     max-width: 700px;
@@ -183,6 +187,13 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
 // The shared navbar predates the generator i18n keys and still contains a few
 // Korean literals. Normalize its visible labels when a generator page loads.
 document.addEventListener("DOMContentLoaded", function () {
+    // Remove stale duplicate card labels left by older deployed templates.
+    document.querySelectorAll(".generator-tab").forEach(function (tab) {
+        tab.querySelectorAll(".generator-tab-copy > *:nth-child(n+3)").forEach(function (node) { node.remove(); });
+        Array.from(tab.childNodes).forEach(function (node) {
+            if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) node.remove();
+        });
+    });
     const nav = document.querySelector(".pf-navbar");
     if (!nav) return;
     const labels = {
