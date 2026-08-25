@@ -766,6 +766,7 @@ def _sns_page():
                                     campaign_request=style,
                                     analyzer=analyze_image_json,
                                 ),
+                                prefer_generated_on_failure=True,
                             )
                             output_path, visual_review = budgeted.output_path, budgeted.review
                             image_path = output_path.relative_to(BASE_DIR).as_posix()

@@ -741,6 +741,7 @@ def _blog_page():
                             campaign_request=topic, media="blog cover",
                             expected_size=(1200, 630), analyzer=analyze_image_json,
                         ),
+                        prefer_generated_on_failure=True,
                     )
                     image_path = budgeted.output_path.relative_to(BASE_DIR).as_posix()
                     image_url = "/" + Path(image_path).as_posix()

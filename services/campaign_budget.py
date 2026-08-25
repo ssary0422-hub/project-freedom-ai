@@ -34,6 +34,7 @@ def generate_with_bounded_backgrounds(
     uploaded_background: str | Path | None = None,
     create_safe_background: Callable[[ArtDirection], str | Path] | None = None,
     max_background_generations: int = MAX_BACKGROUND_GENERATIONS,
+    prefer_generated_on_failure: bool = False,
 ) -> BudgetedCampaignResult:
     """Reuse each costly background across all layouts and stop after two generations.
 
@@ -82,6 +83,15 @@ def generate_with_bounded_backgrounds(
             if review.get("approved"):
                 return BudgetedCampaignResult(output, review, generated, rendered, True)
             failures.append((output, review))
+
+    # If the paid/model background was created successfully, keep the best
+    # photo-led candidate rather than replacing it with an abstract gradient
+    # card solely because visual QA was unavailable or overly conservative.
+    # Callers opt into this only where a publishable visual is preferable to a
+    # misleading photo-free fallback; true provider failures still raise.
+    if prefer_generated_on_failure and generated and failures:
+        best_path, best_review = max(failures, key=lambda item: item[1].get("score", 0))
+        return BudgetedCampaignResult(best_path, best_review, generated, rendered, False)
 
     best_path, best_review = max(failures, key=lambda item: item[1].get("score", 0))
     raise ValueError(

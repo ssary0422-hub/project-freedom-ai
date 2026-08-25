@@ -742,6 +742,7 @@ def _home_page():
                                 image_path=candidate, business=business, company=company,
                                 campaign_request=style, analyzer=analyze_image_json,
                             ),
+                            prefer_generated_on_failure=True,
                         )
                         image_path = budgeted.output_path.relative_to(BASE_DIR).as_posix()
                     else:
