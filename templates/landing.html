@@ -131,7 +131,7 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
   if ({{ 'true' if session.get('user_id') else 'false' }}) {
     const landingMenu = document.querySelector('#landingMenu > div');
     if (landingMenu) {
-      landingMenu.innerHTML = `<a class="btn pf-nav-btn" href="/content">📣 광고 콘텐츠</a><a class="btn pf-nav-btn" href="/sns">📱 SNS</a><a class="btn pf-nav-btn" href="/blog">📄 블로그</a><a class="btn pf-nav-btn" href="/poster">🖼 포스터</a><a class="btn pf-nav-btn" href="/running-form">🏃 {{ t('nav.running') }}</a><a class="btn pf-nav-btn" href="/speaking-coach">💬 {{ t('nav.speaking') }}</a><a class="btn pf-nav-btn" href="/reviews">★ 리뷰</a><a class="btn pf-nav-btn" href="/history">↶ {{ t('nav.history') }}</a><a class="btn pf-credit-pill" href="/credits">▣ {{ session.get('plan_remaining', 0) }} {{ t('nav.credits') }}</a>`;
+      landingMenu.innerHTML = `<a class="btn pf-nav-btn" href="/content">📣 광고 콘텐츠</a><a class="btn pf-nav-btn" href="/sns">📱 SNS</a><a class="btn pf-nav-btn" href="/running-form">🏃 {{ t('nav.running') }}</a><a class="btn pf-nav-btn" href="/speaking-coach">💬 {{ t('nav.speaking') }}</a><a class="btn pf-nav-btn" href="/reviews">★ 리뷰</a><a class="btn pf-nav-btn" href="/history">↶ {{ t('nav.history') }}</a><a class="btn pf-credit-pill" href="/credits">▣ {{ session.get('plan_remaining', 0) }} {{ t('nav.credits') }}</a>`;
     }
   }
 </script>
