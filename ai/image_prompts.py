@@ -150,7 +150,17 @@ def build_marketing_image_prompt(*, business: str, context: str, mood: str,
         else ""
     )
     visual_direction = (
-        "ADORABLE_CHARACTER_MODE. Use a polished kawaii 3D animated advertising illustration, "
+        "ANIMATION_ILLUSTRATION_MODE. Use a polished 2D/3D animated advertising illustration with expressive shapes, "
+        "clean outlines, appealing color blocking and a premium social-media campaign finish. Keep the scene "
+        "friendly and commercially usable, never childish or low-detail. "
+        "Do not render any text inside the artwork."
+        if "animation_illustration" in resolved_image_style.lower()
+        else "SUNGEUM_CHARACTER_MODE. Feature a friendly black-and-tan dachshund mascot with floppy ears, "
+        "a blue collar and a small gold name tag as the recognizable campaign guide. Keep the dog clearly canine, "
+        "on four paws, with clean polished 3D animation and no human hands or human body. "
+        "Do not render any text inside the artwork."
+        if "sungeum_character" in resolved_image_style.lower()
+        else "ADORABLE_CHARACTER_MODE. Use a polished kawaii 3D animated advertising illustration, "
         "soft rounded baby proportions, chubby cheeks, big sparkling expressive eyes, warm pastel "
         "colors, charming smiles and clean character design. Show no more than two characters. "
         "The animals must look healthy, safe and joyful, with coherent anatomy and the correct "

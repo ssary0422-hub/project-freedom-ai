@@ -102,6 +102,8 @@
 <div class="mb-3">
     <label class="form-label">{{ t("v2.image_style") }}</label>
     <select name="image_style" class="form-select">
+        <option value="animation_illustration" {% if image_style == "animation_illustration" %}selected{% endif %}>🎨 애니메이션 일러스트</option>
+        <option value="sungeum_character" {% if image_style == "sungeum_character" %}selected{% endif %}>🐾 순금이 캐릭터 중심</option>
         <option value="AI 추천" {% if not image_style or image_style == "AI 추천" %}selected{% endif %}>✨ AI가 업종에 맞게 추천</option>
         <option value="고급스러운 실사" {% if image_style == "고급스러운 실사" %}selected{% endif %}>{{ t("v21.style.luxury") }}</option>
         <option value="감성적인 분위기" {% if image_style == "감성적인 분위기" %}selected{% endif %}>{{ t("v21.style.emotional") }}</option>
