@@ -649,7 +649,10 @@ def _home_page():
         custom_image_style = request.form.get("custom_image_style", "").strip()
         effective_image_style = custom_image_style or image_style
         with_image = request.form.get("with_image") == "on"
-        image_output_mode = request.form.get("image_output_mode", "ai_photo").strip()
+        # A generated visual should be usable immediately: compose the AI
+        # background with verified copy, CTA, brand name, and logo.  Keep the
+        # explicit form value as an escape hatch for advanced users.
+        image_output_mode = request.form.get("image_output_mode", "finished_card").strip()
 
         required_credits = 3 if with_image else 1
         credit_status = get_plan_status(

@@ -670,7 +670,10 @@ def _sns_page():
         custom_image_style = request.form.get("custom_image_style", "").strip()
         effective_image_style = custom_image_style or image_style
         with_image = request.form.get("with_image") == "on"
-        image_output_mode = request.form.get("image_output_mode", "ai_photo").strip()
+        # Default to one finished, publishable card rather than an unlabelled
+        # stock-style background. The three art directions still vary layout,
+        # subject placement, message angle, and palette for each request.
+        image_output_mode = request.form.get("image_output_mode", "finished_card").strip()
         selected_art_direction = request.form.get("selected_art_direction", "").strip()
 
         required_credits = 3 if with_image else 1
