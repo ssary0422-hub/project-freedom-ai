@@ -1765,6 +1765,17 @@ _ACTIVE_LINEUP_LANDING = {
 for _language, _values in _ACTIVE_LINEUP_LANDING.items():
     TRANSLATIONS[_language].update(_values)
 
+_ACTIVE_LINEUP_GENERATOR = {
+    "ko": "광고·SNS 콘텐츠를 한곳에서 생성하세요.",
+    "en": "Create ads and social content in one place.",
+    "ja": "広告・SNSコンテンツを1か所で作成できます。",
+    "th": "สร้างโฆษณาและโซเชียลได้ในที่เดียว",
+    "zh": "在一个地方生成广告和社交内容。",
+    "es": "Crea anuncios y contenido social en un solo lugar.",
+}
+for _language, _value in _ACTIVE_LINEUP_GENERATOR.items():
+    TRANSLATIONS[_language]["v21.gen.subtitle"] = _value
+
 # Keep public examples fictional and unrelated to personal or past test data.
 TRANSLATIONS["ko"].update({
     "landing.product.sample_industry": "독립서점",

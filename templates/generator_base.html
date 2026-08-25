@@ -25,6 +25,7 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
    protects against older cached markup that appended a repeated title. */
 .generator-tab > :not(.generator-tab-icon):not(.generator-tab-copy) { display:none !important; }
 .generator-tab-copy > :nth-child(n+3) { display:none !important; }
+.generator-tab::before, .generator-tab::after { content:none !important; display:none !important; }
 
 .result-image {
     max-width: 700px;
@@ -189,10 +190,16 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
 document.addEventListener("DOMContentLoaded", function () {
     // Remove stale duplicate card labels left by older deployed templates.
     document.querySelectorAll(".generator-tab").forEach(function (tab) {
-        tab.querySelectorAll(".generator-tab-copy > *:nth-child(n+3)").forEach(function (node) { node.remove(); });
-        Array.from(tab.childNodes).forEach(function (node) {
-            if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) node.remove();
-        });
+        const icon = tab.querySelector(":scope > .generator-tab-icon") || tab.querySelector(".generator-tab-icon");
+        const copy = tab.querySelector(":scope > .generator-tab-copy") || tab.querySelector(".generator-tab-copy");
+        if (icon && copy) {
+            const title = copy.querySelector("strong");
+            const description = copy.querySelector("small");
+            if (title && description) {
+                copy.replaceChildren(title, description);
+                tab.replaceChildren(icon, copy);
+            }
+        }
     });
     const nav = document.querySelector(".pf-navbar");
     if (!nav) return;
