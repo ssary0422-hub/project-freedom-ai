@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}순금이 오늘의 러닝코스{% endblock %}
+{% block content %}
+<main class="route-page">
+  <section class="route-hero">
+    <img src="{{ url_for('static', filename='brand/sungeum-running-coach-paw-v2.png') }}" alt="순금이 러닝코치">
+    <div><p class="route-eyebrow">SUNGEUM RUNNING ROUTE</p><h1>오늘은 어디로 달려볼까?</h1><p>현재 위치와 목표만 알려주면 오늘 컨디션에 맞는 러닝코스를 골라줄게.</p></div>
+  </section>
+
+  <section class="route-card" aria-labelledby="route-form-title">
+    <h2 id="route-form-title">순금이에게 코스 조건 알려주기</h2>
+    <div class="route-field"><label for="route-distance">목표 거리</label><select id="route-distance"><option value="3">3km · 가볍게</option><option value="5" selected>5km · 기본 러닝</option><option value="10">10km · 도전 러닝</option></select></div>
+    <div class="route-field"><span class="route-label">오늘의 목적</span><div class="route-options" data-field="purpose"><button type="button" data-value="easy" class="selected">가볍게 달리기</button><button type="button" data-value="fitness">체력 키우기</button><button type="button" data-value="recovery">회복 러닝</button><button type="button" data-value="record">기록 도전</button></div></div>
+    <div class="route-field"><span class="route-label">선호 코스</span><div class="route-options" data-field="style"><button type="button" data-value="park" class="selected">공원·산책로</button><button type="button" data-value="flat">평지 위주</button><button type="button" data-value="quiet">조용한 길</button><button type="button" data-value="hill">오르막 포함</button></div></div>
+    <button id="route-location" class="route-location" type="button">📍 현재 위치로 코스 추천</button>
+    <p id="route-status" class="route-status" role="status">위치 권한을 허용하면 출발지 기준으로 추천할게.</p>
+  </section>
+
+  <section id="route-result" class="route-result" hidden></section>
+</main>
+<style>
+.route-page{max-width:820px;margin:0 auto;padding:26px 16px 72px;color:#24364b}.route-hero{display:flex;gap:20px;align-items:center;padding:24px;border-radius:26px;background:linear-gradient(135deg,#eafbf6,#eef1ff);margin-bottom:18px}.route-hero img{width:112px;height:132px;object-fit:contain;object-position:center bottom}.route-eyebrow{margin:0;color:#087f78;font-size:.72rem;font-weight:850;letter-spacing:.12em}.route-hero h1{margin:.35rem 0 .5rem;color:#172b42;font-size:clamp(1.7rem,5vw,2.6rem)}.route-hero p:last-child{margin:0;color:#52657d;line-height:1.55}.route-card,.route-result{padding:24px;border:1px solid #dce7ef;border-radius:24px;background:#fff;box-shadow:0 12px 35px #1b35520d}.route-card h2{margin:0 0 1.2rem;color:#172b42;font-size:1.2rem}.route-field{margin-top:1.1rem}.route-field label,.route-label{display:block;margin-bottom:.5rem;color:#52657d;font-size:.86rem;font-weight:750}.route-field select{width:100%;padding:.8rem 1rem;border:1px solid #cbd9e8;border-radius:13px;color:#24364b;background:#fff;font-size:1rem}.route-options{display:flex;flex-wrap:wrap;gap:.55rem}.route-options button{border:1px solid #cbd9e8;border-radius:999px;background:#fff;color:#29405a;padding:.6rem .85rem;font-weight:700}.route-options button.selected{border-color:#0b9e91;background:#dff8f2;color:#08756f}.route-location{width:100%;margin-top:1.35rem;border:0;border-radius:14px;padding:.9rem 1rem;background:linear-gradient(90deg,#377dff,#6c4cff);color:#fff;font-size:1rem;font-weight:800}.route-location:disabled{opacity:.65}.route-status{min-height:1.4rem;margin:.75rem 0 0;color:#61758c;font-size:.84rem}.route-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-bottom:1rem}.route-stat{padding:.85rem;border-radius:15px;background:#f3f8ff;text-align:center}.route-stat strong{display:block;color:#087f78;font-size:1.25rem}.route-stat span{display:block;margin-top:.2rem;color:#61758c;font-size:.75rem}.route-result h2{margin:0 0 .8rem;color:#172b42;font-size:1.3rem}.route-result p{line-height:1.6;color:#30445b}.route-tip{display:flex;gap:.7rem;align-items:center;margin-top:1rem;padding:.85rem;border-radius:15px;background:#effbf8;color:#08756f;font-weight:700}.route-tip img{width:55px;height:65px;object-fit:contain}@media(max-width:560px){.route-hero{padding:18px;gap:12px}.route-hero img{width:82px;height:100px}.route-card,.route-result{padding:18px}.route-summary{grid-template-columns:1fr 1fr}.route-stat:last-child{grid-column:1/-1}.route-options button{flex:1 1 calc(50% - .55rem);font-size:.84rem}}
+</style>
+<script>
+(() => {
+  const state = { purpose: 'easy', style: 'park' };
+  document.querySelectorAll('.route-options').forEach(group => group.querySelectorAll('button').forEach(button => button.addEventListener('click', () => {
+    group.querySelectorAll('button').forEach(item => item.classList.remove('selected')); button.classList.add('selected'); state[group.dataset.field] = button.dataset.value;
+  })));
+  const labels = { easy:'가볍게 달리기', fitness:'체력 키우기', recovery:'회복 러닝', record:'기록 도전' };
+  const styles = { park:'공원·산책로', flat:'평지 위주', quiet:'조용한 길', hill:'오르막 포함' };
+  const btn = document.getElementById('route-location'), status = document.getElementById('route-status'), result = document.getElementById('route-result');
+  btn.addEventListener('click', () => {
+    if (!navigator.geolocation) { status.textContent = '이 브라우저에서는 위치 기능을 사용할 수 없어. 출발지를 직접 입력하는 기능을 준비 중이야.'; return; }
+    btn.disabled = true; status.textContent = '📍 현재 위치를 확인하고 순금이가 코스를 고르는 중이야…';
+    navigator.geolocation.getCurrentPosition(position => {
+      const km = Number(document.getElementById('route-distance').value); const pace = state.purpose === 'record' ? 5.5 : state.purpose === 'recovery' ? 7.5 : 6.5; const minutes = Math.round(km * pace);
+      const lat = position.coords.latitude.toFixed(4), lon = position.coords.longitude.toFixed(4);
+      result.hidden = false; result.innerHTML = `<h2>오늘의 추천 코스</h2><div class="route-summary"><div class="route-stat"><strong>${km}km</strong><span>목표 거리</span></div><div class="route-stat"><strong>${minutes}분</strong><span>예상 시간</span></div><div class="route-stat"><strong>${styles[state.style]}</strong><span>코스 스타일</span></div></div><p><strong>${labels[state.purpose]}</strong> 목적에 맞춰 현재 위치(${lat}, ${lon})를 출발지로 잡았어. ${styles[state.style]} 중심의 <strong>${km}km 왕복 코스</strong>를 추천할게.</p><p class="small text-muted">실제 도로 경로와 통행 가능 여부는 출발 전에 지도 앱에서 한 번 확인해줘. 다음 버전에서는 지도 위에 상세 경로까지 바로 보여줄게.</p><div class="route-tip"><img src="{{ url_for('static', filename='brand/sungeum-running-coach-paw-v2.png') }}" alt="순금이"><span>처음 5분은 천천히. 오늘 목표는 완주하고 기분 좋게 돌아오는 거야 🐾</span></div>`;
+      result.scrollIntoView({ behavior: 'smooth', block: 'start' }); status.textContent = '추천 완료!'; btn.disabled = false;
+    }, error => { status.textContent = error.code === 1 ? '위치 권한이 필요해. 브라우저 주소창의 위치 권한을 허용해줘.' : '현재 위치를 확인하지 못했어. 잠시 후 다시 시도해줘.'; btn.disabled = false; }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+  });
+})();
+</script>
+{% endblock %}
