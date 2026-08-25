@@ -208,12 +208,12 @@ body {
                             </a>
                         </div>
 
-                        <div class="col-6">
+                        {% if false %}<div class="col-6">
                             <a href="/blog"
                                class="btn btn-light hero-action-link w-100">
                                 {{ t("v21.tab.blog") }}
                             </a>
-                        </div>
+                        </div>{% endif %}
 
                         <div class="col-6">
                             <a href="/sns"
@@ -236,12 +236,12 @@ body {
                             </a>
                         </div>
 
-                        <div class="col-6">
+                        {% if false %}<div class="col-6">
                             <a href="/poster"
                                class="btn hero-action-link hero-action-package w-100">
                                 {{ t('dash.poster') }}
                             </a>
-                        </div>
+                        </div>{% endif %}
                     </div>
                 </div>
             </div>
@@ -263,7 +263,7 @@ body {
             </div>
         </div>
 
-        <div class="col-md-4">
+        {% if false %}<div class="col-md-4">
             <div class="card dashboard-card shadow-sm h-100">
                 <div class="card-body p-4">
                     <div class="text-muted mb-2">🚀 {{ t("v3.dash.packages") }}</div>
@@ -273,7 +273,7 @@ body {
                     </a>
                 </div>
             </div>
-        </div>
+        </div>{% endif %}
 
         <div class="col-md-4">
             <div class="card dashboard-card shadow-sm h-100">
@@ -341,7 +341,7 @@ body {
                                     </a>
 
                                     <a
-                                        href="/package?profile_id={{ brand[0] }}"
+                                        href="/ads-generator?profile_id={{ brand[0] }}"
                                         class="btn btn-sm btn-primary">
                                         🚀 {{ t("v3.dash.generate_brand") }}
                                     </a>
@@ -373,7 +373,7 @@ body {
             </div>
         </div>
 
-        <div class="col-lg-7">
+        {% if false %}<div class="col-lg-7">
             <div class="card dashboard-card shadow-sm h-100">
                 <div class="card-body p-4">
 
@@ -472,7 +472,7 @@ body {
 
                 </div>
             </div>
-        </div>
+        </div>{% endif %}
 
     </div>
 
