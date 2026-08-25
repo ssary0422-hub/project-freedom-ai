@@ -32,6 +32,13 @@ ads_bp = Blueprint("ads", __name__)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _public_image_url(path: str | Path) -> str:
+    """Turn either an absolute generated path or a relative static path into a URL."""
+    candidate = Path(path)
+    relative = candidate.relative_to(BASE_DIR) if candidate.is_absolute() else candidate
+    return "/" + relative.as_posix().lstrip("/")
+
+
 def _generate_ad_image(business, company, style, image_style, custom_image_style=""):
     prompt = build_marketing_image_prompt(
         business=business,
@@ -821,7 +828,7 @@ def retry_ads_image():
             image_path = _generate_ad_image(
                 business, company, style, custom_image_style or image_style, custom_image_style
             )
-            image_url = "/" + Path(image_path).as_posix()
+            image_url = _public_image_url(image_path)
             if not update_history_image(history_id, session["user_id"], image_url, "ads"):
                 raise RuntimeError("생성 기록에 이미지를 연결하지 못했습니다.")
             create_word(result, image_path, company)

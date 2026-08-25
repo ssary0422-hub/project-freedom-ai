@@ -35,6 +35,13 @@ sns_bp = Blueprint("sns", __name__)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _public_image_url(path: str | Path) -> str:
+    """Turn either an absolute generated path or a relative static path into a URL."""
+    candidate = Path(path)
+    relative = candidate.relative_to(BASE_DIR) if candidate.is_absolute() else candidate
+    return "/" + relative.as_posix().lstrip("/")
+
+
 def _find_brand_font(size: int):
     candidates = [
         Path(r"C:\Windows\Fonts\malgunbd.ttf"),
@@ -929,7 +936,7 @@ def retry_sns_image():
                 ),
             )
             image_path = budgeted.output_path
-            image_url = "/" + Path(image_path).as_posix()
+            image_url = _public_image_url(image_path)
             if not update_history_image(history_id, session["user_id"], image_url):
                 raise RuntimeError("생성 기록에 이미지를 연결하지 못했습니다.")
             create_sns_word(result, image_path, company)
@@ -946,7 +953,7 @@ def retry_sns_image():
                     business, company, style, platform,
                     image_style, custom_image_style,
                 )
-                image_url = "/" + Path(image_path).as_posix()
+                image_url = _public_image_url(image_path)
                 if not update_history_image(history_id, session["user_id"], image_url):
                     raise RuntimeError("retry history update failed")
                 create_sns_word(result, image_path, company)
