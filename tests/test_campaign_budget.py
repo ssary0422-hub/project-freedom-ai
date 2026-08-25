@@ -40,17 +40,16 @@ def test_one_background_is_reused_across_three_layouts(tmp_path):
     assert len(set(rendered_backgrounds)) == 1
 
 
-def test_generation_stops_after_two_backgrounds(tmp_path):
+def test_generation_stops_after_one_background(tmp_path):
     calls = []
-    with pytest.raises(ValueError, match="안전 한도 2회"):
+    with pytest.raises(ValueError):
         generate_with_bounded_backgrounds(
             directions=[_direction("a"), _direction("b"), _direction("c")],
             generate_background=lambda prompt: calls.append(prompt) or tmp_path / f"bg-{len(calls)}.png",
             render_candidate=lambda background, direction, round_index, direction_index: tmp_path / f"{round_index}-{direction_index}.png",
             evaluate_candidate=lambda _: {"score": 80, "approved": False, "retry_instruction": "use cleaner space"},
         )
-    assert len(calls) == 2
-    assert "use cleaner space" in calls[1]
+    assert len(calls) == 1
 
 
 def test_uploaded_photo_never_calls_image_generator(tmp_path):
@@ -69,7 +68,7 @@ def test_uploaded_photo_never_calls_image_generator(tmp_path):
 def test_safe_background_can_ship_without_third_paid_generation(tmp_path):
     generated = []
     reviews = iter([
-        *({"score": 80, "approved": False, "retry_instruction": "cleaner"} for _ in range(6)),
+        *({"score": 80, "approved": False, "retry_instruction": "cleaner"} for _ in range(3)),
         {"score": 92, "approved": True, "retry_instruction": ""},
     ])
     result = generate_with_bounded_backgrounds(
@@ -80,5 +79,5 @@ def test_safe_background_can_ship_without_third_paid_generation(tmp_path):
         evaluate_candidate=lambda _: next(reviews),
     )
     assert result.used_safe_fallback is True
-    assert result.background_generations == 2
-    assert len(generated) == 2
+    assert result.background_generations == 1
+    assert len(generated) == 1
