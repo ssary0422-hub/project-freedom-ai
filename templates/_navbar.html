@@ -9,6 +9,7 @@
         <symbol id="pf-i-wallet" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M3 9h18M16 13h3"/></symbol>
         <symbol id="pf-i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
         <symbol id="pf-i-tool" viewBox="0 0 24 24"><path d="M14 6a4 4 0 0 0-5-4l2 3-3 3-3-2a4 4 0 0 0 5 5l8 8 3-3-8-8Z"/></symbol>
+        <symbol id="pf-i-speaking" viewBox="0 0 24 24"><path d="M5 5.5A3.5 3.5 0 0 1 8.5 2h7A3.5 3.5 0 0 1 19 5.5v5a3.5 3.5 0 0 1-3.5 3.5H12l-4.5 4v-4.1A3.5 3.5 0 0 1 5 10.5v-5Z"/><path d="M9 7.5h6M9 10.5h4"/></symbol>
     </svg>
     {% macro nav_icon(name) %}<svg class="pf-nav-icon" aria-hidden="true"><use href="#pf-i-{{ name }}"></use></svg>{% endmacro %}
     <div class="container-fluid px-3 px-lg-4">
@@ -24,7 +25,7 @@
                 <a class="btn pf-nav-btn {% if request.path.startswith('/sns') %}pf-nav-active{% endif %}" href="/sns">{{ nav_icon('sns') }} SNS</a>
                 {% endif %}
                 <a class="btn pf-nav-btn {% if request.path.startswith('/running-form') %}pf-nav-active{% endif %}" href="{% if session.get('user_id') %}/running-form{% else %}/login{% endif %}">{{ nav_icon('run') }} {{ t('nav.running') }}</a>
-                <a class="btn pf-nav-btn {% if request.path.startswith('/speaking-coach') %}pf-nav-active{% endif %}" href="/speaking-coach">💬 {{ t('nav.speaking') }}</a>
+                <a class="btn pf-nav-btn {% if request.path.startswith('/speaking-coach') %}pf-nav-active{% endif %}" href="/speaking-coach">{{ nav_icon('speaking') }} {{ t('nav.speaking') }}</a>
                 <a class="btn pf-nav-btn {% if request.path.startswith('/reviews') %}pf-nav-active{% endif %}" href="/reviews">★ 리뷰</a>
                 {% if session.get("user_id") %}
                 <a class="btn pf-nav-btn {% if request.path.startswith('/history') %}pf-nav-active{% endif %}" href="/history">{{ nav_icon('history') }} {{ t("nav.history") }}</a>
