@@ -99,7 +99,7 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 <section class="section pt-2"><div class="container">
 <div class="text-center mb-5"><span class="badge rounded-pill border p-2 mb-3">{{ t("landing.pricing.badge") }}</span><h2 class="display-6 fw-bold">{{ t("landing.pricing.title") }}</h2><p class="muted">{{ t("landing.pricing.desc") }}</p></div>
 <div class="row g-4 justify-content-center">
-<div class="col-md-6 col-lg-4"><div class="glass price-card"><h3 class="h4">{{ t("landing.pricing.free") }}</h3><div class="price mt-3">₩0</div><p class="muted">{{ t("landing.pricing.free_desc") }}</p><hr class="border-secondary"><p>✓ {{ t("landing.pricing.ai") }}</p><p>✓ {{ t("landing.pricing.brand") }}</p><p>✓ {{ t("landing.pricing.history") }}</p><p class="muted">{{ t("landing.pricing.testing") }}</p><a href="/register" class="btn btn-outline-light w-100 mt-2">{{ t("landing.cta.start_free") }}</a></div></div>
+<div class="col-md-6 col-lg-4"><div class="glass price-card"><h3 class="h4">{{ t("landing.pricing.free") }}</h3><div class="price mt-3">₩0</div><p class="muted">{{ t("landing.pricing.free_desc") }}</p><hr class="border-secondary"><p>✓ {{ t("landing.pricing.ai") }}</p><p>✓ {{ t("landing.pricing.history") }}</p><p class="muted">{{ t("landing.pricing.testing") }}</p><a href="/register" class="btn btn-outline-light w-100 mt-2">{{ t("landing.cta.start_free") }}</a></div></div>
 <div class="col-md-6 col-lg-4"><div class="glass price-card popular"><span class="badge bg-primary position-absolute top-0 start-50 translate-middle">{{ t("landing.pricing.popular") }}</span><h3 class="h4">PRO</h3><div class="price mt-3">100 {{ t("landing.pricing.credits") }}</div><p class="muted">{{ t("landing.pricing.pro_desc") }}</p><hr class="border-secondary"><p>✓ {{ t("landing.pricing.more_credits") }}</p><p>✓ {{ t("landing.pricing.abs") }}</p><p>✓ {{ t("landing.pricing.poster") }}</p><p>✓ {{ t("landing.pricing.exports") }}</p><a href="{% if session.get('user_id') %}/credits{% else %}/register{% endif %}" class="btn btn-primary w-100 mt-2">{% if session.get("user_id") %}{{ t("landing.pricing.view_credits") }}{% else %}{{ t("landing.pricing.create_account") }}{% endif %}</a></div></div>
 </div><p class="text-center muted small mt-4">{{ t("landing.pricing.notice") }}</p></div></section>
 
@@ -107,7 +107,6 @@ footer{border-top:1px solid var(--line);color:var(--muted)}
 <div class="row g-4">
 <div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">⚡</div><h3 class="h5 mt-3">{{ t("landing.why.fast") }}</h3><p class="muted mb-0">{{ t("landing.why.fast_desc") }}</p></div></div>
 <div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">🌍</div><h3 class="h5 mt-3">{{ t("landing.why.multi") }}</h3><p class="muted mb-0">{{ t("landing.why.multi_desc") }}</p></div></div>
-<div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">🏢</div><h3 class="h5 mt-3">{{ t("landing.why.brand") }}</h3><p class="muted mb-0">{{ t("landing.why.brand_desc") }}</p></div></div>
 <div class="col-md-6 col-lg-3"><div class="glass feature"><div class="icon">📚</div><h3 class="h5 mt-3">{{ t("landing.why.history") }}</h3><p class="muted mb-0">{{ t("landing.why.history_desc") }}</p></div></div>
 </div></div></section>
 
