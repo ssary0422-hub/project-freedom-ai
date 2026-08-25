@@ -194,7 +194,7 @@ def inject_i18n():
     translation_pairs = []
     for key in set().union(*(TRANSLATIONS[lang].keys() for lang in SUPPORTED_LANGUAGES)):
         values = {TRANSLATIONS[lang].get(key) for lang in SUPPORTED_LANGUAGES}
-            target = TRANSLATIONS[language].get(key)
+        target = TRANSLATIONS[language].get(key)
         if target:
             for source in values:
                 # Never translate bare numeric UI tokens.  A progress step
