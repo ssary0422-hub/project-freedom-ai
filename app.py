@@ -194,9 +194,14 @@ def inject_i18n():
     translation_pairs = []
     for key in set().union(*(TRANSLATIONS[lang].keys() for lang in SUPPORTED_LANGUAGES)):
         values = {TRANSLATIONS[lang].get(key) for lang in SUPPORTED_LANGUAGES}
-        target = TRANSLATIONS[language].get(key)
+            target = TRANSLATIONS[language].get(key)
         if target:
             for source in values:
+                # Never translate bare numeric UI tokens.  A progress step
+                # such as ``<span>3</span>`` was being mapped to the Korean
+                # package label ``3개`` by the legacy fallback translator.
+                if str(source).strip().isdigit() or str(target).strip().isdigit():
+                    continue
                 if source and source != target:
                     translation_pairs.append({"source": source, "target": target})
     for key, source in SPEAKING_COPY["ko"].items():
