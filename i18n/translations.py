@@ -1746,6 +1746,25 @@ _POSTER_LANDING = {
 for _language, _values in _POSTER_LANDING.items():
     TRANSLATIONS[_language].update(_values)
 
+# The active product lineup is ads, SNS, running coach and speaking coach.
+# Keep retired blog/poster wording out of the public landing copy.
+_ACTIVE_LINEUP_LANDING = {
+    "ko": {
+        "landing.meta.description": "AI로 광고와 SNS 콘텐츠를 만들고 러닝·말하기 코치를 이용하세요.",
+        "landing.hero.desc": "광고와 SNS 콘텐츠를 만들고, 순금이 러닝코치와 말하기 코치까지 한곳에서 이용하세요.",
+        "landing.faq.a1": "광고 문구, SNS 게시물, 러닝코칭과 말하기코치를 이용할 수 있습니다.",
+        "landing.pricing.abs": "광고 · SNS · 코칭",
+    },
+    "en": {
+        "landing.meta.description": "Create ads and social content, then use Sungeum's running and speaking coaches.",
+        "landing.hero.desc": "Create ads and social content, with Sungeum's running and speaking coaches in one workspace.",
+        "landing.faq.a1": "Ad copy, social posts, running coaching and speaking coaching.",
+        "landing.pricing.abs": "Ads · Social · Coaching",
+    },
+}
+for _language, _values in _ACTIVE_LINEUP_LANDING.items():
+    TRANSLATIONS[_language].update(_values)
+
 # Keep public examples fictional and unrelated to personal or past test data.
 TRANSLATIONS["ko"].update({
     "landing.product.sample_industry": "독립서점",
