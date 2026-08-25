@@ -723,7 +723,10 @@ def _sns_page():
                     try:
                         if image_output_mode == "finished_card":
                             subject_path = resolve_brand_photo(session["user_id"], request.files.getlist("real_photos"), "sns-photo")
-                            logo_path = resolve_brand_logo(session["user_id"], request.files.get("real_logo"), "sns-logo")
+                            logo_path = resolve_brand_logo(
+                                session["user_id"], request.files.get("real_logo"), "sns-logo",
+                                reuse_saved=bool(request.form.get("use_saved_logo")),
+                            )
                             if selected_art_direction:
                                 directions = [direction_from_payload(json.loads(selected_art_direction))]
                             else:
@@ -883,7 +886,8 @@ def retry_sns_image():
                 session["user_id"], request.files.getlist("real_photos"), "sns-retry-photo"
             )
             logo_path = resolve_brand_logo(
-                session["user_id"], request.files.get("real_logo"), "sns-retry-logo"
+                session["user_id"], request.files.get("real_logo"), "sns-retry-logo",
+                reuse_saved=bool(request.form.get("use_saved_logo")),
             )
             directions = create_art_directions(
                 business=business,

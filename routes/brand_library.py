@@ -29,7 +29,7 @@ def save_files(user_id, files, kind="photo"):
         conn.commit(); return saved
     finally: conn.close()
 
-def resolve_brand_logo(user_id, uploaded_file=None, prefix="brand-logo"):
+def resolve_brand_logo(user_id, uploaded_file=None, prefix="brand-logo", reuse_saved=True):
     """Save a newly uploaded logo, or reuse the user's latest saved logo."""
     if uploaded_file and uploaded_file.filename:
         path = save_uploaded_image(uploaded_file, prefix)
@@ -44,6 +44,8 @@ def resolve_brand_logo(user_id, uploaded_file=None, prefix="brand-logo"):
             conn.commit()
         finally: conn.close()
         return path
+    if not reuse_saved:
+        return ""
     _init(); conn=_connect(); cur=conn.cursor()
     cur.execute("SELECT data FROM brand_media WHERE user_id=? AND kind='logo' ORDER BY id DESC LIMIT 1",(user_id,))
     row=cur.fetchone(); conn.close()
