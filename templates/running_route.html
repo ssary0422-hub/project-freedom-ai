@@ -3,7 +3,7 @@
 {% block content %}
 <main class="route-page">
   <section class="route-hero">
-    <img src="{{ url_for('static', filename='brand/sungeum-running-coach-paw-v2.png') }}" alt="순금이 러닝코치">
+    <img src="{{ url_for('static', filename='brand/sungeum-running-coach-goggles-v1.png') }}" alt="순금이 러닝코치">
     <div><p class="route-eyebrow">SUNGEUM RUNNING ROUTE</p><h1>오늘은 어디로 달려볼까?</h1><p>현재 위치와 목표만 알려주면 오늘 컨디션에 맞는 러닝코스를 골라줄게.</p></div>
   </section>
 
@@ -36,7 +36,7 @@
     navigator.geolocation.getCurrentPosition(position => {
       const km = Number(document.getElementById('route-distance').value); const pace = state.purpose === 'record' ? 5.5 : state.purpose === 'recovery' ? 7.5 : 6.5; const minutes = Math.round(km * pace);
       const lat = position.coords.latitude.toFixed(4), lon = position.coords.longitude.toFixed(4);
-      result.hidden = false; result.innerHTML = `<h2>오늘의 추천 코스</h2><div class="route-summary"><div class="route-stat"><strong>${km}km</strong><span>목표 거리</span></div><div class="route-stat"><strong>${minutes}분</strong><span>예상 시간</span></div><div class="route-stat"><strong>${styles[state.style]}</strong><span>코스 스타일</span></div></div><p><strong>${labels[state.purpose]}</strong> 목적에 맞춰 현재 위치(${lat}, ${lon})를 출발지로 잡았어. ${styles[state.style]} 중심의 <strong>${km}km 왕복 코스</strong>를 추천할게.</p><p class="small text-muted">실제 도로 경로와 통행 가능 여부는 출발 전에 지도 앱에서 한 번 확인해줘. 다음 버전에서는 지도 위에 상세 경로까지 바로 보여줄게.</p><div class="route-tip"><img src="{{ url_for('static', filename='brand/sungeum-running-coach-paw-v2.png') }}" alt="순금이"><span>처음 5분은 천천히. 오늘 목표는 완주하고 기분 좋게 돌아오는 거야 🐾</span></div>`;
+      result.hidden = false; result.innerHTML = `<h2>오늘의 추천 코스</h2><div class="route-summary"><div class="route-stat"><strong>${km}km</strong><span>목표 거리</span></div><div class="route-stat"><strong>${minutes}분</strong><span>예상 시간</span></div><div class="route-stat"><strong>${styles[state.style]}</strong><span>코스 스타일</span></div></div><p><strong>${labels[state.purpose]}</strong> 목적에 맞춰 현재 위치(${lat}, ${lon})를 출발지로 잡았어. ${styles[state.style]} 중심의 <strong>${km}km 왕복 코스</strong>를 추천할게.</p><p class="small text-muted">실제 도로 경로와 통행 가능 여부는 출발 전에 지도 앱에서 한 번 확인해줘. 다음 버전에서는 지도 위에 상세 경로까지 바로 보여줄게.</p><div class="route-tip"><img src="{{ url_for('static', filename='brand/sungeum-running-coach-goggles-v1.png') }}" alt="순금이"><span>처음 5분은 천천히. 오늘 목표는 완주하고 기분 좋게 돌아오는 거야 🐾</span></div>`;
       result.scrollIntoView({ behavior: 'smooth', block: 'start' }); status.textContent = '추천 완료!'; btn.disabled = false;
     }, error => { status.textContent = error.code === 1 ? '위치 권한이 필요해. 브라우저 주소창의 위치 권한을 허용해줘.' : '현재 위치를 확인하지 못했어. 잠시 후 다시 시도해줘.'; btn.disabled = false; }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
   });
