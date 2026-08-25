@@ -120,7 +120,7 @@
     const activeIndex = Math.min(3, Math.floor(Math.max(0, percent - 1) / 25));
     status.className = "run-progress-card mt-4";
     applyLocalizedRunningUi();
-    status.innerHTML = `<div class="run-progress-head"><img class="sungeum-alive is-working" src="/static/brand/sungeum-3d-official.png" alt=""><div><strong>순금이 코치가 분석하고 있어요</strong><div class="small text-secondary mt-1">${escapeHtml(message)}</div></div></div><div class="run-progress-track"><div class="run-progress-bar" style="width:${Math.max(5, percent)}%"></div></div><div class="run-progress-steps">${progressStages.map((stage,index)=>`<span class="${index <= activeIndex ? "is-active" : ""}">${stage}</span>`).join("")}</div>`;
+    status.innerHTML = `<div class="run-progress-head"><img class="sungeum-alive is-working" src="/static/brand/sungeum-running-coach-goggles-v1-transparent.png" alt=""><div><strong>순금이 코치가 분석하고 있어요</strong><div class="small text-secondary mt-1">${escapeHtml(message)}</div></div></div><div class="run-progress-track"><div class="run-progress-bar" style="width:${Math.max(5, percent)}%"></div></div><div class="run-progress-steps">${progressStages.map((stage,index)=>`<span class="${index <= activeIndex ? "is-active" : ""}">${stage}</span>`).join("")}</div>`;
   }
 
   function roundedClip(ctx, x, y, width, height, radius = 28) {
@@ -193,7 +193,7 @@
       const mascot = new Image();
       mascot.onload = () => resolve(mascot);
       mascot.onerror = () => resolve(null);
-      mascot.src = "/static/brand/sungeum-3d-official.png";
+      mascot.src = "/static/brand/sungeum-running-coach-goggles-v1-transparent.png";
     });
   }
 
