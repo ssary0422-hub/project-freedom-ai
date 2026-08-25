@@ -204,7 +204,7 @@
     <strong>이미지만 아직 준비되지 않았어요.</strong><br>
     {{ image_error or '이미지 파일 생성 또는 저장 과정에서 문제가 발생했습니다.' }}
 </div>
-<form method="POST" action="/sns/retry-image" class="w-100 mb-3">
+<form method="POST" action="/sns/retry-image" class="w-100 mb-3" onsubmit="const b=this.querySelector('button[type=submit]'); if(b){b.disabled=true; b.textContent='⏳ 이미지 재생성 중...';} return true;">
     <input type="hidden" name="history_id" value="{{ image_retry_history_id }}">
     <input type="hidden" name="platform" value="{{ platform }}">
     <input type="hidden" name="image_style" value="{{ image_style }}">

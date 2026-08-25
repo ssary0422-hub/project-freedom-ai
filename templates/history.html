@@ -73,7 +73,7 @@
             {% endif %}
             {% if item[5] %}<a href="{{ url_for('history.history_image', history_id=item[0], download=1) if item[7] else '/history/download/' ~ item[0] ~ '/image' }}" class="history-action">이미지 저장</a>{% endif %}
             {% if content_type == 'sns' %}
-            <form method="POST" action="/sns/retry-image" class="d-inline">
+            <form method="POST" action="/sns/retry-image" class="d-inline" onsubmit="const b=this.querySelector('button[type=submit]'); if(b){b.disabled=true; b.textContent='⏳ 이미지 재생성 중...';} return true;">
               <input type="hidden" name="history_id" value="{{ item[0] }}">
               <input type="hidden" name="platform" value="Instagram">
               <input type="hidden" name="image_style" value="AI 추천">
