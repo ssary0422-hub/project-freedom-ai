@@ -6,11 +6,9 @@ from routes.sns import sns_bp
 from routes.history import history_bp
 from routes.feedback import feedback_bp
 from database.db import init_db, get_dashboard_data
-from routes.profiles import profiles_bp
 from routes.auth import auth_bp, login_required
 from routes.plan import plan_bp
 from routes.poster import poster_bp
-from routes.brand_library import brand_library_bp
 from routes.ai_office import ai_office_bp
 from routes.running_form import running_form_bp
 from routes.running_coach import running_coach_bp
@@ -160,11 +158,9 @@ app.register_blueprint(blog_bp)
 app.register_blueprint(sns_bp)
 app.register_blueprint(history_bp)
 app.register_blueprint(feedback_bp)
-app.register_blueprint(profiles_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(plan_bp)
 app.register_blueprint(poster_bp)
-app.register_blueprint(brand_library_bp)
 app.register_blueprint(ai_office_bp)
 app.register_blueprint(running_form_bp)
 app.register_blueprint(running_coach_bp)

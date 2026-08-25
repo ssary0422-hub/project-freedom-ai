@@ -335,6 +335,11 @@ def init_db():
         WHERE is_current IS NULL
     """)
 
+    # Brand management/import has been retired. Remove any legacy tables so
+    # stale logos and profiles cannot be recreated or read on restart.
+    cursor.execute("DROP TABLE IF EXISTS brand_media")
+    cursor.execute("DROP TABLE IF EXISTS brand_profiles")
+
     conn.commit()
     conn.close()
 

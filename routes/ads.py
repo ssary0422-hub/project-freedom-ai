@@ -597,8 +597,10 @@ def _home_page():
     image_retry_history_id = None
 
     user_id = session["user_id"]
-    saved_profiles = get_profiles(user_id=user_id)
-    selected_profile_id = request.args.get("profile_id", type=int)
+    # Saved brand profiles are retired.  Ads always use the values entered in
+    # this request, so an old logo/profile can never be loaded implicitly.
+    saved_profiles = []
+    selected_profile_id = None
     loaded_profile_name = ""
 
     if request.method == "GET" and not selected_profile_id and not result:
@@ -619,17 +621,6 @@ def _home_page():
         style = request.args.get("style", "").strip()
         if assistant_brief:
             style = f"{style}. 순금이 요청 정리: {assistant_brief}".strip(". ")
-
-    if request.method == "GET" and selected_profile_id:
-        selected_profile = get_profile(
-            selected_profile_id,
-            user_id=user_id,
-        )
-        if selected_profile:
-            business = selected_profile["business"] or ""
-            company = selected_profile["company"] or ""
-            style = selected_profile["style"] or ""
-            loaded_profile_name = company or business
 
     if request.method == "POST":
         if not get_ai_enabled():
@@ -845,7 +836,7 @@ def retry_ads_image():
         image_error=image_error, image_retry_history_id=history_id,
         business=business, company=company, style=style, image_style=image_style,
         custom_image_style=custom_image_style, with_image=True,
-        saved_profiles=get_profiles(session["user_id"]), selected_profile_id=None,
+        saved_profiles=[], selected_profile_id=None,
         loaded_profile_name="",
     )
 

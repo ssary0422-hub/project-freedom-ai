@@ -6,6 +6,7 @@
 {% block form %}
 <form method="POST" enctype="multipart/form-data">
     <input type="hidden" name="image_output_mode" value="finished_card">
+    {% if false %}
     {% if saved_profiles %}
     <div class="border rounded-3 p-3 mb-4 bg-light">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
@@ -50,6 +51,7 @@
             {{ t("v21.pkg.save_first") }}
         </a>
     </div>
+    {% endif %}
     {% endif %}
     {% include "_content_mode_switch.html" %}
     <div class="mb-3">

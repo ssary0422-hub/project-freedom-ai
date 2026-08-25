@@ -29,34 +29,24 @@ def save_files(user_id, files, kind="photo"):
         conn.commit(); return saved
     finally: conn.close()
 
-def resolve_brand_logo(user_id, uploaded_file=None, prefix="brand-logo", reuse_saved=True):
-    """Save a newly uploaded logo, or reuse the user's latest saved logo."""
+def resolve_brand_logo(user_id, uploaded_file=None, prefix="brand-logo", reuse_saved=False):
+    """Return only the logo uploaded for this request.
+
+    Brand-library reuse is intentionally retired.  Reusing the latest saved
+    logo made a new ad/SNS request silently pick up an unrelated old logo.
+    ``reuse_saved`` remains in the signature for compatibility with older
+    callers, but is ignored.
+    """
     if uploaded_file and uploaded_file.filename:
         path = save_uploaded_image(uploaded_file, prefix)
         if not path:
             raise ValueError("올린 업체 로고를 읽지 못했어요. JPG·PNG·WebP 이미지로 다시 올려주세요.")
         raw = Path(path).read_bytes()
-        _init(); conn=_connect(); cur=conn.cursor()
-        try:
-            sql="INSERT INTO brand_media(user_id,name,mime,data,kind) VALUES(?,?,?,?,?)"
-            if USE_POSTGRES: sql += " RETURNING id"
-            cur.execute(sql,(user_id,uploaded_file.filename[:180],"image/png",base64.b64encode(raw).decode("ascii"),"logo"))
-            conn.commit()
-        finally: conn.close()
         return path
-    if not reuse_saved:
-        return ""
-    _init(); conn=_connect(); cur=conn.cursor()
-    cur.execute("SELECT data FROM brand_media WHERE user_id=? AND kind='logo' ORDER BY id DESC LIMIT 1",(user_id,))
-    row=cur.fetchone(); conn.close()
-    if not row: return ""
-    target = Path(__file__).resolve().parent.parent / "static" / "generated" / "materials" / f"{prefix}-saved-{user_id}.png"
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_bytes(base64.b64decode(row[0]))
-    return str(target)
+    return ""
 
 def resolve_brand_photo(user_id, uploaded_files=(), prefix="brand-photo"):
-    """Use a newly uploaded real photo first, otherwise reuse the latest saved one."""
+    """Return a photo uploaded for this request; never fall back to a library asset."""
     first_path = ""
     for uploaded_file in list(uploaded_files)[:10]:
         path = save_uploaded_image(uploaded_file, prefix)
@@ -64,24 +54,9 @@ def resolve_brand_photo(user_id, uploaded_files=(), prefix="brand-photo"):
             continue
         if not first_path:
             first_path = path
-        raw = Path(path).read_bytes()
-        _init(); conn=_connect(); cur=conn.cursor()
-        try:
-            sql="INSERT INTO brand_media(user_id,name,mime,data,kind) VALUES(?,?,?,?,?)"
-            if USE_POSTGRES: sql += " RETURNING id"
-            cur.execute(sql,(user_id,uploaded_file.filename[:180],"image/png",base64.b64encode(raw).decode("ascii"),"photo"))
-            conn.commit()
-        finally: conn.close()
     if first_path:
         return first_path
-    _init(); conn=_connect(); cur=conn.cursor()
-    cur.execute("SELECT data FROM brand_media WHERE user_id=? AND kind='photo' ORDER BY id DESC LIMIT 1",(user_id,))
-    row=cur.fetchone(); conn.close()
-    if not row: return ""
-    target = Path(__file__).resolve().parent.parent / "static" / "generated" / "materials" / f"{prefix}-saved-{user_id}.png"
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_bytes(base64.b64decode(row[0]))
-    return str(target)
+    return ""
 
 @brand_library_bp.route("/brand-library", methods=["GET","POST"])
 @login_required

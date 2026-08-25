@@ -101,7 +101,6 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
             <div class="generator-tabs mb-4" aria-label="콘텐츠 종류 선택">
                 <a href="/ads-generator" class="generator-tab{% if active_tab == 'ads' %} active{% endif %}"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 11v2a2 2 0 0 0 2 2h2l2 5h3l-2-5 9-4V7L7 11H5a2 2 0 0 0-2 2Z"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.ads") }}</strong><small>{{ t("v21.tab.ads_desc") }}</small></span></a>
                 <a href="/sns" class="generator-tab{% if active_tab == 'sns' %} active{% endif %}"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 5h4M11 18h2"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.sns") }}</strong><small>{{ t("v21.tab.sns_desc") }}</small></span></a>
-                <a href="/profiles" class="generator-tab"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M4 21V8l8-5 8 5v13M8 21v-6h8v6M8 10h.01M12 10h.01M16 10h.01"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.brand") }}</strong><small>{{ t("v21.tab.brand_desc") }}</small></span></a>
                 <a href="/history" class="generator-tab"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.history") }}</strong><small>{{ t("v21.tab.history_desc") }}</small></span></a>
             </div>
 
