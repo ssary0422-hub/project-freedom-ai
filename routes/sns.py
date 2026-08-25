@@ -805,6 +805,10 @@ def _sns_page():
                             )
                             output_path, visual_review = budgeted.output_path, budgeted.review
                             image_path = output_path.relative_to(BASE_DIR).as_posix()
+                            # The finished-card path returns a relative file path;
+                            # expose it immediately so the first mobile response
+                            # includes the image and history stores its URL.
+                            image_url = _public_image_url(image_path)
                         else:
                             image_path = _generate_sns_image(
                                 business, company, style, platform,
