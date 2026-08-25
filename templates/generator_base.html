@@ -100,15 +100,6 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
                 <a href="/history" class="generator-tab"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.history") }}</strong><small>{{ t("v21.tab.history_desc") }}</small></span></a>
             </div>
 
-            <div class="mb-4">
-                <h4 class="generator-heading fw-bold mb-1">
-                    {% block generator_title %}{% endblock %}
-                </h4>
-                <div class="text-muted">
-                    {% block generator_subtitle %}{% endblock %}
-                </div>
-            </div>
-
             {% if active_tab in ["ads", "sns", "blog"] %}
                 {% include "_sungeum_page_guide.html" %}
             {% endif %}
