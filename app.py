@@ -76,6 +76,7 @@ from flask import (
     render_template,
     request,
     send_file,
+    send_from_directory,
     redirect,
     session
 )
@@ -263,6 +264,16 @@ SNS_WORD_PATH = "downloads/sns.docx"
 @app.route("/")
 def landing():
     return render_template("landing.html")
+
+
+@app.route("/sungeum-walk/")
+def sungeum_walk():
+    return send_from_directory("prototypes/sungeum-walk", "index.html")
+
+
+@app.route("/sungeum-walk/<path:filename>")
+def sungeum_walk_asset(filename):
+    return send_from_directory("prototypes/sungeum-walk", filename)
 
 
 @app.route("/terms")

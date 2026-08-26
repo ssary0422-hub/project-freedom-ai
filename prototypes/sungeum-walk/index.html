@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <title>순금이 산책시키기</title>
+  <style>
+    :root{--ink:#17352f;--mint:#55d6b4;--cream:#fff9e9;--orange:#ff9e55}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;min-height:100%;background:#dff8ee;color:var(--ink);font-family:Pretendard,"Noto Sans KR",system-ui,sans-serif;overflow:hidden}
+    body{display:grid;place-items:center;padding:12px}
+    .shell{position:relative;width:min(100%,480px);height:min(860px,calc(100dvh - 24px));min-height:570px;border-radius:30px;overflow:hidden;background:var(--cream);box-shadow:0 24px 70px #357c6b35;border:3px solid #fff;touch-action:manipulation;user-select:none}
+    canvas{width:100%;height:100%;display:block}
+    .hud{position:absolute;inset:16px 16px auto;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+    .score,.best{background:#fffffff0;border:2px solid #fff;border-radius:18px;padding:9px 14px;box-shadow:0 5px 18px #285c4e20;font-weight:900}
+    .score b{font-size:22px}.best{font-size:13px;text-align:right;color:#56756d}
+    .best b{display:block;color:var(--ink);font-size:17px}
+    .combo{position:absolute;top:82px;left:50%;transform:translateX(-50%) scale(.85);opacity:0;color:#ff6f3c;font-size:24px;font-weight:1000;text-shadow:0 2px #fff;transition:.16s;pointer-events:none}
+    .combo.show{opacity:1;transform:translateX(-50%) scale(1)}
+    .overlay{position:absolute;inset:0;display:grid;place-items:center;padding:26px;background:linear-gradient(#e8fff7cc,#fff9e9ed);text-align:center;transition:.25s}
+    .overlay.hidden{opacity:0;pointer-events:none}
+    .card{width:100%;padding:28px 22px;border-radius:28px;background:#ffffffed;border:2px solid #fff;box-shadow:0 18px 50px #2767572c}
+    .mascot{width:145px;height:145px;object-fit:contain;filter:drop-shadow(0 10px 10px #385f5330);animation:float 2s ease-in-out infinite}
+    @keyframes float{50%{transform:translateY(-8px) rotate(2deg)}}
+    h1{font-size:30px;line-height:1.12;margin:8px 0;color:#153e35} p{margin:8px 0 20px;color:#617c75;line-height:1.55;font-weight:650}
+    button{width:100%;border:0;border-radius:18px;padding:16px;background:linear-gradient(135deg,#27c59d,#5ad8b7);color:#073c30;font-weight:1000;font-size:18px;box-shadow:0 8px 0 #1b9f7f;cursor:pointer}
+    button:active{transform:translateY(5px);box-shadow:0 3px 0 #1b9f7f}
+    .hint{font-size:12px;margin-top:16px;color:#81958f}.result{font-size:42px;font-weight:1000;color:#ff7f47;margin:6px}
+    .toast{position:absolute;left:50%;bottom:108px;transform:translate(-50%,12px);background:#17352fe8;color:#fff;padding:10px 16px;border-radius:99px;font-weight:850;opacity:0;transition:.2s;pointer-events:none;white-space:nowrap}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .jump-label{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);padding:9px 15px;border-radius:99px;background:#ffffffb8;color:#52736a;font-size:12px;font-weight:800;pointer-events:none}
+  </style>
+</head>
+<body>
+<main class="shell" id="gameArea" aria-label="순금이 산책시키기 게임">
+  <canvas id="game"></canvas>
+  <div class="hud"><div class="score">간식 <b id="score">0</b></div><div class="best">최고 기록<b id="best">0</b></div></div>
+  <div class="combo" id="combo"></div>
+  <div class="toast" id="toast"></div>
+  <div class="jump-label">화면 탭 · 스페이스바로 점프</div>
+  <section class="overlay" id="startScreen">
+    <div class="card"><img class="mascot" src="../../static/brand/sungeum-running-coach-goggles-v1-transparent.png" alt="러닝 고글을 쓴 순금이"><h1>순금이<br>산책시키기</h1><p>돌멩이는 폴짝 피하고<br>맛있는 간식을 모아줘!</p><button id="startButton">산책 출발!</button><div class="hint">소리와 가벼운 진동이 나와요</div></div>
+  </section>
+  <section class="overlay hidden" id="endScreen">
+    <div class="card"><img class="mascot" src="../../static/brand/sungeum-running-coach-goggles-v1-transparent.png" alt="신난 순금이"><p id="endMessage">오늘 산책 완전 성공이야!</p><div class="result"><span id="finalScore">0</span>개</div><p>간식을 모았어</p><button id="retryButton">한 번 더 산책</button></div>
+  </section>
+</main>
+<script>
+(()=>{
+  const canvas=document.querySelector('#game'),ctx=canvas.getContext('2d'),area=document.querySelector('#gameArea');
+  const jumpPreview=new URLSearchParams(location.search).has('jump-preview');
+  const scoreEl=document.querySelector('#score'),bestEl=document.querySelector('#best'),comboEl=document.querySelector('#combo');
+  const startScreen=document.querySelector('#startScreen'),endScreen=document.querySelector('#endScreen'),toast=document.querySelector('#toast');
+  const runCycleImg=new Image(); runCycleImg.src='sungeum-run-cycle-face-locked-v2.png';
+  const jumpImg=new Image(); jumpImg.src='sungeum-jump-side-v1.png';
+  const backgroundSources=['korean-alley-1990s-v1.png','mountain-path-v1.png','seaside-path-v1.png','school-track-v1.png'];
+  const backgrounds=backgroundSources.map(src=>{const img=new Image();img.src=src;return img});
+  let W=480,H=800,scale=1,playing=false,last=0,elapsed=0,spawnAt=0,treatAt=0,score=0,combo=0,speed=290,shake=0,activeBgIndex=0,dustClock=0;
+  let best=Number(localStorage.getItem('sungeumWalkBest')||0); bestEl.textContent=best;
+  const dog={x:62,y:0,w:122,h:94,vy:0,onGround:true},things=[],dusts=[],clouds=[{x:30,y:140,s:1},{x:270,y:210,s:.7},{x:400,y:105,s:.55}];
+  function resize(){const r=canvas.getBoundingClientRect();scale=Math.min(devicePixelRatio||1,2);canvas.width=r.width*scale;canvas.height=r.height*scale;W=r.width;H=r.height;ctx.setTransform(scale,0,0,scale,0,0);dog.y=ground()-dog.h-(jumpPreview?150:0);dog.onGround=!jumpPreview}
+  const ground=()=>H-118;
+  new ResizeObserver(resize).observe(canvas); resize();
+  function beep(freq,d=.06,type='sine',gain=.035){try{const A=window.AudioContext||window.webkitAudioContext,a=beep.a||(beep.a=new A),o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=freq;g.gain.value=gain;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,a.currentTime+d);o.stop(a.currentTime+d)}catch(e){}}
+  function jump(){if(!playing)return;if(dog.onGround){dog.vy=-650;dog.onGround=false;beep(380,.07,'sine',.025)}}
+  function start(){if(backgrounds.length>1)activeBgIndex=(activeBgIndex+1+Math.floor(Math.random()*(backgrounds.length-1)))%backgrounds.length;playing=true;last=performance.now();elapsed=0;spawnAt=.8;treatAt=.45;score=0;combo=0;speed=290;things.length=0;dusts.length=0;dustClock=0;dog.y=ground()-dog.h;dog.vy=0;dog.onGround=true;scoreEl.textContent=0;startScreen.classList.add('hidden');endScreen.classList.add('hidden');requestAnimationFrame(loop)}
+  function spawn(type){if(type==='treat')things.push({type,x:W+35,y:ground()-75-Math.random()*95,w:38,h:38,hit:false,spin:0});else things.push({type:'rock',x:W+35,y:ground()-42,w:46,h:42,hit:false})}
+  function hit(a,b,pad=12){return a.x+pad<b.x+b.w-pad&&a.x+a.w-pad>b.x+pad&&a.y+pad<b.y+b.h-pad&&a.y+a.h-pad>b.y+pad}
+  function showToast(text){toast.textContent=text;toast.classList.add('show');clearTimeout(showToast.t);showToast.t=setTimeout(()=>toast.classList.remove('show'),900)}
+  function finish(){playing=false;if(score>best){best=score;localStorage.setItem('sungeumWalkBest',best);bestEl.textContent=best;showToast('새로운 최고 기록!')}document.querySelector('#finalScore').textContent=score;document.querySelector('#endMessage').textContent=score>=12?'오늘 산책 완전 성공이야!':score>=6?'신나게 잘 뛰었어!':'괜찮아, 다시 산책하자!';setTimeout(()=>endScreen.classList.remove('hidden'),350)}
+  function update(dt){elapsed+=dt;speed=Math.min(470,290+elapsed*5);dog.vy+=1750*dt;dog.y+=dog.vy*dt;if(dog.y>=ground()-dog.h){dog.y=ground()-dog.h;dog.vy=0;dog.onGround=true}
+    if(dog.onGround){dustClock-=dt;if(dustClock<=0){dustClock=.09;dusts.push({x:dog.x+18,y:ground()-2,r:3+Math.random()*5,vx:-35-Math.random()*35,vy:-15-Math.random()*24,a:.34})}}for(const d of dusts){d.x+=d.vx*dt;d.y+=d.vy*dt;d.r+=9*dt;d.a-=.55*dt}for(let i=dusts.length-1;i>=0;i--)if(dusts[i].a<=0)dusts.splice(i,1);
+    spawnAt-=dt;treatAt-=dt;if(spawnAt<=0){spawn('rock');spawnAt=.95+Math.random()*.85-Math.min(.25,elapsed/100)}if(treatAt<=0){spawn('treat');treatAt=.65+Math.random()*.9}
+    for(const o of things){o.x-=speed*dt;o.spin=(o.spin||0)+dt*4;if(!o.hit&&hit(dog,o,o.type==='rock'?14:8)){o.hit=true;if(o.type==='treat'){score++;combo++;scoreEl.textContent=score;comboEl.textContent=combo>=3?`${combo} 콤보!`:'';comboEl.classList.toggle('show',combo>=3);setTimeout(()=>comboEl.classList.remove('show'),450);beep(620+Math.min(combo,8)*35,.09,'triangle',.04);if(navigator.vibrate)navigator.vibrate(18)}else{shake=10;beep(120,.2,'sawtooth',.045);if(navigator.vibrate)navigator.vibrate([50,30,50]);finish();return}}}for(let i=things.length-1;i>=0;i--)if(things[i].x<-70||things[i].hit&&things[i].type==='treat')things.splice(i,1);
+    for(const c of clouds){c.x-=12*dt*c.s;if(c.x<-100)c.x=W+80}
+  }
+  function roundRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
+  function drawBackground(){const img=backgrounds[activeBgIndex];if(!(img&&img.complete&&img.naturalWidth)){const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#bff4e6');sky.addColorStop(1,'#f4d9a0');ctx.fillStyle=sky;ctx.fillRect(-20,-20,W+40,H+40);return}const s=H/img.naturalHeight,bw=img.naturalWidth*s,scroll=elapsed*speed*.16,tile=Math.floor(scroll/bw),offset=scroll%bw;for(let i=-1;i<=1;i++){const n=tile+i,x=i*bw-offset;if(Math.abs(n)%2===0)ctx.drawImage(img,x,0,bw,H);else{ctx.save();ctx.translate(x+bw,0);ctx.scale(-1,1);ctx.drawImage(img,0,0,bw,H);ctx.restore()}}}
+  function draw(){ctx.save();if(shake){ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake*=.82}drawBackground();
+    ctx.fillStyle='#3f31231f';ctx.fillRect(0,ground()+4,W,9);ctx.fillStyle='#fff5cf88';for(let x=(-elapsed*speed*.45)%80;x<W;x+=80)roundRect(x,ground()+50,42,5,4);if(playing){ctx.strokeStyle='#fff7d052';ctx.lineWidth=2;for(let i=0;i<3;i++){const lx=((W-elapsed*speed*(.32+i*.025)+i*137)%(W+90))-45,ly=ground()-70-i*34;ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(lx+28+i*5,ly);ctx.stroke()}}
+    ctx.fillStyle='#5f4a3538';const shadowPulse=dog.onGround?1-Math.abs(Math.sin(elapsed*14))*.18:.72;ctx.beginPath();ctx.ellipse(dog.x+dog.w/2,ground()+3,49*shadowPulse,8*shadowPulse,0,0,Math.PI*2);ctx.fill();for(const d of dusts){ctx.globalAlpha=Math.max(0,d.a);ctx.fillStyle='#f4dfb8';ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;
+    for(const o of things){if(o.type==='treat'){ctx.save();ctx.translate(o.x+19,o.y+19);ctx.rotate(Math.sin(o.spin)*.16);ctx.fillStyle='#fff4d4';ctx.strokeStyle='#b86f35';ctx.lineWidth=3;ctx.beginPath();ctx.arc(-12,-7,7,0,Math.PI*2);ctx.arc(-12,7,7,0,Math.PI*2);ctx.arc(12,-7,7,0,Math.PI*2);ctx.arc(12,7,7,0,Math.PI*2);ctx.rect(-12,-8,24,16);ctx.fill();ctx.stroke();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.ellipse(-3,-3,8,3,-.25,0,Math.PI*2);ctx.fill();ctx.restore()}else{ctx.fillStyle='#7e918a';ctx.beginPath();ctx.ellipse(o.x+23,o.y+25,24,19,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#a9b6b1';ctx.beginPath();ctx.ellipse(o.x+16,o.y+18,8,5,-.4,0,Math.PI*2);ctx.fill()}}
+    const gait=Math.sin(elapsed*16),tilt=Math.max(-.12,Math.min(.12,dog.vy/2300))+(dog.onGround?gait*.018:0);ctx.save();ctx.translate(dog.x+dog.w/2, dog.y+dog.h);ctx.rotate(tilt);if(!dog.onGround&&jumpImg.complete&&jumpImg.naturalWidth){ctx.drawImage(jumpImg,-98,-108,168,112)}else if(runCycleImg.complete&&runCycleImg.naturalWidth){const frame=Math.floor(elapsed*10)%3,cell=runCycleImg.naturalWidth/3,lift=-Math.abs(gait)*1.5;ctx.drawImage(runCycleImg,frame*cell,145,cell,500,-84,-108+lift,168,112)}else{ctx.fillStyle='#f7b35c';ctx.beginPath();ctx.arc(0,-40,38,0,Math.PI*2);ctx.fill()}ctx.restore();ctx.restore()}
+  function loop(now){if(!playing){draw();return}const dt=Math.min(.032,(now-last)/1000);last=now;update(dt);draw();if(playing)requestAnimationFrame(loop)}
+  area.addEventListener('pointerdown',e=>{if(e.target.tagName!=='BUTTON')jump()});window.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();jump()}});document.querySelector('#startButton').onclick=start;document.querySelector('#retryButton').onclick=start;runCycleImg.onload=draw;jumpImg.onload=draw;backgrounds.forEach(img=>img.onload=draw);activeBgIndex=Math.floor(Math.random()*backgrounds.length);if(jumpPreview){startScreen.classList.add('hidden');endScreen.classList.add('hidden')}draw();
+})();
+</script>
+</body>
+</html>
