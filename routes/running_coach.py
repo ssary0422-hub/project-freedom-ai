@@ -60,12 +60,6 @@ def running_coach():
     return render_template("running_coach.html")
 
 
-@running_coach_bp.get("/running-route")
-def running_route():
-    """GPS-assisted route recommendation MVP (free, no credit charge)."""
-    return render_template("running_route.html")
-
-
 @running_coach_bp.post("/running-coach/analyze")
 def analyze_running_coach():
     payload = request.get_json(silent=True) or {}
