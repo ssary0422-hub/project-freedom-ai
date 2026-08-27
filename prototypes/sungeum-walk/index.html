@@ -29,6 +29,11 @@
     .toast{position:absolute;left:50%;bottom:108px;transform:translate(-50%,12px);background:#17352fe8;color:#fff;padding:10px 16px;border-radius:99px;font-weight:850;opacity:0;transition:.2s;pointer-events:none;white-space:nowrap}
     .toast.show{opacity:1;transform:translate(-50%,0)}
     .jump-label{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);padding:9px 15px;border-radius:99px;background:#ffffffb8;color:#52736a;font-size:12px;font-weight:800;pointer-events:none}
+    .reward{margin:10px 0 14px;padding:11px 13px;border-radius:16px;background:#fff3c7;color:#6d4c12;font-size:13px;font-weight:850;line-height:1.45}
+    .daily{margin:0 0 14px;padding:10px 12px;border:1px solid #d8eee7;border-radius:16px;background:#f7fffc;text-align:left;font-size:12px}
+    .daily-title{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;font-weight:950}.daily ol{margin:0;padding-left:22px;color:#58736c}.daily li{padding:2px 0}.daily-status{margin-top:7px;color:#1b8068;font-weight:850;text-align:center}.daily a{color:#08745d}
+    .submit-status{min-height:20px;margin:8px 0 10px;color:#1b8068;font-size:13px;font-weight:850}
+    #startScreen .mascot{width:112px;height:112px}#startScreen .card{padding:20px 20px}#startScreen h1{font-size:27px;margin:3px 0}#startScreen p{margin:5px 0 9px}
   </style>
 </head>
 <body>
@@ -39,10 +44,10 @@
   <div class="toast" id="toast"></div>
   <div class="jump-label">화면 탭 · 스페이스바로 점프</div>
   <section class="overlay" id="startScreen">
-    <div class="card"><img class="mascot" src="../../static/brand/sungeum-running-coach-goggles-v1-transparent.png" alt="러닝 고글을 쓴 순금이"><h1>순금이<br>산책시키기</h1><p>돌멩이는 폴짝 피하고<br>맛있는 간식을 모아줘!</p><button id="startButton">산책 출발!</button><div class="hint">소리와 가벼운 진동이 나와요</div></div>
+    <div class="card"><img class="mascot" src="../../static/brand/sungeum-running-coach-goggles-v1-transparent.png" alt="러닝 고글을 쓴 순금이"><h1>순금이<br>산책시키기</h1><p>돌멩이는 폴짝 피하고 맛있는 간식을 모아줘!</p><div class="reward">🏆 매일 1등에게 5크레딧<br><small>한국시간 자정 마감 · 동점은 먼저 달성한 사람</small></div><div class="daily"><div class="daily-title"><span>오늘의 순위</span><span id="dailyDate"></span></div><ol id="leaderboard"><li>순위를 불러오는 중...</li></ol><div class="daily-status" id="dailyStatus"></div></div><button id="startButton">산책 출발!</button><div class="hint">로그인 기록만 일일 순위에 반영돼요</div></div>
   </section>
   <section class="overlay hidden" id="endScreen">
-    <div class="card"><img class="mascot" src="../../static/brand/sungeum-running-coach-goggles-v1-transparent.png" alt="신난 순금이"><p id="endMessage">오늘 산책 완전 성공이야!</p><div class="result"><span id="finalScore">0</span>개</div><p>간식을 모았어</p><button id="retryButton">한 번 더 산책</button></div>
+    <div class="card"><img class="mascot" src="../../static/brand/sungeum-running-coach-goggles-v1-transparent.png" alt="신난 순금이"><p id="endMessage">오늘 산책 완전 성공이야!</p><div class="result"><span id="finalScore">0</span>개</div><p>간식을 모았어</p><div class="submit-status" id="submitStatus"></div><button id="retryButton">한 번 더 산책</button></div>
   </section>
 </main>
 <script>
@@ -50,12 +55,12 @@
   const canvas=document.querySelector('#game'),ctx=canvas.getContext('2d'),area=document.querySelector('#gameArea');
   const jumpPreview=new URLSearchParams(location.search).has('jump-preview');
   const scoreEl=document.querySelector('#score'),bestEl=document.querySelector('#best'),comboEl=document.querySelector('#combo');
-  const startScreen=document.querySelector('#startScreen'),endScreen=document.querySelector('#endScreen'),toast=document.querySelector('#toast');
+  const startScreen=document.querySelector('#startScreen'),endScreen=document.querySelector('#endScreen'),toast=document.querySelector('#toast'),leaderboardEl=document.querySelector('#leaderboard'),dailyStatus=document.querySelector('#dailyStatus'),submitStatus=document.querySelector('#submitStatus');
   const runCycleImg=new Image(); runCycleImg.src='sungeum-run-cycle-face-locked-v2.png';
   const jumpImg=new Image(); jumpImg.src='sungeum-jump-side-v1.png';
   const backgroundSources=['korean-alley-1990s-v1.png','mountain-path-v1.png','seaside-path-v1.png','school-track-v1.png'];
   const backgrounds=backgroundSources.map(src=>{const img=new Image();img.src=src;return img});
-  let W=480,H=800,scale=1,playing=false,last=0,elapsed=0,spawnAt=0,treatAt=0,score=0,combo=0,speed=290,shake=0,activeBgIndex=0,dustClock=0;
+  let W=480,H=800,scale=1,playing=false,last=0,elapsed=0,spawnAt=0,treatAt=0,score=0,combo=0,speed=290,shake=0,activeBgIndex=0,dustClock=0,gameToken=null,startRequest=null;
   let best=Number(localStorage.getItem('sungeumWalkBest')||0); bestEl.textContent=best;
   const dog={x:62,y:0,w:122,h:94,vy:0,onGround:true},things=[],dusts=[],clouds=[{x:30,y:140,s:1},{x:270,y:210,s:.7},{x:400,y:105,s:.55}];
   function resize(){const r=canvas.getBoundingClientRect();scale=Math.min(devicePixelRatio||1,2);canvas.width=r.width*scale;canvas.height=r.height*scale;W=r.width;H=r.height;ctx.setTransform(scale,0,0,scale,0,0);dog.y=ground()-dog.h-(jumpPreview?150:0);dog.onGround=!jumpPreview}
@@ -63,11 +68,15 @@
   new ResizeObserver(resize).observe(canvas); resize();
   function beep(freq,d=.06,type='sine',gain=.035){try{const A=window.AudioContext||window.webkitAudioContext,a=beep.a||(beep.a=new A),o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=freq;g.gain.value=gain;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,a.currentTime+d);o.stop(a.currentTime+d)}catch(e){}}
   function jump(){if(!playing)return;if(dog.onGround){dog.vy=-650;dog.onGround=false;beep(380,.07,'sine',.025)}}
-  function start(){if(backgrounds.length>1)activeBgIndex=(activeBgIndex+1+Math.floor(Math.random()*(backgrounds.length-1)))%backgrounds.length;playing=true;last=performance.now();elapsed=0;spawnAt=.8;treatAt=.45;score=0;combo=0;speed=290;things.length=0;dusts.length=0;dustClock=0;dog.y=ground()-dog.h;dog.vy=0;dog.onGround=true;scoreEl.textContent=0;startScreen.classList.add('hidden');endScreen.classList.add('hidden');requestAnimationFrame(loop)}
+  function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+  function renderBoard(data){document.querySelector('#dailyDate').textContent=data.date||'';const rows=data.ranking||[];leaderboardEl.innerHTML=rows.length?rows.map(row=>`<li><b>${Number(row.rank)}위 ${escapeHtml(row.name)}</b> · ${Number(row.score)}개</li>`).join(''):'<li>아직 기록이 없어요. 첫 1등에 도전!</li>';dailyStatus.innerHTML=data.logged_in?(data.my_rank?`내 기록 ${Number(data.my_best)}개 · ${Number(data.my_rank)}위`:'로그인 완료 · 기록에 도전해요!'):`<a href="/login?next=/sungeum-walk/">로그인하고 ${Number(data.reward||5)}크레딧에 도전!</a>`}
+  async function loadBoard(){try{const response=await fetch('/api/sungeum-walk/leaderboard');renderBoard(await response.json())}catch(e){dailyStatus.textContent='순위표를 잠시 불러오지 못했어요'}}
+  function start(){gameToken=null;submitStatus.textContent='';startRequest=fetch('/api/sungeum-walk/start',{method:'POST'}).then(r=>r.json()).then(data=>{gameToken=data.token;renderBoard(data);return data}).catch(()=>({logged_in:false}));if(backgrounds.length>1)activeBgIndex=(activeBgIndex+1+Math.floor(Math.random()*(backgrounds.length-1)))%backgrounds.length;playing=true;last=performance.now();elapsed=0;spawnAt=.8;treatAt=.45;score=0;combo=0;speed=290;things.length=0;dusts.length=0;dustClock=0;dog.y=ground()-dog.h;dog.vy=0;dog.onGround=true;scoreEl.textContent=0;startScreen.classList.add('hidden');endScreen.classList.add('hidden');requestAnimationFrame(loop)}
   function spawn(type){if(type==='treat')things.push({type,x:W+35,y:ground()-75-Math.random()*95,w:38,h:38,hit:false,spin:0});else things.push({type:'rock',x:W+35,y:ground()-42,w:46,h:42,hit:false})}
   function hit(a,b,pad=12){return a.x+pad<b.x+b.w-pad&&a.x+a.w-pad>b.x+pad&&a.y+pad<b.y+b.h-pad&&a.y+a.h-pad>b.y+pad}
   function showToast(text){toast.textContent=text;toast.classList.add('show');clearTimeout(showToast.t);showToast.t=setTimeout(()=>toast.classList.remove('show'),900)}
-  function finish(){playing=false;if(score>best){best=score;localStorage.setItem('sungeumWalkBest',best);bestEl.textContent=best;showToast('새로운 최고 기록!')}document.querySelector('#finalScore').textContent=score;document.querySelector('#endMessage').textContent=score>=12?'오늘 산책 완전 성공이야!':score>=6?'신나게 잘 뛰었어!':'괜찮아, 다시 산책하자!';setTimeout(()=>endScreen.classList.remove('hidden'),350)}
+  async function submitDailyScore(){const started=await startRequest;if(!started?.logged_in){submitStatus.innerHTML='<a href="/login?next=/sungeum-walk/">로그인하면 일일 순위에 참여할 수 있어요</a>';return}if(!gameToken){submitStatus.textContent='기록 세션을 확인하지 못했어요';return}try{const response=await fetch('/api/sungeum-walk/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:gameToken,score})});const data=await response.json();if(!response.ok)throw new Error(data.error);submitStatus.textContent=data.my_rank===1?`🏆 현재 1등! ${score}개 · 내일 ${Number(data.reward||5)}크레딧 지급`:`오늘 ${data.my_rank}위 · 최고 ${data.my_best}개`;renderBoard({...data,logged_in:true})}catch(e){submitStatus.textContent='기록 검증에 실패했어요. 다시 도전해줘!'}}
+  function finish(){playing=false;if(score>best){best=score;localStorage.setItem('sungeumWalkBest',best);bestEl.textContent=best;showToast('새로운 최고 기록!')}document.querySelector('#finalScore').textContent=score;document.querySelector('#endMessage').textContent=score>=12?'오늘 산책 완전 성공이야!':score>=6?'신나게 잘 뛰었어!':'괜찮아, 다시 산책하자!';submitStatus.textContent='일일 기록 확인 중...';submitDailyScore();setTimeout(()=>endScreen.classList.remove('hidden'),350)}
   function update(dt){elapsed+=dt;speed=Math.min(470,290+elapsed*5);dog.vy+=1750*dt;dog.y+=dog.vy*dt;if(dog.y>=ground()-dog.h){dog.y=ground()-dog.h;dog.vy=0;dog.onGround=true}
     if(dog.onGround){dustClock-=dt;if(dustClock<=0){dustClock=.09;dusts.push({x:dog.x+18,y:ground()-2,r:3+Math.random()*5,vx:-35-Math.random()*35,vy:-15-Math.random()*24,a:.34})}}for(const d of dusts){d.x+=d.vx*dt;d.y+=d.vy*dt;d.r+=9*dt;d.a-=.55*dt}for(let i=dusts.length-1;i>=0;i--)if(dusts[i].a<=0)dusts.splice(i,1);
     spawnAt-=dt;treatAt-=dt;if(spawnAt<=0){spawn('rock');spawnAt=.95+Math.random()*.85-Math.min(.25,elapsed/100)}if(treatAt<=0){spawn('treat');treatAt=.65+Math.random()*.9}
@@ -82,7 +91,7 @@
     for(const o of things){if(o.type==='treat'){ctx.save();ctx.translate(o.x+19,o.y+19);ctx.rotate(Math.sin(o.spin)*.16);ctx.fillStyle='#fff4d4';ctx.strokeStyle='#b86f35';ctx.lineWidth=3;ctx.beginPath();ctx.arc(-12,-7,7,0,Math.PI*2);ctx.arc(-12,7,7,0,Math.PI*2);ctx.arc(12,-7,7,0,Math.PI*2);ctx.arc(12,7,7,0,Math.PI*2);ctx.rect(-12,-8,24,16);ctx.fill();ctx.stroke();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.ellipse(-3,-3,8,3,-.25,0,Math.PI*2);ctx.fill();ctx.restore()}else{ctx.fillStyle='#7e918a';ctx.beginPath();ctx.ellipse(o.x+23,o.y+25,24,19,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#a9b6b1';ctx.beginPath();ctx.ellipse(o.x+16,o.y+18,8,5,-.4,0,Math.PI*2);ctx.fill()}}
     const gait=Math.sin(elapsed*16),tilt=Math.max(-.12,Math.min(.12,dog.vy/2300))+(dog.onGround?gait*.018:0);ctx.save();ctx.translate(dog.x+dog.w/2, dog.y+dog.h);ctx.rotate(tilt);if(!dog.onGround&&jumpImg.complete&&jumpImg.naturalWidth){ctx.drawImage(jumpImg,-98,-108,168,112)}else if(runCycleImg.complete&&runCycleImg.naturalWidth){const frame=Math.floor(elapsed*10)%3,cell=runCycleImg.naturalWidth/3,lift=-Math.abs(gait)*1.5;ctx.drawImage(runCycleImg,frame*cell,145,cell,500,-84,-108+lift,168,112)}else{ctx.fillStyle='#f7b35c';ctx.beginPath();ctx.arc(0,-40,38,0,Math.PI*2);ctx.fill()}ctx.restore();ctx.restore()}
   function loop(now){if(!playing){draw();return}const dt=Math.min(.032,(now-last)/1000);last=now;update(dt);draw();if(playing)requestAnimationFrame(loop)}
-  area.addEventListener('pointerdown',e=>{if(e.target.tagName!=='BUTTON')jump()});window.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();jump()}});document.querySelector('#startButton').onclick=start;document.querySelector('#retryButton').onclick=start;runCycleImg.onload=draw;jumpImg.onload=draw;backgrounds.forEach(img=>img.onload=draw);activeBgIndex=Math.floor(Math.random()*backgrounds.length);if(jumpPreview){startScreen.classList.add('hidden');endScreen.classList.add('hidden')}draw();
+  area.addEventListener('pointerdown',e=>{if(e.target.tagName!=='BUTTON')jump()});window.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();jump()}});document.querySelector('#startButton').onclick=start;document.querySelector('#retryButton').onclick=start;runCycleImg.onload=draw;jumpImg.onload=draw;backgrounds.forEach(img=>img.onload=draw);activeBgIndex=Math.floor(Math.random()*backgrounds.length);if(jumpPreview){startScreen.classList.add('hidden');endScreen.classList.add('hidden')}loadBoard();draw();
 })();
 </script>
 </body>

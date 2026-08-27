@@ -16,6 +16,7 @@ from routes.speaking_coach import speaking_coach_bp
 from routes.social_publish import social_publish_bp
 from routes.payment import payment_bp
 from routes.services import services_bp
+from routes.sungeum_walk import sungeum_walk_bp
 
 from i18n.translations import SUPPORTED_LANGUAGES, TRANSLATIONS, running_i18n, translate
 from i18n.speaking_copy import SPEAKING_COPY
@@ -76,7 +77,6 @@ from flask import (
     render_template,
     request,
     send_file,
-    send_from_directory,
     redirect,
     session
 )
@@ -252,6 +252,7 @@ def set_language(language_code):
 
 app.register_blueprint(admin_bp)
 app.register_blueprint(credits_bp)
+app.register_blueprint(sungeum_walk_bp)
 
 WORD_PATH = "downloads/advertisement.docx"
 BLOG_WORD_PATH = "downloads/blog.docx"
@@ -264,16 +265,6 @@ SNS_WORD_PATH = "downloads/sns.docx"
 @app.route("/")
 def landing():
     return render_template("landing.html")
-
-
-@app.route("/sungeum-walk/")
-def sungeum_walk():
-    return send_from_directory("prototypes/sungeum-walk", "index.html")
-
-
-@app.route("/sungeum-walk/<path:filename>")
-def sungeum_walk_asset(filename):
-    return send_from_directory("prototypes/sungeum-walk", filename)
 
 
 @app.route("/terms")
