@@ -10,7 +10,7 @@ services_bp = Blueprint("services", __name__)
 
 @services_bp.get("/services")
 def services():
-    """Public, payment-free sales page used to validate service demand."""
+    """Show the public project-inquiry page."""
     return render_template("services.html")
 
 
@@ -34,16 +34,16 @@ def service_lead():
         "message": request.form.get("message", "").strip(),
     }
     if any(not fields[key] for key in ("name", "business_name", "contact", "interest")):
-        flash("이름, 사업장명, 연락처, 관심 상품을 입력해주세요.", "warning")
+        flash("이름, 브랜드·사업장명, 연락처와 필요한 작업을 입력해주세요.", "warning")
         return redirect(url_for("services.services") + "#pilot-form")
     if any(len(value) > 500 for value in fields.values()):
-        flash("입력 내용이 너무 깁니다. 500자 이내로 작성해주세요.", "warning")
+        flash("입력 내용이 너무 깁니다. 각 항목을 500자 이내로 작성해주세요.", "warning")
         return redirect(url_for("services.services") + "#pilot-form")
     result = save_service_lead(**fields)
     if result["ok"]:
-        flash("파일럿 신청이 접수됐어요. 확인 후 연락드릴게요.", "success")
+        flash("작업 의뢰가 접수됐어요. 확인 후 연락드릴게요.", "success")
     else:
-        flash("신청을 저장하지 못했어요. 잠시 후 다시 시도해주세요.", "danger")
+        flash("의뢰를 저장하지 못했어요. 잠시 후 다시 시도해주세요.", "danger")
     return redirect(url_for("services.services") + "#pilot-form")
 
 

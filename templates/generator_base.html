@@ -73,13 +73,11 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
 
 <div class="container pb-3">
 
-    <div class="text-center pf-page-header">
-        <div class="pf-eyebrow mb-2">PROJECT FREEDOM AI</div>
-        <h1 class="fw-bold mb-2 d-flex justify-content-center align-items-center gap-3"><img class="pf-title-mascot" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="3D Sungeum mascot"><span>{{ t("v21.gen.title") }}</span></h1>
-        <p class="text-muted mb-0">
-            {{ t("v21.gen.subtitle") }}
-        </p>
-    </div>
+    <header class="studio-tool-header">
+      <p class="studio-kicker">AI CONTENT STUDIO</p>
+      <h1>{{ t('v21.tab.sns')|replace('📱 ', '') if active_tab == 'sns' else t('v21.tab.ads')|replace('📢 ', '') if active_tab == 'ads' else t('v21.gen.title') }}</h1>
+      <p>{% if current_language == 'ko' %}{{ '올릴 소식만 적어주세요. 문구와 이미지를 함께 만듭니다.' if active_tab == 'sns' else '알리고 싶은 내용을, 눈길이 가는 문구와 이미지로.' }}{% else %}{{ t('v21.gen.subtitle') }}{% endif %}</p>
+    </header>
 
     {% if error %}
     <div class="alert alert-warning shadow-sm mb-4">
@@ -95,13 +93,14 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
     </div>
     {% endif %}
 
-    <div class="card shadow main-card">
+    <div class="studio-generator-grid">
+    <div class="card shadow main-card studio-input-card">
         <div class="card-body p-4">
 
             <div class="generator-tabs mb-4" aria-label="콘텐츠 종류 선택">
-                <a href="/ads-generator" class="generator-tab{% if active_tab == 'ads' %} active{% endif %}"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 11v2a2 2 0 0 0 2 2h2l2 5h3l-2-5 9-4V7L7 11H5a2 2 0 0 0-2 2Z"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.ads") }}</strong><small>{{ t("v21.tab.ads_desc") }}</small></span></a>
-                <a href="/sns" class="generator-tab{% if active_tab == 'sns' %} active{% endif %}"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 5h4M11 18h2"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.sns") }}</strong><small>{{ t("v21.tab.sns_desc") }}</small></span></a>
-                <a href="/history" class="generator-tab"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.history") }}</strong><small>{{ t("v21.tab.history_desc") }}</small></span></a>
+                <a href="/ads-generator" class="generator-tab{% if active_tab == 'ads' %} active{% endif %}"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 11v2a2 2 0 0 0 2 2h2l2 5h3l-2-5 9-4V7L7 11H5a2 2 0 0 0-2 2Z"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.ads")|replace("📢 ", "") }}</strong><small>{{ t("v21.tab.ads_desc") }}</small></span></a>
+                <a href="/sns" class="generator-tab{% if active_tab == 'sns' %} active{% endif %}"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 5h4M11 18h2"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.sns")|replace("📱 ", "") }}</strong><small>{{ t("v21.tab.sns_desc") }}</small></span></a>
+                <a href="/history" class="generator-tab"><span class="generator-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></svg></span><span class="generator-tab-copy"><strong>{{ t("v21.tab.history")|replace("📚 ", "") }}</strong><small>{{ t("v21.tab.history_desc") }}</small></span></a>
             </div>
 
             {% if active_tab in ["ads", "sns", "blog"] %}
@@ -112,6 +111,14 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
         </div>
     </div>
 
+    <aside class="studio-example" aria-label="콘텐츠 제작 사례">
+      <div class="studio-example-heading"><span>제작 사례</span><span>01 / CONTENT</span></div>
+      <a href="/works/7days-massage-sns"><img src="{{ url_for('static', filename='showcase/7days-massage-pattaya-sns.png') }}" alt="7day’s massage SNS 홍보 이미지 제작 사례" loading="lazy"></a>
+      <h2>이런 콘텐츠를 만들어요.</h2><p>전하고 싶은 이야기와 실제 자료로 시작해보세요. 완성된 문구와 이미지는 결과 화면에서 확인하고 저장할 수 있어요.</p>
+      <a class="studio-example-link" href="/works/7days-massage-sns">작업물 자세히 보기 <span aria-hidden="true">→</span></a>
+      <div class="studio-example-note"><b>무엇을 적으면 좋을까요?</b><p>업종과 이름, 알릴 소식, 꼭 넣을 정보를 적어주세요. 사진과 로고는 필요한 경우 추가하면 돼요.</p></div>
+    </aside>
+    </div>
     {% if result %}
     <div id="result-card" class="card shadow main-card mt-4">
         <div class="card-header bg-white fw-bold py-3">
@@ -209,8 +216,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const nav = document.querySelector(".pf-navbar");
     if (!nav) return;
     const labels = {
-        ads: {{ t("v21.tab.ads") | tojson }},
-        sns: {{ t("v21.tab.sns") | tojson }},
+        ads: {{ t("v21.tab.ads")|replace("📢 ", "") | tojson }},
+        sns: {{ t("v21.tab.sns")|replace("📱 ", "") | tojson }},
         blog: {{ t("v21.tab.blog") | tojson }},
         poster: {{ t("v21.tab.poster") | tojson }},
         running: {{ running_i18n.get("title", "Sungeum AI Running Coach") | tojson }}

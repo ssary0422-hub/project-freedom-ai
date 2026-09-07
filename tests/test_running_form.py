@@ -19,7 +19,7 @@ class RunningFormTests(unittest.TestCase):
         response = self.client.get("/running-form")
         self.assertEqual(response.status_code, 200)
         self.assertIn("순금이 AI 러닝코치".encode(), response.data)
-        self.assertIn("달리는 영상만 올려봐".encode(), response.data)
+        self.assertIn("내 달리기 자세,".encode(), response.data)
         self.assertIn(b'id="videoInput"', response.data)
         self.assertIn(b'id="poseCanvas"', response.data)
         self.assertIn("분석·코칭·결과지 검수".encode(), response.data)
@@ -81,14 +81,9 @@ class RunningFormTests(unittest.TestCase):
 
     def test_landing_has_dedicated_running_ai_entry(self):
         response = self.client.get("/")
-        self.assertIn("오늘 순금이에게 무엇을 맡길까요?".encode(), response.data)
-        self.assertIn("사업 홍보 맡기기".encode(), response.data)
-        self.assertIn("순금이 AI 러닝코치".encode(), response.data)
-        self.assertIn(b"hero-task-card", response.data)
-        self.assertIn(b'data-kind="running"', response.data)
-        self.assertIn("AI 총괄실장 순금이".encode(), response.data)
-        self.assertIn("오늘 무엇을 맡길까요?".encode(), response.data)
-        self.assertIn("홍보·러닝 함께 보기".encode(), response.data)
+        self.assertIn('href="/running-form"'.encode(), response.data)
+        self.assertIn("러닝 자세 코치".encode(), response.data)
+        self.assertIn('id="tools"'.encode(), response.data)
 
     @patch("routes.poster.save_history", return_value=91)
     @patch("routes.poster._save_poster_result_image", return_value="/static/generated/poster/999999/result.png")

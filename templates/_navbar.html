@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-xl navbar-dark pf-navbar sticky-top">
+<nav class="navbar navbar-expand-xl navbar-light pf-navbar sticky-top" aria-label="주요 메뉴">
     <svg class="position-absolute" width="0" height="0" aria-hidden="true" focusable="false">
         <symbol id="pf-i-megaphone" viewBox="0 0 24 24"><path d="M3 11v2a2 2 0 0 0 2 2h2l2 5h3l-2-5 9-4V7L7 11H5a2 2 0 0 0-2 2Z"/><path d="M19 8c1 .6 2 1.6 2 3s-1 2.4-2 3"/></symbol>
         <symbol id="pf-i-sns" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 5h4M11 18h2"/></symbol>
@@ -14,17 +14,14 @@
     {% macro nav_icon(name) %}<svg class="pf-nav-icon" aria-hidden="true"><use href="#pf-i-{{ name }}"></use></svg>{% endmacro %}
     <div class="container-fluid px-3 px-lg-4">
         <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
-            <img class="pf-brand-mascot" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="순금이">
-            <span>Project Freedom AI</span>
+            {% include "_studio_wordmark.html" %}
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#pfMainNav" aria-controls="pfMainNav" aria-expanded="false" aria-label="{{ t('nav.open_menu') }}"><span class="navbar-toggler-icon"></span></button>
         <div class="collapse navbar-collapse mt-3 mt-xl-0" id="pfMainNav">
             <div class="navbar-nav ms-auto gap-2 align-items-xl-center">
-                <a class="btn pf-nav-btn {% if request.path.startswith('/content') %}pf-nav-active{% endif %}" href="{% if session.get('user_id') %}/content{% else %}/login{% endif %}">{{ nav_icon('megaphone') }} 광고 콘텐츠</a>
-                {% if session.get("user_id") %}
+                <a class="btn pf-nav-btn {% if request.path.startswith('/content') or request.path.startswith('/ads-generator') %}pf-nav-active{% endif %}" href="/ads-generator">{{ nav_icon('megaphone') }} 광고 콘텐츠</a>
                 <a class="btn pf-nav-btn {% if request.path.startswith('/sns') %}pf-nav-active{% endif %}" href="/sns">{{ nav_icon('sns') }} SNS</a>
-                {% endif %}
-                <a class="btn pf-nav-btn {% if request.path.startswith('/running-form') %}pf-nav-active{% endif %}" href="{% if session.get('user_id') %}/running-form{% else %}/login{% endif %}">{{ nav_icon('run') }} {{ t('nav.running') }}</a>
+                <a class="btn pf-nav-btn {% if request.path.startswith('/running') %}pf-nav-active{% endif %}" href="/running-form">{{ nav_icon('run') }} {{ t('nav.running') }}</a>
                 <a class="btn pf-nav-btn {% if request.path.startswith('/speaking-coach') %}pf-nav-active{% endif %}" href="/speaking-coach">{{ nav_icon('speaking') }} {{ t('nav.speaking') }}</a>
                 <a class="btn pf-nav-btn {% if request.path.startswith('/reviews') %}pf-nav-active{% endif %}" href="/reviews">★ 리뷰</a>
                 {% if session.get("user_id") %}

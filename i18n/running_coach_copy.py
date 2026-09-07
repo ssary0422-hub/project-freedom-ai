@@ -1,6 +1,6 @@
 RUNNING_COACH_COPY = {
     "ko": {
-        "eyebrow":"순금이 러닝코치", "title":"오늘 러닝, 순금이랑 정해볼까?", "desc":"영상 없이도 지금 컨디션에 맞는 러닝 계획을 무료로 만들어줄게.",
+        "eyebrow":"순금이 러닝코치", "title":"오늘 나에게 맞는 러닝.", "desc":"영상 없이도 지금 컨디션에 맞는 러닝 계획을 무료로 만들어줄게.",
         "condition":"오늘 몸 상태는 어때?", "good":"좋아, 가볍게 달리고 싶어", "normal":"보통이야", "tired":"조금 피곤해", "pain":"통증이 있어",
         "minutes":"오늘 몇 분 정도 뛸 수 있어?", "goal":"오늘 러닝의 목적은 뭐야?", "easy":"가볍게 뛰기", "fitness":"체력 키우기", "weight":"체중 관리", "race":"대회 준비", "submit":"순금이에게 무료 코칭 받기", "thinking":"순금이가 오늘 계획을 정리하고 있어…", "error":"코칭을 만들지 못했어요.",
         "plan":"오늘의 계획", "intensity":"추천 강도", "warmup":"워밍업", "caution":"주의사항", "cooldown":"마무리", "feedback_title":"순금이 러닝코치는 어땠어? 🐶", "feedback_prompt":"다음 러닝 계획을 더 잘 만들 수 있게 한 번만 알려줘.", "helpful":"👍 도움이 됐어", "neutral":"🙂 보통이야", "not_helpful":"🤔 아쉬워", "feedback_placeholder":"짧은 후기를 남겨줘 (선택)", "feedback_send":"후기 보내기", "thanks":"고마워! 다음 러닝도 더 잘 도와줄게 🐶✨", "fallback":"기본 안전 코칭으로 안내했어.", "ai":"순금이가 너에게 맞춰 정리했어."

@@ -17,6 +17,7 @@ from routes.social_publish import social_publish_bp
 from routes.payment import payment_bp
 from routes.services import services_bp
 from routes.sungeum_walk import sungeum_walk_bp
+from routes.portfolio import portfolio_bp, WORKS
 
 from i18n.translations import SUPPORTED_LANGUAGES, TRANSLATIONS, running_i18n, translate
 from i18n.speaking_copy import SPEAKING_COPY
@@ -253,6 +254,7 @@ def set_language(language_code):
 app.register_blueprint(admin_bp)
 app.register_blueprint(credits_bp)
 app.register_blueprint(sungeum_walk_bp)
+app.register_blueprint(portfolio_bp)
 
 WORD_PATH = "downloads/advertisement.docx"
 BLOG_WORD_PATH = "downloads/blog.docx"
@@ -264,7 +266,7 @@ SNS_WORD_PATH = "downloads/sns.docx"
 
 @app.route("/")
 def landing():
-    return render_template("landing.html")
+    return render_template("landing.html", works=WORKS)
 
 
 @app.route("/terms")

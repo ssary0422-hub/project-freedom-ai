@@ -4,9 +4,14 @@
 .coach-v2{max-width:920px;margin:0 auto}.coach-hero{background:linear-gradient(135deg,#082337,#0b6f73);color:#fff;border-radius:28px;padding:2.4rem}.coach-kicker{color:#9df6e8;font-size:.75rem;font-weight:800;letter-spacing:.16em}.coach-card{border:1px solid #dce9ef;border-radius:24px;background:#fff;box-shadow:0 18px 50px rgba(16,34,60,.08)}.coach-input{min-height:150px;resize:vertical;border:2px solid #dce9ef;border-radius:18px;font-size:1.05rem;padding:1rem}.coach-input:focus{border-color:#0d8b83;box-shadow:0 0 0 4px rgba(13,139,131,.12)}.coach-result{background:#f2fffc;border:1px solid #a9e4d8;border-radius:20px;padding:1.2rem}.coach-quote{background:#fff;border-left:4px solid #0d8b83;border-radius:12px;padding:1rem 1.1rem;font-size:1.12rem;line-height:1.65;color:#1d3853}.coach-actions{display:flex;flex-wrap:wrap;gap:.55rem}.coach-actions button{border:1px solid #b8d4e9;background:#fff;border-radius:999px;padding:.55rem .8rem;color:#24415f;font-weight:700}.coach-actions button.primary{background:#123b59;color:#fff;border-color:#123b59}.coach-mascot{width:120px;height:145px;object-fit:contain}.coach-hint{color:#6b7c90;font-size:.88rem}.coach-loading{color:#0d706b;font-weight:700}@media(max-width:767px){.coach-hero{padding:1.8rem 1.25rem}.coach-mascot{width:88px;height:110px}}
 {% endblock %}
 {% block content %}
-<main class="container coach-v2">
+<div class="container coach-v2">
   <section class="coach-hero mb-4"><div class="row align-items-center"><div class="col"><div class="coach-kicker mb-3">SUNGEUM SPEAKING TEACHER</div><h1 class="display-6 fw-bold mb-3">무슨 일이야?<br>순금이 선생님에게 편하게 말해줘.</h1><p class="lead text-white-50 mb-0">상황을 설명하면, 실제로 말할 수 있는 문장으로 바로 정리해줄게.</p></div><div class="col-auto"><img class="coach-mascot sungeum-alive" src="{{ url_for('static', filename='brand/sungeum-speaking-teacher-v1.png') }}" alt="순금이 말하기 선생님"></div></div></section>
   <section class="coach-card p-3 p-lg-4">
+    <div class="studio-scenarios" role="group" aria-label="말하기 상황 예시">
+      <button type="button" data-studio-scenario="동료의 부탁을 이번에는 정중하게 거절하고 싶어요. 지금 맡은 일을 마무리해야 해서 도와주기 어려워요.">부탁 거절하기</button>
+      <button type="button" data-studio-scenario="답장이 늦어진 친구에게 미안한 마음을 자연스럽게 전하고 싶어요.">미안함 전하기</button>
+      <button type="button" data-studio-scenario="상사에게 업무 일정 조정을 요청하고 싶어요. 우선순위를 함께 정하고 싶습니다.">일정 조정하기</button>
+    </div>
     <label class="form-label fw-bold" for="coachInput">어떤 일이 있었어?</label>
     <textarea id="coachInput" class="form-control coach-input" placeholder="예: 몸이 안 좋아서 오늘 조퇴하고 싶은데 상사에게 어떻게 말하지?"></textarea>
     <div class="d-flex justify-content-between align-items-center mt-3 gap-3"><span class="coach-hint">정리되지 않은 말이어도 괜찮아. 순금이가 알아서 정리할게.</span><button id="coachSubmit" class="btn btn-primary btn-lg fw-bold px-4" type="button">순금아, 어떻게 말해?</button></div>
@@ -14,7 +19,7 @@
     <div id="coachResult" class="coach-result mt-4 d-none" aria-live="polite"><div class="small text-secondary mb-2">순금이가 이해한 상황</div><p id="coachUnderstanding" class="fw-semibold mb-3"></p><div class="small text-secondary mb-2">바로 말할 문장</div><div id="coachQuote" class="coach-quote"></div><div class="small text-secondary mt-3 mb-2">다른 느낌으로 말하면</div><div class="coach-actions"><button type="button" data-variant="soft">더 부드럽게</button><button type="button" data-variant="firm">더 단호하게</button><button type="button" data-quick class="primary">급해! 한 문장만</button></div><section id="speakingFeedback" class="coach-feedback mt-4 d-none" aria-live="polite"><div class="fw-bold">순금이 선생님 코치는 어땠어? 🐶</div><div class="small text-secondary mt-1">한 번만 알려주면 다음 문장을 더 잘 다듬을게.</div><div class="coach-feedback-actions mt-3" role="group" aria-label="코치 후기 평점"><button type="button" data-review-rating="5">👍 도움이 됐어</button><button type="button" data-review-rating="3">🙂 보통이야</button><button type="button" data-review-rating="1">🤔 아쉬워</button></div><textarea id="speakingFeedbackComment" class="form-control mt-3" rows="2" maxlength="3000" placeholder="짧은 후기를 남겨줘 (선택)"></textarea><button id="speakingFeedbackSubmit" type="button" class="btn btn-primary btn-sm mt-2" disabled>후기 보내기</button><div id="speakingFeedbackThanks" class="small text-success fw-semibold mt-2 d-none">고마워! 다음 말도 더 잘 도와줄게 🐶✨</div></section><button id="coachAgain" type="button" class="btn btn-link px-0 mt-3">다른 상황 말해보기</button></div>
   </section>
   <p class="coach-hint text-center mt-3">처음에는 누구에게나 자연스럽고 무난한 말투로 도와줘. 원하는 경우에만 말투를 바꿀 수 있어.</p>
-</main>
+</div>
 <style>
 .coach-mascot{animation:coach-float 3.2s ease-in-out infinite}
 .coach-character-bubble{position:fixed;right:28px;bottom:28px;z-index:20;max-width:210px;padding:.7rem .85rem;border-radius:16px 16px 4px 16px;background:#fff;color:#24415f;box-shadow:0 10px 28px rgba(0,0,0,.16);font-size:.86rem;line-height:1.4}
@@ -31,6 +36,7 @@
 <div id="coachCharacterBubble" class="coach-character-bubble">무슨 일이야? 편하게 말해줘.</div>
 {% endblock %}
 {% block scripts %}
+<script>document.querySelectorAll('[data-studio-scenario]').forEach(button=>button.addEventListener('click',()=>{const input=document.getElementById('coachInput');input.value=button.dataset.studioScenario;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();}));</script>
 <script>window.PF_SPEAKING_COPY = {{ speaking_i18n|tojson }};</script>
 <script src="{{ url_for('static', filename='speaking-localize.js') }}" defer></script>
 <script>
@@ -109,10 +115,16 @@
   const examples = ['친구에게 약속 시간에 늦었다고 어떻게 말하지?', '오늘 일찍 퇴근하고 싶은데 뭐라고 하지?', '부탁을 거절하고 싶은데 미안하지 않게 말하고 싶어.', '상대방에게 서운했던 점을 어떻게 말하지?', '처음 만난 사람에게 자연스럽게 부탁하려면 뭐라고 하지?'];
   categoryPicker.innerHTML = '<span class="coach-tone-label">이런 상황도 도와줄게</span><div class="coach-example-row"><button type="button" class="coach-example" data-example></button><button type="button" class="coach-example-next">다른 예시 보기</button></div>';
   input.insertAdjacentElement('beforebegin', categoryPicker);
+  categoryPicker.hidden = true;
   const lengthPicker = document.createElement('div');
   lengthPicker.className = 'coach-length-picker mt-3';
   lengthPicker.innerHTML = '<span class="coach-tone-label">문장 길이는?</span><div class="coach-length-options"><button type="button" class="is-selected" data-length="normal">자연스럽게</button><button type="button" data-length="short">한 문장</button><button type="button" data-length="detail">자세하게</button><button type="button" data-length="long">더 길게</button></div>';
   tonePicker.insertAdjacentElement('afterend', lengthPicker);
+  const studioOptions = document.createElement('details');
+  studioOptions.className = 'studio-speaking-options';
+  studioOptions.innerHTML = '<summary>말투·길이 조정 <span>(선택)</span></summary>';
+  lengthPicker.insertAdjacentElement('afterend', studioOptions);
+  studioOptions.append(tonePicker, lengthPicker);
   const confirm = document.createElement('div');
   confirm.className = 'coach-confirm mt-3';
   confirm.innerHTML = '<span class="coach-confirm-text">내가 이해한 상황이 맞아?</span><div class="coach-confirm-actions"><button type="button" data-confirm="yes">응, 맞아</button><button type="button" data-confirm="no">다시 설명할게</button></div>';

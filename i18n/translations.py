@@ -1809,7 +1809,7 @@ TRANSLATIONS["ko"].update({
 # stays language-neutral; these labels are injected into running-form.js.
 _RUNNING_I18N = {
     "ko": {
-        "title": "순금이 AI 러닝코치", "hero_title": "달리는 영상만 올려봐\n순금이가 러닝폼을 봐줄게", "hero_desc": "착지·관절 각도·자세를 확인하고, 다음 러닝에서 실천할 한 가지를 알려드려요.",
+        "title": "순금이 AI 러닝코치", "hero_title": "내 달리기 자세,\n영상으로 확인해요.", "hero_desc": "착지·관절 각도·자세를 확인하고, 다음 러닝에서 실천할 한 가지를 알려드려요.",
         "upload_title": "러닝 영상을 올려주세요", "upload_hint": "MP4·MOV·WEBM · 최대 120MB", "choose_video": "러닝 영상 선택", "pace_label": "촬영 당시 페이스", "view_label": "촬영 방향", "side": "측면", "consent": "AI 러닝폼 분석을 위한 영상 처리에 동의합니다.", "analyze": "순금이에게 무료 분석 맡기기", "steps": ["영상 확인", "관절 찾기", "착지 분석", "코칭 정리"],
         "working": "순금이 코치가 분석하고 있어요", "done_stamp": "순금 검수 완료", "landing_frame": "AI 착지 프레임", "foot_zoom": "착지 확대", "coach": "순금이 코치의 한마디", "next_goal": "다음 러닝에서 바꿀 한 가지", "save_image": "SNS 결과 이미지 저장", "save_done": "러닝 결과가 저장됐어요", "generic_error": "영상 분석 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요.", "mediapipe_error": "AI 자세 추적을 다시 준비하고 있어요. 잠시 후 분석 버튼을 다시 눌러주세요.", "range_knee": "권장 범위 105~125°", "range_trunk": "권장 범위 6~14°"
     },

@@ -166,6 +166,7 @@ class ContentFlowTests(unittest.TestCase):
     def test_sns_image_failure_keeps_text_and_offers_image_only_retry(self):
         patches = self._common_patches("sns", "make_sns", "SNS_TEXT_SURVIVES") + [
             patch("routes.sns.make_image", side_effect=RuntimeError("image provider down")),
+            patch("routes.sns.create_finished_promo_card", side_effect=RuntimeError("local fallback unavailable")),
             patch("routes.sns.create_sns_word"),
             patch("routes.sns.create_sns_pdf"),
         ]
@@ -326,7 +327,7 @@ class ContentFlowTests(unittest.TestCase):
              patch("routes.blog.get_profiles", return_value=[]), \
              patch("routes.sns.get_profiles", return_value=[]), \
              patch("routes.brand_library.media_for_user", return_value=[]):
-            for path in ("/ads-generator", "/blog", "/sns", "/poster", "/brand-library"):
+            for path in ("/ads-generator", "/blog", "/sns", "/poster"):
                 with self.subTest(path=path):
                     self.assertEqual(self.client.get(path).status_code, 200)
 
@@ -346,13 +347,13 @@ class ContentFlowTests(unittest.TestCase):
                     self.assertIn(phrase, html)
                     self.assertIn("AI가 업종에 맞게 추천", html)
 
-    def test_customer_navigation_focuses_on_four_creation_tools(self):
+    def test_customer_navigation_focuses_on_studio_tools(self):
         with self.client.session_transaction() as session:
             session["user_id"] = 1
             session["user_name"] = "테스트"
             session["is_admin"] = False
         html = self.client.get("/").get_data(as_text=True)
-        for path in ("/ads-generator", "/sns", "/blog", "/poster"):
+        for path in ("/ads-generator", "/sns", "/running-form", "/speaking-coach"):
             self.assertIn(f'href="{path}"', html)
 
         with patch("routes.ads.get_profiles", return_value=[]):

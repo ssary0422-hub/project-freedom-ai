@@ -1,3 +1,11 @@
+import pytest
+from app import app
+
+@pytest.fixture(autouse=True)
+def request_context():
+    with app.test_request_context("/running-coach"):
+        yield
+
 from routes.running_coach import _fallback_plan
 
 

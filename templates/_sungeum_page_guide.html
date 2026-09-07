@@ -20,7 +20,7 @@
 } %}
 {% set guide = guides.get(active_tab) %}
 {% if guide %}
-<details class="sungeum-page-guide mb-4" open>
+<details class="sungeum-page-guide mb-4">
     <summary><span>🐾 순금이 설명 보기</span><small>접기·펼치기</small></summary>
     <div class="sungeum-page-guide-body">
         <img class="sungeum-alive" src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="{{ guide.label }}를 설명하는 3D 순금">

@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="pf-release" content="studio-suite-20260908">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="icon" href="{{ url_for('static', filename='studio-favicon.svg') }}" type="image/svg+xml">
 
     <title>{% block title %}Project Freedom AI{% endblock %}</title>
 
@@ -218,6 +221,7 @@
         {% block extra_style %}{% endblock %}
     </style>
     <link href="{{ url_for('static', filename='freedom-neon.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='studio-app.css') }}?v=20260908" rel="stylesheet">
     <script>window.PF_TRANSLATION_PAIRS = {{ translation_pairs|tojson }};</script>
     <script>window.PF_MENU_I18N = {{ menu_i18n|tojson }};</script>
     <script src="{{ url_for('static', filename='i18n-runtime.js') }}" defer></script>
@@ -225,11 +229,12 @@
     {% if current_language in ('en', 'th') %}<script src="{{ url_for('static', filename='auto-translate.js') }}" defer></script>{% endif %}
 </head>
 
-<body {% block body_attrs %}{% endblock %}>
+<body class="pf-studio-theme" {% block body_attrs %}{% endblock %}>
+    <a class="studio-skip" href="#main-content">본문으로 바로가기</a>
 
     {% include "_navbar.html" %}
 
-    <main class="pf-page">
+    <main class="pf-page" id="main-content">
         {% block content %}{% endblock %}
     </main>
 

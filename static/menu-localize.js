@@ -27,7 +27,7 @@
 
   function apply(root) {
     const scope = root || document;
-    scope.querySelectorAll("a[href], button").forEach((el) => {
+    scope.querySelectorAll(".pf-navbar a[href], .pf-navbar button").forEach((el) => {
       const href = el.getAttribute("href") || el.getAttribute("data-href") || "";
       const match = routes.find(([, path]) => href === path || href.startsWith(path + "?"));
       if (match) setLabel(el, labels[match[0]]);
