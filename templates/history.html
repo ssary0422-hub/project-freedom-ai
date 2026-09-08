@@ -71,7 +71,7 @@
               <a href="/history/download/{{ item[0] }}/pdf" class="history-action">PDF</a>
               <a href="/history/download/{{ item[0] }}/word" class="history-action">Word</a>
             {% endif %}
-            {% if item[5] %}<a href="{{ url_for('history.history_image', history_id=item[0], download=1) if item[7] else '/history/download/' ~ item[0] ~ '/image' }}" class="history-action">이미지 저장</a>{% endif %}
+            {% if item[5] %}<a href="{{ url_for('history.history_image', history_id=item[0], download=1, v=item[5]) if item[7] else '/history/download/' ~ item[0] ~ '/image' }}" class="history-action">이미지 저장</a>{% endif %}
             {% if content_type == 'sns' %}
             <form method="POST" action="/sns/retry-image" class="d-inline" onsubmit="const b=this.querySelector('button[type=submit]'); if(b){b.disabled=true; b.textContent='⏳ 이미지 재생성 중...';} return true;">
               <input type="hidden" name="history_id" value="{{ item[0] }}">
@@ -89,7 +89,7 @@
         <div class="history-body{% if not item[5] %} no-image{% endif %}">
           {% if item[5] %}
           <div class="history-image-wrap">
-            <img src="{{ url_for('history.history_image', history_id=item[0]) if item[7] else item[5] }}" class="history-image" alt="{{ type_label }} 결과 이미지" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+            <img src="{{ url_for('history.history_image', history_id=item[0], v=item[5]) if item[7] else item[5] }}" class="history-image" alt="{{ type_label }} 결과 이미지" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
             <div class="history-image-error"><div><strong>이미지를 다시 연결해야 해요</strong><span>이전 서버의 파일이 사라졌습니다. 새로 생성한 이미지는 안전하게 보관됩니다.</span></div></div>
           </div>
           {% endif %}

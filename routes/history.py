@@ -50,10 +50,13 @@ def history_image(history_id):
         return "저장된 이미지가 없습니다.", 404
     data, mime = payload
     extension = ".png" if mime == "image/png" else ".jpg"
-    return send_file(
+    response = send_file(
         BytesIO(data),
         mimetype=mime,
-        max_age=31536000,
+        max_age=0,
         as_attachment=request.args.get("download") == "1",
         download_name=f"project-freedom-ai-{history_id}{extension}",
     )
+    # A retry replaces the image for the same history ID.
+    response.headers['Cache-Control'] = 'private, no-store'
+    return response

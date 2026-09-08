@@ -111,3 +111,15 @@ def test_korean_headline_does_not_leave_word_ending_on_its_own_line():
     assert '다.' not in lines
     assert any('늦는다.' in line for line in lines)
     assert all(draw.textlength(line, font=font) <= 936 for line in lines)
+
+
+def test_retried_history_image_is_not_cached_as_immutable(monkeypatch):
+    from routes import history
+    monkeypatch.setattr(history, 'get_history_image', lambda *a: (b'updated-image', 'image/png'))
+    client = app.test_client()
+    with client.session_transaction() as session:
+        session['user_id'] = 999999
+    response = client.get('/history/image/107')
+    assert response.status_code == 200
+    assert response.headers['Cache-Control'] == 'private, no-store'
+    assert response.data == b'updated-image'
