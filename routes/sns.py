@@ -42,7 +42,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 @sns_bp.get('/sns/image-status')
 @login_required
 def image_status():
-    response = jsonify(session.get('sns_image_failure', {}))
+    response = jsonify(release='sns-reliability-20260908-v2', **session.get('sns_image_failure', {}))
     response.headers['Cache-Control'] = 'no-store'
     return response
 
