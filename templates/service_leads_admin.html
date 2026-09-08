@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}파일럿 리드 - 관리자{% endblock %}
+{% block content %}
+<main class="container py-4"><div class="d-flex justify-content-between align-items-center mb-4"><div><div class="text-primary fw-bold small">ADMIN</div><h1 class="h3 fw-bold mb-0">파일럿 신청 리드</h1></div><a class="btn btn-outline-secondary" href="/services">판매 페이지 보기</a></div>
+<div class="table-responsive card border-0 rounded-4 shadow-sm"><table class="table align-middle mb-0"><thead><tr><th>접수일</th><th>사업장</th><th>담당자</th><th>연락처</th><th>관심 상품</th><th>메시지</th><th>상태</th></tr></thead><tbody>{% for lead in leads %}<tr><td class="text-nowrap">{{ lead[7] }}</td><td>{{ lead[2] }}</td><td>{{ lead[1] }}</td><td>{{ lead[3] }}</td><td>{{ lead[4] }}</td><td style="min-width:220px">{{ lead[5] or '' }}</td><td><span class="badge text-bg-primary">{{ lead[6] }}</span></td></tr>{% else %}<tr><td colspan="7" class="text-center text-muted py-5">아직 신청이 없습니다.</td></tr>{% endfor %}</tbody></table></div></main>
+{% endblock %}
