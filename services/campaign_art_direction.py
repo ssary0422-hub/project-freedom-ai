@@ -185,6 +185,8 @@ Hard rules:
 - Choose message_angle only from: {', '.join(MESSAGE_ANGLES)}.
 - Use uploaded photos prominently when they exist; do not pretend an AI scene is the real store.
 - Keep Korean headlines concise and immediately understandable.
+- Base each headline on a concrete occasion, question or observation in the brief. Avoid repeating '한 입', '즐거움', '오늘은' and similar stock hooks unless explicitly requested. Changing a brand name is not a new copy idea.
+- If an exact headline is supplied, preserve its words. Put production instructions only in visual_scene, never in headline or supporting_copy. Keep supporting_copy to one short line when no essential facts require more.
 - Avoid the repeated combination of navy background, top-right circle, middle information card, and bottom pill CTA.
 - Treat composition, photo position, copy hierarchy and palette as one design decision.
 - headline_position: top_left, top_right, bottom_left, bottom_right or auto.

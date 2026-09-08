@@ -908,15 +908,19 @@ def retry_sns_image():
                 session["user_id"], request.files.get("real_logo"), "sns-retry-logo",
                 reuse_saved=bool(request.form.get("use_saved_logo")),
             )
-            directions = create_art_directions(
-                business=business,
-                company=company,
-                request=f"{style}\nVisual style: {custom_image_style or image_style}",
-                media="sns",
-                photo_count=1 if subject_path else 0,
-                generator=generate_text,
-                remember=True,
-            )
+            selected = request.form.get("selected_art_direction", "").strip()
+            if selected:
+                directions = [direction_from_payload(json.loads(selected))]
+            else:
+                directions = create_art_directions(
+                    business=business,
+                    company=company,
+                    request=f"{style}\nVisual style: {custom_image_style or image_style}",
+                    media="sns",
+                    photo_count=1 if subject_path else 0,
+                    generator=generate_text,
+                    remember=True,
+                )
 
             def generate_background(feedback):
                 return _generate_sns_image(

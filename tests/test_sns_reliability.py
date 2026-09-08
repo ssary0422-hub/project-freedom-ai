@@ -75,6 +75,21 @@ def test_failed_retry_preserves_previous_result_and_is_free(tmp_path, monkeypatc
     usage.assert_not_called()
 
 
+def test_retry_renders_selected_copy_without_regenerating_caption(tmp_path, monkeypatch):
+    client, data, save, usage = setup_flow(tmp_path, monkeypatch)
+    monkeypatch.setattr(sns, 'get_history_item', lambda *a: (107, '버거', '롯데리아', '점심', '보존할 기존 글', '', 'sns'))
+    update, planner, writer = Mock(return_value=True), Mock(side_effect=AssertionError('Selected direction exists')), Mock()
+    monkeypatch.setattr(sns, 'update_history_image', update)
+    monkeypatch.setattr(sns, 'create_art_directions', planner)
+    monkeypatch.setattr(sns, 'make_sns', writer)
+    response = client.post('/sns/retry-image', data={'history_id': 107, 'selected_art_direction': data['selected_art_direction']})
+    assert '보존할 기존 글' in response.get_data(as_text=True)
+    update.assert_called_once()
+    assert update.call_args.args[2].startswith('/static/generated/finished-sns-')
+    writer.assert_not_called()
+    usage.assert_called_once_with(999999, 'SNS_IMAGE_RETRY', 2)
+
+
 def test_sns_copy_uses_recent_openings_and_avoids_production_language(monkeypatch):
     from ai import sns as copy
     generate = Mock(return_value='점심 고민 끝.')
@@ -84,3 +99,15 @@ def test_sns_copy_uses_recent_openings_and_avoids_production_language(monkeypatc
     assert '맥도날드: 한 입의 즐거움' in prompt
     assert 'not just the brand name' in prompt
     assert 'not customer-facing copy' in prompt
+
+
+def test_korean_headline_does_not_leave_word_ending_on_its_own_line():
+    from PIL import ImageDraw
+    from services.campaign_layout import _lines
+    from services.finished_promo_card import _font
+    draw = ImageDraw.Draw(Image.new('RGB', (1080, 1350)))
+    font = _font(112, True, 'ko')
+    lines = _lines(draw, '고민 길면, 점심 늦는다.', font, 936)
+    assert '다.' not in lines
+    assert any('늦는다.' in line for line in lines)
+    assert all(draw.textlength(line, font=font) <= 936 for line in lines)

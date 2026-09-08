@@ -84,11 +84,20 @@ def _lines(draw, text, font, width):
     result = []
     for paragraph in str(text or '').split('\n'):
         line = ''
-        for char in paragraph:
-            if line and draw.textlength(line + char, font=font) > width:
-                result.append(line.rstrip())
+        for word in paragraph.split():
+            candidate = (line + ' ' + word).strip()
+            if draw.textlength(candidate, font=font) <= width:
+                line = candidate
+                continue
+            if line:
+                result.append(line)
                 line = ''
-            line += char
+            # Keep Korean words intact; split only a single overlong token.
+            for char in word:
+                if line and draw.textlength(line + char, font=font) > width:
+                    result.append(line)
+                    line = ''
+                line += char
         if line.strip():
             result.append(line.strip())
     return result
@@ -99,6 +108,10 @@ def fit_copy(draw, direction, box, title_size):
     for size in range(title_size, 27, -2):
         body_size = max(24, min(32, size // 2))
         title_font, body_font = _font(size, True, 'ko'), _font(body_size, False, 'ko')
+        try:
+            body_font.set_variation_by_name('Regular')
+        except (AttributeError, OSError, ValueError):
+            pass
         title = _lines(draw, direction.headline, title_font, width)
         body = _lines(draw, direction.supporting_copy, body_font, width)
         needed = len(title) * (size + 16) + (28 if body else 0) + len(body) * (body_size + 14)
