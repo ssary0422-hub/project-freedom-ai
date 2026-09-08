@@ -124,7 +124,7 @@ data-remaining-credits="{{ session.get('plan_remaining', 0) }}"
         <div class="card-header bg-white fw-bold py-3">
             <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
                 <span>{% block result_title %}{{ t("v21.gen.title") }}{% endblock %}</span>
-                {% include "_sungeum_quality_stamp.html" %}
+                {% if request.endpoint not in ('sns.sns', 'sns.retry_sns_image') and request.path != '/sns' %}{% include "_sungeum_quality_stamp.html" %}{% endif %}
             </div>
         </div>
 

@@ -1260,6 +1260,20 @@ def get_payment_by_order_id(order_id):
     conn.close()
     return row
 
+def get_recent_sns_copy(user_id, limit=6):
+    """Small owner-scoped context; do not load image blobs or other users' copy."""
+    init_db()
+    conn = _connect()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""SELECT company, result FROM history
+            WHERE user_id = ? AND content_type = 'sns' AND COALESCE(is_current, 1) = 1
+            ORDER BY id DESC LIMIT ?""", (user_id, min(max(int(limit), 1), 12)))
+        return [str(row[0] or '') + ': ' + str(row[1] or '')[:220] for row in cursor.fetchall()]
+    finally:
+        conn.close()
+
+
 def get_dashboard_data(user_id):
     """Summarize the signed-in user's current work without retired brand tables."""
     init_db()

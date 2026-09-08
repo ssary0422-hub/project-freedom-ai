@@ -12,7 +12,7 @@ from ai.sns import make_sns
 from ai.image import make_image
 from ai.image_prompts import build_marketing_image_prompt, build_campaign_background_prompt
 from ai.providers import analyze_image_json, generate_text
-from database.db import get_history_item, save_history, update_history_image
+from database.db import get_history_item, save_history, update_history_image, get_recent_sns_copy
 from database.profiles import get_profiles, get_profile
 from database.users import (
     get_ai_enabled,
@@ -32,10 +32,19 @@ from services.campaign_art_direction import (
 from services.campaign_renderer import create_safe_typographic_background, render_campaign_concept
 from services.campaign_quality import evaluate_campaign_image
 from services.campaign_budget import generate_with_bounded_backgrounds
+from services.image_failure import record_image_failure
 from services.uploaded_materials import first_valid_uploaded_image, save_uploaded_image
 
 sns_bp = Blueprint("sns", __name__)
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+@sns_bp.get('/sns/image-status')
+@login_required
+def image_status():
+    response = jsonify(session.get('sns_image_failure', {}))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
 
 
 def _public_image_url(path: str | Path) -> str:
@@ -734,7 +743,8 @@ def _sns_page():
             error = "모든 항목을 입력해 주세요."
         else:
             try:
-                result = make_sns(business, company, style, platform, language=session.get("language", "ko"))
+                recent_copy = get_recent_sns_copy(session["user_id"])
+                result = make_sns(business, company, style, platform, language=session.get("language", "ko"), recent_copy=recent_copy)
                 image_path = ""
 
                 if with_image:
@@ -751,7 +761,7 @@ def _sns_page():
                                 directions = create_art_directions(
                                     business=business,
                                     company=company,
-                                    request=f"{style}\nVisual style: {effective_image_style}",
+                                    request=f"{style}\nVisual style: {effective_image_style}\nRecent copy to avoid repeating: {json.dumps(recent_copy, ensure_ascii=False)}",
                                     media="sns",
                                     photo_count=1 if subject_path else 0,
                                     generator=generate_text,
@@ -783,10 +793,7 @@ def _sns_page():
                                 uploaded_background=subject_path,
                                 generate_background=generate_background,
                                 render_candidate=render_candidate,
-                                create_safe_background=lambda direction: create_safe_typographic_background(
-                                    direction=direction,
-                                    output_path=BASE_DIR / "static" / "generated" / f"safe-sns-{uuid4().hex[:10]}.png",
-                                ),
+                                create_safe_background=None,
                                 evaluate_candidate=lambda candidate: evaluate_campaign_image(
                                     image_path=candidate,
                                     business=business,
@@ -796,6 +803,7 @@ def _sns_page():
                                 ),
                                 prefer_generated_on_failure=True,
                             )
+                            session.pop("sns_image_failure", None)
                             output_path, visual_review = budgeted.output_path, budgeted.review
                             image_path = output_path.relative_to(BASE_DIR).as_posix()
                             # The finished-card path returns a relative file path;
@@ -813,26 +821,9 @@ def _sns_page():
                             "글은 안전하게 완성했지만 이미지 생성에 실패했어요. "
                             "같은 글을 유지한 채 이미지만 다시 만들 수 있어요."
                         )
-                        print("SNS image generation failed:", image_exception)
-                        # Keep the paid flow useful when the external image
-                        # provider is unavailable by rendering a local,
-                        # typography-led 1080x1350 card from verified copy.
-                        try:
-                            fallback_path = create_finished_promo_card(
-                                business=business,
-                                company=company,
-                                campaign_request=style,
-                                result=result,
-                                output_name=f"finished-sns-{uuid4().hex[:10]}.png",
-                                website_url=request.form.get("website_url", "").strip(),
-                                map_url=request.form.get("map_url", "").strip(),
-                                language=session.get("language", "ko"),
-                            )
-                            image_path = fallback_path
-                            image_url = _public_image_url(fallback_path)
-                            image_error = ""
-                        except Exception as fallback_exception:
-                            print("SNS safe card fallback failed:", fallback_exception)
+                        record_image_failure(image_exception)
+                        image_path = ""
+                        image_url = ""
 
                 image_retry_history_id = save_history(
                     business, company, style, result, image_url,
@@ -955,10 +946,7 @@ def retry_sns_image():
                 uploaded_background=subject_path,
                 generate_background=generate_background,
                 render_candidate=render_candidate,
-                create_safe_background=lambda direction: create_safe_typographic_background(
-                    direction=direction,
-                    output_path=BASE_DIR / "static" / "generated" / f"safe-sns-{uuid4().hex[:10]}.png",
-                ),
+                create_safe_background=None,
                 evaluate_candidate=lambda candidate: evaluate_campaign_image(
                     image_path=candidate,
                     business=business,
@@ -967,6 +955,7 @@ def retry_sns_image():
                     analyzer=analyze_image_json,
                 ),
             )
+            session.pop("sns_image_failure", None)
             image_path = budgeted.output_path
             image_url = _public_image_url(image_path)
             if not update_history_image(history_id, session["user_id"], image_url):
@@ -977,51 +966,12 @@ def retry_sns_image():
             credit_status = get_plan_status(session["user_id"])
             session["plan_remaining"] = credit_status["remaining"]
         except Exception as image_exception:
-            print("SNS image retry failed:", image_exception)
-            # Compatibility fallback for a temporary planning-provider outage.
-            # Normal retries use the finished-card renderer above.
-            try:
-                image_path = _generate_sns_image(
-                    business, company, style, platform,
-                    image_style, custom_image_style,
-                )
-                image_url = _public_image_url(image_path)
-                if not update_history_image(history_id, session["user_id"], image_url):
-                    raise RuntimeError("retry history update failed")
-                create_sns_word(result, image_path, company)
-                create_sns_pdf(result, image_path)
-                record_ai_credit_usage(session["user_id"], "SNS_IMAGE_RETRY", 2)
-                credit_status = get_plan_status(session["user_id"])
-                session["plan_remaining"] = credit_status["remaining"]
-                image_error = ""
-            except Exception as fallback_exception:
-                print("SNS raw image retry fallback failed:", fallback_exception)
-                # Last-resort local card: the user should still receive a
-                # usable 1080x1350 asset when both image-provider attempts
-                # are unavailable.
-                try:
-                    safe_path = create_finished_promo_card(
-                        business=business,
-                        company=company,
-                        campaign_request=style,
-                        result=result,
-                        output_name=f"finished-sns-{uuid4().hex[:10]}.png",
-                        language=session.get("language", "ko"),
-                    )
-                    image_url = _public_image_url(safe_path)
-                    if update_history_image(history_id, session["user_id"], image_url):
-                        create_sns_word(result, safe_path, company)
-                        create_sns_pdf(result, safe_path)
-                        record_ai_credit_usage(session["user_id"], "SNS_IMAGE_RETRY", 2)
-                        image_error = ""
-                    else:
-                        image_url = ""
-                except Exception as safe_exception:
-                    print("SNS safe card retry fallback failed:", safe_exception)
-                    image_url = ""
-            image_error = image_error if image_url else (
+            record_image_failure(image_exception)
+            image_path = ""
+            image_url = ""
+            image_error = (
                 "이미지 재생성에 실패했어요. 크레딧은 차감하지 않았습니다. "
-                "잠시 후 다시 눌러주세요."
+                "기존 글과 저장된 이미지는 그대로 유지됩니다."
             )
 
     if image_path:

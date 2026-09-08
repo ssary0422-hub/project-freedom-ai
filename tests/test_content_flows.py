@@ -213,10 +213,14 @@ class ContentFlowTests(unittest.TestCase):
     ))
     @patch("routes.sns.get_plan_status", return_value=READY)
     def test_sns_image_only_retry_attaches_image_and_charges_two(self, *mocks):
-        response = self.client.post(
-            "/sns/retry-image",
-            data={"history_id": "77", "platform": "Instagram", "image_style": "AI 추천"},
-        )
+        from services.campaign_budget import BudgetedCampaignResult
+        with patch('routes.sns.create_art_directions', return_value=[TEST_DIRECTION]), \
+             patch('routes.sns.generate_with_bounded_backgrounds', return_value=BudgetedCampaignResult(
+                 Path('static/generated/retry.png'), {'approved': True}, 1, 1)):
+            response = self.client.post(
+                "/sns/retry-image",
+                data={"history_id": "77", "platform": "Instagram", "image_style": "AI 추천"},
+            )
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"SNS_RETRY_RESULT", response.data)
         self.assertIn(b"/static/generated/retry.png", response.data)
