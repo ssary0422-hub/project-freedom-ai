@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="{{ url_for('static', filename='landing-studio.css') }}?v=heritage-1" rel="stylesheet">
   <link href="{{ url_for('static', filename='landing-minimal.css') }}?v=minimal-4.1" rel="stylesheet">
-  <link href="{{ url_for('static', filename='work-detail.css') }}?v=2" rel="stylesheet">
+  <link href="{{ url_for('static', filename='work-detail.css') }}?v=3" rel="stylesheet">
 </head><body>
 <a class="skip-link" href="#work-main">본문으로 바로가기</a>
 <header class="studio-nav"><div class="studio-shell nav-inner">
@@ -17,11 +17,21 @@
 </div></header>
 <main id="work-main" class="studio-shell work-detail">
   <nav class="work-breadcrumb" aria-label="현재 위치"><a href="/#portfolio">작업물</a><span aria-hidden="true">/</span><span>{{ work.format }}</span></nav>
-  <div class="work-product">
+  <div class="work-product{% if work.video %} work-product-video{% endif %}">
+    {% if work.video %}
+    <div class="work-player work-player-{{ work.orientation }}">
+      <video controls playsinline preload="metadata" poster="{{ url_for('static', filename=work.image) }}" aria-label="{{ work.title }} — 음악 포함 영상">
+        <source src="{{ url_for('static', filename=work.video) }}" type="video/mp4">
+        브라우저에서 영상을 재생할 수 없습니다. <a href="{{ url_for('static', filename=work.video) }}">영상 열기</a>
+      </video>
+      <p>음악 포함 버전 · 재생 버튼을 눌러 감상하세요.</p>
+    </div>
+    {% else %}
     <a class="work-artwork{% if work.category == 'web' %} work-artwork-web{% endif %}" href="{{ url_for('static', filename=work.image) }}" aria-label="{{ work.title }} 이미지 크게 보기">
       <img src="{{ url_for('static', filename=work.image) }}" alt="{{ work.title }} — {{ work.format }}" fetchpriority="high">
       <span class="enlarge-hint">이미지 크게 보기 <span aria-hidden="true">↗</span></span>
     </a>
+    {% endif %}
     <section class="work-info" aria-labelledby="work-title">
       <div class="work-labels"><span>{{ work.label }}</span><span>{{ work.status }}</span></div>
       <h1 id="work-title">{{ work.title }}</h1>

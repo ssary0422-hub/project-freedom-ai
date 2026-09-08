@@ -4,6 +4,20 @@ from flask import Blueprint, abort, render_template
 portfolio_bp = Blueprint('portfolio', __name__)
 
 WORKS = [
+    dict(slug='ai-experiment-short', category='video', label='VIDEO · SHORTS', status='자체 프로젝트',
+         image='showcase/ai-experiment-video/short-poster.jpg', video='showcase/ai-experiment-video/short-music.mp4',
+         orientation='portrait', project='순금이의 AI 실험실', title='22초로 보는, 첫 AI 수익 실험.',
+         description='AI 이미지 제출부터 심사 결과까지, 짧고 경쾌하게 담은 쇼츠입니다.',
+         format='세로 쇼츠 · 22초 · 음악 포함',
+         overview='Adobe Stock에 AI 이미지를 제출한 실험을 실제 이미지와 당시 심사·수익 기록으로 소개합니다. 작업 장면 일부는 AI로 연출했으며, 순금이의 AI 내레이션과 자막으로 이야기를 전합니다.',
+         approach='밝고 친근한 목소리에 자체 제작 배경음악 Sunny Steps를 더했습니다. 말할 때는 음악을 낮추고, 마지막에는 다음 실험에 대한 질문을 남겼습니다.'),
+    dict(slug='ai-experiment-episode-01', category='video', label='VIDEO · EPISODE 01', status='자체 프로젝트',
+         image='showcase/ai-experiment-video/episode-poster.jpg', video='showcase/ai-experiment-video/episode-01-music.mp4',
+         orientation='landscape', project='순금이의 AI 실험실', title='AI 이미지, 첫 실험의 기록.',
+         description='어떤 사진이 승인됐을까요? 제출한 이미지와 결과를 함께 살펴보는 첫 본편입니다.',
+         format='가로 영상 · 약 4분 6초 · 음악 포함',
+         overview='순금이의 AI 실험실 첫 번째 본편입니다. 제출한 사진 중 승인된 이미지를 함께 골라보고, 당시 심사 분류와 수익 기록, 다음에 수정할 사진으로 이야기를 이어갑니다. 실제 기록과 AI 연출 장면을 구분했습니다.',
+         approach='사진과 기록 화면, AI 내레이션, 자막으로 실험 과정을 설명합니다. 밝고 가벼운 자체 제작 음악 Sunny Steps를 더하고, 목소리가 잘 들리도록 발화 중 배경음악을 낮췄습니다.'),
     dict(slug='burger-sns-four-directions', category='social', label='SNS · ART DIRECTION', status='디자인 스터디',
          image='showcase/burger-directions/overview.png', project='순금이 AI 작업실 · 자체 콘셉트',
          title='같은 사진, 네 가지 시선.',
