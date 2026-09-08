@@ -4,6 +4,14 @@ from flask import Blueprint, abort, render_template
 portfolio_bp = Blueprint('portfolio', __name__)
 
 WORKS = [
+    dict(slug='mcdonalds-sns-concept', category='social', label='SNS · FOOD CONCEPT', status='비공식 콘셉트',
+         image='showcase/mcdonalds-sns-concept.png', project='순금이 AI 작업실 · 자체 콘셉트',
+         title='맥도날드 SNS · 한 입의 즐거움.',
+         description='우리 홈페이지 SNS 기능으로 만든, 빨강 배경과 버거 중심의 비공식 콘셉트 홍보물입니다.',
+         format='SNS 홍보 이미지 · 1080×1350',
+         overview='맥도날드를 주제로 순금이 AI 작업실의 제작 스타일을 보여주는 자체 프로젝트입니다. 홈페이지 SNS 기능에 업종과 제작 브리프, 이미지 스타일을 입력해 문구와 이미지를 생성했습니다. 공식 의뢰·협업·캠페인이 아니며, 음식은 실제 판매 메뉴 사진이 아닌 AI 생성 이미지입니다.',
+         approach='구도·색감·빛·음식 질감·타이포그래피 기준을 조합했습니다. 짙은 빨강 배경과 크게 배치한 버거, 짧은 흰색 제목을 중심으로 구성했습니다. 첫 결과의 글자 중복을 확인한 뒤, 글자 없는 사진층과 한글 조판을 분리하도록 입력을 수정했습니다. 최종 결과는 홈페이지에서 생성한 원본 그대로 공개합니다.',
+         caption='맥도날드, 한 입에 번지는 가장 선명한 즐거움 🍔\n부드러운 참깨빵과 진한 패티, 녹아드는 치즈의 조화가 보는 순간부터 식욕을 깨워요.\n한 컷만으로도 버거의 맛있는 존재감을 또렷하게 전하는 인스타그램 콘셉트입니다.\n한 입의 즐거움을 담은 버거 무드가 필요하다면 맥도날드 관련 콘셉트도 함께 이야기해보세요.\n※ 본 캡션은 순금이 AI 작업실의 비공식 콘셉트이며 공식 의뢰·협업이 아닙니다.\n#맥도날드 #버거사진 #푸드스타일링 #푸드콘텐츠 #인스타감성 #버거콘셉트 #음식사진 #SNS콘텐츠 #한입의즐거움'),
     dict(slug='running-form-report', category='report', label='REPORT · RUNNING COACH', status='디자인 샘플',
          image='showcase/sungeum-running-report-studio.png',
          title='달리기를 한눈에, 러닝폼 리포트.',
