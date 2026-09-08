@@ -4,6 +4,13 @@ from flask import Blueprint, abort, render_template
 portfolio_bp = Blueprint('portfolio', __name__)
 
 WORKS = [
+    dict(slug='running-form-report', category='report', label='REPORT · RUNNING COACH', status='디자인 샘플',
+         image='showcase/sungeum-running-report-studio.png',
+         title='달리기를 한눈에, 러닝폼 리포트.',
+         description='점수와 자세, 다음 러닝의 포인트를 한 장에 정리한 리포트 디자인입니다.',
+         format='러닝 분석 리포트 · PNG',
+         overview='순금이 러닝코치의 저장·공유 리포트를 작업실 홈페이지와 같은 스타일로 제작했습니다. 이 작업물의 점수와 각도는 디자인을 보여주기 위한 예시이며, 실제 이용자의 영상 분석 결과가 아닙니다. 분석 장면 역시 직접 그린 예시 일러스트입니다.',
+         approach='흰 배경과 검정 글자, 청보라 강조색을 사용했습니다. 종합 점수, 자세 시각화와 착지 확대, 핵심 수치, 코칭 한마디를 차례로 배치했습니다. 실제 서비스에서는 이용자의 분석 장면과 결과가 들어가며, 같은 이미지를 다운로드하고 생성 기록에 저장합니다.'),
     dict(slug='7days-massage-sns', category='social', label='SNS · LOCAL BUSINESS', status='실제 게시',
          image='showcase/7days-massage-pattaya-sns.png', project="7day’s massage",
          title='7day’s massage · SNS 홍보',

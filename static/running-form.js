@@ -123,30 +123,6 @@
     status.innerHTML = `<div class="run-progress-head"><img class="sungeum-alive is-working" src="/static/brand/sungeum-running-coach-goggles-v1-transparent.png" alt=""><div><strong>순금이 코치가 분석하고 있어요</strong><div class="small text-secondary mt-1">${escapeHtml(message)}</div></div></div><div class="run-progress-track"><div class="run-progress-bar" style="width:${Math.max(5, percent)}%"></div></div><div class="run-progress-steps">${progressStages.map((stage,index)=>`<span class="${index <= activeIndex ? "is-active" : ""}">${stage}</span>`).join("")}</div>`;
   }
 
-  function roundedClip(ctx, x, y, width, height, radius = 28) {
-    ctx.beginPath(); ctx.roundRect(x, y, width, height, radius); ctx.clip();
-  }
-
-  function drawContain(ctx, image, x, y, width, height) {
-    const scale = Math.min(width / image.width, height / image.height), drawWidth = image.width * scale, drawHeight = image.height * scale;
-    const drawX = x + (width - drawWidth) / 2, drawY = y + (height - drawHeight) / 2;
-    const backdropScale = Math.max(width / image.width, height / image.height), backdropWidth = image.width * backdropScale, backdropHeight = image.height * backdropScale;
-    ctx.save(); roundedClip(ctx, x, y, width, height); ctx.filter = "blur(18px)"; ctx.globalAlpha = .46; ctx.drawImage(image, x + (width - backdropWidth) / 2 - 12, y + (height - backdropHeight) / 2 - 12, backdropWidth + 24, backdropHeight + 24); ctx.filter = "none"; ctx.globalAlpha = 1; ctx.fillStyle = "rgba(7,17,31,.30)"; ctx.fillRect(x, y, width, height); ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight); ctx.restore();
-  }
-
-  function drawApprovalStamp(ctx, x, y) {
-    ctx.save(); ctx.translate(x, y); ctx.rotate(-.07); ctx.fillStyle = "rgba(16,185,129,.13)"; ctx.strokeStyle = "#61e6d3"; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(0, 0, 238, 74, 20); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = "#61e6d3"; [[34,39,15,13],[18,20,6,8],[31,13,6,8],[44,15,6,8],[54,25,6,8]].forEach(([cx,cy,rx,ry])=>{ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.fill()});
-    ctx.font = '800 23px "Malgun Gothic", sans-serif'; ctx.fillText("순금 검수 완료", 72, 34); ctx.fillStyle = "#a7f3d0"; ctx.font = '600 16px "Malgun Gothic", sans-serif'; ctx.fillText("러닝폼 AI 결과 확인", 72, 57); ctx.restore();
-  }
-
-  function nextScoreTip(result) {
-    if (result.averageTrunkLean > 14) return "다음 목표 · 상체 기울기를 권장 범위로 조절하면 약 +4점";
-    if (result.averageTrunkLean < 6) return "다음 목표 · 상체를 조금만 기울이면 추진 점수 향상 가능";
-    if (result.averageKneeAngle < 105 || result.averageKneeAngle > 125) return "다음 목표 · 착지 때 무릎 각도를 조절하면 점수 향상 가능";
-    return "다음 목표 · 같은 조건으로 다시 촬영해 자세 변화를 비교해봐";
-  }
-
   async function saveRunningHistory(result, card) {
     const response = await fetch("/running-form/history", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...result,coachMessage:result.improvements[0]||"",image:card.toDataURL("image/png")})});
     const saved = await response.json();
@@ -178,46 +154,8 @@
     });
   }
 
-  function drawFootInset(ctx, image, focus, x, y, size) {
-    if (!focus) return;
-    const sourceSize = Math.min(image.width, image.height) * .34;
-    const sourceX = Math.max(0, Math.min(image.width - sourceSize, focus.x * image.width - sourceSize / 2));
-    const sourceY = Math.max(0, Math.min(image.height - sourceSize, focus.y * image.height - sourceSize * .62));
-    ctx.save(); roundedClip(ctx, x, y, size, size, 22); ctx.drawImage(image, sourceX, sourceY, sourceSize, sourceSize, x, y, size, size); ctx.restore();
-    ctx.strokeStyle = "#61e6d3"; ctx.lineWidth = 5; ctx.strokeRect(x + 2, y + 2, size - 4, size - 4);
-    ctx.fillStyle = "rgba(7,17,31,.84)"; ctx.fillRect(x + 10, y + size - 39, size - 20, 30); ctx.fillStyle = "#61e6d3"; ctx.font = '700 18px "Malgun Gothic", sans-serif'; ctx.fillText("착지 확대", x + 24, y + size - 17);
-  }
-
-  function loadCoachMascot() {
-    return new Promise(resolve => {
-      const mascot = new Image();
-      mascot.onload = () => resolve(mascot);
-      mascot.onerror = () => resolve(null);
-      mascot.src = "/static/brand/sungeum-running-coach-goggles-v1-transparent.png";
-    });
-  }
-
   async function makeShareCard(result, analysisFrame) {
-    const card = document.createElement("canvas"); card.width = 1080; card.height = 1350; card.className = "run-share-card";
-    const ctx = card.getContext("2d"), gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
-    gradient.addColorStop(0, "#07111f"); gradient.addColorStop(.55, "#12344c"); gradient.addColorStop(1, "#0d766f"); ctx.fillStyle = gradient; ctx.fillRect(0, 0, 1080, 1350);
-    const mascot = await loadCoachMascot();
-    if (mascot) {
-      ctx.save();
-      ctx.drawImage(mascot, 830, 18, 176, 218); ctx.restore();
-    }
-    ctx.fillStyle = "#61e6d3"; ctx.font = "800 30px Arial"; ctx.fillText("SUNGEUM AI RUNNING COACH", 76, 95);
-    ctx.fillStyle = "#fff"; ctx.font = '900 70px "Malgun Gothic", sans-serif'; ctx.fillText("순금이 코치의 러닝폼 리포트", 76, 205);
-    ctx.fillStyle = "#61e6d3"; ctx.font = "900 170px Arial"; ctx.fillText(String(result.score), 70, 440);
-    ctx.fillStyle = "#fff"; ctx.font = "800 38px Arial"; ctx.fillText("/ 100", 300, 430);
-    if (analysisFrame?.width) { drawContain(ctx, analysisFrame, 500, 265, 500, 300); drawFootInset(ctx, analysisFrame, result.footFocus, 820, 385, 160); ctx.fillStyle="rgba(7,17,31,.82)";ctx.fillRect(520,492,268,50);ctx.fillStyle="#61e6d3";ctx.font='700 19px "Malgun Gothic", sans-serif';ctx.fillText(`AI 착지 프레임 · ${result.side}`,535,523); }
-    ctx.font = '800 44px "Malgun Gothic", sans-serif'; ctx.fillStyle="#fff"; ctx.fillText(result.runnerType, 76, 625);
-    [["착지 유형",result.strikeType,`분석 신뢰도 ${result.strikeConfidence}%`],["무릎 각도",`${result.averageKneeAngle}°`,"권장 범위 105~125°"],["상체 기울기",`${result.averageTrunkLean}°`,"권장 범위 6~14°"]].forEach(([label,value,detail],index)=>{const x=76+index*310;ctx.fillStyle="rgba(255,255,255,.09)";ctx.fillRect(x,690,280,170);ctx.fillStyle="#9fb3c8";ctx.font='600 24px "Malgun Gothic", sans-serif';ctx.fillText(label,x+24,735);ctx.fillStyle="#fff";ctx.font='800 36px "Malgun Gothic", sans-serif';ctx.fillText(value,x+24,790);ctx.fillStyle="#9fb3c8";ctx.font='600 18px "Malgun Gothic", sans-serif';ctx.fillText(detail,x+24,827)});
-    ctx.fillStyle="#fff";ctx.font='800 34px "Malgun Gothic", sans-serif';ctx.fillText("순금이 코치의 한마디",76,950);drawApprovalStamp(ctx,742,900);ctx.fillStyle="#d8e5ee";ctx.font='600 29px "Malgun Gothic", sans-serif';
-    const words=(result.improvements[0]||"지금 자세 좋아. 이 리듬을 유지하면서 편안하게 달려봐.").split(" ");let line="",y=1010;words.forEach(word=>{const test=`${line}${word} `;if(ctx.measureText(test).width>900){ctx.fillText(line,76,y);line=`${word} `;y+=42}else line=test});ctx.fillText(line,76,y);
-    ctx.fillStyle="rgba(97,230,211,.13)";ctx.beginPath();ctx.roundRect(76,1120,900,54,18);ctx.fill();ctx.fillStyle="#9df3e5";ctx.font='700 21px "Malgun Gothic", sans-serif';ctx.fillText(nextScoreTip(result),100,1155);
-    ctx.fillStyle="#d8e5ee";ctx.font='600 22px "Malgun Gothic", sans-serif';ctx.fillText("※ 촬영 각도·속도·조명에 따라 결과가 달라질 수 있으며 의료 진단이 아닙니다.",76,1205);
-    ctx.fillStyle="#61e6d3";ctx.font="700 25px Arial";ctx.fillText("PROJECT FREEDOM AI · AI-assisted estimate",76,1270);return card;
+    return window.createRunningReport(result, analysisFrame, I);
   }
 
   function showFile(file) {

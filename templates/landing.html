@@ -26,7 +26,7 @@
 </section>
 <section id="portfolio" class="portfolio studio-section" aria-labelledby="portfolio-title"><div class="studio-shell">
   <div class="section-heading"><div><p class="eyebrow">SELECTED WORK</p><h2 id="portfolio-title">최근 작업물</h2></div><p>작업물을 눌러 이미지와 자세한 내용을 확인해보세요.</p></div>
-  <div class="portfolio-controls"><div class="filter-row" role="group" aria-label="작업물 분류"><button class="is-active" type="button" data-filter="all" aria-pressed="true">모두 보기 <span>04</span></button><button type="button" data-filter="social" aria-pressed="false">SNS·광고</button><button type="button" data-filter="brand" aria-pressed="false">브랜드</button><button type="button" data-filter="web" aria-pressed="false">웹사이트</button></div><p class="work-count" data-work-count role="status" aria-live="polite">4개의 작업</p></div>
+  <div class="portfolio-controls"><div class="filter-row" role="group" aria-label="작업물 분류"><button class="is-active" type="button" data-filter="all" aria-pressed="true">모두 보기 <span>{{ '%02d'|format(works|length) }}</span></button><button type="button" data-filter="social" aria-pressed="false">SNS·광고</button><button type="button" data-filter="brand" aria-pressed="false">브랜드</button><button type="button" data-filter="web" aria-pressed="false">웹사이트</button><button type="button" data-filter="report" aria-pressed="false">리포트</button></div><p class="work-count" data-work-count role="status" aria-live="polite">{{ works|length }}개의 작업</p></div>
   <div class="work-grid">
   {% for work in works %}
     <article class="project-card{% if work.category == 'web' %} web-project{% endif %}" data-category="{{ work.category }}">
