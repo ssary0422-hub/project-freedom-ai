@@ -7,6 +7,28 @@
 <main class="container py-4 service-wrap"><a class="d-inline-block mb-3 text-decoration-none" href="/">← 작업실로 돌아가기</a>
 <section class="service-hero p-4 p-md-5 mb-4"><div class="row align-items-center g-4"><div class="col-lg-8"><div class="service-kicker mb-3">START A PROJECT</div><h1 class="display-5 fw-bold mb-3">비슷한 작업이 필요하다면<br>먼저 이야기를 들려주세요.</h1><p class="lead text-white-50 mb-0">원하는 결과, 사용할 채널과 일정을 확인한 뒤 가능한 범위와 필요한 자료를 정직하게 안내합니다.</p></div><div class="col-lg-4 text-center text-lg-end"><img src="{{ url_for('static', filename='brand/sungeum-3d-official.png') }}" alt="상담 내용을 확인하는 순금이"></div></div></section>
 {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="mb-4">{% for category, message in messages %}<div class="alert alert-{{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+<section class="card service-card p-4 p-md-5 mb-4" aria-labelledby="sns-package-title">
+  <div class="row g-4 align-items-center">
+    <div class="col-md-7">
+      <div class="service-kicker">SNS DESIGN PACKAGE</div>
+      <h2 id="sns-package-title" class="h3 fw-bold mt-2">이번 주 가게 소식,<br>사진과 문구로 준비하세요.</h2>
+      <p class="fs-5 fw-bold mt-3">홍보 이미지 5장 + 게시글 5개 · 25만 원</p>
+      <p class="text-muted">매장에서 제공해주신 사진과 행사 내용을 바탕으로 인스타그램 홍보물을 제작합니다. 한 매장·한 캠페인 기준이며, 구체적인 범위와 일정은 자료 확인 후 확정합니다.</p>
+      <ul class="text-muted">
+        <li>1080×1350 이미지 5장, PNG/JPG 납품</li>
+        <li>이미지별 게시글과 통합 수정 1회</li>
+        <li>자료·범위 확정 후 영업일 2일 안에 첫 시안</li>
+      </ul>
+      <p class="service-note">사용 권한이 있는 사진·로고와 정확한 가격·행사 기간을 보내주세요. AI를 사용하는 부분은 제작 전에 안내합니다. 촬영·계정 운영·영상 제작은 포함하지 않습니다. 최종 납기는 고객 검토·수정 일정을 포함해 합의합니다.</p>
+      <a class="btn btn-primary px-4 py-3" href="#pilot-form">SNS 5종 제작 상담하기</a>
+      <p class="service-note mt-2 mb-0">상담 신청만으로 결제되거나 계약이 확정되지 않습니다.</p>
+    </div>
+    <div class="col-md-5">
+      <a href="/works/7days-massage-sns"><img class="img-fluid rounded-3" src="{{ url_for('static', filename='showcase/7days-massage-pattaya-sns.png') }}" alt="7day’s massage SNS 홍보 제작 사례"></a>
+      <p class="service-note mt-2 mb-0">7day’s massage 제작·게시 사례 · AI로 연출한 홍보 이미지<br><a href="/works/7days-massage-sns">작업물 자세히 보기 →</a></p>
+    </div>
+  </div>
+</section>
 <section class="mb-4"><div class="row g-3"><div class="col-md-4"><div class="service-step"><strong>1. 필요한 작업 확인</strong><p class="text-muted mb-0 mt-2">목적과 현재 가지고 있는 자료를 확인합니다.</p></div></div><div class="col-md-4"><div class="service-step"><strong>2. 범위와 일정 안내</strong><p class="text-muted mb-0 mt-2">가능한 결과물, 수정 범위와 일정을 정리합니다.</p></div></div><div class="col-md-4"><div class="service-step"><strong>3. 제작과 검수</strong><p class="text-muted mb-0 mt-2">AI 초안, 순금이 검수, 사람의 최종 결정으로 진행합니다.</p></div></div></div></section>
 <section class="mb-4"><div class="row g-3">{% for label,title,items in [('SOCIAL & AD','SNS·광고 콘텐츠',['게시물과 캐러셀 디자인','광고 문구와 이미지','모바일 피드 검수']),('WEB & UI','홈페이지·UI',['랜딩페이지 구조와 디자인','모바일 반응형 화면','작동 흐름과 접근성 검수']),('BRAND SYSTEM','캐릭터·브랜드',['캐릭터 역할과 사용 기준','색상·글꼴·콘텐츠 시스템','채널별 일관성 점검'])] %}<div class="col-md-4"><article class="card service-card p-4"><small>{{ label }}</small><h2 class="h4 fw-bold mt-2">{{ title }}</h2><ul class="text-muted">{% for item in items %}<li>{{ item }}</li>{% endfor %}</ul></article></div>{% endfor %}</div></section>
 <section id="pilot-form" class="card request-form border-0 rounded-4 p-4 p-md-5"><div class="mb-4"><div class="service-kicker">PROJECT REQUEST</div><h2 class="h3 fw-bold mt-2">작업 의뢰서</h2><p class="text-muted mb-0">결제 전 상담 신청입니다. 확인 후 가능한 방식부터 연락드릴게요.</p></div><form method="post" action="/services/lead" class="row g-3"><div class="col-md-6"><label class="form-label" for="lead-name">이름</label><input id="lead-name" name="name" class="form-control" required maxlength="100" autocomplete="name"></div><div class="col-md-6"><label class="form-label" for="lead-business">브랜드·사업장명</label><input id="lead-business" name="business_name" class="form-control" required maxlength="150" placeholder="개인 작업이면 개인이라고 적어주세요"></div><div class="col-md-6"><label class="form-label" for="lead-contact">연락받을 곳</label><input id="lead-contact" name="contact" class="form-control" required maxlength="150" placeholder="이메일 또는 전화번호"></div><div class="col-md-6"><label class="form-label" for="lead-interest">필요한 작업</label><select id="lead-interest" name="interest" class="form-select" required><option value="">선택해주세요</option><option value="SNS·광고 디자인">SNS·광고 디자인</option><option value="홈페이지·UI">홈페이지·UI</option><option value="캐릭터·브랜드">캐릭터·브랜드</option><option value="AI 코치·자동화">AI 코치·자동화</option><option value="기타 상담">아직 잘 모르겠어요</option></select></div><div class="col-12"><label class="form-label" for="lead-message">원하는 결과·채널·일정·예산 범위를 알려주세요</label><textarea id="lead-message" name="message" class="form-control" rows="5" maxlength="500" placeholder="예: 인스타그램에 올릴 5장 캐러셀이 필요해요. 다음 주 게시 예정이고 기존 로고와 사진이 있습니다."></textarea></div><div class="col-12"><button class="btn btn-primary px-4 py-3" type="submit">상담 신청하기</button></div></form><p class="service-note mt-3 mb-0">입력한 정보는 작업 상담과 연락 목적으로만 사용합니다. 민감한 개인정보나 비밀번호는 적지 마세요. 자세한 내용은 <a href="/privacy">개인정보처리방침</a>에서 확인할 수 있습니다.</p></section>
