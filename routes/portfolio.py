@@ -4,6 +4,13 @@ from flask import Blueprint, abort, render_template
 portfolio_bp = Blueprint('portfolio', __name__)
 
 WORKS = [
+    dict(slug='running-diary-short-01', category='video', label='VIDEO · RUNNING SHORTS', status='자체 프로젝트',
+         image='showcase/running-video/poster.jpg', video='showcase/running-video/running-short-music.mp4',
+         orientation='portrait', project='순금이의 러닝일지', title='내 러닝 속도, 이 정도면 괜찮을까?',
+         description='대화 테스트로 러닝 강도를 살펴보는, 순금이의 43초 러닝 쇼츠입니다.',
+         format='세로 쇼츠 · 약 43초 · 음악 포함',
+         overview='달릴 때 자신의 운동 강도를 확인하는 대화 테스트를 소개한 러닝 콘텐츠입니다. CDC의 신체 활동 강도 측정 안내를 바탕으로 구성했으며, 영상 장면과 순금이의 목소리는 AI로 제작했습니다.',
+         approach='짧은 인사와 질문으로 시작하고, 달리는 장면과 큰 한글 자막으로 내용을 전합니다. 순금이의 내레이션에 자체 제작 배경음악 Sunny Steps를 더한 최종본입니다.'),
     dict(slug='sotttukkeong-sns-concept', category='social', label='SNS · FOOD CONCEPT', status='자체 콘셉트',
          image='showcase/sotttukkeong-sns-concept.png', project='순금이 AI 작업실 · 자체 콘셉트',
          title='솥뚜껑 삼겹살 SNS · 오늘 모임, 솥뚜껑 앞으로.',
