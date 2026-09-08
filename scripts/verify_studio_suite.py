@@ -20,5 +20,5 @@ with tempfile.TemporaryDirectory(prefix='pfa-studio-tests-') as temporary:
                           'tests/test_request_security.py', 'tests/test_campaign_composition.py',
                           'tests/test_campaign_renderer.py', 'tests/test_campaign_art_direction.py',
                           'tests/test_campaign_budget.py', 'tests/test_campaign_quality.py',
-                          'tests/test_image_prompts.py'])
+                          'tests/test_image_prompts.py', 'tests/test_dashboard.py'])
     sys.exit(result)
