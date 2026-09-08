@@ -17,5 +17,8 @@ with tempfile.TemporaryDirectory(prefix='pfa-studio-tests-') as temporary:
     result = pytest.main(['-q', '--tb=short', 'tests/test_landing_showcase.py', 'tests/test_content_flows.py',
                           'tests/test_running_form.py', 'tests/test_running_coach.py',
                           'tests/test_speaking_coach.py', 'tests/test_i18n_integrity.py',
-                          'tests/test_request_security.py'])
+                          'tests/test_request_security.py', 'tests/test_campaign_composition.py',
+                          'tests/test_campaign_renderer.py', 'tests/test_campaign_art_direction.py',
+                          'tests/test_campaign_budget.py', 'tests/test_campaign_quality.py',
+                          'tests/test_image_prompts.py'])
     sys.exit(result)

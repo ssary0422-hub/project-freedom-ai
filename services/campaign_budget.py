@@ -67,7 +67,7 @@ def generate_with_bounded_backgrounds(
             output = Path(render_candidate(background, direction, round_index, direction_index))
             rendered += 1
             review = evaluate_candidate(output)
-            if review.get("approved"):
+            if review.get("approved") and not review.get("blockers"):
                 return BudgetedCampaignResult(output, review, generated, rendered)
             failures.append((output, review))
 
@@ -80,7 +80,7 @@ def generate_with_bounded_backgrounds(
             output = Path(render_candidate(safe_background, direction, rounds, direction_index))
             rendered += 1
             review = evaluate_candidate(output)
-            if review.get("approved"):
+            if review.get("approved") and not review.get("blockers"):
                 return BudgetedCampaignResult(output, review, generated, rendered, True)
             failures.append((output, review))
 
@@ -89,8 +89,10 @@ def generate_with_bounded_backgrounds(
     # card solely because visual QA was unavailable or overly conservative.
     # Callers opt into this only where a publishable visual is preferable to a
     # misleading photo-free fallback; true provider failures still raise.
-    if prefer_generated_on_failure and generated and failures:
-        best_path, best_review = max(failures, key=lambda item: item[1].get("score", 0))
+    eligible = [(path, review) for path, review in failures[:len(directions) * rounds]
+                if not review.get("blockers")]
+    if prefer_generated_on_failure and generated and eligible:
+        best_path, best_review = max(eligible, key=lambda item: item[1].get("score", 0))
         return BudgetedCampaignResult(best_path, best_review, generated, rendered, False)
 
     best_path, best_review = max(failures, key=lambda item: item[1].get("score", 0))

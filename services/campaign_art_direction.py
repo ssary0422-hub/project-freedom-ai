@@ -62,6 +62,9 @@ class ArtDirection:
     cta: str
     palette: tuple[str, str, str]
     avoid: tuple[str, ...]
+    cta_style: str = 'auto'
+    brand_style: str = 'text'
+    visual_scene: str = ''
 
 
 def _read_history() -> dict[str, list[dict]]:
@@ -112,6 +115,9 @@ def _direction_from_dict(item: dict) -> ArtDirection:
         cta=str(item.get("cta", "")).strip(),
         palette=palette[:3],
         avoid=avoid,
+        cta_style=str(item.get('cta_style', 'auto')),
+        brand_style=str(item.get('brand_style', 'text')),
+        visual_scene=str(item.get('visual_scene', '')),
     )
 
 
@@ -120,11 +126,13 @@ def direction_from_payload(item: dict) -> ArtDirection:
     if not isinstance(item, dict):
         raise ValueError("Art direction must be an object")
     direction = _direction_from_dict(item)
+    if direction.cta_style not in ('auto', 'none', 'text', 'button') or direction.brand_style not in ('text', 'none'):
+        raise ValueError('Unsupported brand or action treatment')
     if direction.layout_family not in LAYOUT_FAMILIES:
         raise ValueError(f"Unknown layout family: {direction.layout_family}")
     if direction.message_angle not in MESSAGE_ANGLES:
         raise ValueError(f"Unknown message angle: {direction.message_angle}")
-    if not all((direction.concept_name, direction.campaign_angle, direction.headline, direction.cta)):
+    if not all((direction.concept_name, direction.campaign_angle, direction.headline)):
         raise ValueError("Selected direction is incomplete")
     if len(direction.palette) != 3:
         raise ValueError("Selected direction needs a three-color palette")
@@ -143,12 +151,14 @@ def validate_directions(directions: list[ArtDirection], media: str) -> None:
     if len({item.photo_strategy for item in directions}) != 3:
         raise ValueError("The three concepts must use different photo strategies")
     for item in directions:
+        if item.cta_style not in ('auto', 'none', 'text', 'button') or item.brand_style not in ('text', 'none'):
+            raise ValueError('Unsupported brand or action treatment')
         if item.layout_family not in LAYOUT_FAMILIES:
             raise ValueError(f"Unknown layout family: {item.layout_family}")
         if item.message_angle not in MESSAGE_ANGLES:
             raise ValueError(f"Unknown message angle: {item.message_angle}")
-        if not all((item.concept_name, item.campaign_angle, item.headline, item.cta)):
-            raise ValueError("Every concept needs a name, angle, headline, and CTA")
+        if not all((item.concept_name, item.campaign_angle, item.headline)):
+            raise ValueError("Every concept needs a name, angle, and headline")
         if len(item.palette) != 3:
             raise ValueError("Every concept needs a three-color palette")
 
@@ -176,11 +186,20 @@ Hard rules:
 - Use uploaded photos prominently when they exist; do not pretend an AI scene is the real store.
 - Keep Korean headlines concise and immediately understandable.
 - Avoid the repeated combination of navy background, top-right circle, middle information card, and bottom pill CTA.
+- Treat composition, photo position, copy hierarchy and palette as one design decision.
+- headline_position: top_left, top_right, bottom_left, bottom_right or auto.
+- subject_position must locate the actual visual subject; leave the opposite area quiet for copy.
+- Use cta_style none for awareness/editorial work, text for a subtle action, button only for a real conversion goal. Never add a button simply to fill space.
+- Use brand_style text or none. No mandatory badge, underline, ornamental stripe or repeated footer logo.
+- Palette order is background, accent, paper. Preserve the requested brand hues; do not automatically convert every design to navy and pastel gold.
+- Keep headline under 60 characters and supporting_copy under 150 characters. Put full explanations in the accompanying caption.
 
 Each object must contain exactly these fields:
 concept_name, campaign_angle, layout_family, message_angle, photo_strategy,
 subject_position, headline_position, mood, headline, supporting_copy, cta,
-palette (three hex colors), avoid (array of visual repetitions).
+palette (three hex colors), avoid (array of visual repetitions), cta_style, brand_style, visual_scene.
+For visual_scene, describe only the subject, physical scene, material, light and camera.
+Never put the headline, supporting copy, CTA, brand lettering or other printable text in visual_scene.
 Return JSON only.
 """.strip()
 

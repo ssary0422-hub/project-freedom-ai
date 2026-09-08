@@ -1,3 +1,19 @@
+def build_campaign_background_prompt(*, business, direction):
+    """The photograph input deliberately excludes campaign copy and brand names."""
+    scene = direction.visual_scene or _subject_for(business, '')
+    return f'''PHOTOGRAPH / ARTWORK ASSET ONLY. This is NOT a finished advertisement or poster.
+Delivery: portrait 4:5 background, software will compose typography afterwards.
+Visual subject and scene: {scene}
+Subject position: {direction.subject_position}.
+Leave a quiet, low-detail area at {direction.headline_position} for later software typography.
+Lighting and atmosphere: {direction.mood}.
+Palette roles (background, accent, paper): {', '.join(direction.palette)}.
+Show coherent material edges, natural object contact and a consistent light direction.
+ABSOLUTELY ZERO readable text, letters, numbers, logos, labels, signs, packaging copy or watermarks.
+Do not invent or render a headline, slogan, CTA, badge, button or decorative text placeholder.
+If the visual description mentions any words to display, ignore those words; only render the physical scene.'''
+
+
 def _subject_for(business: str, context: str) -> str:
     source = f"{business} {context}".lower()
     if any(key in source for key in ("ai 마케팅", "마케팅 콘텐츠", "광고 제작 플랫폼", "project freedom")):

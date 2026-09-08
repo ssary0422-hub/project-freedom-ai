@@ -43,6 +43,12 @@ def evaluate_campaign_image(*, image_path: str | Path, business: str, company: s
         media_contract = (
             "This is a print poster: require distance readability and a truthful action/contact path."
         )
+    elif 'social' in normalized_media or 'sns' in normalized_media:
+        media_contract = (
+            "This is social content. Require a clear central message. Awareness and editorial "
+            "images do not require a CTA; never reject them for missing a button, badge or underline. "
+            "A conversion action may be plain text or a button when the brief calls for one."
+        )
     else:
         media_contract = (
             "This is a social or conversion creative: require a clear benefit and visible CTA."
@@ -59,7 +65,8 @@ Evaluate the rendered image itself, not the prompt. Check:
 1. The business and main benefit are understandable within one second.
 2. Korean text is readable, natural, not clipped, not ellipsized, and has strong contrast.
 3. The background supports the exact service rather than resembling an unrelated industry.
-4. Headline, image, and CTA have a clear mobile visual hierarchy.
+4. Headline, image, and any requested action have a clear mobile visual hierarchy.
+   Duplicated background lettering, text over text, or text covering the important subject are blockers.
 5. It looks structurally different from generic navy-card templates.
 6. It is truthful to the verified request and contains no unsupported claim.
 7. It is polished enough for a paying customer to publish immediately.

@@ -10,7 +10,7 @@ from flask import Blueprint, jsonify, render_template, request, session, send_fi
 
 from ai.sns import make_sns
 from ai.image import make_image
-from ai.image_prompts import build_marketing_image_prompt
+from ai.image_prompts import build_marketing_image_prompt, build_campaign_background_prompt
 from ai.providers import analyze_image_json, generate_text
 from database.db import get_history_item, save_history, update_history_image
 from database.profiles import get_profiles, get_profile
@@ -571,7 +571,9 @@ def _image_style_instruction(image_style):
     )
 
 
-def _generate_sns_image(business, company, style, platform, image_style, custom_image_style=""):
+def _generate_sns_image(business, company, style, platform, image_style, custom_image_style="", art_direction=None):
+    if art_direction is not None:
+        return make_image(build_campaign_background_prompt(business=business, direction=art_direction))
     effective_image_style = custom_image_style or image_style
     prompt = build_marketing_image_prompt(
         business=business,
@@ -749,7 +751,7 @@ def _sns_page():
                                 directions = create_art_directions(
                                     business=business,
                                     company=company,
-                                    request=style,
+                                    request=f"{style}\nVisual style: {effective_image_style}",
                                     media="sns",
                                     photo_count=1 if subject_path else 0,
                                     generator=generate_text,
@@ -759,9 +761,9 @@ def _sns_page():
                             def generate_background(feedback):
                                 return _generate_sns_image(
                                     business, company,
-                                    f"{style}. {feedback}. The scene must clearly fit the exact business. "
-                                    "No readable text, letters, logos, or watermark.",
+                                    "",
                                     platform, image_style, custom_image_style,
+                                    art_direction=directions[0],
                                 )
 
                             def render_candidate(background_path, direction, round_index, direction_index):
@@ -918,7 +920,7 @@ def retry_sns_image():
             directions = create_art_directions(
                 business=business,
                 company=company,
-                request=style,
+                request=f"{style}\nVisual style: {custom_image_style or image_style}",
                 media="sns",
                 photo_count=1 if subject_path else 0,
                 generator=generate_text,
@@ -929,11 +931,11 @@ def retry_sns_image():
                 return _generate_sns_image(
                     business,
                     company,
-                    f"{style}. {feedback}. The scene must clearly fit the exact business. "
-                    "No readable text, letters, logos, or watermark.",
+                    "",
                     platform,
                     image_style,
                     custom_image_style,
+                    art_direction=directions[0],
                 )
 
             def render_candidate(background_path, direction, round_index, direction_index):

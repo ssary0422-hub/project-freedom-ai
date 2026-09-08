@@ -8,7 +8,7 @@ from flask import Blueprint, render_template, request, session, send_file
 
 from ai.ads import make_ads
 from ai.image import make_image
-from ai.image_prompts import build_marketing_image_prompt
+from ai.image_prompts import build_marketing_image_prompt, build_campaign_background_prompt
 from ai.providers import analyze_image_json, generate_text
 from documents.pdf import create_pdf, PDF_PATH
 from database.db import save_history, get_history_item, update_history_image
@@ -39,7 +39,9 @@ def _public_image_url(path: str | Path) -> str:
     return "/" + relative.as_posix().lstrip("/")
 
 
-def _generate_ad_image(business, company, style, image_style, custom_image_style=""):
+def _generate_ad_image(business, company, style, image_style, custom_image_style="", art_direction=None):
+    if art_direction is not None:
+        return make_image(build_campaign_background_prompt(business=business, direction=art_direction))
     prompt = build_marketing_image_prompt(
         business=business,
         context=f"advertising campaign for {company}",
@@ -706,15 +708,16 @@ def _home_page():
                         subject_path = resolve_brand_photo(session["user_id"], request.files.getlist("real_photos"), "ad-photo")
                         logo_path = resolve_brand_logo(session["user_id"], request.files.get("real_logo"), "ad-logo")
                         directions = create_art_directions(
-                            business=business, company=company, request=style,
+                            business=business, company=company, request=f"{style}\nVisual style: {effective_image_style}",
                             media="ads", photo_count=1 if subject_path else 0,
                             generator=generate_text, remember=True,
                         )
                         def generate_background(feedback):
                             return _generate_ad_image(
                                 business, company,
-                                f"{style}. {feedback}. Reserve clean text space. The scene must fit the exact business.",
+                                "",
                                 effective_image_style, custom_image_style,
+                                art_direction=directions[0],
                             )
 
                         def render_candidate(background_path, direction, round_index, direction_index):
