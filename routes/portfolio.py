@@ -4,6 +4,20 @@ from flask import Blueprint, abort, render_template
 portfolio_bp = Blueprint('portfolio', __name__)
 
 WORKS = [
+    dict(slug='lotteria-sns-concept', category='social', label='SNS · FOOD CONCEPT', status='비공식 콘셉트',
+         image='showcase/lotteria-sns-concept.png', project='순금이 AI 작업실 · 자체 콘셉트',
+         title='롯데리아 SNS · 점심 고민, 여기까지.',
+         description='점심 메뉴를 고르는 순간을 짧은 문구와 따뜻한 음식 이미지로 담았습니다.',
+         format='SNS 홍보 이미지 · 1080×1350',
+         overview='롯데리아를 주제로 우리 홈페이지 SNS 기능에서 만든 자체 디자인입니다. 공식 광고나 의뢰·협업이 아니며, 음식은 실제 판매 메뉴 사진이 아닌 AI 생성 이미지입니다.',
+         approach='크림색 바탕과 검정 제목, 빨강 포인트로 구성했습니다. 막연한 즐거움을 이야기하는 대신 점심 메뉴를 고르는 상황에서 문구를 시작하고, 제목과 사진을 분리해 읽기 쉽게 정리했습니다. 홈페이지에서 생성한 최종 원본을 그대로 공개합니다.',
+         caption='12시 넘어서도 못 고르면, 이제 끝.\n\n롯데리아 · 비공식 콘셉트\n\n뭘 먹을지 넘기기만 하던 점심시간,\n멈출 이유는 하나면 됩니다.\n\n점심 고민, 여기까지.\n\n비공식 콘셉트·AI 이미지이며 공식 광고나 협업이 아닙니다.\n\n#롯데리아 #롯데리아비공식콘셉트 #버거무드 #점심메뉴 #점심시간 #메뉴고민 #인스타브랜드콘셉트 #푸드콘텐츠 #버거콘텐츠',
+         gallery_title='맥도날드와 롯데리아, 두 가지 표현',
+         gallery_note='서로 다른 제작 방향으로 만든 비공식 콘셉트입니다. 이미지를 누르면 원본 크기로 볼 수 있습니다.',
+         gallery=[
+             dict(image='showcase/mcdonalds-sns-concept.png', title='맥도날드 · 한 입의 즐거움', description='짙은 빨강과 흰 제목으로 즐거움을 강조한 기존 시안입니다.'),
+             dict(image='showcase/lotteria-sns-concept.png', title='롯데리아 · 점심 고민, 여기까지.', description='밝은 크림색과 짧은 제목으로 점심 메뉴를 고르는 순간을 담았습니다.'),
+         ]),
     dict(slug='ai-experiment-short', category='video', label='VIDEO · SHORTS', status='자체 프로젝트',
          image='showcase/ai-experiment-video/short-poster.jpg', video='showcase/ai-experiment-video/short-music.mp4',
          orientation='portrait', project='순금이의 AI 실험실', title='22초로 보는, 첫 AI 수익 실험.',
