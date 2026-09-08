@@ -4,6 +4,19 @@ from flask import Blueprint, abort, render_template
 portfolio_bp = Blueprint('portfolio', __name__)
 
 WORKS = [
+    dict(slug='burger-sns-four-directions', category='social', label='SNS · ART DIRECTION', status='디자인 스터디',
+         image='showcase/burger-directions/overview.png', project='순금이 AI 작업실 · 자체 콘셉트',
+         title='같은 사진, 네 가지 시선.',
+         description='한 장의 버거 사진을 네 가지 구도로 풀어낸 SNS 디자인 시리즈입니다.',
+         format='SNS 디자인 시리즈 · 4종',
+         overview='같은 사진과 문구도 무엇을 강조하느냐에 따라 인상이 달라집니다. 사진의 빈 공간, 제품의 크기, 제목의 비중, 좌우 배치를 바꾸어 네 가지 방향을 만들었습니다. 음식은 실제 판매 메뉴 사진이 아닌 비교용 AI 생성 이미지입니다.',
+         approach='빨강과 크림색, 짧은 제목을 공통으로 두고 사진과 문구의 관계를 달리했습니다. 별도로 생성한 AI 사진에 작업실의 새 문구 배치 방식을 적용한 자체 디자인 스터디입니다.',
+         gallery=[
+             dict(image='showcase/burger-directions/full_bleed_photo.png', title='01 · 사진의 빈 공간', description='사진을 가득 채우고 조용한 공간에 제목을 놓았습니다.'),
+             dict(image='showcase/burger-directions/product_closeup.png', title='02 · 제품 중심', description='버거를 크게 보여주고 문구는 상단에 정리했습니다.'),
+             dict(image='showcase/burger-directions/editorial_type.png', title='03 · 큰 글자 중심', description='제목이 먼저 읽히도록 글자와 사진의 비중을 조절했습니다.'),
+             dict(image='showcase/burger-directions/split_scene.png', title='04 · 좌우 분할', description='문구와 사진을 나란히 두어 서로의 영역을 확보했습니다.'),
+         ]),
     dict(slug='mcdonalds-sns-concept', category='social', label='SNS · FOOD CONCEPT', status='비공식 콘셉트',
          image='showcase/mcdonalds-sns-concept.png', project='순금이 AI 작업실 · 자체 콘셉트',
          title='맥도날드 SNS · 한 입의 즐거움.',

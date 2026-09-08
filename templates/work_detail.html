@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="{{ url_for('static', filename='landing-studio.css') }}?v=heritage-1" rel="stylesheet">
   <link href="{{ url_for('static', filename='landing-minimal.css') }}?v=minimal-4.1" rel="stylesheet">
-  <link href="{{ url_for('static', filename='work-detail.css') }}?v=1" rel="stylesheet">
+  <link href="{{ url_for('static', filename='work-detail.css') }}?v=2" rel="stylesheet">
 </head><body>
 <a class="skip-link" href="#work-main">본문으로 바로가기</a>
 <header class="studio-nav"><div class="studio-shell nav-inner">
@@ -33,6 +33,17 @@
       <a class="work-return" href="/#portfolio">다른 작업물 보기 <span aria-hidden="true">→</span></a>
     </section>
   </div>
+  {% if work.gallery %}
+  <section class="work-series" aria-labelledby="series-title">
+    <h2 id="series-title">네 가지 구도, 자세히 보기</h2>
+    <p>이미지를 누르면 원본 크기로 볼 수 있습니다.</p>
+    <div class="work-series-grid">
+      {% for variant in work.gallery %}
+      <figure><a href="{{ url_for('static', filename=variant.image) }}" aria-label="{{ variant.title }} 이미지 크게 보기"><img src="{{ url_for('static', filename=variant.image) }}" alt="{{ variant.title }} — {{ variant.description }}" width="1080" height="1350" loading="lazy"></a><figcaption><h3>{{ variant.title }}</h3><p>{{ variant.description }}</p></figcaption></figure>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
   <section class="related-works" aria-labelledby="related-title"><h2 id="related-title">다른 작업물</h2><div class="related-grid">
     {% for item in related %}<a href="{{ url_for('portfolio.detail', slug=item.slug) }}"><div><img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.title }}" loading="lazy"></div><small>{{ item.format }}</small><h3>{{ item.title }}</h3></a>{% endfor %}
   </div></section>
