@@ -4,6 +4,14 @@ from flask import Blueprint, abort, render_template
 portfolio_bp = Blueprint('portfolio', __name__)
 
 WORKS = [
+    dict(slug='sotttukkeong-sns-concept', category='social', label='SNS · FOOD CONCEPT', status='자체 콘셉트',
+         image='showcase/sotttukkeong-sns-concept.png', project='순금이 AI 작업실 · 자체 콘셉트',
+         title='솥뚜껑 삼겹살 SNS · 오늘 모임, 솥뚜껑 앞으로.',
+         description='노릇하게 구운 삼겹살과 무쇠 솥뚜껑으로 함께 모이는 저녁을 담았습니다.',
+         format='SNS 홍보 이미지 · 1080×1350',
+         overview='솥뚜껑 삼겹살집을 주제로 우리 홈페이지 SNS 기능에서 만든 홍보 시안입니다. 특정 매장의 의뢰가 아닌 자체 콘셉트로, 상호 대신 업종 이름을 사용했습니다. 음식과 공간은 실제 매장 사진이 아닌 AI 생성 이미지입니다.',
+         approach='어두운 식탁 위 무쇠 솥뚜껑과 삼겹살의 구운 질감을 크게 보여주고, 흰 제목을 사진 위에 배치했습니다. 함께 둘러앉아 고기를 굽고 이야기를 나누는 상황에서 문구를 시작했습니다.',
+         caption='오늘 모임, 솥뚜껑 앞으로.\n\n솥뚜껑 삼겹살\n\n지글지글 익는 소리 들으면서\n앞사람 이야기 하나 더 듣게 되는 자리.\n\n고기 굽는 손길 사이로\n웃음도 대화도 조금씩 더 무르익는\n그 저녁의 분위기를 담았습니다. 🔥\n\n홍보 시안 · AI 이미지\n\n실제 매장 사진이 아닌 AI 홍보 시안입니다.\n\n#솥뚜껑삼겹살 #삼겹살 #솥뚜껑삼겹살집 #고기모임 #저녁모임 #인스타홍보 #외식무드 #고기굽는시간 #AI홍보시안'),
     dict(slug='lotteria-sns-concept', category='social', label='SNS · FOOD CONCEPT', status='비공식 콘셉트',
          image='showcase/lotteria-sns-concept.png', project='순금이 AI 작업실 · 자체 콘셉트',
          title='롯데리아 SNS · 점심 고민, 여기까지.',
