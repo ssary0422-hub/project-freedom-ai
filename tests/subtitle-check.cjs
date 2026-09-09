@@ -1,0 +1,17 @@
+const assert = require('node:assert/strict');
+const {parse, inspect, serialize} = require('../static/tools/subtitle-check/checker.js');
+const sample = '\uFEFF7\r\n00:00:00,000 --> 00:00:03,000\r\n첫 번째 자막\r\n\r\n9\r\n00:00:02,500 --> 00:00:04,000\r\n시간이 겹치는 두 번째 자막입니다.\r\n';
+const cues = parse(sample);
+assert.equal(cues.length, 2);
+assert.equal(cues[1].start, 2500);
+assert.match(inspect(cues, 18, 12)[0].notes.join(' '), /1번 자막과 시간 겹침/);
+for (const bad of ['', '1\ninvalid\ntext', '1\n00:00:03,000 --> 00:00:01,000\ntext', '1\n00:61:00,000 --> 00:62:00,000\ntext', '1\n00:00:01,000 --> 00:00:03,000']) assert.throws(() => parse(bad));
+const wrapped = parse(serialize(cues, 8));
+assert.deepEqual(wrapped.map(c => [c.start, c.end]), cues.map(c => [c.start, c.end]));
+assert.deepEqual(wrapped.map(c => c.text.replace(/\s/g, '')), cues.map(c => c.text.replace(/\s/g, '')));
+const styled = parse('1\n00:00:00,000 --> 00:00:03,000\n<i>서식을 유지하는 긴 자막입니다</i>');
+assert.equal(parse(serialize(styled, 8))[0].text, styled[0].text);
+const nested = parse('1\n00:00:00,000 --> 00:00:10,000\na\n\n2\n00:00:01,000 --> 00:00:02,000\nb\n\n3\n00:00:03,000 --> 00:00:04,000\nc');
+assert.equal(inspect(nested, 18, 12).length, 2);
+assert.deepEqual(parse(serialize(cues)), cues);
+console.log('PASS: parser validation, BOM/CRLF, overlap including nested intervals, timing/text preservation, styled captions, round trip.');
