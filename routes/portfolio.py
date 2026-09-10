@@ -4,6 +4,20 @@ from flask import Blueprint, abort, render_template
 portfolio_bp = Blueprint('portfolio', __name__)
 
 WORKS = [
+    dict(slug='running-diary-03', category='video', label='VIDEO · RUNNING 03', status='자체 프로젝트',
+         image='showcase/running-video/episode-03-poster.jpg', video='showcase/running-video/episode-03.mp4',
+         orientation='portrait', project='순금이의 러닝일지', title='1분 뛰고 90초 걷기, 타이머에 맡겨요.',
+         description='실제 웹 타이머에 운동 순서를 입력하고, 저장과 전환 알림까지 확인하는 3편입니다.',
+         format='세로 영상 · 2분 4초 · 음악 포함',
+         overview='2편에서 소개한 NHS Couch to 5K 첫날 순서를 Online Interval Timer 웹사이트에 설정합니다. 준비 걷기 300초, 달리기 60초와 걷기 90초를 7회 반복한 뒤 마지막 달리기 60초, 마무리 걷기 300초를 넣는 과정을 보여줍니다. 자신의 몸에 맞는 속도로 하고 이상이 느껴지면 멈추세요.',
+         approach='순금이의 인사와 짧은 상황 연출에 실제 웹사이트 조작 녹화를 연결했습니다. PC Chrome에서 모바일 화면 크기로 녹화했으며, 설정 화면은 속도를 조절하고 알림 전환의 대기 구간은 생략했습니다. 실물 휴대폰의 잠금·백그라운드 알림은 검증하지 않았으므로 화면을 켜고 자신의 기기에서 먼저 시험해 주세요. 캐릭터와 음성은 AI 제작, 배경음악은 자체 제작입니다.'),
+    dict(slug='running-diary-02', category='video', label='VIDEO · RUNNING 02', status='자체 프로젝트',
+         image='showcase/running-video/episode-02-poster.jpg', video='showcase/running-video/episode-02.mp4',
+         orientation='portrait', project='순금이의 러닝일지', title='뛰다가 걸어도 돼요! 초보 러닝 첫날 순서.',
+         description='걷기도 계획의 일부예요. 준비 걷기부터 마무리까지, 첫날의 운동 순서를 알아봅니다.',
+         format='세로 영상 · 1분 18초 · 음악 포함',
+         overview='NHS Couch to 5K 첫날 계획을 예시로 준비 걷기 5분, 달리기 1분과 걷기 90초를 7회 반복, 마지막 달리기 1분, 마무리 걷기 5분을 설명합니다. 스트레칭 제외 총 28분 30초이며 달리기는 8분입니다. 모든 사람에게 같은 운동량을 권하는 규칙은 아니며 자신의 몸에 맞는 속도로 하고 이상이 느껴지면 멈추세요.',
+         approach='같은 여성 순금이 진행자와 움직이는 순서·시간 그래픽으로 설명합니다. 다른 체형의 러너 자료는 사용하지 않았습니다. 캐릭터와 목소리는 AI로 제작했으며 자체 제작 배경음악을 더했습니다. 다음 3편에서 실제 타이머 설정으로 이어집니다.'),
     dict(slug='running-diary-short-01', category='video', label='VIDEO · RUNNING SHORTS', status='자체 프로젝트',
          image='showcase/running-video/poster.jpg', video='showcase/running-video/running-short-music.mp4',
          orientation='portrait', project='순금이의 러닝일지', title='내 러닝 속도, 이 정도면 괜찮을까?',
