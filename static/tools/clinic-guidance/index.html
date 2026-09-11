@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>진료 안내문 자동 작성 도구 | Project Freedom AI</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;color:#17202a;background:#f6f7fb}*{box-sizing:border-box}body{margin:0}.wrap{max-width:920px;margin:0 auto;padding:28px 16px 56px}.hero,.card{background:#fff;border:1px solid #e3e6ee;border-radius:20px;padding:24px;box-shadow:0 8px 24px #18233a0b}.hero{margin-bottom:16px}.eyebrow{font-size:12px;font-weight:800;color:#6757d9;letter-spacing:.08em}.hero h1{margin:8px 0;font-size:clamp(26px,5vw,42px);letter-spacing:-.04em}.hero p{color:#5e6878;line-height:1.65;margin:0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}label{font-weight:750;font-size:14px}input,select,textarea{width:100%;border:1px solid #d9ddea;border-radius:12px;padding:11px 12px;font:inherit;background:#fff}textarea{min-height:96px;resize:vertical}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}button{border:0;border-radius:999px;padding:11px 16px;font-weight:800;cursor:pointer;background:#6757d9;color:#fff}button.secondary{background:#eef0ff;color:#4436a6}button.ghost{background:#f1f3f7;color:#334155}.notice{font-size:13px;color:#697386;line-height:1.55;margin-top:14px}.result{display:none;margin-top:16px}.result.show{display:block}.result h2{margin:0 0 8px}.output{white-space:pre-wrap;background:#f8f9fc;border:1px solid #e1e5ef;border-radius:14px;padding:16px;line-height:1.75;min-height:180px}.status{font-size:13px;color:#4d5a70;margin-top:10px}.tag{display:inline-block;background:#f0edff;color:#5744c5;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800;margin-top:8px}@media(max-width:680px){.grid{grid-template-columns:1fr}.field.full{grid-column:auto}}
+  </style>
+</head>
+<body><main class="wrap">
+  <section class="hero"><div class="eyebrow">CLINIC MESSAGE HELPER</div><h1>진료 안내문을 빠르게 정리하세요</h1><p>접수·대기·준비물·예약 변경·진료 후 주의사항처럼 병원에서 반복해서 보내는 <b>행정 안내문</b>을 템플릿으로 작성합니다.</p><span class="tag">브라우저에서만 처리 · 서버 저장 없음</span></section>
+  <section class="card"><div class="grid">
+    <div class="field"><label for="clinic">기관명</label><input id="clinic" placeholder="예: 더편한의원"></div>
+    <div class="field"><label for="stage">안내 상황</label><select id="stage"><option value="접수">접수 안내</option><option value="대기">대기시간 안내</option><option value="준비">방문 전 준비 안내</option><option value="변경">예약 변경 안내</option><option value="후속">진료 후 행정 안내</option></select></div>
+    <div class="field"><label for="when">일시·예약 정보</label><input id="when" placeholder="예: 9월 15일 오후 2시 / 초진"></div>
+    <div class="field"><label for="delay">대기시간 또는 도착 요청</label><input id="delay" placeholder="예: 약 20분 / 10분 전 도착"></div>
+    <div class="field full"><label for="prep">환자가 알아야 할 사실</label><textarea id="prep" placeholder="확인된 준비물, 주차·접수 위치, 제출 서류 등 사실만 입력하세요."></textarea></div>
+    <div class="field full"><label for="contact">문의 방법</label><input id="contact" placeholder="예: 02-0000-0000 또는 접수 데스크"></div>
+  </div><div class="actions"><button id="make">안내문 만들기</button><button class="secondary" id="copy" disabled>복사</button><button class="ghost" id="download" disabled>TXT 저장</button></div><p class="notice">이 도구는 진단·처방·응급 판단을 하지 않습니다. 증상, 약 복용, 검사 결과 해석은 의료진에게 직접 확인하도록 안내하세요. 개인정보와 주민등록번호는 입력하지 마세요.</p></section>
+  <section class="card result" id="result"><h2>작성된 안내문</h2><div class="output" id="output"></div><div class="status" id="status" aria-live="polite"></div></section>
+</main><script>
+const $=id=>document.getElementById(id), val=id=>$(id).value.trim();
+function make(){const clinic=val('clinic')||'우리 병원',stage=val('stage'),when=val('when'),delay=val('delay'),prep=val('prep'),contact=val('contact')||'접수 데스크';let lead={접수:'접수 안내',대기:'대기시간 안내',준비:'방문 전 준비 안내',변경:'예약 변경 안내',후속:'진료 후 안내'}[stage];let lines=[`[${clinic}] ${lead}`,'',when?`예약·방문 정보: ${when}`:''];if(stage==='대기'&&delay)lines.push(`현재 안내: ${delay}`);if(stage==='준비'&&delay)lines.push(`도착 안내: ${delay}`);if(prep)lines.push('',`확인된 안내: ${prep}`);lines.push('',`문의: ${contact}`,'','※ 증상이나 검사 결과에 대한 판단은 의료진에게 직접 확인해 주세요.');$('output').textContent=lines.filter((x,i)=>x!==''||lines[i-1]!=='').join('\n');$('result').classList.add('show');$('copy').disabled=false;$('download').disabled=false;$('status').textContent='입력한 사실을 원본 자료와 대조한 뒤 사용하세요.'}
+$('make').onclick=make;$('copy').onclick=async()=>{await navigator.clipboard.writeText($('output').textContent);$('status').textContent='안내문을 클립보드에 복사했습니다.'};$('download').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('output').textContent],{type:'text/plain;charset=utf-8'}));a.download='clinic-guidance.txt';a.click();URL.revokeObjectURL(a.href)};
+</script></body></html>
