@@ -16,6 +16,7 @@ from routes.speaking_coach import speaking_coach_bp
 from routes.social_publish import social_publish_bp
 from routes.payment import payment_bp
 from routes.services import services_bp
+from routes.discovery import discovery_bp
 from routes.sungeum_walk import sungeum_walk_bp
 from routes.portfolio import portfolio_bp, WORKS
 
@@ -173,6 +174,7 @@ app.register_blueprint(speaking_coach_bp)
 app.register_blueprint(social_publish_bp)
 app.register_blueprint(payment_bp)
 app.register_blueprint(services_bp)
+app.register_blueprint(discovery_bp)
 
 
 # -------------------------
