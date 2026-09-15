@@ -4,6 +4,20 @@ from flask import Blueprint, abort, render_template
 portfolio_bp = Blueprint('portfolio', __name__)
 
 WORKS = [
+    dict(slug='lipstick-beauty-concept', category='social', label='SNS · BEAUTY CONCEPT', status='자체 콘셉트',
+         image='showcase/lipstick-ad-v2.png', project='순금이의 AI 작업실 · 가상 뷰티 캠페인',
+         title='색보다 오래 남는 건, 인상.',
+         description='깊은 레드와 골드, 빛과 질감으로 만든 두 가지 립스틱 광고 이미지입니다.',
+         format='SNS 광고 이미지 · 2종 · 1122×1402',
+         overview='가상의 립스틱을 주제로 광고 이미지와 인스타그램 캡션을 함께 제작했습니다. 실제 판매 제품이나 브랜드 의뢰·협업이 아닌, 광고 제작 역량을 보여주기 위한 AI 포트폴리오 작업입니다.',
+         approach='체리 레드와 샴페인 골드, 아이보리 배경을 공통으로 사용했습니다. 첫 시안은 큰 헤드라인과 풍부한 발색 질감을 강조했고, 다음 시안에서는 제품을 키우고 문구와 발색 자국의 비중을 줄였습니다. 금속 케이스의 반사와 그림자로 형태를 표현하고, 같은 제품이 구도에 따라 어떻게 달라 보이는지 살펴봤습니다.',
+         caption='색보다 오래 남는 건, 인상.\n\n하나의 립스틱을 상상하고,\n빛과 질감, 한 줄의 카피로 광고를 만들었습니다.\n\n깊은 레드, 섬세한 골드, 선명한 그림자.\n당신의 브랜드라면 어떤 장면을 만들 수 있을까요?\n\nAI로 제작한 가상 립스틱 캠페인입니다.\n실제 판매 제품이나 브랜드 협업이 아닌 포트폴리오 작업입니다.\n\n#AI광고 #광고디자인 #뷰티광고 #브랜드비주얼 #AICreative',
+         gallery_title='하나의 립스틱, 두 가지 인상',
+         gallery_note='인스타그램에 게시한 순서대로 소개합니다. 이미지를 누르면 원본 크기로 볼 수 있습니다.',
+         gallery=[
+             dict(image='showcase/lipstick-ad-v2.png', title='01 · 제품에 집중한 구성', description='제품을 크게 보여주고 문구와 발색 자국을 절제한 두 번째 시안입니다.'),
+             dict(image='showcase/lipstick-ad.png', title='02 · 색과 문구의 존재감', description='큰 헤드라인과 풍부한 붉은 질감을 강조한 첫 번째 시안입니다.'),
+         ]),
     dict(slug='running-diary-03', category='video', label='VIDEO · RUNNING 03', status='자체 프로젝트',
          image='showcase/running-video/episode-03-poster.jpg', video='showcase/running-video/episode-03.mp4',
          orientation='portrait', project='순금이의 러닝일지', title='1분 뛰고 90초 걷기, 타이머에 맡겨요.',
