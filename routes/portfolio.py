@@ -4,6 +4,45 @@ from flask import Blueprint, abort, render_template
 portfolio_bp = Blueprint('portfolio', __name__)
 
 WORKS = [
+{'slug': 'beauty-editorial-white-black',
+ 'category': 'social',
+ 'label': 'SNS · BEAUTY EDITORIAL',
+ 'status': '자체 콘셉트',
+ 'image': 'showcase/a-silk-updo-nine.png',
+ 'project': '순금이의 AI 작업실 · 가상 뷰티 화보',
+ 'title': '같은 립스틱, 다른 분위기.',
+ 'description': '빛을 가득 채운 화이트와 부드러운 깊이를 담은 블랙. 두 가지 스타일을 각각 아홉 가지 포즈로 표현했습니다.',
+ 'format': '뷰티 화보 · 9포즈 시트 2종 · 각 1122×1402',
+ 'overview': '가상의 모델과 립스틱으로 만든 AI 뷰티 포트폴리오입니다. 스타일링과 조명, 시선과 작은 표정 변화로 같은 제품의 서로 다른 분위기를 보여줍니다. 실제 인물의 광고 '
+             '참여나 브랜드 의뢰·협업을 의미하지 않습니다.',
+ 'approach': 'A는 흰 끈나시와 묶은 머리, 순백 배경에 얼굴을 밝게 채우는 조명을 사용했습니다. B는 검정 의상과 긴 머리, 부드러운 아이보리 배경으로 구성했습니다. 고개의 각도와 '
+             '시선, 미소와 제품을 든 자세를 달리해 각 스타일을 3×3 시트로 담았습니다.',
+ 'caption': '같은 립스틱, 다른 분위기.\n'
+            '\n'
+            '빛을 가득 채운 화이트와\n'
+            '부드러운 깊이를 담은 블랙.\n'
+            '\n'
+            '시선과 고개, 작은 미소를 바꾸며\n'
+            '두 가지 뷰티 화보를 만들었습니다.\n'
+            '\n'
+            '모델의 스타일링부터 조명, 제품을 드는 포즈까지.\n'
+            '하나의 콘셉트가 광고 이미지로 이어지는 과정을 담았어요.\n'
+            '\n'
+            '당신의 브랜드에는 어느 쪽이 어울리나요?\n'
+            'A · 화이트 / B · 블랙\n'
+            '\n'
+            'AI로 제작한 가상 모델·가상 제품의 포트폴리오입니다.\n'
+            '실제 인물의 광고 참여나 브랜드 협업을 의미하지 않습니다.\n'
+            '\n'
+            '#순금이의AI작업실 #AI광고 #뷰티화보 #브랜드콘텐츠 #AI모델',
+ 'gallery_title': '화이트와 블랙, 아홉 가지 순간',
+ 'gallery_note': '인스타그램에 게시한 A → B 순서입니다. 각 이미지는 아홉 포즈를 담은 한 장의 시트이며, 누르면 원본 크기로 볼 수 있습니다.',
+ 'gallery': [{'image': 'showcase/a-silk-updo-nine.png',
+              'title': 'A · 빛을 채운 화이트',
+              'description': '흰 끈나시와 묶은 머리, 밝은 얼굴 조명으로 표현한 아홉 포즈입니다.'},
+             {'image': 'showcase/b-editorial-nine.png',
+              'title': 'B · 부드러운 블랙',
+              'description': '검정 의상과 긴 머리, 아이보리 배경으로 표현한 아홉 포즈입니다.'}]},
     dict(slug='lipstick-beauty-concept', category='social', label='SNS · BEAUTY CONCEPT', status='자체 콘셉트',
          image='showcase/lipstick-ad-v2.png', project='순금이의 AI 작업실 · 가상 뷰티 캠페인',
          title='색보다 오래 남는 건, 인상.',
