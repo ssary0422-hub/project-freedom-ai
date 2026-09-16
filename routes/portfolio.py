@@ -4,6 +4,49 @@ from flask import Blueprint, abort, render_template
 portfolio_bp = Blueprint('portfolio', __name__)
 
 WORKS = [
+{'slug': 'after-rain-perfume-concept',
+ 'category': 'social',
+ 'label': 'SNS · PERFUME CONCEPT',
+ 'status': '자체 콘셉트',
+ 'image': 'showcase/after-rain/01-hero.png',
+ 'project': '순금이의 AI 작업실 · 가상 향수 캠페인',
+ 'title': '비가 지나간 자리, 향이 남았다.',
+ 'description': '젖은 잎과 물방울, 아침 햇빛으로 표현한 가상 향수 AFTER RAIN. 제품부터 디테일, 모델까지 세 장의 광고 이미지로 담았습니다.',
+ 'format': '향수 광고 이미지 · 3종 · 각 1122×1402',
+ 'overview': '비가 그친 뒤의 정원을 상상하며 가상의 향수 AFTER RAIN을 만들었습니다. 제품의 첫인상과 유리의 질감, 손에 들었을 때의 분위기를 하나의 캠페인으로 연결한 AI '
+             '포트폴리오입니다. 제품과 모델은 AI로 제작했으며 실제 판매 제품이나 브랜드 의뢰·협업이 아닙니다.',
+ 'approach': '연녹색 유리병과 아이보리 라벨, 젖은 돌과 잎을 공통으로 사용했습니다. 첫 장은 제품과 카피를 크게 보여주고, 두 번째는 유리와 물방울을 가까이 담았습니다. 마지막은 '
+             '같은 제품 디자인을 참조한 가상 모델 컷으로 구성해 색감과 조명의 흐름을 이어갔습니다.',
+ 'caption': '비가 지나간 자리, 향이 남았다.\n'
+            '\n'
+            '젖은 잎과 투명한 물방울,\n'
+            '그 사이로 스며드는 아침 햇빛.\n'
+            '\n'
+            '비가 그친 정원을 상상하며\n'
+            '가상의 향수 AFTER RAIN을 만들었습니다.\n'
+            '\n'
+            '제품의 첫인상부터 유리의 질감,\n'
+            '손에 들었을 때의 분위기까지.\n'
+            '하나의 콘셉트를 세 장의 광고 이미지로 담았어요.\n'
+            '\n'
+            '세 장 중 가장 마음에 드는 컷을 댓글로 남겨주세요.\n'
+            '1 · 제품 / 2 · 디테일 / 3 · 모델\n'
+            '\n'
+            'AI로 제작한 가상 제품·가상 모델의 포트폴리오입니다.\n'
+            '실제 판매 제품이나 브랜드 협업이 아닙니다.\n'
+            '\n'
+            '#순금이의AI작업실 #AI광고 #향수광고 #제품사진 #브랜드콘텐츠',
+ 'gallery_title': '하나의 향수, 세 가지 장면',
+ 'gallery_note': '인스타그램에 게시한 제품 → 디테일 → 모델 순서입니다. 이미지를 누르면 원본 크기로 볼 수 있습니다.',
+ 'gallery': [{'image': 'showcase/after-rain/01-hero.png',
+              'title': '01 · 비가 그친 정원',
+              'description': '젖은 돌 위의 향수병과 아침 햇빛, 한 줄의 카피로 만든 대표 광고 컷입니다.'},
+             {'image': 'showcase/after-rain/02-detail.png',
+              'title': '02 · 유리와 물방울',
+              'description': '유리의 두께와 빛의 굴절, 표면에 맺힌 물방울을 가까이 담았습니다.'},
+             {'image': 'showcase/after-rain/03-model.png',
+              'title': '03 · 향을 담은 순간',
+              'description': '가상 모델이 향수병을 든 장면으로 제품 크기와 스타일링을 함께 보여줍니다.'}]},
 {'slug': 'beauty-editorial-white-black',
  'category': 'social',
  'label': 'SNS · BEAUTY EDITORIAL',
